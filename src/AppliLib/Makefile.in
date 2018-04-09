@@ -10,12 +10,15 @@ SOURCES = \
 	./TimeMgr/TimeMgr.c \
 	./ObjectMgr/ObjectMgr.c
 
+HEADERS = $(SOURCES:.c=.h)
+
 OBJECTS = $(SOURCES:.c=.o)
 
 all: libAppli.a
 
 libAppli.a: $(OBJECTS)
-	mkdir -p lib include
+	mkdir -p include
+	ln -sf $(HEADERS) include
 	@MAKELIB@ $(OBJECTS)
 	@RANLIB@ $@
 
