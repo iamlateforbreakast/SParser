@@ -1,0 +1,23 @@
+.c.o:
+	@CC@ @CFLAGS@ $< -o $@
+
+LIB = libAppli
+
+SOURCES = \
+	./ErrorMgr/ErrorMgr.c \
+	./FileMgr/FileMgr.c \
+	./OptionMgr/OptionMgr.c \
+	./TimeMgr/TimeMgr.c \
+	./ObjectMgr/ObjectMgr.c
+
+OBJECTS = $(SOURCES:.c=.o)
+
+all: libAppli.a
+
+libAppli.a: $(OBJECTS)
+	mkdir -p lib include
+	@MAKELIB@ $(OBJECTS)
+	@RANLIB@ $@
+
+clean:
+	@CLEAN@
