@@ -1,0 +1,22 @@
+.c.o:
+	@CC@ @CFLAGS@ $< -o $@
+
+EXE = sparse
+
+SOURCES = ./main.c
+
+OBJECTS = $(SOURCES:.c=.o)
+
+LIBRARIES = CommonLib AppliLib ParseLib
+
+all: $(EXE)
+
+$(EXE): $(OBJECTS)
+	@for lib in $(LIBRARIES); do\
+		cd $$lib; \
+		make; \
+		cd ..; \
+	done
+
+clean:
+	@CLEAN@ $(EXE)
