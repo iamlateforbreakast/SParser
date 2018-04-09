@@ -1,0 +1,24 @@
+.c.o:
+	@CC@ @CFLAGS@ $< -o $@
+
+LIB = libCommon
+
+SOURCES = \
+	./Object/Object.c \
+	./List/List.c \
+	./Map/Map.c 
+
+HEADERS = $(SOURCES:.c=.h)
+
+OBJECTS = $(SOURCES:.c=.o)
+
+all: libCommon.a
+
+libCommon.a: $(OBJECTS)
+	mkdir -p include
+	ln -sf $(HEADERS) include
+	@MAKELIB@ $(OBJECTS)
+	@RANLIB@ $@
+
+clean:
+	@CLEAN@

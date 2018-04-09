@@ -1,0 +1,20 @@
+.c.o:
+	@CC@ @CFLAGS@ $< -o $@
+
+LIB = libParse
+
+SOURCES = \
+	./SParse/SParse.c \
+	./StreamParser/StreamParser.c
+
+OBJECTS = $(SOURCES:.c=.o)
+
+all: libParse.a
+
+libParse.a: $(OBJECTS)
+	mkdir -p include
+	@MAKELIB@ $(OBJECTS)
+	@RANLIB@ $@
+
+clean:
+	@CLEAN@
