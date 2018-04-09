@@ -1,5 +1,5 @@
 .c.o:
-	@CC@ @CFLAGS@ $< -o $@
+	@CC@ @CFLAGS@ -I./AppliLib/include $< -o $@
 
 EXE = sparse
 
