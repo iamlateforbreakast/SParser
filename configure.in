@@ -21,4 +21,4 @@ AC_SUBST(CLEAN)
 AC_SUBST(CC)
 AC_SUBST(CFLAGS)
 
-AC_OUTPUT(Makefile src/Makefile src/CommonLib/Makefile src/AppliLib/Makefile src/ParseLib/Makefile)
+AC_OUTPUT(Makefile src/Makefile src/CommonLib/Makefile src/AppliLib/Makefile src/ParseLib/Makefile doc/Makefile tests/Makefile)
