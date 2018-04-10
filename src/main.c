@@ -12,7 +12,7 @@
 
 #include "OptionMgr.h"
 #include "FileMgr.h"
-#include "SdbMgr.h"
+//#include "SdbMgr.h"
 #include "StreamParser.h"
 
 int main(int argc, char** argv)
