@@ -9,3 +9,17 @@ all:
 	done
 
 clean:
+	@for dir in $(PRODUCTS); do \
+	    echo "**** Cleaning "$$dir" ****"; \
+	    cd $$dir; \
+	    make clean; \
+	    cd ..; \
+	done
+
+distclean:
+	@for dir in $(PRODUCTS); do \
+	    echo "**** Cleaning "$$dir" ****"; \
+	    cd $$dir; \
+	    make distclean; \
+	    cd ..; \
+	done
