@@ -7,14 +7,22 @@ SOURCES = \
 	./SParse/SParse.c \
 	./StreamParser/StreamParser.c
 
+HEADERS = $(SOURCES:.c=.h)
+
 OBJECTS = $(SOURCES:.c=.o)
 
 all: libParse.a
 
-libParse.a: $(OBJECTS)
-	mkdir -p include
+libParse.a: includes $(OBJECTS)
+
 	@MAKELIB@ $(OBJECTS)
 	@RANLIB@ $@
 
+includes:
+	mkdir -p include
+	for f in $(HEADERS); do \
+	    ln -sf .$$f -t include; \
+	done
+	
 clean:
-	@CLEAN@
+	@CLEAN@ include $(OBJECTS) libParse.a
