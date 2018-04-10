@@ -14,11 +14,16 @@ OBJECTS = $(SOURCES:.c=.o)
 
 all: libCommon.a
 
-libCommon.a: $(OBJECTS)
-	mkdir -p include
-	ln -sf $(HEADERS) include
+libCommon.a: includes $(OBJECTS)
+
 	@MAKELIB@ $(OBJECTS)
 	@RANLIB@ $@
 
+includes:
+	mkdir -p include
+	for f in $(HEADERS); do \
+	    ln -sf .$$f -t include; \
+	done
+	
 clean:
-	@CLEAN@
+	@CLEAN@ include $(OBJECTS) libCommon.a
