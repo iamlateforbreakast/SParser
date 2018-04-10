@@ -1,5 +1,9 @@
+CFLAGS = @CFLAGS@ -I./AppliLib/include -I./ParseLib/include -I./CommonLib/include
+
+LDFLAGS = @LDFLAGS@
+
 .c.o:
-	@CC@ @CFLAGS@ -I./AppliLib/include $< -o $@
+	@CC@ $CFLAGS $< -o $@
 
 EXE = sparse
 
@@ -7,16 +11,21 @@ SOURCES = ./main.c
 
 OBJECTS = $(SOURCES:.c=.o)
 
-LIBRARIES = CommonLib AppliLib ParseLib
+LIBRARIES = ./CommonLib/libCommon.a \
+	    ./AppliLib/libAppli.a \
+	    ./ParseLib/libParse.a
 
 all: $(EXE)
 
-$(EXE): $(OBJECTS)
-	@for lib in $(LIBRARIES); do\
-		cd $$lib; \
-		make; \
-		cd ..; \
-	done
+$(EXE): $(LIBRARIES) $(OBJECTS)
+	@CC@ $(OBJECTS) $(LIBRARIES) -o $(EXE)
 
+$(LIBRARIES):
+	echo "Building " $@
+        cd $(@D) && make && cd ..;
 clean:
-	@CLEAN@ $(EXE)
+	@CLEAN@ $(LIBRARIES)
+	@CLEAN@ ./*/*/*.o
+	@CLEAN@ -rf $(OBJECT) $(EXE)
+
+distclean:
