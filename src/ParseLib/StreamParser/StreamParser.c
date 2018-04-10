@@ -14,6 +14,10 @@
 
 #include "StreamParser.h"
 
+struct StreamParser
+{
+};
+
 StreamParser* StreamParser_new(/* Filereader fileReader */)
 {
 }
@@ -22,12 +26,12 @@ void StreamParser_delete(StreamParser* this)
 {
 }
 
-void StreamParser_parse(StreamParser* this, FileName* f)
+void StreamParser_parse(StreamParser* this /*, FileName* f*/)
 {
     yyyparse();
 }
 
-char StreamParser_parse(StreamParser * this)
+char StreamParser_parse2(StreamParser * this)
 {
   char c = 0;
   

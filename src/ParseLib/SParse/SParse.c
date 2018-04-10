@@ -8,17 +8,17 @@
   The class SParse is TBD
 **************************************************/
 
-#include "FileReader.h"
-#include "StreamParser.h"
-#include "SdbMgr.h"
+//#include "FileReader.h"
+//#include "StreamParser.h"
+//#include "SdbMgr.h"
 
 typedef struct SParse
 {
 } SParse;
 
-SParse * SParse_new(/* extension */,/* Sdb name */)
+SParse * SParse_new(/* Sdb name */)
 {
-  SParse * result = NULL;
+  SParse * result = 0;
 
   /* Initialise SdbMgr */
   
@@ -46,6 +46,8 @@ void SParse_delete(SParse * this)
 
 unsigned int SParse_parseFile(SParse * this /* , Filename * file */ )
 { 
+  unsigned int result = 0;
+
   /*   1) Create a FileReader object */
   /* FileReader * fileReader = FileReader_new(file); */
   
@@ -54,4 +56,5 @@ unsigned int SParse_parseFile(SParse * this /* , Filename * file */ )
   
   /*   3) If error in StreamParser_parse then exit */
 
+  return result;
 }
