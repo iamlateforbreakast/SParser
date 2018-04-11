@@ -5,18 +5,23 @@
   
   @brief This file contains the implementation for the class SParse
   
-  The class SParse is TBD
+  The class SParse parses all files with extension
+  and stores the result of the parsing in the SQLite DB name.
 **************************************************/
 
 //#include "FileReader.h"
-//#include "StreamParser.h"
+#include "StreamParser.h"
 //#include "SdbMgr.h"
 
-typedef struct SParse
-{
-} SParse;
+#include "SParse.h"
 
-SParse * SParse_new(/* Sdb name */)
+struct SParse
+{
+  char * extension;
+  char * sdbName;
+};
+
+SParse *SParse_new(/* Sdb name */)
 {
   SParse * result = 0;
 
@@ -45,9 +50,9 @@ void SParse_delete(SParse * this)
 }
 
 unsigned int SParse_parseFile(SParse * this /* , Filename * file */ )
-{ 
+{
   unsigned int result = 0;
-
+  
   /*   1) Create a FileReader object */
   /* FileReader * fileReader = FileReader_new(file); */
   
