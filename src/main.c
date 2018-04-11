@@ -12,23 +12,32 @@
 
 #include "OptionMgr.h"
 #include "FileMgr.h"
-//#include "SdbMgr.h"
-#include "StreamParser.h"
+#include "ErrMgr.h"
+#include "SParse.h"
 
 int main(int argc, char** argv)
 {
-  /* OptionMgr* optionMgr = OptionMgr_getOptionMgr(); */
-  /* FileMgr* fileMgr = FileMgr_getFileMgr(); */
+  /* SParse *sparse = NULL; */
+  
+  /* ErrMgr *errMgr = ErrMgr_getErrMgr(); */
+  /* OptionMgr *optionMgr = OptionMgr_getOptionMgr(); */
+  /* FileMgr *fileMgr = FileMgr_getFileMgr(); */
   
   /* Initialise OptionMgr from file */
   /* OptionMgr_readFromFile(optionMgr, "options.txt"); */
 
   /* Initialise OptionMgr from command line */
-  /* OptionMgr_readFromCmdLine(optionMgr, argc, argv);
+  /* OptionMgr_readFromCmdLine(optionMgr, argc, argv); */
    
   /* Add Directory to FileMgr */
   /* FileMgr_addDirectory(OptionMgr_get("Input Directory")); */
- 
+
+  /* SParse_new(OptionMgr_get("SDB name")); */
+  
+  /* SParse_parse("*.c"); */
+  
+  /* SParse_delete(sparse); */
+  
   /* Generate Memory report */
 
   /* Dump error log */
@@ -37,6 +46,7 @@ int main(int argc, char** argv)
   /* Cleanup */
   /* OptionMgr_delete(optionMgr); */
   /* FileMgr_delete(fileMgr); */
-
+  /* ErrMgr_delete(errMgr); */
+  
   return 0;
 }
