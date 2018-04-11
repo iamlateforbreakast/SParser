@@ -3,7 +3,7 @@ CFLAGS = @CFLAGS@ -I./AppliLib/include -I./ParseLib/include -I./CommonLib/includ
 LDFLAGS = @LDFLAGS@
 
 .c.o:
-	@CC@ $CFLAGS $< -o $@
+	@CC@ $(CFLAGS) $< -o $@
 
 EXE = sparse
 
@@ -22,7 +22,7 @@ $(EXE): $(LIBRARIES) $(OBJECTS)
 
 $(LIBRARIES):
 	echo "Building " $@
-        cd $(@D) && make && cd ..;
+	cd $(@D) && make && cd ..;
 clean:
 	@CLEAN@ $(LIBRARIES)
 	@CLEAN@ ./*/*/*.o
