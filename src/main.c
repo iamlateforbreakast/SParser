@@ -12,14 +12,14 @@
 
 #include "OptionMgr.h"
 #include "FileMgr.h"
-#include "ErrMgr.h"
+#include "ErrorMgr.h"
 #include "SParse.h"
 
 int main(int argc, char** argv)
 {
   /* SParse *sparse = NULL; */
   
-  /* ErrMgr *errMgr = ErrMgr_getErrMgr(); */
+  /* ErrMgr *errorMgr = ErrMgr_getErrorMgr(); */
   /* OptionMgr *optionMgr = OptionMgr_getOptionMgr(); */
   /* FileMgr *fileMgr = FileMgr_getFileMgr(); */
   
@@ -46,7 +46,7 @@ int main(int argc, char** argv)
   /* Cleanup */
   /* OptionMgr_delete(optionMgr); */
   /* FileMgr_delete(fileMgr); */
-  /* ErrMgr_delete(errMgr); */
+  /* ErrorMgr_delete(errorMgr); */
   
   return 0;
 }

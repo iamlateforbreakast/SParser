@@ -1,5 +1,7 @@
 /* FileReader.c */
 
+#include "FileReader.h"
+
 struct FileReader
 {
 };
