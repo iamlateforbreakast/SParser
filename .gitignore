@@ -1,0 +1,11 @@
+*.o
+*.a
+Makefile
+config.log
+configure
+config.status
+autom4te.cache/
+src/AppliLib/include/
+src/CommonLib/include/
+src/ParseLib/include/
+src/sparse

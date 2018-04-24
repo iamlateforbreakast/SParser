@@ -1,0 +1,1 @@
+/* ErrorMgr.h */
