@@ -7,43 +7,74 @@
 //Node * currentNode;
 
 void count(void);
-int macro_statement(void);
-int ml_comment(void);
-int sl_comment(void);
+int start_node_comment();
+int finish_node_comment();
+int start_node_code();
+int finish_node_code();
 %}
 
 %option prefix="Grammar1"
+%x IN_ML_COMMENT
+%x IN_SL_COMMENT
+%x IN_CODE
 
 %%
-"/*"			{ return(ml_comment()); }
-"//"                    { return(sl_comment()); }
-"#"			{ return(macro_statement()); }
+<INITIAL>{
+"/*"			start_node_comment();
+"//"           BEGIN(IN_SL_COMMENT);
+.               BEGIN(IN_CODE);
+}
+<IN_ML_COMMENT>{
+"*/"           finish_node_comment();
+.|\n            ;
+}
+<IN_SL_COMMENT>{
+\n          BEGIN(INITIAL);
+.            ;
+}
+<IN_CODE>{
+"/*"          BEGIN(IN_ML_COMMENT); yyless(2);
+"//"           BEGIN(IN_SL_COMMENT);
+}
+[//t/n]        ;
+
 %%
+
+int start_node_comment()
+{
+  int result=0;
+  
+  BEGIN(IN_ML_COMMENT);
+  
+  return result;
+}
+
+int finish_node_comment()
+{
+  int result=0;
+  
+  BEGIN(INITIAL);
+  
+  return result;
+}
+
+int start_node_code()
+{
+  int result = 0;
+  
+  return result;
+}
+
+int finish_node_code()
+{
+  int result = 0;
+  
+  return result;
+}
 
 int yywrap(void)
 {
   return 1;
-}
-
-int macro_statement(void)
-{
-}
-
-int sl_comment(void)
-{
-}
-
-int ml_comment(void)
-{
-  char c, prev = 0;
-
-  while ((c = input()) != 0)      /* (EOF maps to 0) */
-  {
-    if (c == '/' && prev == '*')
-      return(COMMENT);
-    prev = c;
-  }
-  error("unterminated comment");
 }
 
 int column = 0;
