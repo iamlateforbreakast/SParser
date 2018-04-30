@@ -2,12 +2,13 @@
 #include <stdio.h>
 #include "Grammar1.parse.h"
 #define YY_DECL Grammar1_lex(void)
+#define MEMORY_BLOCK_BYTES (500)
 //#include "Node.h"
 
 //Node * currentNode;
 
 char * node_text = NULL;
-int node_max_size_bytes = 500;
+int node_max_size_bytes = MEMORY_BLOCK_BYTES;
 int node_text_position = 0;
 
 void count(void);
@@ -69,13 +70,16 @@ int start_node_comment(int type)
 int add_node_comment()
 {
   int result = 0;
+  char * temp = 0;
   
   node_text[node_text_position] = yytext[0];
   node_text_position++;
   if (node_text_position>(node_max_size_bytes-1)) 
   {
     printf("Node text buffer too small\n");
-    exit(0);
+	node_max_size_bytes+=MEMORY_BLOCK_BYTES ;
+    temp = (char *)realloc(node_text, node_max_size_bytes);
+    node_text = temp;
   }
   
   return result;
@@ -89,7 +93,7 @@ int finish_node_comment()
   node_text[node_text_position] = 0;
   printf("\nComment found: %s\n", node_text);
   node_text_position = 0;
-  node_max_size_bytes = 500;
+  node_max_size_bytes = MEMORY_BLOCK_BYTES ;
   free(node_text);
   
   
@@ -111,13 +115,16 @@ int start_node_code()
 int add_node_code()
 {
   int result = 0;
+  char * temp = 0;
   
   node_text[node_text_position] = yytext[0];
   node_text_position++;
   if (node_text_position>(node_max_size_bytes-1)) 
   {
     printf("Node text buffer too small\n");
-    exit(0);
+    node_max_size_bytes+=MEMORY_BLOCK_BYTES ;
+    temp = (char *)realloc(node_text, node_max_size_bytes);
+    node_text = temp;
   }
   
   return result;
@@ -130,7 +137,7 @@ int finish_node_code()
   node_text[node_text_position] = 0;
   printf("\nCode found: %s\n", node_text);
   node_text_position = 0;
-  node_max_size_bytes = 500;
+  node_max_size_bytes = MEMORY_BLOCK_BYTES ;
   free(node_text);
   return CODE;
 }
