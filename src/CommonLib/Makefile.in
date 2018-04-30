@@ -1,5 +1,6 @@
+CFLAGS = @CFLAGS@ -I../CommonLib/include
 .c.o:
-	@CC@ @CFLAGS@ $< -o $@
+	@CC@ $(CFLAGS) $< -o $@
 
 LIB = libCommon
 
@@ -8,7 +9,7 @@ SOURCES = \
 	./List/List.c \
 	./Map/Map.c 
 
-HEADERS = $(SOURCES:.c=.h)
+HEADERS = ./Types/Types.h $(SOURCES:.c=.h)
 
 OBJECTS = $(SOURCES:.c=.o)
 
