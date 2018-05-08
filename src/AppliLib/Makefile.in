@@ -1,5 +1,6 @@
+CFLAGS = @CFLAGS@ -I./include -I../CommonLib/include
 .c.o:
-	@CC@ @CFLAGS@ $< -o $@
+	@CC@ $(CFLAGS) $< -o $@
 
 LIB = libAppli
 
@@ -8,7 +9,7 @@ SOURCES = \
 	./FileMgr/FileMgr.c \
 	./OptionMgr/OptionMgr.c \
 	./TimeMgr/TimeMgr.c \
-	./ObjectMgr/ObjectMgr.c
+	./SdbMgr/SdbMgr.c
 
 HEADERS = $(SOURCES:.c=.h)
 

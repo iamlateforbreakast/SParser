@@ -8,7 +8,7 @@ int yylex(int * p);
 %lex-param {int * p}
 %parse-param {int * p}
 
-%token COMMENT STATEMENT
+%token COMMENT CODE
 
 %start translation_unit
 %%
@@ -17,13 +17,13 @@ comment
   : COMMENT
   ;
 
-statement
-  : STATEMENT
+code
+  : CODE
   ;
 
 node
   : comment
-  | statement
+  | code
   ;
 
 translation_unit
