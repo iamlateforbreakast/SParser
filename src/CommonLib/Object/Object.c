@@ -13,7 +13,7 @@
 
 /* PRIVATE ObjectMgr * Object_objMgrPtr = 0; */
 
-PUBLIC Object * Object_new(unsigned int size, void (*f_delete)(Object*), void (*f_copy)(Object*))
+PUBLIC Object * Object_new(unsigned int size, void (*f_delete)(Object*), Object * (*f_copy)(Object*))
 {
   Object * this = 0;
   
