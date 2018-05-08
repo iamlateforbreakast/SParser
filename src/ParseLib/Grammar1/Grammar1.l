@@ -31,6 +31,13 @@ int macro_statement(void)
 
 int sl_comment(void)
 {
+  char c = 0;
+
+  while ((c = input()) != 0)      /* (EOF maps to 0) */
+  {
+    if (c == '\n')
+      return (COMMENT);
+  }
 }
 
 int ml_comment(void)
