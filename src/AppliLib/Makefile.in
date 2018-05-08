@@ -9,7 +9,6 @@ SOURCES = \
 	./FileMgr/FileMgr.c \
 	./OptionMgr/OptionMgr.c \
 	./TimeMgr/TimeMgr.c \
-	./ObjectMgr/ObjectMgr.c \
 	./SdbMgr/SdbMgr.c
 
 HEADERS = $(SOURCES:.c=.h)
