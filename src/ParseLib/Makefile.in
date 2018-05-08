@@ -1,4 +1,4 @@
-CFLAGS = @CFLAGS@ -I./AppliLib/include -I./include -I./CommonLib/include
+CFLAGS = @CFLAGS@ -I../AppliLib/include -I./include -I../CommonLib/include
 
 .c.o:
 	@CC@ $(CFLAGS) $< -o $@
