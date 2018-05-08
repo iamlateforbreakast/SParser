@@ -41,14 +41,15 @@ PRIVATE ObjectMgr * objectMgr = 0;
 PRIVATE ObjectMgr * ObjectMgr_new()
 {
   ObjectMgr * this = 0;
+  int i = 0;
   
   this = (ObjectMgr*)malloc(sizeof(ObjectMgr));
     
-  this->object.delete = &ObjectMgr_delete;
-  this->object.copy = &ObjectMgr_copy;
+  this->object.delete = (void(*)(Object*))&ObjectMgr_delete;
+  this->object.copy = (Object*(*)(Object*))&ObjectMgr_copy;
   this->object.size = sizeof(ObjectMgr);
-  this->object.refCount = 0;
-  this->object.id =0;
+  this->object.refCount = 1;
+  this->object.id = 0;
   
   this->nbBytesAllocated = 0;
   this->maxNbBytesAllocated = 0;
@@ -57,9 +58,25 @@ PRIVATE ObjectMgr * ObjectMgr_new()
   this->freeRequestId = 0;
   this->maxAddress = (void*)0x0;
   this->minAddress = (void*)0xFFFFFFFF;
-  this->nbAllocatedObjects = 0;
+  this->nbAllocatedObjects = 1;
   memset(this->allocatedObjects, 0, MAX_NB_OBJECTS * sizeof(Object*));
-  
+
+  for (i=2; i<MAX_NB_OBJECTS-1; i++)
+  {
+    this->allocatedObjects[i].prevId = i - 1;
+    this->allocatedObjects[i].nextId = i + 1;
+  }
+
+  this->allocatedObjects[1].prevId = 0xFFFFFFFF; 
+  this->allocatedObjects[1].nextId = 2; 
+  this->allocatedObjects[MAX_NB_OBJECTS-1].prevId = MAX_NB_OBJECTS-2;
+  this->allocatedObjects[MAX_NB_OBJECTS-1].nextId = 0xFFFFFFFF;
+  this->freeSpace = 1;
+  this->allocatedObjects[0].ptr = (Object*)&this->object;
+  this->allocatedObjects[0].prevId = 0xFFFFFFFF;
+  this->allocatedObjects[0].nextId = 0xFFFFFFFF;
+  this->usedSpace = 0;
+
   return this;
 }
 
@@ -123,7 +140,10 @@ PUBLIC Object * ObjectMgr_allocate(ObjectMgr * this, unsigned int size)
         this->usedSpace = this->freeSpace;
         this->freeSpace = this->allocatedObjects[this->freeSpace].nextId;
         this->allocatedObjects[this->freeSpace].prevId = 0xFFFFFFFF;
+        this->allocatedObjects[this->usedSpace].nextId = 0xFFFFFFFF;
         this->nbAllocatedObjects++;
+        this->allocatedObjects[this->usedSpace].ptr = result;
+        result->id = this->usedSpace;
       }
       else
       {
@@ -152,10 +172,18 @@ PUBLIC void ObjectMgr_deallocate(ObjectMgr * this, Object * object)
   
   if (object!=0)
   {
-    this->allocatedObjects[this->allocatedObjects[idx].nextId].prevId = this->allocatedObjects[idx].prevId;
+    if (this->allocatedObjects[idx].nextId != 0xFFFFFFFF)
+    {
+      this->allocatedObjects[this->allocatedObjects[idx].nextId].prevId = this->allocatedObjects[idx].prevId;
+    }
+    else
+    {
+    }
     this->allocatedObjects[this->allocatedObjects[idx].prevId].nextId = this->allocatedObjects[idx].nextId;
+    this->usedSpace = this->allocatedObjects[idx].prevId;
     this->allocatedObjects[idx].nextId = this->freeSpace;
     this->allocatedObjects[idx].prevId = 0xFFFFFFFF;
+    this->freeSpace = idx;
   }
   else
   {
