@@ -6,6 +6,7 @@ LIB = libCommon
 
 SOURCES = \
 	./Object/Object.c \
+	./ObjectMgr/ObjectMgr.c \
 	./List/List.c \
 	./Map/Map.c 
 
