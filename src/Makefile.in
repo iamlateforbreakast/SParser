@@ -22,10 +22,11 @@ $(EXE): $(LIBRARIES) $(OBJECTS)
 
 $(LIBRARIES):
 	echo "Building " $@
-	cd $(@D) && make && cd ..;
+	make -C $(@D)
 clean:
 	@CLEAN@ $(LIBRARIES)
+	@CLEAN@ ./*/include
 	@CLEAN@ ./*/*/*.o
-	@CLEAN@ -rf $(OBJECT) $(EXE)
+	@CLEAN@ $(OBJECT) $(EXE)
 
 distclean:
