@@ -29,8 +29,6 @@ struct ObjectMgr
   unsigned int allocRequestId;
   unsigned int freeRequestId;
   unsigned int nbAllocatedObjects;
-  void* maxAddress;
-  void* minAddress;
   ObjectInfo allocatedObjects[MAX_NB_OBJECTS];
   unsigned int freeSpace;
   unsigned int usedSpace;
@@ -49,24 +47,20 @@ PRIVATE ObjectMgr * ObjectMgr_new()
   this->object.copy = (Object*(*)(Object*))&ObjectMgr_copy;
   this->object.size = sizeof(ObjectMgr);
   this->object.refCount = 1;
-  this->object.id = 0;
+  this->object.id =0;
   
-  this->nbBytesAllocated = 0;
-  this->maxNbBytesAllocated = 0;
-  this->allocRequestId = 0;
-  this->allocRequestId = 0;
+  this->nbBytesAllocated = sizeof(ObjectMgr);
+  this->maxNbBytesAllocated = sizeof(ObjectMgr);
+  this->allocRequestId = 1;
   this->freeRequestId = 0;
-  this->maxAddress = (void*)0x0;
-  this->minAddress = (void*)0xFFFFFFFF;
   this->nbAllocatedObjects = 1;
   memset(this->allocatedObjects, 0, MAX_NB_OBJECTS * sizeof(Object*));
-
+  
   for (i=2; i<MAX_NB_OBJECTS-1; i++)
   {
     this->allocatedObjects[i].prevId = i - 1;
     this->allocatedObjects[i].nextId = i + 1;
   }
-
   this->allocatedObjects[1].prevId = 0xFFFFFFFF; 
   this->allocatedObjects[1].nextId = 2; 
   this->allocatedObjects[MAX_NB_OBJECTS-1].prevId = MAX_NB_OBJECTS-2;
@@ -76,7 +70,6 @@ PRIVATE ObjectMgr * ObjectMgr_new()
   this->allocatedObjects[0].prevId = 0xFFFFFFFF;
   this->allocatedObjects[0].nextId = 0xFFFFFFFF;
   this->usedSpace = 0;
-
   return this;
 }
 
@@ -93,9 +86,7 @@ PUBLIC void ObjectMgr_delete(ObjectMgr * this)
 
 PUBLIC ObjectMgr * ObjectMgr_copy(ObjectMgr * this)
 {
-  ObjectMgr * copy = 0;
-  
-  return copy;
+  return this;
 }
 
 PUBLIC ObjectMgr * ObjectMgr_getRef()
@@ -118,8 +109,6 @@ PUBLIC void ObjectMgr_report(ObjectMgr * this)
   printf("Max nb bytes used: %d\n", this->maxNbBytesAllocated);
   printf("Nb alloc request %d\n", this->allocRequestId);
   printf("Nb free requests %d\n", this->freeRequestId);
-  printf("Lower Address %p\n", this->minAddress);
-  printf("Upper Address %p\n", this->maxAddress);
 }
 
 PUBLIC Object * ObjectMgr_allocate(ObjectMgr * this, unsigned int size)
@@ -144,6 +133,9 @@ PUBLIC Object * ObjectMgr_allocate(ObjectMgr * this, unsigned int size)
         this->nbAllocatedObjects++;
         this->allocatedObjects[this->usedSpace].ptr = result;
         result->id = this->usedSpace;
+        this->nbBytesAllocated=this->nbBytesAllocated + size;
+        if (this->nbBytesAllocated >this->maxNbBytesAllocated) this->maxNbBytesAllocated = this->nbBytesAllocated;
+        this->allocRequestId++;
       }
       else
       {
@@ -172,18 +164,29 @@ PUBLIC void ObjectMgr_deallocate(ObjectMgr * this, Object * object)
   
   if (object!=0)
   {
-    if (this->allocatedObjects[idx].nextId != 0xFFFFFFFF)
+    if (this->nbAllocatedObjects>1)
     {
-      this->allocatedObjects[this->allocatedObjects[idx].nextId].prevId = this->allocatedObjects[idx].prevId;
+      free(this->allocatedObjects[idx].ptr);
+      
+      if (this->allocatedObjects[idx].nextId != 0xFFFFFFFF)
+      {
+        this->allocatedObjects[this->allocatedObjects[idx].nextId].prevId = this->allocatedObjects[idx].prevId;  
+      }
+      else
+      {
+        this->usedSpace = this->allocatedObjects[idx].prevId;
+      }
+      this->allocatedObjects[this->allocatedObjects[idx].prevId].nextId = this->allocatedObjects[idx].nextId;
+      this->allocatedObjects[idx].nextId = this->freeSpace;
+      this->allocatedObjects[idx].prevId = 0xFFFFFFFF;
+      this->freeSpace = idx;
+      this->nbAllocatedObjects = this->nbAllocatedObjects - 1;
+      this->nbBytesAllocated = this->nbBytesAllocated - object->size;
     }
     else
     {
+      /* Error case: No allocated object left to free */
     }
-    this->allocatedObjects[this->allocatedObjects[idx].prevId].nextId = this->allocatedObjects[idx].nextId;
-    this->usedSpace = this->allocatedObjects[idx].prevId;
-    this->allocatedObjects[idx].nextId = this->freeSpace;
-    this->allocatedObjects[idx].prevId = 0xFFFFFFFF;
-    this->freeSpace = idx;
   }
   else
   {
