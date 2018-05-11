@@ -8,6 +8,7 @@ SOURCES = \
 	./Object/Object.c \
 	./ObjectMgr/ObjectMgr.c \
 	./List/List.c \
+	./String/String2.c \
 	./Map/Map.c 
 
 HEADERS = ./Types/Types.h $(SOURCES:.c=.h)
