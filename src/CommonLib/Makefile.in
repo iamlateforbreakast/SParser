@@ -5,6 +5,8 @@ CFLAGS = @CFLAGS@ -I../CommonLib/include
 LIB = libCommon
 
 SOURCES = \
+	./Debug/Debug.c \
+	./Memory/Memory.c \
 	./Object/Object.c \
 	./ObjectMgr/ObjectMgr.c \
 	./List/List.c \
