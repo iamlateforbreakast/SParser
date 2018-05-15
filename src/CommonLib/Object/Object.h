@@ -7,6 +7,9 @@
 
 typedef struct Object Object;
 
+typedef void (*Destructor)(struct Object *);
+typedef struct Object * (*Copy_operator)(struct Object *);
+
 struct Object
 {
   unsigned int id;
