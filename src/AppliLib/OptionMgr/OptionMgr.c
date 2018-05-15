@@ -42,7 +42,7 @@ PRIVATE OptionMgr * OptionMgr_new()
 {
   OptionMgr * this = 0;
   
-  this = (OptionMgr*)Object_new(sizeof(OptionMgr),&OptionMgr_delete, &OptionMgr_copy);
+  this = (OptionMgr*)Object_new(sizeof(OptionMgr),(Destructor)&OptionMgr_delete, (Copy_operator)&OptionMgr_copy);
   this->options = Map_new();
   
   return this;
