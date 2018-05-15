@@ -16,6 +16,9 @@
 //#include "Grammar1.h"
 #include "SParse.h"
 
+/**********************************************//** 
+  @private
+**************************************************/
 typedef struct SParseDefault
 {
   char* extension;
@@ -32,10 +35,12 @@ struct SParse
   char * sdbName;
 };
 
-static const SParseDefault SParse_default[] = {{"*.c",0/*&Grammar1_process*/},
-                                               {"*.c",0/*&Grammar2_process*/}};
+static const SParseDefault SParse_default[] = 
+{{"*.c",0/*&Grammar1_process*/},
+ {"*.c",0/*&Grammar2_process*/}};
 
-static const char * SParse_ignoreFiles[] = {"test.c"};
+static const char * SParse_ignoreFiles[] = 
+{"test1.c"};
 
 /**********************************************//** 
   @brief Create a new SParse object.
@@ -47,7 +52,7 @@ PUBLIC SParse *SParse_new(/* Sdb name */)
 {
   SParse * this = 0;
 
-  this = (SParse*)Object_new(sizeof(SParse),&SParse_delete, &SParse_copy);
+  this = (SParse*)Object_new(sizeof(SParse),(Destructor)&SParse_delete, (Copy_operator)&SParse_copy);
   this->object.size = sizeof(SParse);
   
   /* Initialise SdbMgr */
@@ -69,6 +74,8 @@ PUBLIC void SParse_delete(SParse * this)
 PUBLIC SParse * SParse_copy(SParse * this)
 {
   SParse * copy = 0;
+  
+  copy = Object_copy(&this->object);
   
   return copy;
 }
