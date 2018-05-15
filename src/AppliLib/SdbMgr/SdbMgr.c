@@ -9,9 +9,12 @@
 #include "Object.h"
 #include <sqlite3.h>
 
+/**********************************************//** 
+  @class SdbMgr
+**************************************************/
 struct SdbMgr
 {
-  //Object object;
+  Object object;
   //String* name;
   sqlite3* db;
   //unsigned int isQueryReady;
@@ -20,6 +23,10 @@ struct SdbMgr
   unsigned int refCount;
 };
 
+
+/**********************************************//** 
+  @private
+**************************************************/
 PRIVATE SdbMgr* sdbMgr = 0;
 
 PRIVATE SdbMgr* SdbMgr_new()
