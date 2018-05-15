@@ -139,10 +139,11 @@ PUBLIC ObjectMgr * ObjectMgr_getRef()
 **************************************************/
 PUBLIC void ObjectMgr_report(ObjectMgr * this)
 {
-	printf("Nb bytes not freed: %d\n", this->nbBytesAllocated);
-  printf("Max nb bytes used: %d\n", this->maxNbBytesAllocated);
-  printf("Nb alloc request %d\n", this->allocRequestId);
-  printf("Nb free requests %d\n", this->freeRequestId);
+  printf("Nb allocated objects: %d\n", this->nbAllocatedObjects);
+	printf("Nb allocated bytes: %d\n", this->nbBytesAllocated);
+  printf("Max nb allocated bytes: %d\n", this->maxNbBytesAllocated);
+  printf("Nb alloc request: %d\n", this->allocRequestId);
+  printf("Nb free requests: %d\n", this->freeRequestId);
 }
 
 /**********************************************//** 
