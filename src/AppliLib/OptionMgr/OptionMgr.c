@@ -114,9 +114,13 @@ PUBLIC OptionMgr* OptionMgr_getRef()
   @public
   @memberof OptionMgr
 **************************************************/
-PUBLIC OptionMgr* OptionMgr_getOption(OptionMgr * this, const char * optionName)
+PUBLIC String * OptionMgr_getOption(OptionMgr * this, const char * optionName)
 {
-  OptionMgr * result = 0;
+  String * result = 0;
+  
+  /*
+  Map_find(this->map, optionName, &result));
+  */
   
   return result;
 }
@@ -129,6 +133,9 @@ PUBLIC OptionMgr* OptionMgr_getOption(OptionMgr * this, const char * optionName)
 **************************************************/
 PUBLIC void OptionMgr_setOption(OptionMgr * this, const char * optionName, String * value)
 {
+  /* find optionName in this->map */
+  /* if not found insert value */
+  /* else modify value found in map */
 }
 
 /**********************************************//** 
