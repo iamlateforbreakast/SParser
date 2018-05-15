@@ -48,10 +48,21 @@ PRIVATE struct OptionDefault optionDefault[] =
 PRIVATE OptionMgr * OptionMgr_new()
 {
   OptionMgr * this = 0;
-  
+  int j = 0;
+  String * optionName = 0;
+  String * optionValue = 0;
+  const int nbOptions = sizeof(optionDefault)/sizeof(struct OptionDefault);
+
   this = (OptionMgr*)Object_new(sizeof(OptionMgr),(Destructor)&OptionMgr_delete, (Copy_operator)&OptionMgr_copy);
   this->options = Map_new();
   
+  for (j=0; j<nbOptions; j++)
+  {
+    optionName = String_new(optionDefault[j].name);
+    optionValue = String_new(optionDefault[j].value);
+    Map_set(this->map, optionName, optionValue);
+  }
+
   return this;
 }
 
@@ -132,7 +143,7 @@ PUBLIC unsigned int OptionMgr_readFromFile(OptionMgr * this, const char * fileNa
   /* FileMgr * fileMgr = FileMgr_getRef() */
   /* Add Filename to FileMgr */
   /* FileMgr_addFile(fileMgr, fileName); */
-  /* FIleMgr_load */
+  /* FileMgr_load */
   /* OptionMgr parse */
   
   return result;
@@ -168,7 +179,7 @@ PUBLIC unsigned int OptionMgr_readFromCmdLine(OptionMgr * this, const int argc, 
           optionValue = String_new(argv[i+1]);
           i++;
         }
-        Map_set(map, optionName, optionValue);
+        Map_set(this->map, optionName, optionValue);
         break;
       }
     }
