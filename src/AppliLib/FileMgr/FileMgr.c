@@ -21,8 +21,18 @@ struct FileMgr
   List * files;
 };
 
+
+/**********************************************//**
+  @private
+**************************************************/
 PRIVATE FileMgr * fileMgr = 0;
 
+/**********************************************//** 
+  @brief Create an instance of the class FileMgr.
+  @private
+  @memberof FileMgr
+  @return New instance.
+**************************************************/
 PRIVATE FileMgr * FileMgr_new()
 {
   FileMgr * this = 0;
@@ -47,7 +57,7 @@ PUBLIC void FileMgr_delete(FileMgr * this)
 **************************************************/
 PUBLIC FileMgr * FileMgr_copy(FileMgr * this)
 {
-  FileMgr * copy;
+  FileMgr * copy = 0;
   
   return copy;
 }
