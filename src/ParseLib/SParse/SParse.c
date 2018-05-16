@@ -1,8 +1,6 @@
 /**********************************************//** 
   @file SParse.c
   
-  @class SParse
-  
   @brief This file contains the implementation for the class SParse
   
   The class SParse parses all files with extension .X
