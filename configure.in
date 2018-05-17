@@ -13,7 +13,7 @@ PRIMARY_TARGET='sparse'
 MAKELIB="ar rv \$@"
 CLEAN="rm -rf"
 CC="gcc"
-CFLAGS="-c -Wall"
+CFLAGS="-c -g -Wall"
 
 AC_SUBST(PRIMARY_TARGET)
 AC_SUBST(MAKELIB)
