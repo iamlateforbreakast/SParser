@@ -27,36 +27,65 @@ struct String
   @memberof String
   @return Created String object.
 **************************************************/
-PUBLIC String * String_new()
+PUBLIC String * String_new(const char* initString)
 {
   String * this = 0;
   
   this = (String*)Object_new(sizeof(String),(Destructor)&String_delete, (Copy_operator)&String_copy);
-  this->buffer = 0;
-  this->length = 0;
+  // TODO: Check if this is NULL
+  if (initString!=0)
+  {
+    this->length = strlen(initString);
+    this->buffer = Memory_alloc(this->length);
+    Memory_copy(this->buffer, initString, this->length);
+  }
+  else
+  {
+    this->buffer = 0;
+    this->length = 0;
+  }
   
   return this;
 }
 
 /**********************************************//** 
-  @brief TBD
+  @brief Delete an instance of class String.
   @public
   @memberof String
 **************************************************/
 PUBLIC void String_delete(String * this)
 {
-  if (this->buffer!=0) free(this->buffer);
-  Object_delete(&this->object);
+  if (this==0)
+  {
+    // TODO: Check refCOunt
+    if (this->buffer!=0) 
+    {
+      Memory_free(this->buffer);
+    }
+    Object_delete(&this->object);
+  }
 }
 
 /**********************************************//** 
-  @brief TBD
+  @brief Copy an instance of class String.
   @public
   @memberof String
+  @return Copy of instance.
 **************************************************/
 PUBLIC String * String_copy(String * this)
 {
   String * copy = 0;
+  
+  if (this!=0)
+  {
+    copy = String_new(0);
+    copy->length = this->length;
+    if (this->buffer!=0)
+    {
+      copy->buffer = Memory_alloc(copy->length);
+      Memory_copy(copy->buffer, this->buffer, copy->length);
+    }
+  }
   
   return copy;
 }
@@ -68,6 +97,15 @@ PUBLIC String * String_copy(String * this)
 **************************************************/
 PUBLIC unsigned int String_isEqual(String * this, String * compared)
 {
+  unsigned int result = 0;
+  
+  result = Memory_ncmp(this, compared, this->length);
+  if (this->length==compared->length)
+  {
+    result = 1;
+  }
+  
+  return result;
 }
 
 /**********************************************//** 
@@ -94,5 +132,13 @@ PUBLIC int String_toInt(String* this)
   @memberof String
 **************************************************/
 PUBLIC String* String_searchAndReplace(String* this, String* search, String* replace)
+{
+}
+
+PUBLIC unsigned int String_getLength(String * this)
+{
+}
+
+PUBLIC char * String_getBuffer(String * this)
 {
 }
