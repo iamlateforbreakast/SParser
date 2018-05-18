@@ -36,8 +36,9 @@ PUBLIC String * String_new(const char* initString)
   if (initString!=0)
   {
     this->length = strlen(initString);
-    this->buffer = Memory_alloc(this->length);
-    Memory_copy(this->buffer, initString, this->length);
+    this->buffer = Memory_alloc(this->length+1);
+    Memory_copy(this->buffer, initString, this->length+1);
+    this->buffer[this->length] = 0;
   }
   else
   {
@@ -55,12 +56,12 @@ PUBLIC String * String_new(const char* initString)
 **************************************************/
 PUBLIC void String_delete(String * this)
 {
-  if (this==0)
+  if (this!=0)
   {
     // TODO: Check refCOunt
     if (this->buffer!=0) 
     {
-      Memory_free(this->buffer);
+      Memory_free(this->buffer, this->length + 1);
     }
     Object_delete(&this->object);
   }
@@ -82,8 +83,9 @@ PUBLIC String * String_copy(String * this)
     copy->length = this->length;
     if (this->buffer!=0)
     {
-      copy->buffer = Memory_alloc(copy->length);
+      copy->buffer = Memory_alloc(copy->length+1);
       Memory_copy(copy->buffer, this->buffer, copy->length);
+      copy->buffer[this->length] = 0;
     }
   }
   
@@ -137,8 +139,32 @@ PUBLIC String* String_searchAndReplace(String* this, String* search, String* rep
 
 PUBLIC unsigned int String_getLength(String * this)
 {
+  if (this!=0)
+  {
+    return this->length;
+  }
+  return 0;
 }
 
 PUBLIC char * String_getBuffer(String * this)
 {
+  if (this!=0)
+  {
+    return this->buffer;
+  }
+  return 0;
+}
+
+PUBLIC void String_setBuffer(String * this, char * buffer)
+{
+  if (this!=0)
+  {
+    if (this->buffer!=0)
+    {
+      Memory_free(this->buffer, this->length+1);
+    }
+    this->buffer = buffer;
+    // TO DO: check for NULL char
+    this->length = strlen(this->buffer);
+  }
 }
