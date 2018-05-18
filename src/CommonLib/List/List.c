@@ -220,3 +220,22 @@ PUBLIC unsigned int List_getSize(List * this)
 {
   return this->nbNodes;
 }
+
+PUBLIC void * List_getNext(List * this)
+{
+  void * result = 0;
+  
+  if (this->iterator==0) 
+  {
+    this->iterator = this->tail;
+    result = 0;
+  }
+  else
+  {
+    result = this->iterator->item;
+    this->iterator = this->iterator->next;
+  }
+  
+  
+  return result;
+}

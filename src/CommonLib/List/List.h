@@ -14,7 +14,8 @@ PUBLIC void List_insertHead(List* this, void* item);
 PUBLIC void List_insertTail(List* this, void* item);
 PUBLIC void List_merge(List* this, List* l1);
 PUBLIC void List_forEach(List* this, void (*f)(void* t));
-//PUBLIC void* List_getNext(List* this);
+PUBLIC void* List_getNext(List* this);
+
 //PUBLIC void* List_getHead(List* this);
 PUBLIC unsigned int List_getSize(List * this);
 
