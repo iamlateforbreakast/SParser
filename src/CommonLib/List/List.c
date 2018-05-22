@@ -69,16 +69,16 @@ PUBLIC void List_delete(List* this)
   
   if (this!=0)
   {
-    node = this->head;
-    while (node!=0)
+    //node = this->tail;
+    while ((node = this->tail)!=0)
     {
-      this->head = node->next;
+      this->tail = node->next;
       if (((Object*)node->item)->delete!=0)
       {
         ((Object*)node->item)->delete(node->item);
       }
       Memory_free(node, sizeof(ListNode));
-      node = this->head;
+      //node = this->tail;
     }
     Object_delete(&this->object);
   }
@@ -137,6 +137,7 @@ PUBLIC void List_insertHead(List* this, void* item)
   else
   {
       this->head->next = newNode;
+      if (this->iterator == 0) this->iterator = newNode;
   }
   this->head = newNode;
 
@@ -190,7 +191,9 @@ PUBLIC void List_merge(List* this, List* l1)
   l1->nbNodes = 0;
   l1->iterator = 0;
   l1->head = 0;
-  Memory_free(l1, sizeof(List));
+  l1->tail = 0;
+  l1->iterator = 0;
+  List_delete(l1);
 }
 
 /**********************************************//** 
@@ -211,7 +214,7 @@ PUBLIC void List_forEach(List* this, void (*f)(void* t))
 }
 
 /**********************************************//** 
-  @brief Get the number of item in List insance.
+  @brief Get the number of item in List instance.
   @public
   @memberof List
   @return Number of items.
