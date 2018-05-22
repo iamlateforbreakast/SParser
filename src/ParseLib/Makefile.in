@@ -1,5 +1,4 @@
 CFLAGS = @CFLAGS@ -I../AppliLib/include -I./include -I../CommonLib/include
-
 .c.o:
 	@CC@ $(CFLAGS) $< -o $@
 
@@ -8,7 +7,7 @@ LIB = libParse
 SOURCES = \
 	./SParse/SParse.c \
 	./FileReader/FileReader.c \
-	./StreamParser/StreamParser.c
+	./Grammar1/Grammar1.c
 
 HEADERS = $(SOURCES:.c=.h)
 
