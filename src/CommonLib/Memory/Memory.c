@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DEBUG (0)
+#define DEBUG (1)
 
 PRIVATE unsigned int Memory_allocRequestId = 0;
 PRIVATE unsigned int Memory_freeRequestId = 0;
@@ -26,7 +26,7 @@ PUBLIC void* Memory_alloc(unsigned int nbBytes)
   //if (Memory_nbBytesAllocated>Memory_maxNbBytesAllocated) Memory_maxNbBytesAllocated = Memory_nbBytesAllocated;
   Memory_allocRequestId++;
     
-  TRACE(("Memory: Malloc %d|%d %p\n", Memory_allocRequestId, nbBytes,p));
+  //TRACE(("Memory: Malloc %d|%d %p\n", Memory_allocRequestId, nbBytes,p));
 
    //if (p+nbBytes> (void*)Memory_maxAddress) Memory_maxAddress = p + nbBytes;
   return p;
@@ -68,5 +68,14 @@ PUBLIC unsigned int Memory_ncmp(void * pointer, void * compared, unsigned int nb
 {
   unsigned int result = 0;
   
+  if (memcmp(pointer, compared, nbBytes)==0) result = 1;
+  
   return result;
+}
+
+PUBLIC void Memory_report()
+{
+  printf("Memory Usage Report:\n");
+  printf("Number of memory allocation Requests: %d\n", Memory_allocRequestId);
+  printf("Number of memory de-allocation Requests: %d\n", Memory_freeRequestId);
 }
