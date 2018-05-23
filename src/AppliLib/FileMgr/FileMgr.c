@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <dirent.h>
 //#include <stat.h>
+#include <stdio.h>
 
 #define FILEMGR_MAX_PATH (1024)
 
@@ -59,8 +60,12 @@ PRIVATE FileMgr * FileMgr_new()
   if (getcwd(this->rootLocation, FILEMGR_MAX_PATH)==0)
   {
     /* Error case: Cannot obtain the FileMgr root location. */
+    /* e = Error_set(E_ERROR_FATAL, "Error", 0);
+        Error_raise(e); */
     exit(2);
   }
+  
+  /* TODO: Check this->rootLocation has a valid length */
   
   return this;
 }
@@ -122,12 +127,18 @@ PUBLIC FileMgr* FileMgr_getRef()
 **************************************************/
 PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryName)
 {
+  static nbCalls = 0;
+  
   unsigned int result = 0;
   String * fullPathDirectory = String_new(this->rootLocation);
   String * addedDirectory = String_new(directoryName);
   
+  /* TODO: Check directoryName has a valid length */
+  
   /* Merge directory name with current path to have the full path of the directory*/
   FileMgr_mergePath(this, fullPathDirectory, addedDirectory);
+  
+  /* TODO: Check if merged path exist on filesystem */
   
   /* add directory to this->directories */
   List_insertHead(this->directories,fullPathDirectory);
@@ -140,6 +151,12 @@ PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryN
   {
     FileMgr_listFiles(this, fullPathDirectory);
     fullPathDirectory = List_getNext(this->directories);
+    if (String_getLength(fullPathDirectory)>1000) 
+    {
+      printf("String length = %d\n", String_getLength(fullPathDirectory));
+      printf("Nb calls = %d\n", nbCalls);
+    }
+    nbCalls++;
   }
   
   String_delete(addedDirectory);
@@ -150,11 +167,18 @@ PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryN
 PUBLIC unsigned int FileMgr_addFile(FileMgr * this, const char * fileName)
 {
   unsigned int result = 0;
+  String * fullPathDirectory = String_new(this->rootLocation);
+  String * addedFile = String_new(fileName);
   
-  /* Merge curent path with fileName */
+  /* Merge current path with fileName */
+  FileMgr_mergePath(this, fullPathDirectory, addedFile);
   
   /* Check existence */
-  
+  /* if FileMgr_find(); */
+  /*   else
+      check if exist on FS
+      if yes
+      else */
   /* If exists add to the list of files */
   
   return result;
@@ -163,8 +187,23 @@ PUBLIC unsigned int FileMgr_addFile(FileMgr * this, const char * fileName)
 PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
 {
   String * fileContent = 0;
-  
+  FILE * f = NULL;
   /* Find file in list */
+  
+  /* Open file */
+  /*f=fopen(s,"rb");
+  if (f)
+  {
+    result = (String*)malloc(sizeof(String));
+	  fseek(f, 0, SEEK_END);
+	  result->length=ftell(f);
+	  fseek(f, 0 , SEEK_SET);
+        
+	  result->buffer = (char*)malloc(result->length+1);
+    fread(result->buffer,result->length, 1, f);
+    result->buffer[result->length] = 0;
+	  fclose(f);
+  }*/
   
   return fileContent;
 }
@@ -175,6 +214,7 @@ PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory)
   DIR * dir = 0;
   FileDesc * fileDesc= 0;
   String * fullName = 0;
+  String * name = 0;
   
   dir = opendir(String_getBuffer(directory));
   
@@ -185,10 +225,23 @@ PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory)
       if (directoryEntry->d_type != DT_DIR)
       {
         fileDesc = FileDesc_new();
+        name = String_new(directoryEntry->d_name);
         fullName = String_copy(directory);
-        FileMgr_mergePath(this, fullName, String_new(directoryEntry->d_name));
+        FileMgr_mergePath(this, fullName, name);
         FileDesc_setFullName(fileDesc, fullName);
+        FileDesc_setName(fileDesc, name);
         List_insertHead(this->files, (void*)fileDesc);
+      }
+      else
+      {
+        if ((Memory_ncmp(directoryEntry->d_name,"..",2)==0) && (Memory_ncmp(directoryEntry->d_name,".",1)==0))
+        {
+          fullName = String_copy(directory);
+          name = String_new(directoryEntry->d_name);
+          FileMgr_mergePath(this, fullName, name);
+          List_insertHead(this->directories,fullName);
+          String_delete(name);
+        }
       }
     }
   }
@@ -212,12 +265,18 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   char * p2_idx = 0;
   char * p1_idx = 0;
   char buffer[FILEMGR_MAX_PATH];
+  unsigned int bufferLength = String_getLength(path1);
+  
+  // TODO: CHeck initial condition of validity length > 0
+  
+  /* TODO: check if path2 is absolute path in which case copy and return */
   
   // Initialise result buffer
-  memcpy(buffer, String_getBuffer(path1), String_getLength(path1));
+  memcpy(buffer, String_getBuffer(path1), bufferLength);
+  
   
   p1_idx = buffer + String_getLength(path1);
-  if (*p1_idx != '/')
+  if (*(p1_idx-1)  != '/')
   {
     *p1_idx = '/';
     p1_idx++;
@@ -227,6 +286,7 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   {
       //Take ../ into account
       if (memcmp(p2_idx, "..", 2) == 0)
+         //((memcmp(p2_idx, "..",2)==0) && (p2_idx == (String_getBuffer(path2)+String_getLength(path2)))))
       {
         p1_idx = p1_idx - 2;
         while ((*p1_idx != '/') && (p1_idx > buffer))
@@ -237,7 +297,8 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
         p2_idx = p2_idx + 2;
       }
       //Ignore ./ in path2
-      else if (memcmp(p2_idx, ".", 1) == 0)
+      else if ((memcmp(p2_idx, "./", 2) == 0) ||
+                 ((memcmp(p2_idx, ".", 1) == 0) && (p2_idx == (String_getBuffer(path2)+String_getLength(path2)-1))))
       {
         //p1_idx = p1_idx - 1;
         p2_idx = p2_idx + 2;
@@ -256,5 +317,17 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   //Place merged path into path1
   String_delete(path1);
   path1 = String_new(buffer);
+  if (String_getLength(path1)>1000) 
+  {
+    printf("String length = %d\n", String_getLength(path1));
+    printf("Str length = %d\n", strlen(String_getBuffer(path1)));
+  }
   printf("Merged path: %s\n", buffer);
+}
+
+PRIVATE FileDesc * FileMgr_findFile(FileMgr * this, String * name)
+{
+  FileDesc * result = 0;
+  
+  return result;
 }
