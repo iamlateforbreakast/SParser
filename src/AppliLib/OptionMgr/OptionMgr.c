@@ -60,7 +60,7 @@ PRIVATE OptionMgr * OptionMgr_new()
   {
     optionName = String_new(optionDefault[j].name);
     optionValue = String_new(optionDefault[j].value);
-    Map_set(this->map, optionName, optionValue);
+    //TODO: Map_set(this->options, optionName, optionValue);
   }
 
   return this;
@@ -180,13 +180,13 @@ PUBLIC unsigned int OptionMgr_readFromCmdLine(OptionMgr * this, const int argc, 
     {
       if (optionDefault[j].flag == argv[i])
       {
-        optionName = String_new(optionDefault[j].optionName);
+        optionName = String_new(optionDefault[j].name);
         if ((optionDefault[j].value!=0)&&((i+1)<=argc))
         {
           optionValue = String_new(argv[i+1]);
           i++;
         }
-        Map_set(this->map, optionName, optionValue);
+        Map_set(this->options, optionName, optionValue);
         break;
       }
     }
