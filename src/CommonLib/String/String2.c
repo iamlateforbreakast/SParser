@@ -168,3 +168,22 @@ PUBLIC void String_setBuffer(String * this, char * buffer)
     this->length = strlen(this->buffer);
   }
 }
+
+PUBLIC unsigned int String_isContained(String * this, String * s2)
+{
+  unsigned int result = 0;
+  char * p = 0;
+  
+  if ((this==0) || (s2==0)) return 0;
+  
+  for (p=this->buffer; p<this->buffer + this->length - s2->length;p++)
+  {
+    if (Memory_ncmp(p, s2->buffer, s2->length))
+    {
+      result = 1;
+      break;
+    }
+  }
+  
+  return result;
+} 
