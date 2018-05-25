@@ -140,6 +140,7 @@ PUBLIC ObjectMgr * ObjectMgr_getRef()
 **************************************************/
 PUBLIC void ObjectMgr_report(ObjectMgr * this)
 {
+  printf("Object Manager Usage report:\n");
   printf("Nb allocated objects: %d\n", this->nbAllocatedObjects);
   printf("Max nb allocated objects: %d\n", this->maxNbObjectAllocated);
   printf("Nb alloc request: %d\n", this->allocRequestId);
@@ -178,7 +179,7 @@ PUBLIC Object * ObjectMgr_allocate(ObjectMgr * this, unsigned int size)
         this->allocatedObjects[this->usedSpace].ptr = result;
         result->id = this->usedSpace;
         if (this->nbAllocatedObjects >this->maxNbObjectAllocated) this->maxNbObjectAllocated = this->nbAllocatedObjects;
-        this->allocRequestId++;
+        this->nbAllocatedObjects++;
       }
       else
       {
