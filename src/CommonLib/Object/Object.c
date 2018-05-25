@@ -1,8 +1,6 @@
 /**********************************************//** 
   @file Object.c
   
-  @class Object
-  
   @brief This file contains the implementation for the class Object
   
   The class Object is TBD
@@ -11,8 +9,18 @@
 #include "Object.h"
 #include "ObjectMgr.h"
 
+/**********************************************//**
+  @private
+**************************************************/
 PRIVATE ObjectMgr * Object_objMgrPtr = 0;
 
+/**********************************************//** 
+  @brief Create an instance of the class Object.
+  @public
+  @param[in] f_delete Destructor function.
+  @param[in] f_copy Copy_operator function.
+  @memberof Object
+**************************************************/
 PUBLIC Object * Object_new(unsigned int size, void (*f_delete)(Object*), Object * (*f_copy)(Object*))
 {
   Object * this = 0;
@@ -34,7 +42,7 @@ PUBLIC Object * Object_new(unsigned int size, void (*f_delete)(Object*), Object 
 /**********************************************//** 
   @brief Delete an instance of the class Object.
   @public
-  @memberof ObjectMgr
+  @memberof Object
 **************************************************/
 PUBLIC void Object_delete(Object * this)
 {
@@ -44,7 +52,7 @@ PUBLIC void Object_delete(Object * this)
 /**********************************************//** 
   @brief Copy an instance of the class Object.
   @public
-  @memberof ObjectMgr
+  @memberof Object
   @return New instance
 **************************************************/
 PUBLIC Object * Object_copy(Object * this)
@@ -63,7 +71,7 @@ PUBLIC Object * Object_copy(Object * this)
 /**********************************************//** 
   @brief Get a reference to an instance of the class Object.
   @public
-  @memberof ObjectMgr
+  @memberof Object
   @return Reference to instance
 **************************************************/
 PUBLIC Object* Object_getRef(Object* this)
