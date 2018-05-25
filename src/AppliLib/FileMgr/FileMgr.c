@@ -186,26 +186,55 @@ PUBLIC unsigned int FileMgr_addFile(FileMgr * this, const char * fileName)
 
 PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
 {
-  String * fileContent = 0;
+  String * result = 0;
+  String * fullName = String_new(this->rootLocation);
+  String * name = String_new(fileName);
   FILE * f = NULL;
+  FileDesc * c = 0;
+  unsigned int isFound = 0;
+  char * buffer = 0;
+  unsigned int length = 0;
+  
+  /* Normalise file name */
+  FileMgr_mergePath(this, fullName, name);
+  
   /* Find file in list */
+  while (c = List_getNext(this->files)!=0)
+  {
+    if (String_isContained(FileDesc_getFullName((FileDesc*)c), fullName))
+    {
+      isFound ++;
+    }
+  }
+  
+  if (isFound==0)
+  {
+    return 0;
+  }
+  if (isFound > 1)
+  {
+    return 0;
+  }
   
   /* Open file */
-  /*f=fopen(s,"rb");
+  f=fopen(String_getBuffer(fullName),"rb");
   if (f)
   {
-    result = (String*)malloc(sizeof(String));
 	  fseek(f, 0, SEEK_END);
-	  result->length=ftell(f);
+	  length=ftell(f);
 	  fseek(f, 0 , SEEK_SET);
         
-	  result->buffer = (char*)malloc(result->length+1);
-    fread(result->buffer,result->length, 1, f);
-    result->buffer[result->length] = 0;
-	  fclose(f);
-  }*/
+	  buffer = (char*)malloc(length+1);
+    if (buffer)
+    {
+      fread(buffer, length, 1, f);
+      buffer[length] = 0;
+      result = String_new(buffer);
+	    fclose(f);
+    }
+  }
   
-  return fileContent;
+  return result;
 }
 
 PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory)
@@ -300,7 +329,7 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
       else if ((memcmp(p2_idx, "./", 2) == 0) ||
                  ((memcmp(p2_idx, ".", 1) == 0) && (p2_idx == (String_getBuffer(path2)+String_getLength(path2)-1))))
       {
-        //p1_idx = p1_idx - 1;
+        p1_idx = p1_idx - 1;
         p2_idx = p2_idx + 2;
       }
       else
@@ -317,6 +346,7 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   //Place merged path into path1
   String_delete(path1);
   path1 = String_new(buffer);
+
   if (String_getLength(path1)>1000) 
   {
     printf("String length = %d\n", String_getLength(path1));

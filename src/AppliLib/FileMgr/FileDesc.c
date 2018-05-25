@@ -76,5 +76,15 @@ PUBLIC void FileDesc_setFullName(FileDesc * this, String * fullName)
 **************************************************/
 PUBLIC String * FileDesc_getFullName(FileDesc * this)
 {
-  return this->name;
+  return this->fullName;
+}
+
+/**********************************************//** 
+  @brief TBD
+  @public
+  @memberof FileDesc
+**************************************************/
+PUBLIC void FileDesc_setName(FileDesc * this, String * name)
+{
+  this->name = name;
 }

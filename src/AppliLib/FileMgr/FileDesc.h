@@ -13,5 +13,6 @@ PUBLIC void FileDesc_delete(FileDesc * this);
 PUBLIC FileDesc * FileDesc_copy(FileDesc * this);
 PUBLIC void FileDesc_setFullName(FileDesc * this, String * fullName);
 PUBLIC String * FileDesc_getFullName(FileDesc * this);
+PUBLIC void FileDesc_setName(FileDesc * this, String * name);
 
 #endif /* _FILEDESC_H_ */
