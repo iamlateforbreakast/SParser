@@ -10,6 +10,7 @@
 #include "List.h"
 #include "Object.h"
 #include "String2.h"
+#include "Memory.h"
 
 #define HTABLE_SIZE (50)
 
@@ -32,7 +33,7 @@ typedef struct MapEntry
 **************************************************/
 struct Map
 {
-  Object * object;
+  Object object;
   List * htable[HTABLE_SIZE];
 };
 
@@ -103,7 +104,7 @@ PUBLIC unsigned int Map_insert(Map * this,String * s, void * p)
   MapEntry * entry =0;
   
   /* TODO: Manage duplication */
-  for (i=1; (i<=String_length(s->length)) && (result==0); i++)
+  for (i=1; (i<=String_getLength(s)) && (result==0); i++)
   {
     key = Map_hash(this,String_getBuffer(s), i);
     if (this->htable[key] == 0)
