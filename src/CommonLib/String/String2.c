@@ -9,6 +9,7 @@
 
 #include "String2.h"
 #include "Object.h"
+#include "Memory.h"
 #include <stdlib.h>
 
 /**********************************************//** 
@@ -36,7 +37,7 @@ PUBLIC String * String_new(const char* initString)
   if (initString!=0)
   {
     this->length = strlen(initString);
-    this->buffer = Memory_alloc(this->length+1);
+    this->buffer = (char*)Memory_alloc(this->length+1);
     Memory_copy(this->buffer, initString, this->length+1);
     this->buffer[this->length] = 0;
   }
@@ -117,6 +118,9 @@ PUBLIC unsigned int String_isEqual(String * this, String * compared)
 **************************************************/
 PUBLIC String* String_subString(String* this, unsigned int pos, unsigned int length)
 {
+  String * result = 0;
+  
+  return result;
 }
 
 /**********************************************//** 
@@ -126,6 +130,9 @@ PUBLIC String* String_subString(String* this, unsigned int pos, unsigned int len
 **************************************************/
 PUBLIC int String_toInt(String* this)
 {
+  int result = 0;
+  
+  return result;
 }
 
 /**********************************************//** 
