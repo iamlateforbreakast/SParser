@@ -9,7 +9,7 @@
 #include "Map.h"
 #include "List.h"
 #include "Object.h"
-#include "String.h"
+#include "String2.h"
 
 #define HTABLE_SIZE (50)
 
