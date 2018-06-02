@@ -1,9 +1,12 @@
-/**********************************************//** 
-  @file TimeMgr.h
-  
-  @class TimeMgr
-  
-  @brief This file contains the prototye for the class TimeMgr
-  
-  The class TimeMgr is TBD
-**************************************************/
+/* TimeMgr.h */
+
+#ifndef _TIMEMGR_H_
+#define _TIMEMGR_H_
+
+typedef struct TimeMgr TimeMgr;
+
+PUBLIC void TimeMgr_delete(TimeMgr * this);
+PUBLIC TimeMgr * TimeMgr_copy(TimeMgr * this);
+PUBLIC TimeMgr * TimeMgr_getRef();
+
+#endif /* _TIMEMGR_H_ */
