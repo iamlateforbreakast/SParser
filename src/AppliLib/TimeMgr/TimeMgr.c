@@ -8,6 +8,7 @@
 #include "TimeMgr.h"
 #include "Timer.h"
 #include "String2.h"
+#include "List.h"
 
 /**********************************************//**
   @class TimeMgr
