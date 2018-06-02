@@ -3,6 +3,8 @@
 #ifndef _TIMEMGR_H_
 #define _TIMEMGR_H_
 
+#include "Types.h"
+
 typedef struct TimeMgr TimeMgr;
 
 PUBLIC void TimeMgr_delete(TimeMgr * this);
