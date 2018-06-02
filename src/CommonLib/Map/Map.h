@@ -4,6 +4,7 @@
 #define _MAP_H_
 
 #include "Types.h"
+#include "String2.h"
 
 typedef struct Map Map;
 
