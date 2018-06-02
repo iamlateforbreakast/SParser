@@ -116,7 +116,7 @@ PUBLIC unsigned int Map_insert(Map * this,String * s, void * p)
       List_insertHead(this->htable[key], entry);
       result = 1;
     }
-    else if (i==String_length(s->length)) 
+    else if (i==String_getLength(s)) 
     {
       entry = (MapEntry*)Memory_alloc(sizeof(MapEntry));
       entry->s = s;
