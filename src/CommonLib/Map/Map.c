@@ -79,6 +79,7 @@ PUBLIC void Map_delete(Map * this)
   @brief Copy an instance of the class Map.
   @public
   @memberof Map
+  @return Copy of instance.
 **************************************************/
 PUBLIC Map * Map_copy(Map * this)
 {
@@ -91,6 +92,7 @@ PUBLIC Map * Map_copy(Map * this)
   @brief TBD
   @public
   @memberof Map
+  @return TBD
 **************************************************/
 PUBLIC unsigned int Map_insert(Map * this,String * s, void * p)
 {
@@ -134,18 +136,18 @@ PUBLIC unsigned int Map_find(Map* this, String* s, void** p)
   unsigned int key = 0;
   unsigned int i = 0;
   unsigned int isFound = 0;
-  ListNode n = 0;
+  MapEntry * n = 0;
   
   for (i=1; (i<=s->length) && (!isFound); i++)
   {
     key = Map_hash(this, String_getBuffer(s), i);
     if (this->htable[key] != 0)
     {
-      while ((n = List_getNext(this->htable[key]))!= 0)
+      while ((n = (MapEntry*)List_getNext(this->htable[key]))!= 0)
       {
-        if (String_isEqual((ListNode*)n->s, s))
+        if (String_isEqual(n->s, s))
         {
-          *p = (ListNode*)n->item;
+          *p = n->item;
           isFound = 1;
           result = 1;
           break;
@@ -159,7 +161,6 @@ PUBLIC unsigned int Map_find(Map* this, String* s, void** p)
 
 /**********************************************//** 
   @brief TBD
-  @details TBD
   @private
   @memberof Map
 **************************************************/
