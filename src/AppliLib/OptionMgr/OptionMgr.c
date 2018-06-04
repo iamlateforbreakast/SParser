@@ -186,7 +186,7 @@ PUBLIC unsigned int OptionMgr_readFromCmdLine(OptionMgr * this, const int argc, 
           optionValue = String_new(argv[i+1]);
           i++;
         }
-        Map_set(this->options, optionName, optionValue);
+        Map_insert(this->options, optionName, optionValue);
         break;
       }
     }
