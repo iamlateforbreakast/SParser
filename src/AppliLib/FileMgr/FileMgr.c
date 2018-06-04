@@ -199,7 +199,7 @@ PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
   FileMgr_mergePath(this, fullName, name);
   
   /* Find file in list */
-  while (c = List_getNext(this->files)!=0)
+  while ((c = List_getNext(this->files))!=0)
   {
     if (String_isContained(FileDesc_getFullName((FileDesc*)c), fullName))
     {
