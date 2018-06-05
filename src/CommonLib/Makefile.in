@@ -11,7 +11,8 @@ SOURCES = \
 	./ObjectMgr/ObjectMgr.c \
 	./List/List.c \
 	./String/String2.c \
-	./Map/Map.c 
+	./Map/Map.c \
+	./Map/MapEntry.c
 
 HEADERS = ./Types/Types.h $(SOURCES:.c=.h)
 
