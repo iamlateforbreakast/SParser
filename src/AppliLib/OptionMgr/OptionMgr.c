@@ -60,7 +60,7 @@ PRIVATE OptionMgr * OptionMgr_new()
   {
     optionName = String_new(optionDefault[j].name);
     optionValue = String_new(optionDefault[j].value);
-    //TODO: Map_set(this->options, optionName, optionValue);
+    Map_insert(this->options, optionName, optionValue);
   }
 
   return this;
@@ -114,14 +114,15 @@ PUBLIC OptionMgr* OptionMgr_getRef()
   @public
   @memberof OptionMgr
 **************************************************/
-PUBLIC String * OptionMgr_getOption(OptionMgr * this, const char * optionName)
+PUBLIC String * OptionMgr_getOption(OptionMgr * this, const char * name)
 {
   String * result = 0;
-  
-  /*
-  Map_find(this->map, optionName, &result));
-  */
-  
+  String * optionName = String_new(name);
+
+  Map_find(this->options, optionName, &result);
+ 
+  String_delete(optionName);
+
   return result;
 }
 
@@ -133,8 +134,10 @@ PUBLIC String * OptionMgr_getOption(OptionMgr * this, const char * optionName)
 **************************************************/
 PUBLIC void OptionMgr_setOption(OptionMgr * this, const char * optionName, String * value)
 {
+  String * option = String_new(optionName);
   /* find optionName in this->map */
   /* if not found insert value */
+  Map_insert(this->options, option, value);
   /* else modify value found in map */
 }
 
