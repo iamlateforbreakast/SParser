@@ -7,6 +7,7 @@
 **************************************************/
 
 #include "Map.h"
+#include "MapEntry.h"
 #include "List.h"
 #include "Object.h"
 #include "String2.h"
@@ -18,15 +19,6 @@
   @private
 **************************************************/
 PRIVATE unsigned int Map_hash(Map * this, char * s, unsigned int i);
-
-/**********************************************//**
-  @private
-**************************************************/
-typedef struct MapEntry
-{
-  String * s;
-  void * item;
-} MapEntry;
 
 /**********************************************//**
   @class Map
@@ -110,17 +102,13 @@ PUBLIC unsigned int Map_insert(Map * this,String * s, void * p)
     if (this->htable[key] == 0)
     {
       this->htable[key] = List_new();
-      entry = (MapEntry*)Memory_alloc(sizeof(MapEntry));
-      entry->s = s;
-      entry->item = p;
+      entry = MapEntry_new(s,p);
       List_insertHead(this->htable[key], entry);
       result = 1;
     }
     else if (i==String_getLength(s)) 
     {
-      entry = (MapEntry*)Memory_alloc(sizeof(MapEntry));
-      entry->s = s;
-      entry->item = p;
+      entry = MapEntry_new(s,p);
       List_insertHead(this->htable[key], entry);
     }
   }
@@ -147,9 +135,9 @@ PUBLIC unsigned int Map_find(Map* this, String* s, void** p)
     {
       while ((n = (MapEntry*)List_getNext(this->htable[key]))!= 0)
       {
-        if (String_isEqual(n->s, s))
+        if (String_isEqual(MapEntry_getString(n), s))
         {
-          *p = n->item;
+          *p = MapEntry_getItem(n);
           isFound = 1;
           result = 1;
           break;
