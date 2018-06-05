@@ -1,5 +1,6 @@
 #include "Map.h"
 #include "String.h"
+#include "ObjectMgr.h"
 
 Map * testMap = 0;
 
