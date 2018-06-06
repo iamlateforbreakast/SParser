@@ -73,6 +73,15 @@ PUBLIC unsigned int Memory_ncmp(void * pointer, void * compared, unsigned int nb
   return result;
 }
 
+PUBLIC unsigned int Memory_cmp(void * pointer, void * compared)
+{
+  unsigned int result = 0;
+  
+  if (strcmp(pointer, compared)==0) result=1;
+  
+  return result;
+}
+
 PUBLIC void Memory_report()
 {
   printf("Memory Usage Report:\n");
