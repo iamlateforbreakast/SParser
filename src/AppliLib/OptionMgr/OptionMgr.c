@@ -110,7 +110,6 @@ PUBLIC OptionMgr* OptionMgr_getRef()
 
 /**********************************************//** 
   @brief TBD
-  @details TBD
   @public
   @memberof OptionMgr
 **************************************************/
@@ -128,7 +127,6 @@ PUBLIC String * OptionMgr_getOption(OptionMgr * this, const char * name)
 
 /**********************************************//** 
   @brief TBD
-  @details TBD
   @public
   @memberof OptionMgr
 **************************************************/
@@ -143,7 +141,6 @@ PUBLIC void OptionMgr_setOption(OptionMgr * this, const char * optionName, Strin
 
 /**********************************************//** 
   @brief TBD
-  @details TBD
   @public
   @memberof OptionMgr
 **************************************************/
@@ -161,7 +158,6 @@ PUBLIC unsigned int OptionMgr_readFromFile(OptionMgr * this, const char * fileNa
 
 /**********************************************//** 
   @brief TBD
-  @details TBD
   @public
   @memberof OptionMgr
   @param[in] argc Number of commandline arguments.
@@ -174,14 +170,15 @@ PUBLIC unsigned int OptionMgr_readFromCmdLine(OptionMgr * this, const int argc, 
   int i = 0, j = 0;
   String * optionName = 0;
   String * optionValue = 0;
-
+  unsigned int isFound = 0;
+  
   const int nbOptions = sizeof(optionDefault)/sizeof(struct OptionDefault);
 
   for (i=0; i<=argc; i++)
   {
     for (j=0; j<nbOptions; j++)
     {
-      if (optionDefault[j].flag == argv[i])
+      if (Memory_cmp(optionDefault[j].flag, argv[i]))
       {
         optionName = String_new(optionDefault[j].name);
         if ((optionDefault[j].value!=0)&&((i+1)<=argc))
@@ -189,9 +186,18 @@ PUBLIC unsigned int OptionMgr_readFromCmdLine(OptionMgr * this, const int argc, 
           optionValue = String_new(argv[i+1]);
           i++;
         }
-        Map_insert(this->options, optionName, optionValue);
+        isFound = 1;
         break;
       }
+    }
+    if (isFound)
+    {
+      Map_insert(this->options, optionName, optionValue);
+    }
+    else
+    {
+      /* Error case: Illegal arg */
+      exit(2);
     }
   }
   
