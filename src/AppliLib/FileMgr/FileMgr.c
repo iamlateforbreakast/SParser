@@ -12,6 +12,7 @@
 #include "Object.h"
 #include "List.h"
 #include "FileDesc.h"
+#include "Memory.h"
 
 #include <unistd.h>
 #include <dirent.h>
@@ -43,6 +44,7 @@ PRIVATE FileMgr * fileMgr = 0;
 PRIVATE void FileMgr_changeDirectory(FileMgr * this);
 PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2);
 PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory);
+PRIVATE unsigned int FileMgr_isManaged(FileMgr * this, String * fullName);
 
 /**********************************************//** 
   @brief Create an instance of the class FileMgr.
@@ -164,22 +166,34 @@ PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryN
   return result;
 }
 
+/**********************************************//** 
+  @brief Add a files to the list of managed files.
+  @public
+  @memberof FileMgr
+  @return Status.
+**************************************************/
 PUBLIC unsigned int FileMgr_addFile(FileMgr * this, const char * fileName)
 {
   unsigned int result = 0;
-  String * fullPathDirectory = String_new(this->rootLocation);
+  String * fullName = String_new(this->rootLocation);
   String * addedFile = String_new(fileName);
   
   /* Merge current path with fileName */
-  FileMgr_mergePath(this, fullPathDirectory, addedFile);
+  FileMgr_mergePath(this, fullName, addedFile);
   
+  #if 0
   /* Check existence */
-  /* if FileMgr_find(); */
+  /* if (FileMgr_find(this, fullPathDirectory) */
   /*   else
       check if exist on FS
+      f=fopen(
       if yes
       else */
   /* If exists add to the list of files */
+  FileDesc_setFullName(fileDesc, fullName);
+  //FileDesc_setName(fileDesc, name);
+  List_insertHead(this->files, (void*)fileDesc);
+  #endif
   
   return result;
 }
@@ -190,7 +204,7 @@ PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
   String * fullName = String_new(this->rootLocation);
   String * name = String_new(fileName);
   FILE * f = NULL;
-  FileDesc * c = 0;
+
   unsigned int isFound = 0;
   char * buffer = 0;
   unsigned int length = 0;
@@ -198,40 +212,31 @@ PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
   /* Normalise file name */
   FileMgr_mergePath(this, fullName, name);
   
-  /* Find file in list */
-  while ((c = List_getNext(this->files))!=0)
+  if (FileMgr_isManaged(this, fullName))
   {
-    if (String_isContained(FileDesc_getFullName((FileDesc*)c), fullName))
+  
+    /* Open file */
+    f=fopen(String_getBuffer(fullName),"rb");
+    if (f)
     {
-      isFound ++;
-    }
-  }
-  
-  if (isFound==0)
-  {
-    return 0;
-  }
-  if (isFound > 1)
-  {
-    return 0;
-  }
-  
-  /* Open file */
-  f=fopen(String_getBuffer(fullName),"rb");
-  if (f)
-  {
-	  fseek(f, 0, SEEK_END);
-	  length=ftell(f);
-	  fseek(f, 0 , SEEK_SET);
+	    fseek(f, 0, SEEK_END);
+	    length=ftell(f);
+	    fseek(f, 0 , SEEK_SET);
         
-	  buffer = (char*)malloc(length+1);
-    if (buffer)
-    {
-      fread(buffer, length, 1, f);
-      buffer[length] = 0;
-      result = String_new(buffer);
-	    fclose(f);
+	    buffer = (char*)malloc(length+1);
+      if (buffer)
+      {
+        fread(buffer, length, 1, f);
+        buffer[length] = 0;
+        result = String_new(buffer);
+	      fclose(f);
+      }
     }
+  }
+  else
+  {
+    /* ERROR case: File is not in the list of managed files */
+    exit(2);
   }
   
   return result;
@@ -355,9 +360,58 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   printf("Merged path: %s\n", buffer);
 }
 
-PRIVATE FileDesc * FileMgr_findFile(FileMgr * this, String * name)
+PRIVATE FileDesc * FileMgr_searchFile(FileMgr * this, String * name)
 {
   FileDesc * result = 0;
+  FileDesc * c = 0;
+  unsigned int isFound = 0;
+  
+   /* Find file in list */
+  while ((c = List_getNext(this->files))!=0)
+  {
+    if (String_isContained(FileDesc_getFullName((FileDesc*)c), name))
+    {
+      isFound ++;
+      result =c;
+    }
+  }
+  
+  if (isFound==0)
+  {
+    return 0;
+  }
+  if (isFound > 1)
+  {
+    return 0;
+  }
+  
+  return result;
+}
+
+PRIVATE unsigned int FileMgr_isManaged(FileMgr * this, String * fullName)
+{
+  unsigned int result = 0;
+  FileDesc * c = 0;
+  unsigned int isFound = 0;
+  
+  /* Find file in list */
+  while ((c = List_getNext(this->files))!=0)
+  {
+    if (String_isEqual(FileDesc_getFullName((FileDesc*)c), fullName))
+    {
+      isFound ++;
+      result =1;
+    }
+  }
+  
+  if (isFound==0)
+  {
+    return 0;
+  }
+  if (isFound > 1)
+  {
+    return 0;
+  }
   
   return result;
 }
