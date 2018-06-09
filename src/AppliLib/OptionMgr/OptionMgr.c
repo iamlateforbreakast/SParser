@@ -10,6 +10,7 @@
 #include "Object.h"
 #include "String2.h"
 #include "Map.h"
+#include "FileMgr.h"
 
 /**********************************************//**
   @class OptionMgr
@@ -37,7 +38,8 @@ PRIVATE OptionMgr * optionMgr = 0;
 PRIVATE struct OptionDefault optionDefault[] = 
 {
   {"DB Name","-o","test.db"},
-  {"Input directory","-d","."}
+  {"Input directory","-d","."},
+  {"Config file name","-c","sparse.txt"}
 };
 
 /**********************************************//** 
@@ -144,14 +146,27 @@ PUBLIC void OptionMgr_setOption(OptionMgr * this, const char * optionName, Strin
   @public
   @memberof OptionMgr
 **************************************************/
-PUBLIC unsigned int OptionMgr_readFromFile(OptionMgr * this, const char * fileName)
+PUBLIC unsigned int OptionMgr_readFromFile(OptionMgr * this)
 {
   unsigned int result = 0;
-  /* FileMgr * fileMgr = FileMgr_getRef() */
-  /* Add Filename to FileMgr */
-  /* FileMgr_addFile(fileMgr, fileName); */
-  /* FileMgr_load */
-  /* OptionMgr parse */
+  FileMgr * fileMgr = FileMgr_getRef();
+  String * fileName = 0;
+  String * fileContent = 0;
+  
+  #if 0
+  fileName = OptionMgr_getOption(this);
+  String_prepend(fileName,"./");
+  if (FileMgr_add(fileMgr, fileName))
+  {
+    /* File exists and is managed */
+    fileContent = FileMgr_load(fileMgr, fileName);
+    OptionMgr_parseFile(this, fileContent);
+  }
+  /* TODO: Try home director */
+  #endif
+  
+  //String_delete(fileName);
+  FileMgr_delete(fileMgr);
   
   return result;
 }
@@ -213,6 +228,41 @@ PUBLIC unsigned int OptionMgr_readFromCmdLine(OptionMgr * this, const int argc, 
 PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
 {
   unsigned int result = 0;
+  char * p = 0;
+  
+  #if 0
+  for (p = String_getBuffer(fileContent);
+       p < String_getBuffer(fileContent)+String_getLength(fileContent));
+       p++)
+  {
+    switch(state)
+    {
+      case 0:
+        if (p=='[') state = 1;
+        break;
+      case 1:
+        if (p==']') state = 2;
+        optioName = ;
+        break;
+      case 2:
+        if (p!=' ') state = 3;
+        break;
+      case 3:
+        if (p=='\n') state = 0;
+        /* TODO: Case of windows file */
+        optionValue = ;
+        OptionMgr_setOption(optionMgr, optionName, optionValue);
+        break;
+      default:
+        /* Error case : */
+        break;
+      if ((state == 1) || (state == 2))
+      {
+        /* Error case: Syntax error */
+      }
+    }
+  }
+  #endif
   
   return result;
 }
