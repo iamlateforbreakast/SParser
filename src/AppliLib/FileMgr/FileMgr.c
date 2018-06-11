@@ -129,8 +129,6 @@ PUBLIC FileMgr* FileMgr_getRef()
 **************************************************/
 PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryName)
 {
-  static nbCalls = 0;
-  
   unsigned int result = 0;
   String * fullPathDirectory = String_new(this->rootLocation);
   String * addedDirectory = String_new(directoryName);
@@ -153,12 +151,14 @@ PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryN
   {
     FileMgr_listFiles(this, fullPathDirectory);
     fullPathDirectory = List_getNext(this->directories);
+    #if 0
     if (String_getLength(fullPathDirectory)>1000) 
     {
       printf("String length = %d\n", String_getLength(fullPathDirectory));
       printf("Nb calls = %d\n", nbCalls);
     }
     nbCalls++;
+    #endif
   }
   
   String_delete(addedDirectory);
@@ -182,22 +182,33 @@ PUBLIC unsigned int FileMgr_addFile(FileMgr * this, const char * fileName)
   FileMgr_mergePath(this, fullName, addedFile);
   
   #if 0
-  /* Check existence */
-  /* if (FileMgr_find(this, fullPathDirectory) */
-  /*   else
-      check if exist on FS
-      f=fopen(
-      if yes
-      else */
-  /* If exists add to the list of files */
-  FileDesc_setFullName(fileDesc, fullName);
-  //FileDesc_setName(fileDesc, name);
-  List_insertHead(this->files, (void*)fileDesc);
+  /* Check file is not already managed */
+  if (!FileMgr_isManaged(this, fullPathDirectory)
+  {
+    /* Check file exists on filesystem */
+    if (FileMgr_existFS(this, fullPathDirectory))
+      {
+        /* If exists add to the list of files */
+        FileDesc_setFullName(fileDesc, fullName);
+        List_insertHead(this->files, (void*)fileDesc);
+      }
+      else
+      {
+        /* TODO: Free fullName */
+  }
   #endif
+  
+  String_delete(addedFile);
   
   return result;
 }
 
+/**********************************************//** 
+  @brief Load a managed file into a String.
+  @public
+  @memberof FileMgr
+  @return Content of file.
+**************************************************/
 PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
 {
   String * result = 0;
@@ -279,10 +290,6 @@ PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory)
       }
     }
   }
-}
-
-PRIVATE void FileMgr_changeDirectory(FileMgr * this)
-{
 }
 
 /**************************************************

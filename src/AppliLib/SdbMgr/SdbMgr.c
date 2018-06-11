@@ -7,6 +7,7 @@
 
 #include "SdbMgr.h"
 #include "Object.h"
+#include "String2.h"
 #include <sqlite3.h>
 
 /**********************************************//** 
@@ -15,27 +16,23 @@
 struct SdbMgr
 {
   Object object;
-  //String* name;
   sqlite3* db;
-  //unsigned int isQueryReady;
-  //unsigned int queryCount;
-  //char queryResult[512];
-  unsigned int refCount;
 };
 
 
 /**********************************************//** 
   @private
 **************************************************/
-PRIVATE SdbMgr* sdbMgr = 0;
-
-PRIVATE SdbMgr* SdbMgr_new()
+PRIVATE SdbMgr* SdbMgr_new(String * name)
 {
-    SdbMgr* this = 0;
+  SdbMgr* this = 0;
 
-    /* this = (SdbMgr*)Memory_alloc(sizeof(SdbMgr)); */
-    
-    return this;
+  this = (SdbMgr*)Object_new(sizeof(SdbMgr),(Destructor)&SdbMgr_delete, (Copy_operator)&SdbMgr_copy);
+  this->object.size = sizeof(SdbMgr);
+  
+  SdbMgr_open(this, name);
+  
+  return this;
 }
 
 PUBLIC void SdbMgr_delete(SdbMgr* this)
@@ -46,10 +43,7 @@ PUBLIC void SdbMgr_delete(SdbMgr* this)
     {
       SdbMgr_close(this);
       this->name = NULL;
-      this->db = NULL;
-      this->isQueryReady = 0;
-      this->queryCount = 0;
-      memset(this->queryResult, 0, sizeof(this->queryResult));
+      this->db = 0;
       Memory_free(this, sizeof(SdbMgr));
     } */
 }
@@ -97,4 +91,19 @@ PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement)
   sqlite3_finalize(res);*/
   
   return 0;
+}
+
+PRIVATE unsigned int SdbMgr_open(SdbMgr* this, String* sdbName)
+{
+  unsigned int result = 0;
+  
+  result = sqlite3_open(String_getBuffer(sdbName), &(this->db));
+  (void)SdbMgr_execute(this, "PRAGMA synchronous=NORMAL;");
+  
+  return result;
+}
+
+PRIVATE void SdbMgr_close(SdbMgr* this)
+{
+  sqlite3_close(this->db);
 }

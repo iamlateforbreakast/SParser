@@ -17,6 +17,7 @@ struct FileDesc
   String * fullName;
 };
 
+PRIVATE String * FileDesc_getBasename(FileDesc * this);
 /**********************************************//** 
   @brief TBD
   @public
@@ -79,12 +80,6 @@ PUBLIC String * FileDesc_getFullName(FileDesc * this)
   return this->fullName;
 }
 
-/**********************************************//** 
-  @brief TBD
-  @public
-  @memberof FileDesc
-**************************************************/
-PUBLIC void FileDesc_setName(FileDesc * this, String * name)
+PRIVATE String * FileDesc_getBasename(FileDesc * this)
 {
-  this->name = name;
 }
