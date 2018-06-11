@@ -21,7 +21,7 @@ struct SdbMgr
 
 
 PRIVATE unsigned int SdbMgr_open(SdbMgr* this, String* sdbName);
-
+PRIVATE void SdbMgr_close(SdbMgr* this);
 /**********************************************//** 
   @private
 **************************************************/
@@ -39,26 +39,16 @@ PUBLIC SdbMgr* SdbMgr_new(String * name)
 
 PUBLIC void SdbMgr_delete(SdbMgr* this)
 {
-    /*this->refCount = this->refCount - 1;
-    
-    if (this->refCount==0)
-    {
-      SdbMgr_close(this);
-      this->name = NULL;
-      this->db = 0;
-      Memory_free(this, sizeof(SdbMgr));
-    } */
+  SdbMgr_close(this);
+  this->db = 0;
+  Object_delete(&this->object);
 }
 
-PUBLIC SdbMgr* SdbMgr_getSdbMgr()
-{ 
-  /*if (sdbMgr==NULL)
-  {
-    sdbMgr = SdbMgr_new();
-  }
-  sdbMgr->refCount++;
-  
-  return sdbMgr;*/
+PUBLIC SdbMgr * SdbMgr_copy(SdbMgr* this)
+{
+  SdbMgr * copy = 0;
+
+  return copy;
 }
 
 PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement)
