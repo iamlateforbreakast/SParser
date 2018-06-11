@@ -8,9 +8,10 @@
 
 typedef struct SdbMgr SdbMgr;
 
-PRIVATE SdbMgr* SdbMgr_new(String * name);
+PUBLIC SdbMgr * SdbMgr_new(String * name);
 PUBLIC void SdbMgr_delete(SdbMgr* this);
-PUBLIC SdbMgr* SdbMgr_getSdbMgr();
+PUBLIC SdbMgr * SdbMgr_copy(SdbMgr* this);
+PUBLIC SdbMgr * SdbMgr_getSdbMgr();
 PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement);
 
 #endif /* _SDBMGR_H_ */

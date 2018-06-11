@@ -20,10 +20,12 @@ struct SdbMgr
 };
 
 
+PRIVATE unsigned int SdbMgr_open(SdbMgr* this, String* sdbName);
+
 /**********************************************//** 
   @private
 **************************************************/
-PRIVATE SdbMgr* SdbMgr_new(String * name)
+PUBLIC SdbMgr* SdbMgr_new(String * name)
 {
   SdbMgr* this = 0;
 
