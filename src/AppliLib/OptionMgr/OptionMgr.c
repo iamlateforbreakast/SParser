@@ -42,6 +42,8 @@ PRIVATE struct OptionDefault optionDefault[] =
   {"Config file name","-c","sparse.txt"}
 };
 
+PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent);
+
 /**********************************************//** 
   @brief TBD
   @private
@@ -189,7 +191,7 @@ PUBLIC unsigned int OptionMgr_readFromCmdLine(OptionMgr * this, const int argc, 
   
   const int nbOptions = sizeof(optionDefault)/sizeof(struct OptionDefault);
 
-  for (i=0; i<=argc; i++)
+  for (i=0; i<argc; i++)
   {
     for (j=0; j<nbOptions; j++)
     {
