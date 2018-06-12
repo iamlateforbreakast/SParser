@@ -203,7 +203,7 @@ PUBLIC unsigned int String_prepend(String * this, const char * prefix)
   buffer = Memory_alloc(size);
   Memory_copy(buffer, prefix, strlen(prefix));
   Memory_copy(buffer+strlen(prefix), String_getBuffer(this), String_getLength(this));
-  Memory_free(this->buffer);
+  Memory_free(this->buffer, this->length + 1);
   this->buffer = buffer;
   
   return 0;
