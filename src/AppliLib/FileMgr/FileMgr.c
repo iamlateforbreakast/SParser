@@ -175,6 +175,7 @@ PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryN
 PUBLIC unsigned int FileMgr_addFile(FileMgr * this, const char * fileName)
 {
   unsigned int result = 0;
+  FileDesc * fileDesc = 0;
   String * fullName = String_new(this->rootLocation);
   String * addedFile = String_new(fileName);
   
@@ -182,19 +183,20 @@ PUBLIC unsigned int FileMgr_addFile(FileMgr * this, const char * fileName)
   FileMgr_mergePath(this, fullName, addedFile);
   
   /* Check file is not already managed */
-  if (!FileMgr_isManaged(this, fullName)
+  if (!FileMgr_isManaged(this, fullName))
   {
     /* Check file exists on filesystem */
     if (FileMgr_existFS(this, fullName))
     {
       /* If exists add to the list of files */
+      fileDesc = FileDesc_new();
       FileDesc_setFullName(fileDesc, fullName);
       List_insertHead(this->files, (void*)fileDesc);
       result = 1;
     }
     else
     {
-      /* TODO: Free fullName */
+      String_delete(fullName);
     }
   }
   else
