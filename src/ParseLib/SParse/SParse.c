@@ -46,7 +46,7 @@ static const char * SParse_ignoreFiles[] =
   @memberof SParse
   @return New SParse object.
 **************************************************/
-PUBLIC SParse *SParse_new(/* Sdb name */)
+PUBLIC SParse *SParse_new(String * sdbName)
 {
   SParse * this = 0;
 
@@ -54,6 +54,7 @@ PUBLIC SParse *SParse_new(/* Sdb name */)
   this->object.size = sizeof(SParse);
   
   /* Initialise SdbMgr */
+  SdbMgr_new(this->sdbMgr, sdbName);
   
   return this;
 }
@@ -66,7 +67,8 @@ PUBLIC SParse *SParse_new(/* Sdb name */)
 **************************************************/
 PUBLIC void SParse_delete(SParse * this)
 {
-    Object_delete(&this->object);
+  SdbMgr_delete(this->sdbMgr);
+  Object_delete(&this->object);
 }
 
 PUBLIC SParse * SParse_copy(SParse * this)
@@ -84,7 +86,7 @@ PUBLIC SParse * SParse_copy(SParse * this)
   @param[in] extension Extension of the files to parse.
   @return Status of the operation.
 **************************************************/
-PUBLIC unsigned int SParse_parse(SParse * this /* extension */)
+PUBLIC unsigned int SParse_parse(SParse * this, const char * extension)
 {
   unsigned int result = 0;
   
@@ -92,7 +94,7 @@ PUBLIC unsigned int SParse_parse(SParse * this /* extension */)
   /* List * fileList = new List(); */
   
   /* List all files with extension in all the input directories */
-  /* FileMgr_listFiles(fileMgr); */
+  /* FileMgr_listFiles(fileMgr, extension); */
 
   /* List_forEach(fileList, &SParseFile, this); */
   

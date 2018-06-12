@@ -26,6 +26,7 @@ PUBLIC SdbRequest * SdbRequest_new()
 
 PUBLIC void SdbRequest_delete(SdbRequest * this)
 {
+  Object_delete(&this->object);
 }
 
 PUBLIC SdbRequest * SdbRequest_copy(SdbRequest * this)
