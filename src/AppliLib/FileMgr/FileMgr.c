@@ -274,7 +274,6 @@ PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory)
         fullName = String_copy(directory);
         FileMgr_mergePath(this, fullName, name);
         FileDesc_setFullName(fileDesc, fullName);
-        FileDesc_setName(fileDesc, name);
         List_insertHead(this->files, (void*)fileDesc);
       }
       else
