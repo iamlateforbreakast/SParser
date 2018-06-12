@@ -194,3 +194,17 @@ PUBLIC unsigned int String_isContained(String * this, String * s2)
   
   return result;
 } 
+
+PUBLIC unsigned in String_prepend(String * this, const char * prefix)
+{
+  char * buffer;
+  unsigned int newSize = String_getSize(this) + strlen(prefix);
+  
+  buffer = Memory_alloc(size);
+  Memory_copy(buffer, prefix, strlen(prefix));
+  Memory_copy(buffer+strlen(prefix), String_getBuffer(this), String_getLength(this));
+  Memory_free(this->buffer);
+  this->buffer = buffer;
+  
+  return 0;
+}

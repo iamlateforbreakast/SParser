@@ -14,5 +14,5 @@ PUBLIC unsigned int String_getLength(String * this);
 PUBLIC char * String_getBuffer(String * this);
 PUBLIC void String_setBuffer(String * this, char * buffer);
 PUBLIC unsigned int String_isContained(String * this, String * s2);
-
+PUBLIC unsigned in String_prepend(String * this, const char * prefix);
 #endif /* _STRING2_H_ */
