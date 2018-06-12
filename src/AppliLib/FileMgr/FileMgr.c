@@ -181,22 +181,26 @@ PUBLIC unsigned int FileMgr_addFile(FileMgr * this, const char * fileName)
   /* Merge current path with fileName */
   FileMgr_mergePath(this, fullName, addedFile);
   
-  #if 0
   /* Check file is not already managed */
-  if (!FileMgr_isManaged(this, fullPathDirectory)
+  if (!FileMgr_isManaged(this, fullName)
   {
     /* Check file exists on filesystem */
-    if (FileMgr_existFS(this, fullPathDirectory))
-      {
-        /* If exists add to the list of files */
-        FileDesc_setFullName(fileDesc, fullName);
-        List_insertHead(this->files, (void*)fileDesc);
-      }
-      else
-      {
-        /* TODO: Free fullName */
+    if (FileMgr_existFS(this, fullName))
+    {
+      /* If exists add to the list of files */
+      FileDesc_setFullName(fileDesc, fullName);
+      List_insertHead(this->files, (void*)fileDesc);
+      result = 1;
+    }
+    else
+    {
+      /* TODO: Free fullName */
+    }
   }
-  #endif
+  else
+  {
+    String_delete(fullName);
+  }
   
   String_delete(addedFile);
   
@@ -418,6 +422,13 @@ PRIVATE unsigned int FileMgr_isManaged(FileMgr * this, String * fullName)
   {
     return 0;
   }
+  
+  return result;
+}
+
+PRIVATE unsigned int FileMgr_existFS(FileMgr * this, String * fullName)
+{
+  unsigned int result = 0;
   
   return result;
 }
