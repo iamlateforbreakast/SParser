@@ -17,7 +17,8 @@ struct FileDesc
   String * fullName;
 };
 
-PRIVATE String * FileDesc_getBasename(FileDesc * this);
+PRIVATE String * FIleDesc_extractBasename(FileDesc * this);
+
 /**********************************************//** 
   @brief TBD
   @public
@@ -68,6 +69,7 @@ PUBLIC FileDesc * FileDesc_copy(FileDesc * this)
 PUBLIC void FileDesc_setFullName(FileDesc * this, String * fullName)
 {
   this->fullName = fullName;
+  this->name = FileDesc_extractBasename(this);
 }
 
 /**********************************************//** 
@@ -80,6 +82,34 @@ PUBLIC String * FileDesc_getFullName(FileDesc * this)
   return this->fullName;
 }
 
-PRIVATE String * FileDesc_getBasename(FileDesc * this)
+/**********************************************//** 
+  @brief TBD
+  @public
+  @memberof FileDesc
+**************************************************/
+PUBLIC String * FileDesc_getName(FileDesc * this)
 {
+  return this->name;
+}
+
+/**********************************************//** 
+  @brief TBD
+  @private
+  @memberof FileDesc
+**************************************************/
+PRIVATE String * FIleDesc_extractBasename(FileDesc * this)
+{
+  String * result = 0;
+  
+  char * p = String_getBuffer(this->fullName) + String_getLength(this->fullName);
+  
+  while (p>=String_getBuffer(this->fullName) )
+  {
+    if (p=='/') break;
+    p--;
+  }
+  
+  this->name = String_new(p);
+  
+  return result;
 }
