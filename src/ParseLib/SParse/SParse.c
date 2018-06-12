@@ -30,7 +30,7 @@ struct SParse
 {
   Object object;
   char * extension;
-  char * sdbName;
+  SdbMgr * sdbMgr;
 };
 
 static const SParseDefault SParse_default[] = 
@@ -54,7 +54,7 @@ PUBLIC SParse *SParse_new(String * sdbName)
   this->object.size = sizeof(SParse);
   
   /* Initialise SdbMgr */
-  SdbMgr_new(this->sdbMgr, sdbName);
+  this->sdbMgr = SdbMgr_new(sdbName);
   
   return this;
 }
