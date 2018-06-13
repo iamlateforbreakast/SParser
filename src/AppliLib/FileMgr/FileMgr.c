@@ -130,8 +130,6 @@ PUBLIC FileMgr* FileMgr_getRef()
 **************************************************/
 PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryName)
 {
-  static nbCalls = 0;
-  
   unsigned int result = 0;
   String * fullPathDirectory = String_new(this->rootLocation);
   String * addedDirectory = String_new(directoryName);
