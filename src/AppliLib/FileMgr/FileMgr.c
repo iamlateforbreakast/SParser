@@ -45,6 +45,7 @@ PRIVATE void FileMgr_changeDirectory(FileMgr * this);
 PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2);
 PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory);
 PRIVATE unsigned int FileMgr_isManaged(FileMgr * this, String * fullName);
+PRIVATE unsigned int FileMgr_existFS(FileMgr * this, String * fullName);
 
 /**********************************************//** 
   @brief Create an instance of the class FileMgr.
@@ -129,6 +130,8 @@ PUBLIC FileMgr* FileMgr_getRef()
 **************************************************/
 PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryName)
 {
+  static nbCalls = 0;
+  
   unsigned int result = 0;
   String * fullPathDirectory = String_new(this->rootLocation);
   String * addedDirectory = String_new(directoryName);
