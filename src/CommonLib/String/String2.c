@@ -102,7 +102,7 @@ PUBLIC unsigned int String_isEqual(String * this, String * compared)
 {
   unsigned int result = 0;
   
-  result = Memory_ncmp(this, compared, this->length);
+  result = Memory_ncmp(this->buffer, compared->buffer, this->length);
   if (this->length==compared->length)
   {
     result = 1;
@@ -198,7 +198,7 @@ PUBLIC unsigned int String_isContained(String * this, String * s2)
 PUBLIC unsigned int String_prepend(String * this, const char * prefix)
 {
   char * buffer;
-  unsigned int newSize = String_getSize(this) + strlen(prefix);
+  unsigned int newSize = String_getLength(this) + strlen(prefix);
   
   buffer = Memory_alloc(newSize);
   Memory_copy(buffer, prefix, strlen(prefix));
