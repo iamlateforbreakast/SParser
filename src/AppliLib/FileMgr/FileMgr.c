@@ -247,7 +247,7 @@ PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
 	    length=ftell(f);
 	    fseek(f, 0 , SEEK_SET);
         
-	    buffer = (char*)malloc(length+1);
+	    buffer = (char*)Memory_alloc(length+1);
       if (buffer)
       {
         fread(buffer, length, 1, f);
@@ -325,7 +325,7 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   /* TODO: check if path2 is absolute path in which case copy and return */
   
   // Initialise result buffer
-  memcpy(buffer, String_getBuffer(path1), bufferLength);
+  Memory_ncmp(buffer, String_getBuffer(path1), bufferLength);
   
   
   p1_idx = buffer + String_getLength(path1);
@@ -338,7 +338,7 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   for (p2_idx=String_getBuffer(path2); p2_idx<(String_getBuffer(path2)+String_getLength(path2)); p2_idx++)
   {
       //Take ../ into account
-      if (memcmp(p2_idx, "..", 2) == 0)
+      if (Memory_ncmp(p2_idx, "..", 2) == 0)
          //((memcmp(p2_idx, "..",2)==0) && (p2_idx == (String_getBuffer(path2)+String_getLength(path2)))))
       {
         p1_idx = p1_idx - 2;
@@ -350,8 +350,8 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
         p2_idx = p2_idx + 2;
       }
       //Ignore ./ in path2
-      else if ((memcmp(p2_idx, "./", 2) == 0) ||
-                 ((memcmp(p2_idx, ".", 1) == 0) && (p2_idx == (String_getBuffer(path2)+String_getLength(path2)-1))))
+      else if ((Memory_ncmp(p2_idx, "./", 2) == 0) ||
+                 ((Memory_ncmp(p2_idx, ".", 1) == 0) && (p2_idx == (String_getBuffer(path2)+String_getLength(path2)-1))))
       {
         p1_idx = p1_idx - 1;
         p2_idx = p2_idx + 2;
