@@ -82,10 +82,14 @@ PUBLIC void FileMgr_delete(FileMgr * this)
 {
   if (this!=0)
   {
-    List_delete(this->files);
-    List_delete(this->directories);
-    // TODO: String_delete(this->rootLocation);
-    Object_delete(&this->object);
+    if (this->object.refCount==1)
+    {
+      List_delete(this->files);
+      List_delete(this->directories);
+      // TODO: String_delete(this->rootLocation);
+      Object_delete(&this->object);
+      fileMgr = 0;
+    }
   }
 }
 
@@ -130,6 +134,8 @@ PUBLIC FileMgr* FileMgr_getRef()
 **************************************************/
 PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryName)
 {
+  static nbCalls = 0;
+  
   unsigned int result = 0;
   String * fullPathDirectory = String_new(this->rootLocation);
   String * addedDirectory = String_new(directoryName);
@@ -432,6 +438,13 @@ PRIVATE unsigned int FileMgr_isManaged(FileMgr * this, String * fullName)
 PRIVATE unsigned int FileMgr_existFS(FileMgr * this, String * fullName)
 {
   unsigned int result = 0;
-  
+  FILE * f;
+
+  f=fopen(String_getBuffer(fullName),"rb");
+  if (f) 
+  {
+    result = 1;
+    fclose(f);
+  }
   return result;
 }
