@@ -45,6 +45,23 @@ int step2()
 
   FileMgr_delete(testFileMgr);
 
+  Memory_report();
+
+  return 0;
+}
+
+int step3()
+{
+  FileMgr * testFileMgr = FileMgr_getRef();
+  String * testFileContent = 0;
+
+  FileMgr_addFile(testFileMgr, "../FileMgr.c");
+  testFileContent = FileMgr_load(testFileMgr, "FileMgr.c");
+
+  FileMgr_delete(testFileMgr);
+
+  Memory_report();
+
   return 0;
 }
 
@@ -52,5 +69,6 @@ int main()
 {
   //step1();
   step2();
+  step3();
   return 0;
 }
