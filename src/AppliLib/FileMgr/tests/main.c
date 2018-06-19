@@ -1,6 +1,7 @@
 #include "FileMgr.h"
 #include "Object.h"
 #include "List.h"
+#include "Memory.h"
 
 #include <stdio.h>
 
