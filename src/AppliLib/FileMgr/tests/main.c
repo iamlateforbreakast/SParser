@@ -59,6 +59,7 @@ int step3()
   FileMgr_addFile(testFileMgr, "../FileMgr.c");
   testFileContent = FileMgr_load(testFileMgr, "FileMgr.c");
 
+  String_delete(testFileContent);
   FileMgr_delete(testFileMgr);
 
   Memory_report();
@@ -71,5 +72,6 @@ int main()
   //step1();
   step2();
   step3();
+
   return 0;
 }
