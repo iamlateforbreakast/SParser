@@ -104,11 +104,14 @@ PRIVATE String * FileDesc_getBasename(FileDesc * this)
   
   while (p>=String_getBuffer(this->fullName) )
   {
-    if (*p=='/') break;
+    if (*p=='/') 
+    {
+      p++;
+      result = String_new(p);
+      break;
+    }
     p--;
   }
-  
-  this->name = String_new(p);
   
   return result;
 }
