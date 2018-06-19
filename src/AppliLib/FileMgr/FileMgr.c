@@ -44,7 +44,7 @@ PRIVATE FileMgr * fileMgr = 0;
 PRIVATE void FileMgr_changeDirectory(FileMgr * this);
 PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2);
 PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory);
-PRIVATE unsigned int FileMgr_isManaged(FileMgr * this, String * fullName);
+PRIVATE FileDesc * FileMgr_isManaged(FileMgr * this, String * fullName);
 PRIVATE unsigned int FileMgr_existFS(FileMgr * this, String * fullName);
 
 /**********************************************//** 
@@ -225,22 +225,21 @@ PUBLIC unsigned int FileMgr_addFile(FileMgr * this, const char * fileName)
 PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
 {
   String * result = 0;
-  String * fullName = String_new(this->rootLocation);
   String * name = String_new(fileName);
   FILE * f = NULL;
-
+  FileDesc * fd = NULL;
+  
   unsigned int isFound = 0;
   char * buffer = 0;
   unsigned int length = 0;
   
-  /* Normalise file name */
-  FileMgr_mergePath(this, fullName, name);
+  fd = FileMgr_isManaged(this, name);
   
-  if (FileMgr_isManaged(this, fullName))
+  if (fd)
   {
   
     /* Open file */
-    f=fopen(String_getBuffer(fullName),"rb");
+    f=fopen(String_getBuffer(FileDesc_getFullName(fd)),"rb");
     if (f)
     {
 	    fseek(f, 0, SEEK_END);
@@ -252,7 +251,8 @@ PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
       {
         fread(buffer, length, 1, f);
         buffer[length] = 0;
-        result = String_new(buffer);
+        result = String_new(0);
+        String_setBuffer(result, buffer);
 	      fclose(f);
       }
     }
@@ -262,6 +262,8 @@ PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
     /* ERROR case: File is not in the list of managed files */
     exit(2);
   }
+  
+  String_delete(name);
   
   return result;
 }
@@ -283,11 +285,12 @@ PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory)
       if (directoryEntry->d_type != DT_DIR)
       {
         fileDesc = FileDesc_new();
-        name = String_new(directoryEntry->d_name);
         fullName = String_copy(directory);
+        name = String_new(directoryEntry->d_name);
         FileMgr_mergePath(this, fullName, name);
         FileDesc_setFullName(fileDesc, fullName);
         List_insertHead(this->files, (void*)fileDesc);
+        //String_delete(name);
       }
       else
       {
@@ -318,6 +321,7 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   char * p2_idx = 0;
   char * p1_idx = 0;
   char buffer[FILEMGR_MAX_PATH];
+  char * mergedPath = 0;
   unsigned int bufferLength = String_getLength(path1);
   
   // TODO: CHeck initial condition of validity length > 0
@@ -369,9 +373,13 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   *p1_idx = 0;
   
   //Place merged path into path1
-  String_delete(path1);
-  path1 = String_new(buffer);
-
+  mergedPath = String_getBuffer(path1);
+  Memory_free(mergedPath, String_getLength(path1));
+  mergedPath = (char *)Memory_alloc(p1_idx - buffer);
+  Memory_copy(mergedPath, buffer, p1_idx-buffer);
+  
+  String_setBuffer(path1, mergedPath);
+  
   if (String_getLength(path1)>1000) 
   {
     printf("String length = %d\n", String_getLength(path1));
@@ -408,29 +416,29 @@ PRIVATE FileDesc * FileMgr_searchFile(FileMgr * this, String * name)
   return result;
 }
 
-PRIVATE unsigned int FileMgr_isManaged(FileMgr * this, String * fullName)
+PRIVATE FileDesc * FileMgr_isManaged(FileMgr * this, String * fullName)
 {
-  unsigned int result = 0;
-  FileDesc * c = 0;
+  FileDesc * result = 0;
+  FileDesc * fd = 0;
   unsigned int isFound = 0;
   
   /* Find file in list */
-  while ((c = List_getNext(this->files))!=0)
+  while ((fd = List_getNext(this->files))!=0)
   {
-    if (String_isEqual(FileDesc_getFullName((FileDesc*)c), fullName))
+    if (String_isEqual(FileDesc_getName(fd), fullName))
     {
       isFound ++;
-      result =1;
+      result = fd;
     }
   }
   
   if (isFound==0)
   {
-    return 0;
+    result = 0;
   }
   if (isFound > 1)
   {
-    return 0;
+    result = 0;
   }
   
   return result;
