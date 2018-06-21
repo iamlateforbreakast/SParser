@@ -373,8 +373,8 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   *p1_idx = 0;
   
   //Place merged path into path1
-  mergedPath = (char *)Memory_alloc(p1_idx - buffer);
-  Memory_copy(mergedPath, buffer, p1_idx-buffer);
+  mergedPath = (char *)Memory_alloc(p1_idx - buffer + 1);
+  Memory_copy(mergedPath, buffer, p1_idx-buffer + 1);
   
   String_setBuffer(path1, mergedPath);
   
