@@ -155,17 +155,15 @@ PUBLIC unsigned int OptionMgr_readFromFile(OptionMgr * this)
   String * fileName = 0;
   String * fileContent = 0;
   
-  #if 0
-  fileName = OptionMgr_getOption(this);
+  fileName = OptionMgr_getOption(this,"Config file name");
   String_prepend(fileName,"./");
-  if (FileMgr_add(fileMgr, fileName))
+  if (FileMgr_addFile(fileMgr, String_getBuffer(fileName)))
   {
     /* File exists and is managed */
     fileContent = FileMgr_load(fileMgr, fileName);
     OptionMgr_parseFile(this, fileContent);
   }
   /* TODO: Try home director */
-  #endif
   
   //String_delete(fileName);
   FileMgr_delete(fileMgr);
