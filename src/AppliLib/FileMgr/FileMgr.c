@@ -290,7 +290,7 @@ PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory)
         FileMgr_mergePath(this, fullName, name);
         FileDesc_setFullName(fileDesc, fullName);
         List_insertHead(this->files, (void*)fileDesc);
-        //String_delete(name);
+        String_delete(name);
       }
       else
       {
@@ -373,8 +373,8 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   *p1_idx = 0;
   
   //Place merged path into path1
-  mergedPath = (char *)Memory_alloc(p1_idx - buffer + 1);
-  Memory_copy(mergedPath, buffer, p1_idx-buffer + 1);
+  mergedPath = (char *)Memory_alloc(p1_idx - buffer+1);
+  Memory_copy(mergedPath, buffer, p1_idx-buffer+1);
   
   String_setBuffer(path1, mergedPath);
   
