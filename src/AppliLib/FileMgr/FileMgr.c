@@ -358,8 +358,8 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
       else if ((Memory_ncmp(p2_idx, "./", 2) == 1) ||
                  ((Memory_ncmp(p2_idx, ".", 1) == 1) && (p2_idx == (String_getBuffer(path2)+String_getLength(path2)-1))))
       {
-        p1_idx = p1_idx - 1;
-        p2_idx = p2_idx + 2;
+        //p1_idx = p1_idx - 1;
+        p2_idx = p2_idx + 1;
       }
       else
       {
