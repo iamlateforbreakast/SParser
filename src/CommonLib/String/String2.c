@@ -200,11 +200,13 @@ PUBLIC unsigned int String_prepend(String * this, const char * prefix)
   char * buffer;
   unsigned int newSize = String_getLength(this) + strlen(prefix);
   
-  buffer = Memory_alloc(newSize);
+  buffer = Memory_alloc(newSize+1);
   Memory_copy(buffer, prefix, strlen(prefix));
   Memory_copy(buffer+strlen(prefix), String_getBuffer(this), String_getLength(this));
   Memory_free(this->buffer, this->length + 1);
+  buffer[newSize] = 0;
   this->buffer = buffer;
+  this->length = newSize;
   
   return 0;
 }
