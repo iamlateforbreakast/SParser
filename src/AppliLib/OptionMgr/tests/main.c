@@ -50,6 +50,18 @@ int step4()
   return 0;
 }
 
+int step5()
+{
+  String * option = 0;
+  
+  OptionMgr_readFromFile(testOptionMgr);
+  
+  option = OptionMgr_getOption(testOptionMgr,"DB Name");
+  printf("DB Name option = %s\n", String_getBuffer(option));
+  
+  return 0;
+}
+
 int main()
 {
   step1();
