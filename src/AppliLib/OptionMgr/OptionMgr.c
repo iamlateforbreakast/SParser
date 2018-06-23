@@ -160,7 +160,7 @@ PUBLIC unsigned int OptionMgr_readFromFile(OptionMgr * this)
   if (FileMgr_addFile(fileMgr, String_getBuffer(fileName)))
   {
     /* File exists and is managed */
-    fileContent = FileMgr_load(fileMgr, fileName);
+    fileContent = FileMgr_load(fileMgr, String_getBuffer(fileName));
     OptionMgr_parseFile(this, fileContent);
   }
   /* TODO: Try home director */
