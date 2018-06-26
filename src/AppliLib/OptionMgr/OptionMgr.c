@@ -232,8 +232,11 @@ PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
 {
   unsigned int result = 0;
   char * p = 0;
+  unsigned int idx = 0;
+  unsigned int length =0;
+  String * optionName = 0;
+  String * optionValue = 0;
   
-  #if 0
   for (p = String_getBuffer(fileContent);
        p < String_getBuffer(fileContent)+String_getLength(fileContent));
        p++)
@@ -241,20 +244,37 @@ PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
     switch(state)
     {
       case 0:
-        if (p=='[') state = 1;
+        if (*p=='[') 
+        {
+          state = 1;
+          idx = p - String_getBuffer(fileContent) + 1;
+          length = 0;
+        }
         break;
       case 1:
-        if (p==']') state = 2;
-        optioName = ;
+        if (*p==']') 
+        {
+          state = 2;
+          optionName = String_subString(fileContent, idx, length);
+        }
+        else length++;
         break;
       case 2:
-        if (p!=' ') state = 3;
+        if (*p!=' ') 
+        {
+          state = 3;
+          idx = p - String_getBuffer(fileContent);
+          length = 0;
+        }
         break;
       case 3:
-        if (p=='\n') state = 0;
-        /* TODO: Case of windows file */
-        optionValue = ;
+        if (*p=='\n') 
+        {
+          state = 0;
+          /* TODO: Case of windows file */
+          optionValue = String_subString(fileContent, idx, length);
         OptionMgr_setOption(optionMgr, optionName, optionValue);
+        }
         break;
       default:
         /* Error case : */
@@ -265,7 +285,6 @@ PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
       }
     }
   }
-  #endif
   
   return result;
 }

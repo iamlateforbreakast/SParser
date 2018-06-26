@@ -210,3 +210,10 @@ PUBLIC unsigned int String_prepend(String * this, const char * prefix)
   
   return 0;
 }
+
+PUBLIC String * String_subString(String * this, unsigned int idx, unsigned int length)
+{
+  String * result = 0;
+  
+  return 0;
+}
