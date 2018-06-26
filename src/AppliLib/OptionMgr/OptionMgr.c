@@ -11,6 +11,7 @@
 #include "String2.h"
 #include "Map.h"
 #include "FileMgr.h"
+#include "Memory.h"
 
 /**********************************************//**
   @class OptionMgr
@@ -154,10 +155,12 @@ PUBLIC unsigned int OptionMgr_readFromFile(OptionMgr * this)
   FileMgr * fileMgr = FileMgr_getRef();
   String * fileName = 0;
   String * fileContent = 0;
-  
+  String * path1 = 0;
+ 
   fileName = OptionMgr_getOption(this,"Config file name");
-  String_prepend(fileName,"./");
-  if (FileMgr_addFile(fileMgr, String_getBuffer(fileName)))
+  path1 = String_copy(fileName);
+  String_prepend(path1,"./");
+  if (FileMgr_addFile(fileMgr, String_getBuffer(path1)))
   {
     /* File exists and is managed */
     fileContent = FileMgr_load(fileMgr, String_getBuffer(fileName));
