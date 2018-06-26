@@ -28,7 +28,7 @@ void sighandler(int signum, siginfo_t *info, void *ptr)
 
 int main(int argc, char** argv)
 {
-  SParse *sparse = NULL;
+  SParse *sparse = 0;
   
   /* ErrorMgr *errMgr = ErrorMgr_getErrorMgr(); */
   /* OptionMgr *optionMgr = OptionMgr_getOptionMgr(); */
@@ -61,12 +61,12 @@ int main(int argc, char** argv)
   action.sa_sigaction = sighandler;
   action.sa_flags = SA_SIGINFO;
  
-  sigaction(SIGTERM, &action, NULL);
-  sigaction(SIGSEGV, &action, NULL);
-  sigaction(SIGSEGV, &action, NULL);
-  sigaction(SIGINT, &action, NULL);
-  sigaction(SIGTERM, &action, NULL);
-  sigaction(SIGHUP, &action, NULL);
+  sigaction(SIGTERM, &action, 0);
+  sigaction(SIGSEGV, &action, 0);
+  sigaction(SIGSEGV, &action, 0);
+  sigaction(SIGINT, &action, 0);
+  sigaction(SIGTERM, &action, 0);
+  sigaction(SIGHUP, &action, 0);
 
   int *test = 0;
 
