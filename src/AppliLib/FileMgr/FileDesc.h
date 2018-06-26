@@ -14,5 +14,6 @@ PUBLIC FileDesc * FileDesc_copy(FileDesc * this);
 PUBLIC void FileDesc_setFullName(FileDesc * this, String * fullName);
 PUBLIC String * FileDesc_getFullName(FileDesc * this);
 PUBLIC void FileDesc_setName(FileDesc * this, String * name);
+PUBLIC String * FileDesc_getName(FileDesc * this);
 
 #endif /* _FILEDESC_H_ */
