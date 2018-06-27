@@ -284,17 +284,17 @@ PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
       default:
         /* Error case : */
         break;
-      if ((state == 1) || (state == 2))
-      {
-        /* Error case: Syntax error */
-      }
-      else if (state == 3)
-      {
-        optionValue = String_subString(fileContent, idx, length);
-        OptionMgr_setOption(optionMgr, optionName, optionValue);
       }
     }
-  }
+    if ((state == 1) || (state == 2))
+    {
+      /* Error case: Syntax error */
+    }
+    else if (state == 3)
+    {
+      optionValue = String_subString(fileContent, idx, length);
+      OptionMgr_setOption(optionMgr, optionName, optionValue);
+    }
   
   return result;
 }
