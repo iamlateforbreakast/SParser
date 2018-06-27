@@ -236,9 +236,10 @@ PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
   unsigned int length =0;
   String * optionName = 0;
   String * optionValue = 0;
+  unsigned int state = 0;
   
   for (p = String_getBuffer(fileContent);
-       p < String_getBuffer(fileContent)+String_getLength(fileContent));
+       p < String_getBuffer(fileContent)+String_getLength(fileContent);
        p++)
   {
     switch(state)
@@ -264,16 +265,20 @@ PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
         {
           state = 3;
           idx = p - String_getBuffer(fileContent);
-          length = 0;
+          length = 1;
         }
         break;
       case 3:
-        if (*p=='\n') 
+        if ((*p=='\n')  || (*(p+1) == 0))
         {
           state = 0;
           /* TODO: Case of windows file */
           optionValue = String_subString(fileContent, idx, length);
         OptionMgr_setOption(optionMgr, optionName, optionValue);
+        }
+        else
+        {
+          length++;
         }
         break;
       default:
