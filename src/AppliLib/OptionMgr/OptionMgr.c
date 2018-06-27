@@ -269,7 +269,7 @@ PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
         }
         break;
       case 3:
-        if ((*p=='\n')  || (*(p+1) == 0))
+        if (*p=='\n')
         {
           state = 0;
           /* TODO: Case of windows file */
@@ -287,6 +287,11 @@ PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
       if ((state == 1) || (state == 2))
       {
         /* Error case: Syntax error */
+      }
+      else if (state == 3)
+      {
+        optionValue = String_subString(fileContent, idx, length);
+        OptionMgr_setOption(optionMgr, optionName, optionValue);
       }
     }
   }
