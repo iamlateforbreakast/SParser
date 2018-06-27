@@ -116,9 +116,25 @@ PUBLIC unsigned int String_isEqual(String * this, String * compared)
   @public
   @memberof String
 **************************************************/
-PUBLIC String* String_subString(String* this, unsigned int pos, unsigned int length)
+PUBLIC String * String_subString(String * this, unsigned int idx, unsigned int length)
 {
   String * result = 0;
+  
+  if (this!=0)
+  {
+    result = String_new(0);
+    if (idx+length < this->length)
+    {
+      result->length = length;
+    }
+    else
+    {
+      result->length = this->length - idx;  
+    }
+    result->buffer = Memory_alloc(result->length+1);
+    Memory_copy(result->buffer, this->buffer + idx, result->length);
+    result->buffer[length] = 0;
+  }
   
   return result;
 }
@@ -211,9 +227,4 @@ PUBLIC unsigned int String_prepend(String * this, const char * prefix)
   return 0;
 }
 
-PUBLIC String * String_subString(String * this, unsigned int idx, unsigned int length)
-{
-  String * result = 0;
-  
-  return 0;
-}
+
