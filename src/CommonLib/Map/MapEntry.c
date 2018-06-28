@@ -28,6 +28,10 @@ MapEntry * MapEntry_new(String * s, void * item)
 void MapEntry_delete(MapEntry * this)
 {
   String_delete(this->s);
+  if (((Object*)this->item)->delete!=0)
+  {
+    ((Object*)this->item)->delete(this->item);
+  }
   Object_delete(&this->object);
 }
 
@@ -43,7 +47,22 @@ String * MapEntry_getString(MapEntry * this)
   return this->s;
 }
 
+void MapEntry_setString(MapEntry * this, String * s)
+{
+  String_delete(this->s);
+  this->s = s;
+}
+
 void * MapEntry_getItem(MapEntry * this)
 {
   return this->item;
+}
+
+void MapEntry_setItem(MapEntry * this, void * item)
+{
+  if (((Object*)this->item)->delete!=0)
+  {
+    ((Object*)this->item)->delete(this->item);
+  }
+  this->item = item;
 }
