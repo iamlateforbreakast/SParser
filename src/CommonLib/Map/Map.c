@@ -96,22 +96,30 @@ PUBLIC unsigned int Map_insert(Map * this,String * s, void * p)
   MapEntry * entry =0;
   
   /* TODO: Manage duplication */
-  for (i=1; (i<=String_getLength(s)) && (result==0); i++)
+  if (Map_find(this, s, &entry))
   {
-    key = Map_hash(this,String_getBuffer(s), i);
-    if (this->htable[key] == 0)
+    MapEntry_setItem(entry, p);
+  }
+  else
+  {
+    for (i=1; (i<=String_getLength(s)) && (result==0); i++)
     {
-      this->htable[key] = List_new();
-      entry = MapEntry_new(s,p);
-      List_insertHead(this->htable[key], entry);
-      result = 1;
-    }
-    else if (i==String_getLength(s)) 
-    {
-      entry = MapEntry_new(s,p);
-      List_insertHead(this->htable[key], entry);
+      key = Map_hash(this,String_getBuffer(s), i);
+      if (this->htable[key] == 0)
+      {
+        this->htable[key] = List_new();
+        entry = MapEntry_new(s,p);
+        List_insertHead(this->htable[key], entry);
+        result = 1;
+      }
+      else if (i==String_getLength(s)) 
+      {
+        entry = MapEntry_new(s,p);
+        List_insertHead(this->htable[key], entry);
+      }
     }
   }
+  
   return result;
 }
 
