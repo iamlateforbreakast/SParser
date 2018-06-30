@@ -93,12 +93,14 @@ PUBLIC unsigned int Map_insert(Map * this,String * s, void * p)
   unsigned int result = 0;
   unsigned int key = 0;
   unsigned int i = 0;
-  MapEntry * entry =0;
+  void * entry =0;
   
   /* TODO: Manage duplication */
   if (Map_find(this, s, &entry))
   {
-    MapEntry_setItem(entry, p);
+    //MapEntry_setItem(entry, p);
+    ((Object*)entry)->delete();
+    entry = p;
   }
   else
   {
