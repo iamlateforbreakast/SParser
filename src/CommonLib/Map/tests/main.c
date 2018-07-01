@@ -33,6 +33,21 @@ int step3()
 
 int step4()
 {
+  String * s = String_new("Hello world");
+  String * item = String_new("The new value");
+  String * newItem = 0;
+  
+  Map_insert(testMap, s, item);
+  Map_find(testMap, s, &newItem);
+  
+  printf("New value : %s\n",
+          String_getBuffer(newItem));
+  
+  return 0;
+}
+
+int step5()
+{
   Map_delete(testMap);
   
   return 0;
@@ -44,6 +59,7 @@ int main()
   step2();
   step3();
   step4();
+  step5();
   
   return 0;
 }
