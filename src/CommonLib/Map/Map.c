@@ -19,6 +19,7 @@
   @private
 **************************************************/
 PRIVATE unsigned int Map_hash(Map * this, char * s, unsigned int i);
+PRIVATE MapEntry * Map_findEntry(Map* this, String * s);
 
 /**********************************************//**
   @class Map
@@ -94,16 +95,18 @@ PUBLIC unsigned int Map_insert(Map * this,String * s, void * p)
   unsigned int key = 0;
   unsigned int i = 0;
   void * entry =0;
+  MapEntry * me = 0;
   
-  /* TODO: Manage duplication */
-  if (Map_find(this, s, &entry))
+  /* Check if there is an entry under s */
+  if ((me = Map_findEntry(this, s))!=0)
   {
-    //MapEntry_setItem(entry, p);
-    ((Object*)entry)->delete();
-    entry = p;
+    /* Replace entry with new entry an free existing entry */
+    MapEntry_setString(me, s);
+    MapEntry_setItem(me, p);
   }
   else
   {
+    /* Create a new entry */
     for (i=1; (i<=String_getLength(s)) && (result==0); i++)
     {
       key = Map_hash(this,String_getBuffer(s), i);
@@ -138,22 +141,11 @@ PUBLIC unsigned int Map_find(Map* this, String* s, void** p)
   unsigned int isFound = 0;
   MapEntry * n = 0;
   
-  for (i=1; (i<=String_getLength(s)) && (!isFound); i++)
+  n = Map_findEntry(this, s);
+  
+  if (n!=0)
   {
-    key = Map_hash(this, String_getBuffer(s), i);
-    if (this->htable[key] != 0)
-    {
-      while ((n = (MapEntry*)List_getNext(this->htable[key]))!= 0)
-      {
-        if (String_isEqual(MapEntry_getString(n), s))
-        {
-          *p = MapEntry_getItem(n);
-          isFound = 1;
-          result = 1;
-          break;
-        }
-      }
-    }
+    *p = (MapEntry_getItem(n));
   }
   
   return result;
@@ -182,5 +174,33 @@ PRIVATE unsigned int Map_hash(Map * this, char * s, unsigned int length)
     hash += ( hash << 3 ), hash ^= ( hash >> 11 ), hash += ( hash << 15 );
     */
 
+  return result;
+}
+
+PRIVATE MapEntry * Map_findEntry(Map* this, String * s)
+{
+  MapEntry * result = 0;
+  unsigned int key = 0;
+  unsigned int i = 0;
+  unsigned int isFound = 0;
+  MapEntry * n = 0;
+  
+  for (i=1; (i<=String_getLength(s)) && (!isFound); i++)
+  {
+    key = Map_hash(this, String_getBuffer(s), i);
+    if (this->htable[key] != 0)
+    {
+      while ((n = (MapEntry*)List_getNext(this->htable[key]))!= 0)
+      {
+        if (String_isEqual(MapEntry_getString(n), s))
+        {
+          isFound = 1;
+          result = n;
+          break;
+        }
+      }
+    }
+  }
+  
   return result;
 }
