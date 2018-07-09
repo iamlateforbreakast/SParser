@@ -6,6 +6,7 @@
 #include "Types.h"
 
 PUBLIC void* Memory_alloc(unsigned int nbBytes);
+PUBLIC void * Memory_realloc(void * pointer, unsigned int prevSizeBytes, unsigned int newSizeBytes);
 PUBLIC void Memory_free(void* pointer, unsigned int nbBytes);
 PUBLIC void Memory_set(void * pointer, unsigned char val, unsigned int nbBytes);
 PUBLIC void Memory_copy(void * pointer, void * src, unsigned int nbBytes);

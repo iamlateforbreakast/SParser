@@ -26,7 +26,7 @@ PUBLIC void* Memory_alloc(unsigned int nbBytes)
   //if (Memory_nbBytesAllocated>Memory_maxNbBytesAllocated) Memory_maxNbBytesAllocated = Memory_nbBytesAllocated;
   Memory_allocRequestId++;
     
-  //TRACE(("Memory: Malloc %d|%d %p\n", Memory_allocRequestId, nbBytes,p));
+  TRACE(("Memory: Malloc %d|%d %p\n", Memory_allocRequestId, nbBytes,p));
 
    //if (p+nbBytes> (void*)Memory_maxAddress) Memory_maxAddress = p + nbBytes;
   return p;
@@ -46,6 +46,17 @@ PUBLIC void Memory_free(void* pointer, unsigned int nbBytes)
           Memory_minAddress = p;
         }*/
     }
+}
+
+PUBLIC void * Memory_realloc(void * pointer, unsigned int prevSizeBytes, unsigned int newSizeBytes)
+{
+  if (pointer!=0)
+  {
+    Memory_free(pointer, prevSizeBytes);
+    pointer = Memory_alloc(newSizeBytes);
+  }
+  
+  return pointer;
 }
 
 PUBLIC void Memory_set(void * pointer, unsigned char val, unsigned int nbBytes)
