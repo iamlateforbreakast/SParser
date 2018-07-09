@@ -18,22 +18,32 @@ int step1()
 
   testSdbMgr = SdbMgr_new(sdbName);
 
+  String_delete(sdbName);
+
   return 0;
 }
 
 int step2()
 {
-  SdbRequest * request = 0;
+  SdbRequest * createTable = 0;
+  SdbRequest * dropTable = 0;
 
-  request = SdbRequest_new(
+  dropTable = SdbRequest_new(
+              "DROP TABLE "
+              "IF EXISTS Test_table;"
+              );
+
+  createTable = SdbRequest_new(
               "CREATE TABLE Test_table ( "
               "Test_text text NOT NULL "
               ");");
               
-  SdbRequest_execute(request);
+  SdbRequest_execute(dropTable);
+  SdbRequest_execute(createTable);
   
-  SdbRequest_delete(request);
-  
+  SdbRequest_delete(createTable);
+  SdbRequest_delete(dropTable);
+
   return 0;
 }
 
@@ -41,12 +51,13 @@ int step3()
 {
   SdbRequest * request = 0;
   unsigned int i;
+
+  request = SdbRequest_new(
+            "INSERT INTO Test_table(Test_text) "
+            "VALUES ('Value %d');");
   
   for (i=0; i<20; i++)
   {
-    request = SdbRequest_new(
-              "INSERT INTO Test_table(Test_text) "
-              "VALUES ('Value %d');");
               
     SdbRequest_execute(request, i);
   }
@@ -63,10 +74,12 @@ int step4()
   request = SdbRequest_new(
               "SELECT * "
               "FROM Test_table "
-              "WHERE Test_text=%s");
+              "WHERE Test_text='%s';");
   
   SdbRequest_execute(request, "Value 1");
-  
+
+  SdbRequest_delete(request);
+
   return 0;
 }
 
