@@ -12,6 +12,6 @@ PUBLIC SdbMgr * SdbMgr_new(String * name);
 PUBLIC void SdbMgr_delete(SdbMgr* this);
 PUBLIC SdbMgr * SdbMgr_copy(SdbMgr* this);
 PUBLIC SdbMgr * SdbMgr_getSdbMgr();
-PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement);
+PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement, void ** result);
 
 #endif /* _SDBMGR_H_ */
