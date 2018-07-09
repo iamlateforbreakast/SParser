@@ -10,8 +10,8 @@ struct SdbRequest
   Object object;
   char * buffer;
   unsigned int size;
-  char * fmt;
-  char ** result;
+  const char * fmt;
+  String ** result;
 };
 
 PUBLIC SdbRequest * SdbRequest_new(const char * fmt)
@@ -24,6 +24,7 @@ PUBLIC SdbRequest * SdbRequest_new(const char * fmt)
   this->fmt = fmt;
   this->size = 0;
   this->buffer = 0;
+  this->result = 0;
   
   return this;
 }
@@ -51,8 +52,9 @@ PUBLIC void SdbRequest_execute(SdbRequest * this, ...)
   unsigned int size = 0;
   SdbMgr * sdbMgr = SdbMgr_getRef();
   va_list args;
+  String **result;
   
-  va_start(args, this->fmt);
+  va_start(args, this);
   size = vsnprintf(0, 0, this->fmt, args);
   this->buffer = Memory_realloc(this->buffer, this->size + 1, size + 1);
   this->buffer[size] = 0;
@@ -64,7 +66,7 @@ PUBLIC void SdbRequest_execute(SdbRequest * this, ...)
   
   SdbMgr_execute(sdbMgr, 
                  this->buffer, 
-                 this->result);
+                 &this->result);
   
   SdbMgr_delete(sdbMgr);
 }
