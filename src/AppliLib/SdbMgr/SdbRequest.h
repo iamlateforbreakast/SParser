@@ -6,7 +6,7 @@
 
 typedef struct SdbRequest SdbRequest;
 
-PUBLIC SdbRequest * SdbRequest_new();
+PUBLIC SdbRequest * SdbRequest_new(const char * fmt);
 PUBLIC void SdbRequest_delete(SdbRequest * this);
 PUBLIC SdbRequest * SdbRequest_copy(SdbRequest * this);
 
