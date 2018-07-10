@@ -36,9 +36,9 @@ PUBLIC String * String_new(const char* initString)
   // TODO: Check if this is NULL
   if (initString!=0)
   {
-    this->length = strlen(initString);
+    this->length = Memory_len((void*)initString);
     this->buffer = (char*)Memory_alloc(this->length+1);
-    Memory_copy(this->buffer, initString, this->length+1);
+    Memory_copy(this->buffer, (void*)initString, this->length+1);
     this->buffer[this->length] = 0;
   }
   else
@@ -151,15 +151,6 @@ PUBLIC int String_toInt(String* this)
   return result;
 }
 
-/**********************************************//** 
-  @brief TBD
-  @public
-  @memberof String
-**************************************************/
-PUBLIC String* String_searchAndReplace(String* this, String* search, String* replace)
-{
-}
-
 PUBLIC unsigned int String_getLength(String * this)
 {
   if (this!=0)
@@ -188,7 +179,7 @@ PUBLIC void String_setBuffer(String * this, char * buffer)
     }
     this->buffer = buffer;
     // TO DO: check for NULL char
-    this->length = strlen(this->buffer);
+    this->length = Memory_len((void*)this->buffer);
   }
 }
 
@@ -214,11 +205,11 @@ PUBLIC unsigned int String_isContained(String * this, String * s2)
 PUBLIC unsigned int String_prepend(String * this, const char * prefix)
 {
   char * buffer;
-  unsigned int newSize = String_getLength(this) + strlen(prefix);
+  unsigned int newSize = String_getLength(this) + Memory_len((void*)prefix);
   
   buffer = Memory_alloc(newSize+1);
-  Memory_copy(buffer, prefix, strlen(prefix));
-  Memory_copy(buffer+strlen(prefix), String_getBuffer(this), String_getLength(this));
+  Memory_copy(buffer, (void*)prefix, Memory_len((void*)prefix));
+  Memory_copy(buffer+Memory_len((void*)prefix), String_getBuffer(this), String_getLength(this));
   Memory_free(this->buffer, this->length + 1);
   buffer[newSize] = 0;
   this->buffer = buffer;
