@@ -136,9 +136,6 @@ PUBLIC unsigned int Map_insert(Map * this,String * s, void * p)
 PUBLIC unsigned int Map_find(Map* this, String* s, void** p)
 {
   unsigned int result = 0;
-  unsigned int key = 0;
-  unsigned int i = 0;
-  unsigned int isFound = 0;
   MapEntry * n = 0;
   
   n = Map_findEntry(this, s);

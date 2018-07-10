@@ -14,7 +14,7 @@ struct MapEntry
   void * item;
 };
 
-MapEntry * MapEntry_new(String * s, void * item)
+PUBLIC MapEntry * MapEntry_new(String * s, void * item)
 {
   MapEntry * this = 0;
 
@@ -25,7 +25,7 @@ MapEntry * MapEntry_new(String * s, void * item)
   return this;
 }
 
-void MapEntry_delete(MapEntry * this)
+PUBLIC void MapEntry_delete(MapEntry * this)
 {
   String_delete(this->s);
   if (((Object*)this->item)->delete!=0)
@@ -35,30 +35,30 @@ void MapEntry_delete(MapEntry * this)
   Object_delete(&this->object);
 }
 
-MapEntry * MapEntry_copy(MapEntry * this)
+PUBLIC MapEntry * MapEntry_copy(MapEntry * this)
 {
   MapEntry * copy = 0;
 
   return copy;
 }
 
-String * MapEntry_getString(MapEntry * this)
+PUBLIC String * MapEntry_getString(MapEntry * this)
 {
   return this->s;
 }
 
-void MapEntry_setString(MapEntry * this, String * s)
+PUBLIC void MapEntry_setString(MapEntry * this, String * s)
 {
   String_delete(this->s);
   this->s = s;
 }
 
-void * MapEntry_getItem(MapEntry * this)
+PUBLIC void * MapEntry_getItem(MapEntry * this)
 {
   return this->item;
 }
 
-void MapEntry_setItem(MapEntry * this, void * item)
+PUBLIC void MapEntry_setItem(MapEntry * this, void * item)
 {
   if (((Object*)this->item)->delete!=0)
   {
