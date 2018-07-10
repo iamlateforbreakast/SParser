@@ -52,7 +52,6 @@ PUBLIC void SdbRequest_execute(SdbRequest * this, ...)
   unsigned int size = 0;
   SdbMgr * sdbMgr = SdbMgr_getRef();
   va_list args;
-  String **result;
   
   va_start(args, this);
   size = vsnprintf(0, 0, this->fmt, args);

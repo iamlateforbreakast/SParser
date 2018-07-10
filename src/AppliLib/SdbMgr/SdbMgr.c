@@ -8,6 +8,9 @@
 #include "SdbMgr.h"
 #include "Object.h"
 #include "String2.h"
+#include "Memory.h"
+#include "Error.h"
+
 #include <sqlite3.h>
 
 /**********************************************//** 
@@ -78,20 +81,20 @@ PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement, String *
 {
   int rc = 0;
   sqlite3_stmt *res = 0;
-  const unsigned char *text = 0;
-  const unsigned char *text1 = 0;
   int step = 0;
   void **rows = 0;
   unsigned int count = 0;
   int i;
   
-  printf("SdbMgr: %s\n", statement);
+  //printf("SdbMgr: %s\n", statement);
+  Error_new(ERROR_DBG, "SdbMgr: %s\n", statement);
   rc = sqlite3_prepare_v2(this->db, statement, -1, &res, 0);
   
   step = sqlite3_step(res);
   
   count = sqlite3_column_count(res);
-  printf("Count = %d\n", count);
+  //printf("Count = %d\n", count);
+  Error_new(ERROR_DBG, "Count = %d\n", count);
    if (count>0)
    {
     *result = (String**)Memory_alloc(sizeof(String*)*count);
@@ -101,7 +104,7 @@ PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement, String *
       for (i=0; i<count; i++)
       {
         //printf("SdbMgr: Query performed\n");
-        *result[i] = String_new(sqlite3_column_text(res, i));
+        *result[i] = String_new((char *)sqlite3_column_text(res, i));
       }
     step = sqlite3_step(res);
     }
