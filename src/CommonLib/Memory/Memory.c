@@ -8,6 +8,8 @@
 
 #include "Memory.h"
 #include "Debug.h"
+#include "Error.h"
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -93,9 +95,14 @@ PUBLIC unsigned int Memory_cmp(void * pointer, void * compared)
   return result;
 }
 
+PUBLIC unsigned int Memory_len(void * pointer)
+{
+  return strlen(pointer);
+}
+
 PUBLIC void Memory_report()
 {
-  printf("Memory Usage Report:\n");
-  printf("Number of memory allocation Requests: %d\n", Memory_allocRequestId);
-  printf("Number of memory de-allocation Requests: %d\n", Memory_freeRequestId);
+  Error_new(ERROR_INFO, "Memory Usage Report:\n"
+                                        "Number of memory allocation Requests: %d\n"
+                                        "Number of memory de-allocation Requests: %d\n", Memory_allocRequestId, Memory_freeRequestId);
 }

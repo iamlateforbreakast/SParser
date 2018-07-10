@@ -12,6 +12,7 @@ PUBLIC void Memory_set(void * pointer, unsigned char val, unsigned int nbBytes);
 PUBLIC void Memory_copy(void * pointer, void * src, unsigned int nbBytes);
 PUBLIC unsigned int Memory_ncmp(void * pointer, void * compared, unsigned int nbBytes);
 PUBLIC unsigned int Memory_cmp(void * pointer, void * compared);
+PUBLIC unsigned int Memory_len(void * pointer);
 PUBLIC void Memory_report();
 
 #endif /* _MEMORY_H_ */
