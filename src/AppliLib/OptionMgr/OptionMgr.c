@@ -12,6 +12,7 @@
 #include "Map.h"
 #include "FileMgr.h"
 #include "Memory.h"
+#include "Error.h"
 
 /**********************************************//**
   @class OptionMgr
@@ -36,7 +37,7 @@ PRIVATE OptionMgr * optionMgr = 0;
 /**********************************************//**
   @private
 **************************************************/
-PRIVATE struct OptionDefault optionDefault[] = 
+PRIVATE const struct OptionDefault optionDefault[] = 
 {
   {"DB Name","-o","test.db"},
   {"Input directory","-d","."},
@@ -123,7 +124,7 @@ PUBLIC String * OptionMgr_getOption(OptionMgr * this, const char * name)
   String * result = 0;
   String * optionName = String_new(name);
 
-  Map_find(this->options, optionName, &result);
+  Map_find(this->options, optionName, (void**)&result);
  
   String_delete(optionName);
 
@@ -196,7 +197,7 @@ PUBLIC unsigned int OptionMgr_readFromCmdLine(OptionMgr * this, const int argc, 
   {
     for (j=0; j<nbOptions; j++)
     {
-      if (Memory_cmp(optionDefault[j].flag, argv[i]))
+      if (Memory_cmp(optionDefault[j].flag, (void*)argv[i]))
       {
         optionName = String_new(optionDefault[j].name);
         if ((optionDefault[j].value!=0)&&((i+1)<=argc))
@@ -215,7 +216,7 @@ PUBLIC unsigned int OptionMgr_readFromCmdLine(OptionMgr * this, const int argc, 
     else
     {
       /* Error case: Illegal arg */
-      exit(2);
+      Error_new(ERROR_FATAL, "Illegal argument\n");
     }
   }
   
