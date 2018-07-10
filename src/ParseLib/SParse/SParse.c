@@ -75,8 +75,6 @@ PUBLIC SParse * SParse_copy(SParse * this)
 {
   SParse * copy = 0;
   
-  copy = Object_copy(&this->object);
-  
   return copy;
 }
 
