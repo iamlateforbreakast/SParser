@@ -12,7 +12,8 @@ SOURCES = \
 	./List/List.c \
 	./String/String2.c \
 	./Map/Map.c \
-	./Map/MapEntry.c
+	./Map/MapEntry.c \
+	./Error/Error.c
 
 HEADERS = ./Types/Types.h $(SOURCES:.c=.h)
 
