@@ -16,6 +16,9 @@ struct Grammar1
 
 PUBLIC Grammar1 * Grammar1_new(FileReader * f, SdbMgr * sdbMgr)
 {
+  Grammar1 * this = 0;
+  
+  return this;
 }
 
 PUBLIC void Grammar1_delete(Grammar1 * this)
@@ -24,6 +27,9 @@ PUBLIC void Grammar1_delete(Grammar1 * this)
 
 PUBLIC Grammar1 * Grammar_copy(Grammar1 * this)
 {
+  Grammar1 * result = 0;
+  
+  return result;
 }
 
 void Grammar1_process(Grammar1 * this)
