@@ -13,6 +13,7 @@
 #include "List.h"
 #include "FileDesc.h"
 #include "Memory.h"
+#include "Error.h"
 
 #include <unistd.h>
 #include <dirent.h>
@@ -41,7 +42,6 @@ PRIVATE FileMgr * fileMgr = 0;
 /**********************************************//**
   @private
 **************************************************/
-PRIVATE void FileMgr_changeDirectory(FileMgr * this);
 PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2);
 PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory);
 PRIVATE FileDesc * FileMgr_isManaged(FileMgr * this, String * fullName);
@@ -63,9 +63,7 @@ PRIVATE FileMgr * FileMgr_new()
   if (getcwd(this->rootLocation, FILEMGR_MAX_PATH)==0)
   {
     /* Error case: Cannot obtain the FileMgr root location. */
-    /* e = Error_set(E_ERROR_FATAL, "Error", 0);
-        Error_raise(e); */
-    exit(2);
+    Error_new(ERROR_FATAL, "Cannot obtain the FileMgr root location");
   }
   
   /* TODO: Check this->rootLocation has a valid length */
@@ -134,7 +132,7 @@ PUBLIC FileMgr* FileMgr_getRef()
 **************************************************/
 PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryName)
 {
-  static nbCalls = 0;
+  //static int nbCalls = 0;
   
   unsigned int result = 0;
   String * fullPathDirectory = String_new(this->rootLocation);
@@ -229,7 +227,6 @@ PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
   FILE * f = NULL;
   FileDesc * fd = NULL;
   
-  unsigned int isFound = 0;
   char * buffer = 0;
   unsigned int length = 0;
   
@@ -237,7 +234,6 @@ PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
   
   if (fd)
   {
-  
     /* Open file */
     f=fopen(String_getBuffer(FileDesc_getFullName(fd)),"rb");
     if (f)
@@ -260,7 +256,7 @@ PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
   else
   {
     /* ERROR case: File is not in the list of managed files */
-    exit(2);
+    Error_new(ERROR_FATAL, "File is not in the list of managed files.");
   }
   
   String_delete(name);
@@ -381,11 +377,12 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   if (String_getLength(path1)>1000) 
   {
     printf("String length = %d\n", String_getLength(path1));
-    printf("Str length = %d\n", strlen(String_getBuffer(path1)));
+    printf("Str length = %d\n", Memory_len(String_getBuffer(path1)));
   }
-  printf("Merged path: %s\n", buffer);
+  Error_new(ERROR_INFO,"Merged path: %s\n", buffer);
 }
 
+#if 0
 PRIVATE FileDesc * FileMgr_searchFile(FileMgr * this, String * name)
 {
   FileDesc * result = 0;
@@ -413,6 +410,7 @@ PRIVATE FileDesc * FileMgr_searchFile(FileMgr * this, String * name)
   
   return result;
 }
+#endif
 
 PRIVATE FileDesc * FileMgr_isManaged(FileMgr * this, String * fullName)
 {
