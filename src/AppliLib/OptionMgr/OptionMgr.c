@@ -193,7 +193,7 @@ PUBLIC unsigned int OptionMgr_readFromCmdLine(OptionMgr * this, const int argc, 
   
   const int nbOptions = sizeof(optionDefault)/sizeof(struct OptionDefault);
 
-  for (i=0; i<argc; i++)
+  for (i=1; i<argc; i++)
   {
     for (j=0; j<nbOptions; j++)
     {
