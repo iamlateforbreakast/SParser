@@ -10,7 +10,7 @@
 #include "Object.h"
 #include "FileReader.h"
 #include "SdbMgr.h"
-//#include "ErrorMgr.h"
+#include "Error.h"
 //#include "Grammar1.h"
 #include "SParse.h"
 
