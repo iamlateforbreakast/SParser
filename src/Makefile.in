@@ -1,6 +1,6 @@
 CFLAGS = @CFLAGS@ -I./AppliLib/include -I./ParseLib/include -I./CommonLib/include
 
-LDFLAGS = @LDFLAGS@
+LDFLAGS = @LDFLAGS@ -L./CommonLib -L./Applib -L./ParseLib -lCommon -lAppli -lParse
 
 .c.o:
 	@CC@ $(CFLAGS) $< -o $@
@@ -18,7 +18,7 @@ LIBRARIES = ./CommonLib/libCommon.a \
 all: $(EXE)
 
 $(EXE): $(LIBRARIES) $(OBJECTS)
-	@CC@ $(OBJECTS) $(LIBRARIES) -o $(EXE)
+	@CC@ $(OBJECTS) $(LIBRARIES) $(LDFLAGS) -o $(EXE)
 
 $(LIBRARIES):
 	echo "Building " $@
