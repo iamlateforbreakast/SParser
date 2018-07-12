@@ -196,6 +196,7 @@ PRIVATE MapEntry * Map_findEntry(Map* this, String * s)
           break;
         }
       }
+      n = (MapEntry*)List_getNext(this->htable[key]);
     }
   }
   
