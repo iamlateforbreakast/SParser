@@ -12,7 +12,7 @@
 
 #include "OptionMgr.h"
 #include "FileMgr.h"
-//#include "ErrorMgr.h"
+#include "Error.h"
 #include "SParse.h"
 #include <signal.h>
 
@@ -21,43 +21,14 @@ struct sigaction action;
 
 void sighandler(int signum, siginfo_t *info, void *ptr) 
 { 
-  printf("Received signal %d\n", signum); 
-  printf("Signal originates from process %lu\n", 
-  (unsigned long)info->si_pid); 
+  Error_new(ERROR_NORMAL, "Received signal %d\n", signum); 
+  Error_new(ERROR_NORMAL, "Signal originates from process %lu\n", (unsigned long)info->si_pid); 
 } 
 
 int main(int argc, char** argv)
 {
   SParse *sparse = 0;
   
-  /* ErrorMgr *errMgr = ErrorMgr_getErrorMgr(); */
-  /* OptionMgr *optionMgr = OptionMgr_getOptionMgr(); */
-  /* FileMgr *fileMgr = FileMgr_getFileMgr(); */
-  
-  /* Initialise OptionMgr from command line */
-  /* OptionMgr_readFromCmdLine(optionMgr, argc, argv); */
-  
-  /* Initialise OptionMgr from file */
-  /* OptionMgr_readFromFile(optionMgr, "options.txt"); */
-   
-  /* Add Directory to FileMgr */
-  /* FileMgr_addDirectory(OptionMgr_get(optionMgr, "Input Directory")); */
-
-  /* SParse_new(OptionMgr_get("SDB name")); */
-  
-  /* SParse_parse("*.c"); */
-  
-  /* SParse_delete(sparse); */
-  
-  /* Generate Memory report */
-
-  /* Dump error log */
-  /* ErrorMgr_dump() */
-  
-  /* Cleanup */
-  /* OptionMgr_delete(optionMgr); */
-  /* FileMgr_delete(fileMgr); */
-  /* ErrorMgr_delete(errorMgr); */
   action.sa_sigaction = sighandler;
   action.sa_flags = SA_SIGINFO;
  
@@ -68,9 +39,30 @@ int main(int argc, char** argv)
   sigaction(SIGTERM, &action, 0);
   sigaction(SIGHUP, &action, 0);
 
-  int *test = 0;
+  OptionMgr *optionMgr = OptionMgr_getRef();
+  FileMgr *fileMgr = FileMgr_getRef();
+  
+  /* Initialise OptionMgr from command line */
+  OptionMgr_readFromCmdLine(optionMgr, argc, argv);
+  
+  /* Initialise OptionMgr from file */
+  /* OptionMgr_readFromFile(optionMgr, "options.txt"); */
+   
+  /* Add Directory to FileMgr */
+  FileMgr_addDirectory(fileMgr, OptionMgr_getOption(optionMgr, "Input Directory"));
 
-  *test = 1;;
-  sleep(100);
+  sparse = SParse_new(OptionMgr_getOption(optionMgr, "DB name"));
+  
+  SParse_parse(sparse, "*.c");
+  
+  SParse_delete(sparse);
+  
+  /* Cleanup */
+  OptionMgr_delete(optionMgr);
+  FileMgr_delete(fileMgr);
+
+  /* Generate Memory report */
+  Memory_report();
+  
   return 0;
 }
