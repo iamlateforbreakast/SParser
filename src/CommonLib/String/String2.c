@@ -234,27 +234,28 @@ PUBLIC unsigned int String_matchWildcard(String * this, const char * wildcard)
   unsigned int isMatch = 1;
   unsigned int f_idx = 0;
   unsigned int w_idx = 0;
- 
-  for (w_idx = 0; (w_idx < wildcard->length) && (isMatch == 1); w_idx++)
+  unsigned int wlen = Memory_len(wildcard);
+  
+  for (w_idx = 0; (w_idx < wlen) && (isMatch == 1); w_idx++)
   {
-    if ((wildcard->buffer[w_idx]=='*') && (w_idx + 1 < wildcard->length))
+    if ((wildcard[w_idx]=='*') && (w_idx + 1 < wlen))
     {  
-      while ((f_idx < s->length) && (this->buffer[f_idx]!= wildcard->buffer[w_idx+1]))
+      while ((f_idx < s->length) && (this->buffer[f_idx]!= wildcard[w_idx+1]))
       {
         f_idx++;
       }
       if (f_idx == this->length) isMatch = 0;
     }
-    else if (wildcard->buffer[w_idx]=='?')
+    else if (wildcard[w_idx]=='?')
     {
     }
-    else if (wildcard->buffer[w_idx]=='[')
+    else if (wildcard[w_idx]=='[')
     {
     }
-    else if (wildcard->buffer[w_idx]==']')
+    else if (wildcard[w_idx]==']')
     {
     }
-    else if (this->buffer[f_idx]!= wildcard->buffer[w_idx])
+    else if (this->buffer[f_idx]!= wildcard[w_idx])
     {
       isMatch = 0; 
     } else
