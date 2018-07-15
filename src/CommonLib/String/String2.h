@@ -17,4 +17,5 @@ PUBLIC unsigned int String_isContained(String * this, String * s2);
 PUBLIC unsigned int String_prepend(String * this, const char * prefix);
 PUBLIC unsigned int String_isEqual(String * this, String * compared);
 PUBLIC String * String_subString(String * this, unsigned int idx, unsigned int length);
+PUBLIC unsigned int String_matchWildcard(String * this, const char * wildcard);
 #endif /* _STRING2_H_ */
