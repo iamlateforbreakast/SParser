@@ -264,6 +264,30 @@ PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
   return result;
 }
 
+/**********************************************//** 
+  @brief TBD
+  @public
+  @memberof FileMgr
+  @return TBD
+**************************************************/
+PUBLIC List * FileMgr_filterFiles(FileMgr * this, const char * pattern)
+{
+  List * result = 0;
+  FileDesc * fd = 0;
+  String * s = 0;
+  
+  while ((fd = List_getNext(this->files))!=0)
+  {
+    if (String_matchWildcard(FileDesc_getName(fd), pattern))
+    {
+      s = String_getRef(FileDesc_getFullName(fd));
+      List_insert(result, s);
+    }
+  }
+  
+  return result;
+}
+
 PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory)
 {
   struct dirent *directoryEntry = NULL;
