@@ -28,6 +28,9 @@ void sighandler(int signum, siginfo_t *info, void *ptr)
 int main(int argc, char** argv)
 {
   SParse *sparse = 0;
+  String * inDir = 0;
+  OptionMgr *optionMgr = OptionMgr_getRef();
+  FileMgr *fileMgr = FileMgr_getRef();
   
   action.sa_sigaction = sighandler;
   action.sa_flags = SA_SIGINFO;
@@ -39,18 +42,18 @@ int main(int argc, char** argv)
   sigaction(SIGTERM, &action, 0);
   sigaction(SIGHUP, &action, 0);
 
-  OptionMgr *optionMgr = OptionMgr_getRef();
-  FileMgr *fileMgr = FileMgr_getRef();
+
   
   /* Initialise OptionMgr from command line */
-  OptionMgr_readFromCmdLine(optionMgr, argc, argv);
+  /* OptionMgr_readFromCmdLine(optionMgr, argc, argv); */
   
   /* Initialise OptionMgr from file */
   /* OptionMgr_readFromFile(optionMgr, "options.txt"); */
    
   /* Add Directory to FileMgr */
-  FileMgr_addDirectory(fileMgr, OptionMgr_getOption(optionMgr, "Input Directory"));
-
+  inDir = OptionMgr_getOption(optionMgr, "Input Directory");
+  //FileMgr_addDirectory(fileMgr, String_getBuffer(inDir));
+  
   sparse = SParse_new(OptionMgr_getOption(optionMgr, "DB name"));
   
   SParse_parse(sparse, "*.c");
@@ -58,6 +61,7 @@ int main(int argc, char** argv)
   SParse_delete(sparse);
   
   /* Cleanup */
+  //String_delete(inDir);
   OptionMgr_delete(optionMgr);
   FileMgr_delete(fileMgr);
 
