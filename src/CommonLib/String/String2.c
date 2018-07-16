@@ -59,12 +59,15 @@ PUBLIC void String_delete(String * this)
 {
   if (this!=0)
   {
-    // TODO: Check refCOunt
-    if (this->buffer!=0) 
+    if (this->object.refCount == 1)
     {
-      Memory_free(this->buffer, this->length + 1);
-    }
-    Object_delete(&this->object);
+      // TODO: Check refCOunt
+      if (this->buffer!=0) 
+      {
+        Memory_free(this->buffer, this->length + 1);
+      }
+      Object_delete(&this->object);
+     }
   }
 }
 
@@ -91,6 +94,25 @@ PUBLIC String * String_copy(String * this)
   }
   
   return copy;
+}
+
+/**********************************************//** 
+  @brief Copy an instance of class String.
+  @public
+  @memberof String
+  @return Copy of instance.
+**************************************************/
+PUBLIC String * String_getRef(String * this)
+{
+  String * ref = 0;
+  
+  if (this!=0)
+  {
+    this->object.refCount++;
+    ref = this;
+  }
+  
+  return ref;
 }
 
 /**********************************************//** 
@@ -230,7 +252,6 @@ PUBLIC unsigned int String_prepend(String * this, const char * prefix)
 **************************************************/
 PUBLIC unsigned int String_matchWildcard(String * this, const char * wildcard)
 {
-#if 0
   unsigned int isMatch = 1;
   unsigned int f_idx = 0;
   unsigned int w_idx = 0;
@@ -240,7 +261,7 @@ PUBLIC unsigned int String_matchWildcard(String * this, const char * wildcard)
   {
     if ((wildcard[w_idx]=='*') && (w_idx + 1 < wlen))
     {  
-      while ((f_idx < s->length) && (this->buffer[f_idx]!= wildcard[w_idx+1]))
+      while ((f_idx < this->length) && (this->buffer[f_idx]!= wildcard[w_idx+1]))
       {
         f_idx++;
       }
@@ -267,6 +288,5 @@ PUBLIC unsigned int String_matchWildcard(String * this, const char * wildcard)
   if (f_idx < this->length) isMatch = 0;
   
   return isMatch;
-#endif
 }
 

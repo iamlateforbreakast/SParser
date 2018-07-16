@@ -10,6 +10,7 @@ typedef struct String String;
 PUBLIC String * String_new(const char * constString);
 PUBLIC void String_delete(String * this);
 PUBLIC String * String_copy(String * this);
+PUBLIC String * String_getRef(String * this);
 PUBLIC unsigned int String_getLength(String * this);
 PUBLIC char * String_getBuffer(String * this);
 PUBLIC void String_setBuffer(String * this, char * buffer);
