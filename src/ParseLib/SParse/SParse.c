@@ -12,6 +12,8 @@
 #include "SdbMgr.h"
 #include "Error.h"
 //#include "Grammar1.h"
+#include "FileMgr.h"
+#include "List.h"
 #include "SParse.h"
 
 /**********************************************//** 
@@ -67,8 +69,11 @@ PUBLIC SParse *SParse_new(String * sdbName)
 **************************************************/
 PUBLIC void SParse_delete(SParse * this)
 {
-  SdbMgr_delete(this->sdbMgr);
-  Object_delete(&this->object);
+  if (this!=0)
+  {
+    SdbMgr_delete(this->sdbMgr);
+    Object_delete(&this->object);
+  }
 }
 
 PUBLIC SParse * SParse_copy(SParse * this)
@@ -88,15 +93,18 @@ PUBLIC unsigned int SParse_parse(SParse * this, const char * extension)
 {
   unsigned int result = 0;
   
-  /* FileMgr* fileMgr  = FileMgr_getFileMgr(); */
-  /* List * fileList = new List(); */
+  FileMgr* fileMgr  = FileMgr_getRef();
+  List * fileList = 0;
   
   /* List all files with extension in all the input directories */
-  /* FileMgr_listFiles(fileMgr, extension); */
+  fileList = FileMgr_filterFiles(fileMgr, extension);
 
   /* List_forEach(fileList, &SParseFile, this); */
   
-  return result;  
+  FileMgr_delete(fileMgr);
+  List_delete(fileList);
+  
+  return result;
 }
 
 /**********************************************//** 
