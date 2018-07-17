@@ -1,5 +1,5 @@
 CFLAGS = @CFLAGS@ -I./include -I../CommonLib/include
-.c.o:
+%.o: %.c
 	@CC@ $(CFLAGS) $< -o $@
 
 LIB = libAppli
@@ -18,10 +18,9 @@ HEADERS = $(SOURCES:.c=.h)
 
 OBJECTS = $(SOURCES:.c=.o)
 
-all: libAppli.a
+all: includes libAppli.a
 
-libAppli.a: includes $(OBJECTS)
-
+libAppli.a: $(OBJECTS)
 	@MAKELIB@ $(OBJECTS)
 	@RANLIB@ $@
 
