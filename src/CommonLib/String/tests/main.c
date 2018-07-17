@@ -35,7 +35,7 @@ int step2()
 int step3()
 {
   String * testString = 0;
-  const char testPattern = "*.c";
+  const char * testPattern = "*.c";
 
   testString = String_new("test.c");
   
