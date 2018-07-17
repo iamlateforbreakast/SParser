@@ -202,13 +202,13 @@ PUBLIC void List_merge(List* this, List* l1)
   @memberof List
   @param[in] f Pointer to function.
 **************************************************/
-PUBLIC void List_forEach(List* this, void (*f)(void* t))
+PUBLIC void List_forEach(List* this, void (*method)(void* o, void *p), void * object)
 {
   ListNode* iterator = this->tail;
   
   while (iterator!=0)
   {
-    f(iterator->item);
+    method(object, iterator->item);
     iterator = iterator->next;
   }
 }
