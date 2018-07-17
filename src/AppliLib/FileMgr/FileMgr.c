@@ -88,6 +88,10 @@ PUBLIC void FileMgr_delete(FileMgr * this)
       Object_delete(&this->object);
       fileMgr = 0;
     }
+    else if (this->object.refCount>1)
+    {
+      this->object.refCount--;
+    }
   }
 }
 
@@ -314,7 +318,8 @@ PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory)
       }
       else
       {
-        if ((Memory_ncmp(directoryEntry->d_name,"..",2)==0) && (Memory_ncmp(directoryEntry->d_name,".",1)==0))
+        if ((Memory_ncmp(directoryEntry->d_name,"..",2)==0) 
+           && (Memory_ncmp(directoryEntry->d_name,".",1)==0))
         {
           fullName = String_copy(directory);
           name = String_new(directoryEntry->d_name);
