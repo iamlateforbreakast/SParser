@@ -61,10 +61,14 @@ PUBLIC void String_delete(String * this)
   {
     if (this->object.refCount == 1)
     {
-      Memory_free(this->buffer, this->length + 1);
+      // TODO: Check refCOunt
+      if (this->buffer!=0) 
+      {
+        Memory_free(this->buffer, this->length + 1);
+      }
       Object_delete(&this->object);
     }
-    else if (this->object.refCount > 1)
+    else if (this->object.refCount>1)
     {
       this->object.refCount--;
     }
