@@ -52,7 +52,7 @@ int main(int argc, char** argv)
    
   /* Add Directory to FileMgr */
   inDir = OptionMgr_getOption(optionMgr, "Input Directory");
-  //FileMgr_addDirectory(fileMgr, String_getBuffer(inDir));
+  FileMgr_addDirectory(fileMgr, String_getBuffer(inDir));
   
   sparse = SParse_new(OptionMgr_getOption(optionMgr, "DB name"));
   
