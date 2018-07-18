@@ -1,6 +1,6 @@
 /* SdbMgr.h */
 
-#ifndef _SDBBMGR_H_
+#ifndef _SDBMGR_H_
 #define _SDBMGR_H_
 
 #include "Types.h"
