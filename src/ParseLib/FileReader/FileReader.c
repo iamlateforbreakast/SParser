@@ -38,11 +38,18 @@ PUBLIC void FileReader_delete(FileReader * this)
 
 PUBLIC FileReader * FileReader_copy(FileReader * this)
 {
-  FileReader * copy;
+  FileReader * copy = 0;
   
   /* copy = Object_copy(this); */
   
   return copy;
+}
+
+PUBLIC char * FileReader_getBuffer(FileReader * this)
+{
+  char * result = 0;
+  
+  return result;
 }
 
 PUBLIC void FileReader_add(FileReader * this /* , String * s */)
