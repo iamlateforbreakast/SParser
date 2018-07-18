@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 
   
   /* Initialise OptionMgr from command line */
-  /* OptionMgr_readFromCmdLine(optionMgr, argc, argv); */
+  OptionMgr_readFromCmdLine(optionMgr, argc, argv);
   
   /* Initialise OptionMgr from file */
   /* OptionMgr_readFromFile(optionMgr, "options.txt"); */
