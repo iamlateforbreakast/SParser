@@ -2,22 +2,22 @@ CFLAGS = @CFLAGS@ -I../AppliLib/include -I./include -I../CommonLib/include
 .c.o:
 	@CC@ $(CFLAGS) $< -o $@
 
-LIB = libParse
-
 SOURCES = \
 	./SParse/SParse.c \
 	./FileReader/FileReader.c \
 	./Grammar1/Grammar1.c
 
-HEADERS = $(SOURCES:.c=.h)
+HEADERS = $(SOURCES:.c=.h) ./Grammar2/Grammar2.h
+
+GRAMMAR_OBJECTS = ./Grammar2/Grammar2.parse.o ./Grammar2/Grammar2.lex.o ./Grammar2/Grammar2.o
 
 OBJECTS = $(SOURCES:.c=.o)
 
-all: libParse.a
+all: includes grammars libParse.a
 
 libParse.a: includes $(OBJECTS)
 
-	@MAKELIB@ $(OBJECTS)
+	@MAKELIB@ $(OBJECTS) $(GRAMMAR_OBJECTS)
 	@RANLIB@ $@
 
 includes:
@@ -26,5 +26,9 @@ includes:
 	    ln -sf .$$f -t include; \
 	done
 	
+grammars:
+	make -C ./Grammar2
+	
 clean:
+	make clean -C ./Grammar2
 	@CLEAN@ include $(OBJECTS) libParse.a
