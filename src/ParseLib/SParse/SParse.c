@@ -11,7 +11,7 @@
 #include "FileReader.h"
 #include "SdbMgr.h"
 #include "Error.h"
-//#include "Grammar1.h"
+#include "Grammar2.h"
 #include "FileMgr.h"
 #include "List.h"
 #include "SParse.h"
@@ -22,7 +22,8 @@
 typedef struct SParseDefault
 {
   char* extension;
-  unsigned int (*function_parse)(/* FileReader, SdbMgr */);
+  void * (*function_new)(FileReader * fr, SdbMgr * sdbMgr);
+  unsigned int (*function_process)(void * g);
 } SParseDefault;
 
 /**********************************************//** 
@@ -36,11 +37,13 @@ struct SParse
 };
 
 static const SParseDefault SParse_default[] = 
-{{"*.c",0/*&Grammar1_process*/},
- {"*.c",0/*&Grammar2_process*/}};
+{{"*.c",&Grammar2_new, &Grammar2_process},
+ {"*.d",0,0/*&Grammar2_process*/}};
 
 static const char * SParse_ignoreFiles[] = 
 {"test1.c"};
+
+PRIVATE unsigned int SParse_parseFile(SParse * this, String * file);
 
 /**********************************************//** 
   @brief Create a new SParse object.
@@ -99,7 +102,7 @@ PUBLIC unsigned int SParse_parse(SParse * this, const char * extension)
   /* List all files with extension in all the input directories */
   fileList = FileMgr_filterFiles(fileMgr, extension);
 
-  /* List_forEach(fileList, &SParseFile, this); */
+  List_forEach(fileList, &SParse_parseFile, (void*)this);
   
   FileMgr_delete(fileMgr);
   List_delete(fileList);
@@ -114,16 +117,29 @@ PUBLIC unsigned int SParse_parse(SParse * this, const char * extension)
   @param Filename.
   @return Status of the operation.
 **************************************************/
-PRIVATE unsigned int SParse_parseFile(SParse * this /* , Filename * file */ )
+PRIVATE unsigned int SParse_parseFile(SParse * this, String * file)
 {
   unsigned int error = 0;
+  unsigned int i = 0;
+  unsigned int nbRows = sizeof(SParse_default)/sizeof(SParseDefault);
+  void * g = 0;
   /* 1) If fileName is to be ignored */
+  for (i=0; i<nbRows; i++)
+  {
+    if (String_matchWildcard(file, SParse_default[i].extension))
+    {
+      FileReader * fileReader = FileReader_new(file);
+      g = SParse_default[i].function_new(fileReader, this->sdbMgr);
+      SParse_default[i].function_process(g);
+      // delete g
+    }
+  }
   
   /* 2) Create a FileReader object */
-  /*   FileReader * fileReader = FileReader_new(fileName); */
+  FileReader * fileReader = FileReader_new(file);
   
   /* 3) Parse file with Grammar and stores in DB */
-  /*   Grammar1_process(FileReader, sdbMgr); */
+  //Grammar2_process();
   
   /* 4) If error in StreamParser_parse then exit */
 
