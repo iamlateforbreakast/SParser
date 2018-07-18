@@ -1,4 +1,6 @@
 %{
+#include "FileReader.h"
+#include "SdbMgr.h"
 //void yyerror(int * p, const char *s);
 //int yylex(int * p);
 %}
@@ -7,9 +9,11 @@
 %name-prefix "Grammar2_"
 %output "Grammar2.parse.c"
 %lex-param {void * scanner} 
-%lex-param {int * p}
+%lex-param {FileReader * fr}
+%lex-param {SdbMgr * sdbMgr}
 %parse-param {void * scanner} 
-%parse-param {int * p}
+%parse-param {FileReader * fr}
+%parse-param {SdbMgr * sdbMgr}
 
 %token COMMENT CODE
 
