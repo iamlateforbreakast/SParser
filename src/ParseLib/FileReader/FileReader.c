@@ -8,6 +8,8 @@
 
 #include "FileReader.h"
 #include "Object.h"
+#include "String2.h"
+#include "FileMgr.h"
  
  /**********************************************//**
    @class FileReader
@@ -18,17 +20,20 @@ struct FileReader
   //List * buffers;
 };
 
-PUBLIC FileReader * FileReader_new(/* String * s */)
+PUBLIC FileReader * FileReader_new(String * fileName)
 {
-  FileReader * result = 0;
-
-  /* this = Object_new(sizeof(FileReader), &FileReader_delete, &FileReader_copy); */
+  FileReader * this = 0;
+  FileMgr * fileMgr = FileMgr_getRef();
   
-  /* FileMgr_open(fileName) */
+  this = Object_new(sizeof(FileReader), &FileReader_delete, &FileReader_copy);
+  
+  FileMgr_load(fileMgr, fileName);
   
   /* associate buffer containing the file to the fileRead */
   
-  return result;
+  FileMgr_delete(fileMgr);
+  
+  return this;
 }
 
 PUBLIC void FileReader_delete(FileReader * this)

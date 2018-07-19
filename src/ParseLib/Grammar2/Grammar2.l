@@ -1,5 +1,7 @@
 %{
 #include <stdio.h>
+#include "FileReader.h"
+#include "SdbMgr.h"
 #include "Grammar2.parse.h"
 #define YY_DECL int Grammar2_lex(YYSTYPE * yylval_param, void * yyscanner)
 //#include "Node.h"
@@ -26,11 +28,13 @@ int add_node_commment(void * yyscanner);
 %x IN_ML_COMMENT
 %x IN_SL_COMMENT
 %x IN_CODE
+%x INC
 
 %%
 <INITIAL>{
 "/*"		   start_node_comment(yyscanner, 1);
 "//"           start_node_comment(yyscanner, 2);
+"#include"     yy_push_state(INC, yyscanner);
 .|\n           start_node_code(yyscanner);
 <<EOF>>        return(0);
 }
@@ -50,8 +54,17 @@ int add_node_commment(void * yyscanner);
 .|\n           add_node_code(yyscanner);
 <<EOF>>        finish_node_code(yyscanner);yy_push_state(INITIAL, yyscanner);return CODE;
 }
-
+<INC>{
+[^ \t\n>]+     read_include(yyscanner);yy_pop_state(yyscanner);
+}
 %%
+#include "SdbMgr.h"
+void read_include(void * yyscanner)
+{
+  char * include_file = yyget_text(yyscanner);
+
+  printf("INCLUDE: %s\n", include_file);
+}
 
 int start_node_comment(void * yyscanner, int type)
 {

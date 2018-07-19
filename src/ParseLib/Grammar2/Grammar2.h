@@ -2,7 +2,7 @@
 
 #include "Types.h"
 #include "SdbMgr.h"
-#include "Filereader.h"
+#include "FileReader.h"
 
 typedef struct Grammar2 Grammar2;
 

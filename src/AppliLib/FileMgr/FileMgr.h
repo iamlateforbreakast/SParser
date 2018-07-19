@@ -4,7 +4,7 @@
 #define _FILEMGR_H_
 
 #include "Types.h"
-#include "LIst.h"
+#include "List.h"
 #include "String2.h"
 
 typedef struct FileMgr FileMgr;

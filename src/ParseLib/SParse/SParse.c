@@ -128,20 +128,12 @@ PRIVATE unsigned int SParse_parseFile(SParse * this, String * file)
   {
     if (String_matchWildcard(file, SParse_default[i].extension))
     {
-      FileReader * fileReader = FileReader_new(file);
+      FileReader * fileReader = FileReader_new(String_getBuffer(file));
       g = SParse_default[i].function_new(fileReader, this->sdbMgr);
       SParse_default[i].function_process(g);
       // delete g
     }
   }
-  
-  /* 2) Create a FileReader object */
-  FileReader * fileReader = FileReader_new(file);
-  
-  /* 3) Parse file with Grammar and stores in DB */
-  //Grammar2_process();
-  
-  /* 4) If error in StreamParser_parse then exit */
 
   return error;
 }
