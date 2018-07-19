@@ -17,6 +17,7 @@
 struct FileReader
 {
   Object object;
+  String * buffer;
   //List * buffers;
 };
 
@@ -27,7 +28,7 @@ PUBLIC FileReader * FileReader_new(String * fileName)
   
   this = Object_new(sizeof(FileReader), &FileReader_delete, &FileReader_copy);
   
-  FileMgr_load(fileMgr, fileName);
+  this->buffer = FileMgr_load(fileMgr, fileName);
   
   /* associate buffer containing the file to the fileRead */
   
@@ -53,6 +54,8 @@ PUBLIC FileReader * FileReader_copy(FileReader * this)
 PUBLIC char * FileReader_getBuffer(FileReader * this)
 {
   char * result = 0;
+  
+  result = String_getBuffer(this->buffer);
   
   return result;
 }

@@ -450,10 +450,11 @@ PRIVATE FileDesc * FileMgr_isManaged(FileMgr * this, String * fullName)
   /* Find file in list */
   while ((fd = List_getNext(this->files))!=0)
   {
-    if (String_isEqual(FileDesc_getName(fd), fullName))
+    if (String_isEqual(FileDesc_getFullName(fd), fullName))
     {
       isFound ++;
       result = fd;
+      Error_new(ERROR_DBG,"Matched %s\n", String_getBuffer(FileDesc_getFullName(fd)));
     }
   }
   

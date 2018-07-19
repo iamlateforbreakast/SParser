@@ -128,11 +128,8 @@ PUBLIC unsigned int String_isEqual(String * this, String * compared)
 {
   unsigned int result = 0;
   
+  if (this->length!=compared->length) return 0;
   result = Memory_ncmp(this->buffer, compared->buffer, this->length);
-  if (this->length==compared->length)
-  {
-    result = 1;
-  }
   
   return result;
 }
