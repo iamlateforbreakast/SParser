@@ -24,6 +24,7 @@ typedef struct SParseDefault
   char* extension;
   void * (*function_new)(FileReader * fr, SdbMgr * sdbMgr);
   unsigned int (*function_process)(void * g);
+  void (*function_delete)(void * g);
 } SParseDefault;
 
 /**********************************************//** 
@@ -37,8 +38,8 @@ struct SParse
 };
 
 static const SParseDefault SParse_default[] = 
-{{"*.c",&Grammar2_new, &Grammar2_process},
- {"*.d",0,0/*&Grammar2_process*/}};
+{{"*.c",&Grammar2_new, &Grammar2_process,&Grammar2_delete},
+ {"*.d",0,0,0/*&Grammar2_process*/}};
 
 static const char * SParse_ignoreFiles[] = 
 {"test1.c"};
@@ -131,7 +132,8 @@ PRIVATE unsigned int SParse_parseFile(SParse * this, String * file)
       FileReader * fileReader = FileReader_new(String_getBuffer(file));
       g = SParse_default[i].function_new(fileReader, this->sdbMgr);
       SParse_default[i].function_process(g);
-      // delete g
+      SParse_default[i].function_delete(g);
+      FileReader_delete(fileReader);
     }
   }
 
