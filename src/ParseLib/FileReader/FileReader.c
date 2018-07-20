@@ -39,7 +39,8 @@ PUBLIC FileReader * FileReader_new(String * fileName)
 
 PUBLIC void FileReader_delete(FileReader * this)
 {
-  /* Object_delete(this) */
+  String_delete(this->buffer);
+  Object_delete(&this->object);
 }
 
 PUBLIC FileReader * FileReader_copy(FileReader * this)
@@ -60,6 +61,3 @@ PUBLIC char * FileReader_getBuffer(FileReader * this)
   return result;
 }
 
-PUBLIC void FileReader_add(FileReader * this /* , String * s */)
-{
-}
