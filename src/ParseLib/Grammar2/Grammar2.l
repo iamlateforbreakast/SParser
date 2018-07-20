@@ -7,9 +7,9 @@
 //#include "Node.h"
 
 //Node * currentNode;
-
+#define MAX_BUFFER_SIZE  (16384)
+char buffer[MAX_BUFFER_SIZE];
 char * node_text = NULL;
-int node_max_size_bytes = 500;
 int node_text_position = 0;
 
 void count(void * yyscanner);
@@ -28,13 +28,11 @@ int add_node_commment(void * yyscanner);
 %x IN_ML_COMMENT
 %x IN_SL_COMMENT
 %x IN_CODE
-%x INC
 
 %%
 <INITIAL>{
 "/*"		   start_node_comment(yyscanner, 1);
 "//"           start_node_comment(yyscanner, 2);
-"#include"     yy_push_state(INC, yyscanner);
 .|\n           start_node_code(yyscanner);
 <<EOF>>        return(0);
 }
@@ -54,17 +52,8 @@ int add_node_commment(void * yyscanner);
 .|\n           add_node_code(yyscanner);
 <<EOF>>        finish_node_code(yyscanner);yy_push_state(INITIAL, yyscanner);return CODE;
 }
-<INC>{
-[^ \t\n>]+     read_include(yyscanner);yy_pop_state(yyscanner);
-}
-%%
-#include "SdbMgr.h"
-void read_include(void * yyscanner)
-{
-  char * include_file = yyget_text(yyscanner);
 
-  printf("INCLUDE: %s\n", include_file);
-}
+%%
 
 int start_node_comment(void * yyscanner, int type)
 {
@@ -78,7 +67,7 @@ int start_node_comment(void * yyscanner, int type)
   {
     yy_push_state(IN_SL_COMMENT, yyscanner);
   }
-  node_text = malloc(node_max_size_bytes);
+  //node_text = malloc(node_max_size_bytes);
   
   return result;
 }
@@ -87,10 +76,10 @@ int add_node_comment(void * yyscanner)
 {
   int result = 0;
   char * text = yyget_text(yyscanner);
-  
-  node_text[node_text_position] = text[0];
+ 
+  buffer[node_text_position] = text[0];
   node_text_position++;
-  if (node_text_position>(node_max_size_bytes-1)) 
+  if (node_text_position>(MAX_BUFFER_SIZE-1)) 
   {
     printf("Node text buffer too small\n");
     exit(0);
@@ -101,15 +90,10 @@ int add_node_comment(void * yyscanner)
 
 int finish_node_comment(void * yyscanner)
 {
-  int result=0;
-  
   yy_push_state(INITIAL, yyscanner);
-  node_text[node_text_position] = 0;
-  printf("\nComment found: %s\n", node_text);
+  buffer[node_text_position] = 0;
+  printf("\nComment found: %s\n", buffer);
   node_text_position = 0;
-  node_max_size_bytes = 500;
-  free(node_text);
-  
   
   return COMMENT;
 }
@@ -120,8 +104,7 @@ int start_node_code(void * yyscanner)
   char * text = yyget_text(yyscanner);
 
   yy_push_state(IN_CODE, yyscanner);
-  node_text = malloc(node_max_size_bytes);
-  node_text[node_text_position] = text[0];
+  buffer[node_text_position] = text[0];
   node_text_position++;
   
   return result;
@@ -132,9 +115,9 @@ int add_node_code(void * yyscanner)
   int result = 0;
   char * text = yyget_text(yyscanner);
   
-  node_text[node_text_position] = text[0];
+  buffer[node_text_position] = text[0];
   node_text_position++;
-  if (node_text_position>(node_max_size_bytes-1)) 
+  if (node_text_position>(MAX_BUFFER_SIZE-1)) 
   {
     printf("Node text buffer too small\n");
     exit(0);
@@ -145,13 +128,10 @@ int add_node_code(void * yyscanner)
 
 int finish_node_code(void * yyscanner)
 {
-  int result = 0;
-  
-  node_text[node_text_position] = 0;
-  printf("\nCode found: %s\n", node_text);
+  buffer[node_text_position] = 0;
+  node_text_position++;
+  printf("\nCode found: %s\n", buffer);
   node_text_position = 0;
-  node_max_size_bytes = 500;
-  free(node_text);
   return CODE;
 }
 
