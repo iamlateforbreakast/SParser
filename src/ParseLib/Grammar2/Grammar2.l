@@ -18,6 +18,7 @@ int finish_node_comment(void * yyscanner);
 int start_node_code(void * yyscanner);
 int finish_node_code(void * yyscanner);
 int add_node_commment(void * yyscanner);
+int add_node_code(void * yyscanner);
 %}
 
 %option noyywrap

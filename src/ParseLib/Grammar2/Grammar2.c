@@ -1,7 +1,11 @@
 
 #include "Grammar2.h"
 #include "Object.h"
+#include "FileReader.h"
 #include "Grammar2.parse.h"
+
+extern int Grammar2_parse (void * scanner, FileReader * fr, SdbMgr * sdbMgr);
+extern void * Grammar2_scan_string (const char * yystr , void * yyscanner);
 
 struct Grammar2
 {
