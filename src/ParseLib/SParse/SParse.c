@@ -129,7 +129,7 @@ PRIVATE unsigned int SParse_parseFile(SParse * this, String * file)
   {
     if (String_matchWildcard(file, SParse_default[i].extension))
     {
-      FileReader * fileReader = FileReader_new(String_getBuffer(file));
+      FileReader * fileReader = FileReader_new(file);
       g = SParse_default[i].function_new(fileReader, this->sdbMgr);
       SParse_default[i].function_process(g);
       SParse_default[i].function_delete(g);
