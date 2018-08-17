@@ -26,9 +26,9 @@ PUBLIC FileReader * FileReader_new(String * fileName)
   FileReader * this = 0;
   FileMgr * fileMgr = FileMgr_getRef();
   
-  this = Object_new(sizeof(FileReader), &FileReader_delete, &FileReader_copy);
+  this = (FileReader*)Object_new(sizeof(FileReader), (Destructor)&FileReader_delete, (Copy_operator)&FileReader_copy);
   
-  this->buffer = FileMgr_load(fileMgr, fileName);
+  this->buffer = FileMgr_load(fileMgr, String_getBuffer(fileName));
   
   /* associate buffer containing the file to the fileRead */
   
