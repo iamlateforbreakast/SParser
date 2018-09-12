@@ -103,7 +103,7 @@ PUBLIC unsigned int SParse_parse(SParse * this, const char * extension)
   /* List all files with extension in all the input directories */
   fileList = FileMgr_filterFiles(fileMgr, extension);
 
-  List_forEach(fileList, &SParse_parseFile, (void*)this);
+  List_forEach(fileList, (void (*)(void* , void *))&SParse_parseFile, (void*)this);
   
   FileMgr_delete(fileMgr);
   List_delete(fileList);
