@@ -42,6 +42,11 @@ PUBLIC SdbMgr* SdbMgr_new(String * name)
   return this;
 }
 
+/**********************************************//** 
+  @brief Destroy an instance of the class SdbMgr.
+  @public
+  @memberof SdbMgr
+**************************************************/
 PUBLIC void SdbMgr_delete(SdbMgr* this)
 { 
   if (this!=0)
@@ -60,6 +65,12 @@ PUBLIC void SdbMgr_delete(SdbMgr* this)
   }
 }
 
+/**********************************************//** 
+  @brief Create a copy of an SdbMgr object.
+  @public
+  @memberof SdbMgr
+  @return A copy of the SdbMgr object.
+**************************************************/
 PUBLIC SdbMgr * SdbMgr_copy(SdbMgr* this)
 {
   SdbMgr * copy = 0;
@@ -67,6 +78,12 @@ PUBLIC SdbMgr * SdbMgr_copy(SdbMgr* this)
   return copy;
 }
 
+/**********************************************//** 
+  @brief Get a reference to an object.
+  @public
+  @memberof SdbMgr
+  @return A reference to a SdbMgr object.
+**************************************************/
 PUBLIC SdbMgr * SdbMgr_getRef()
 {  
     if (sdbMgr!=0)
@@ -77,6 +94,12 @@ PUBLIC SdbMgr * SdbMgr_getRef()
   return sdbMgr;
 }
 
+/**********************************************//** 
+  @brief Execute a Sdb request.
+  @public
+  @memberof SdbMgr
+  @return status
+**************************************************/
 PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement, String *** result)
 {
   int rc = 0;
@@ -114,6 +137,9 @@ PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement, String *
   return 0;
 }
 
+/**********************************************//** 
+  @private
+**************************************************/
 PRIVATE unsigned int SdbMgr_open(SdbMgr* this, String* sdbName)
 {
   unsigned int result = 0;
@@ -125,6 +151,9 @@ PRIVATE unsigned int SdbMgr_open(SdbMgr* this, String* sdbName)
   return result;
 }
 
+/**********************************************//** 
+  @private
+**************************************************/
 PRIVATE void SdbMgr_close(SdbMgr* this)
 {
   sqlite3_close(this->db);
