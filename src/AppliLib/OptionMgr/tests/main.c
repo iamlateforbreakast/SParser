@@ -41,7 +41,7 @@ int step3()
 int step4()
 {
   const char *argv[] = { "-o", "test2.db" };
-  int argc = 2;
+  int argc = 3;
   String * option = 0;
 
   OptionMgr_readFromCmdLine(testOptionMgr, argc, argv);
