@@ -54,7 +54,7 @@ int main(int argc, char** argv)
   inDir = OptionMgr_getOption(optionMgr, "Input Directory");
   FileMgr_addDirectory(fileMgr, String_getBuffer(inDir));
   
-  sparse = SParse_new(OptionMgr_getOption(optionMgr, "DB name"));
+  sparse = SParse_new(OptionMgr_getOption(optionMgr, "DB Name"));
   
   SParse_parse(sparse, "*.c");
   
