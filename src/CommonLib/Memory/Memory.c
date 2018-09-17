@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DEBUG (1)
+#define DEBUG (0)
 
 PRIVATE unsigned int Memory_allocRequestId = 0;
 PRIVATE unsigned int Memory_freeRequestId = 0;
@@ -55,8 +55,8 @@ PUBLIC void * Memory_realloc(void * pointer, unsigned int prevSizeBytes, unsigne
   if (pointer!=0)
   {
     Memory_free(pointer, prevSizeBytes);
-    pointer = Memory_alloc(newSizeBytes);
   }
+  pointer = Memory_alloc(newSizeBytes);
   
   return pointer;
 }
