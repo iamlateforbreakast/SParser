@@ -10,15 +10,19 @@
 #include "Object.h"
 #include "String2.h"
 #include "FileMgr.h"
- 
+#include "List.h"
+
+  char newBuffer[] = "#include <test.h>\n //COmment 1\n void main()\n{\n}\n";
+  
  /**********************************************//**
    @class FileReader
  **************************************************/
 struct FileReader
 {
   Object object;
-  String * buffer;
+  List * buffers;
   String * fileName;
+  String * currentBuffer;
   //List * buffers;
 };
 
@@ -26,10 +30,15 @@ PUBLIC FileReader * FileReader_new(String * fileName)
 {
   FileReader * this = 0;
   FileMgr * fileMgr = FileMgr_getRef();
+  String * newFileContent = 0;
   
   this = (FileReader*)Object_new(sizeof(FileReader), (Destructor)&FileReader_delete, (Copy_operator)&FileReader_copy);
   
-  this->buffer = FileMgr_load(fileMgr, String_getBuffer(fileName));
+  //this->buffer = FileMgr_load(fileMgr, String_getBuffer(fileName));
+  newFileContent = FileMgr_load(fileMgr, String_getBuffer(fileName));
+  this->buffers = List_new(this->buffers);
+  List_insertHead(this->buffers, newFileContent);
+  this->currentBuffer = newFileContent;
   this->fileName = fileName;
   /* associate buffer containing the file to the fileRead */
   
@@ -40,7 +49,7 @@ PUBLIC FileReader * FileReader_new(String * fileName)
 
 PUBLIC void FileReader_delete(FileReader * this)
 {
-  String_delete(this->buffer);
+  List_delete(this->buffers);
   Object_delete(&this->object);
 }
 
@@ -57,7 +66,7 @@ PUBLIC char * FileReader_getBuffer(FileReader * this)
 {
   char * result = 0;
   
-  result = String_getBuffer(this->buffer);
+  result = String_getBuffer(this->currentBuffer);
   
   return result;
 }
@@ -65,4 +74,13 @@ PUBLIC char * FileReader_getBuffer(FileReader * this)
 PUBLIC String * FileReader_getName(FileReader * this)
 {
   return this->fileName;
+}
+
+PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
+{
+
+  
+  /* Search for files with name fileName */
+  
+  return newBuffer;
 }

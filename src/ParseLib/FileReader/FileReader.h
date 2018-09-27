@@ -13,4 +13,5 @@ PUBLIC void FileReader_delete(FileReader * this);
 PUBLIC FileReader * FileReader_copy(FileReader * this);
 PUBLIC char * FileReader_getBuffer(FileReader * this);
 PUBLIC String * FileReader_getName(FileReader * this);
+PUBLIC char * FileReader_addFile(FileReader * this, String * fileName);
 #endif /* _FILEREADER_H_ */
