@@ -15,7 +15,13 @@
 %parse-param {FileReader * fr}
 %parse-param {SdbMgr * sdbMgr}
 
-%token COMMENT CODE
+%union {
+  String * text;
+}
+
+%token COMMENT 
+%token CODE
+%token INCLUDE
 
 %start translation_unit
 %%

@@ -4,7 +4,7 @@
 #include "SdbMgr.h"
 #include "SdbRequest.h"
 #include "Grammar2.parse.h"
-#define YY_DECL int Grammar2_lex(YYSTYPE * yylval_param, void * yyscanner, SdbMgr * sdbMgr)
+#define YY_DECL int Grammar2_lex(YYSTYPE * yylval_param, void * yyscanner, SdbMgr * sdbMgr, FileReader * fileReader)
 //#include "Node.h"
 
 //Node * currentNode;
@@ -20,6 +20,8 @@ int start_node_code(void * yyscanner);
 int finish_node_code(void * yyscanner, SdbMgr *sdbMgr);
 int add_node_comment(void * yyscanner);
 int add_node_code(void * yyscanner);
+int read_include(void * yyscanner, FileReader * fileReader);
+int end_of_file(void * yyscanner);
 %}
 
 %option noyywrap
@@ -30,29 +32,42 @@ int add_node_code(void * yyscanner);
 %x IN_ML_COMMENT
 %x IN_SL_COMMENT
 %x IN_CODE
+%x IN_INCLUDE
 
 %%
 <INITIAL>{
+"#include" yy_push_state(IN_INCLUDE,yyscanner);
 "/*"		   start_node_comment(yyscanner, 1);
 "//"           start_node_comment(yyscanner, 2);
+<<EOF>>        printf("EOF1\n");yypop_buffer_state(yyscanner); return(0);
 .|\n           start_node_code(yyscanner);
-<<EOF>>        return(0);
+
 }
 <IN_ML_COMMENT>{
 "*/"           finish_node_comment(yyscanner, sdbMgr); return COMMENT;
+<<EOF>>        printf("EOF2\n");finish_node_comment(yyscanner, sdbMgr);return COMMENT;
 .|\n           add_node_comment(yyscanner);
-<<EOF>>        finish_node_comment(yyscanner, sdbMgr);return 0;
+
 }
 <IN_SL_COMMENT>{
 \n             finish_node_comment(yyscanner, sdbMgr); return COMMENT;
+<<EOF>>       printf("EOF3\n"); finish_node_comment(yyscanner, sdbMgr); yy_push_state(INITIAL, yyscanner);return COMMENT;
 .              add_node_comment(yyscanner);
-<<EOF>>        finish_node_comment(yyscanner, sdbMgr); yy_push_state(INITIAL, yyscanner);return COMMENT;
+
 }
 <IN_CODE>{
+"#include" finish_node_code(yyscanner, sdbMgr); yy_push_state(IN_INCLUDE,yyscanner); return CODE;
 "/*"           finish_node_code(yyscanner, sdbMgr);start_node_comment(yyscanner, 1);return CODE;
 "//"           finish_node_code(yyscanner, sdbMgr);start_node_comment(yyscanner, 2);return CODE;
+<<EOF>>        printf("EOF4\n");finish_node_code(yyscanner, sdbMgr);yy_push_state(INITIAL, yyscanner);yypop_buffer_state(yyscanner);return CODE;
 .|\n           add_node_code(yyscanner);
-<<EOF>>        finish_node_code(yyscanner, sdbMgr);yy_push_state(INITIAL, yyscanner);return CODE;
+
+}
+<IN_INCLUDE>{
+[ \t]*
+[^ \t\n]+		read_include(yyscanner, fileReader);
+<<EOF>>  printf("EOF6\n");
+.|\n		printf("Error\n"); yyterminate();
 }
 
 %%
@@ -99,7 +114,8 @@ int finish_node_comment(void * yyscanner, SdbMgr * sdbMgr)
   "VALUES ('%s');"
   );
   
-  yy_push_state(INITIAL, yyscanner);
+  //yy_push_state(INITIAL, yyscanner);
+  yy_pop_state(yyscanner);
   buffer[node_text_position] = 0;
   printf("\nComment found: %s\n", buffer);
   node_text_position = 0;
@@ -155,7 +171,34 @@ int finish_node_code(void * yyscanner, SdbMgr * sdbMgr)
   SdbRequest_execute(insertCodeNode, buffer);
   SdbRequest_delete(insertCodeNode);
   
+  yy_pop_state(yyscanner);
+  
   return CODE;
+}
+
+int read_include(void * yyscanner, FileReader * fileReader)
+{
+  char * c = 0;
+  String * fileName = String_new(0);
+  char * text = yyget_text(yyscanner);
+  unsigned int l = Memory_len(text);
+  char * buffer = Memory_alloc(l);
+  Memory_copy(buffer, &text[1], l-2);
+  buffer[l-2] = 0;
+  
+  String_setBuffer(fileName, buffer);
+  printf("INCLUDE %s!!!\n", buffer);
+  c = FileReader_addFile(fileReader, fileName);
+  yypush_buffer_state(yy_scan_string(c, yyscanner),yyscanner);
+  //yy_pop_state(yyscanner);
+  yy_push_state(INITIAL, yyscanner);
+  return INCLUDE;
+}
+
+int end_of_file(void * yyscanner)
+{
+
+  return 0;
 }
 
 //int yywrap(void)
