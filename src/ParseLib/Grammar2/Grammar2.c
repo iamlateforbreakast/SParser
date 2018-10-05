@@ -8,6 +8,8 @@
 
 extern int Grammar2_parse (void * scanner, FileReader * fr, SdbMgr * sdbMgr);
 extern void * Grammar2_scan_string (const char * yystr , void * yyscanner);
+extern int Grammar2lex_init (void * scanner);
+extern int Grammar2lex_destroy  (void * yyscanner);
 
 PRIVATE void Grammar2_initSdbTables(Grammar2 * this);
 
@@ -68,7 +70,7 @@ PUBLIC void Grammar2_process(Grammar2 * this)
   SdbRequest_execute(insertTransUnit, String_getBuffer(FileReader_getName(this->reader)));
   
   Grammar2_scan_string(FileReader_getBuffer(this->reader), this->scanner);
-  Grammar2set_in(FileReader_getBuffer(this->reader), this->scanner);
+  //Grammar2set_in(FileReader_getBuffer(this->reader), this->scanner);
   Grammar2_parse(this->scanner, this->reader, this->sdbMgr);
   
   SdbRequest_delete(insertTransUnit);
