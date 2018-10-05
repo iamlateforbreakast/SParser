@@ -14,6 +14,13 @@ struct SdbRequest
   String ** result;
 };
 
+/**********************************************//** 
+  @brief Create a new SdbRequest instance
+  @memberof SdbRequest
+  @public
+  @parameter SQL statement template
+  @return Instance of an SdbRequest
+**************************************************/
 PUBLIC SdbRequest * SdbRequest_new(const char * fmt)
 {
   SdbRequest * this = 0;
@@ -29,6 +36,13 @@ PUBLIC SdbRequest * SdbRequest_new(const char * fmt)
   return this;
 }
 
+/**********************************************//** 
+  @brief Create a new SdbRequest instance
+  @memberof SdbRequest
+  @public
+  @parameter SQL statement template
+  @return Instance of an SdbRequest
+**************************************************/
 PUBLIC void SdbRequest_delete(SdbRequest * this)
 {
   if (this->buffer)
@@ -47,6 +61,13 @@ PUBLIC SdbRequest * SdbRequest_copy(SdbRequest * this)
   return result;
 }
 
+/**********************************************//** 
+  @brief Execute a SdbRequest
+  @memberof SdbRequest
+  @public
+  @parameter Variable list of parameter to use with SQL template
+  @return Instance of an SdbRequest
+**************************************************/
 PUBLIC void SdbRequest_execute(SdbRequest * this, ...)
 {
   unsigned int size = 0;
