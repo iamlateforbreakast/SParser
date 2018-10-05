@@ -15,14 +15,17 @@ LIBRARIES = ./CommonLib/libCommon.a \
 	    ./AppliLib/libAppli.a \
 	    ./ParseLib/libParse.a
 
+SUBDIRS = $(dir $(LIBRARIES))
+
 all: $(EXE)
 
-$(EXE): $(LIBRARIES) $(OBJECTS)
+$(EXE): $(SUBDIRS) $(OBJECTS)
 	@CC@ $(OBJECTS) $(LIBRARIES) $(LDFLAGS) -o $(EXE)
 
-$(LIBRARIES):
-	echo "Building " $@
-	make -C $(@D)
+$(SUBDIRS):
+    echo "Building " $@
+    $(MAKE) -C $@ $(MAKECMDGOALS)
+	
 clean:
 	@CLEAN@ $(LIBRARIES)
 	@CLEAN@ ./*/include
@@ -30,3 +33,5 @@ clean:
 	@CLEAN@ $(OBJECT) $(EXE)
 
 distclean:
+
+.PHONY: all clean $(SUBDIRS)
