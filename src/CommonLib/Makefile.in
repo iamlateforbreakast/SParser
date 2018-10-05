@@ -1,36 +1,37 @@
-CFLAGS = @CFLAGS@ -I../CommonLib/include
+CFLAGS = @CFLAGS@ -I./AppliLib/include -I./ParseLib/include -I./CommonLib/include
+
+LDFLAGS = @LDFLAGS@ -L./CommonLib -L./AppliLib -L./ParseLib -lCommon -lAppli -lParse -lsqlite3
+
 .c.o:
 	@CC@ $(CFLAGS) $< -o $@
 
-LIB = libCommon
+EXE = sparse
 
-SOURCES = \
-	./Debug/Debug.c \
-	./Memory/Memory.c \
-	./Object/Object.c \
-	./ObjectMgr/ObjectMgr.c \
-	./List/List.c \
-	./String/String2.c \
-	./Map/Map.c \
-	./Map/MapEntry.c \
-	./Error/Error.c
-
-HEADERS = ./Types/Types.h $(SOURCES:.c=.h)
+SOURCES = ./main.c
 
 OBJECTS = $(SOURCES:.c=.o)
 
-all: libCommon.a
+LIBRARIES = ./CommonLib/libCommon.a \
+	    ./AppliLib/libAppli.a \
+	    ./ParseLib/libParse.a
 
-libCommon.a: includes $(OBJECTS)
+SUBDIRS = $(dir $(LIBRARIES))
 
-	@MAKELIB@ $(OBJECTS)
-	@RANLIB@ $@
+all: $(EXE)
 
-includes:
-	mkdir -p include
-	for f in $(HEADERS); do \
-	    ln -sf .$$f -t include; \
-	done
+$(EXE): $(LIBRARIES) $(OBJECTS)
+	@CC@ $(OBJECTS) $(LIBRARIES) $(LDFLAGS) -o $(EXE)
+
+$(SUBDIRS):
+    echo "Building " $@
+    $(MAKE) -C $@ $(MAKECMDGOALS)
 	
 clean:
-	@CLEAN@ include $(OBJECTS) libCommon.a
+	@CLEAN@ $(LIBRARIES)
+	@CLEAN@ ./*/include
+	@CLEAN@ ./*/*/*.o
+	@CLEAN@ $(OBJECT) $(EXE)
+
+distclean:
+
+.PHONY: all clean $(SUBDIRS)
