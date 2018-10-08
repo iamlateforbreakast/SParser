@@ -24,7 +24,7 @@ PUBLIC void ErrorMgr_delete(ErrorMgr * this)
 
 PUBLIC ErrorMgr * ErrorMgr_copy(ErrorMgr * this)
 {
-  ErrorMgr * copy;
+  ErrorMgr * copy = 0;
   
   return copy;
 }
