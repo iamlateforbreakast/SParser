@@ -213,7 +213,7 @@ PUBLIC unsigned int String_isContained(String * this, String * s2)
   
   if ((this==0) || (s2==0)) return 0;
   
-  for (p=this->buffer; p<this->buffer + this->length - s2->length;p++)
+  for (p=this->buffer; p<this->buffer + this->length - s2->length + 1;p++)
   {
     if (Memory_ncmp(p, s2->buffer, s2->length))
     {
