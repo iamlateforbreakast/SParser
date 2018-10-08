@@ -12,7 +12,7 @@
 #include "FileMgr.h"
 #include "List.h"
 
-  char newBuffer[] = "#include <test.h>\n //COmment 1\n void main()\n{\n}\n";
+  char newBuffer[] = "//COmment 1\n void main()\n{\n}\n";
   
  /**********************************************//**
    @class FileReader
@@ -23,9 +23,14 @@ struct FileReader
   List * buffers;
   String * fileName;
   String * currentBuffer;
-  //List * buffers;
 };
 
+/**********************************************//** 
+  @brief Create a new FileReader object.
+  @public
+  @memberof FileReader
+  @return Created FileReader object.
+**************************************************/
 PUBLIC FileReader * FileReader_new(String * fileName)
 {
   FileReader * this = 0;
@@ -47,6 +52,11 @@ PUBLIC FileReader * FileReader_new(String * fileName)
   return this;
 }
 
+/**********************************************//** 
+  @brief Delete an instance of a FileReader object.
+  @public
+  @memberof FileReader
+**************************************************/
 PUBLIC void FileReader_delete(FileReader * this)
 {
   List_delete(this->buffers);
@@ -78,9 +88,15 @@ PUBLIC String * FileReader_getName(FileReader * this)
 
 PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
 {
-
+  FileMgr * fileMgr = FileMgr_getRef();
+  String * newFileContent = 0;
   
   /* Search for files with name fileName */
+  newFileContent = FileMgr_load(fileMgr, String_getBuffer(fileName));
+  List_insertHead(this->buffers, newFileContent);
+  this->currentBuffer = newFileContent;
+  
+  FileMgr_delete(fileMgr);
   
   return newBuffer;
 }
