@@ -222,6 +222,7 @@ PUBLIC unsigned int FileMgr_addFile(FileMgr * this, const char * fileName)
   @brief Load a managed file into a String.
   @public
   @memberof FileMgr
+  @parameter File Name
   @return Content of file.
 **************************************************/
 PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
@@ -411,36 +412,57 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   Error_new(ERROR_INFO,"Merged path: %s\n", buffer);
 }
 
-#if 0
-PRIVATE FileDesc * FileMgr_searchFile(FileMgr * this, String * name)
+/**************************************************
+ @brief FileMgr_searchFile
+ 
+ This function search for a file in the file of file by its name
+ or by its partial path.
+ 
+ @param [in]     name: String* - name of the file.
+ @return: none
+**************************************************/
+PUBLIC String * FileMgr_searchFile(FileMgr * this, String * name)
 {
-  FileDesc * result = 0;
+  String * result = 0;
+  String * temp = 0;
   FileDesc * c = 0;
   unsigned int isFound = 0;
   
    /* Find file in list */
   while ((c = List_getNext(this->files))!=0)
   {
-    if (String_isContained(FileDesc_getFullName((FileDesc*)c), name))
+    temp = FileDesc_getFullName((FileDesc*)c);
+    if (String_isContained(temp, name))
     {
       isFound ++;
-      result =c;
+      result =temp;
     }
   }
   
-  if (isFound==0)
+  /* If more than one file was found matching return 0 */
+  if (isFound == 0)
   {
     return 0;
   }
+  
   if (isFound > 1)
   {
+    Error_new(ERROR_INFO,"Several managed files match the name %s\n", String_getBuffer(name));
     return 0;
   }
   
   return result;
 }
-#endif
 
+/**************************************************
+ @brief FileMgr_mergePath
+ 
+ This function merges 2 paths into one.
+ 
+ @param [in/out] path1: String* - Path to merge
+ @param [in]     path2: String* - Path to merge
+ @return: none
+**************************************************/
 PRIVATE FileDesc * FileMgr_isManaged(FileMgr * this, String * fullName)
 {
   FileDesc * result = 0;

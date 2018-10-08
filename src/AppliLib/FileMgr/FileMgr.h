@@ -17,4 +17,5 @@ PUBLIC FileMgr* FileMgr_getRef();
 PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryName);
 PUBLIC unsigned int FileMgr_addFile(FileMgr * this, const char * fileName);
 PUBLIC List * FileMgr_filterFiles(FileMgr * this, const char * pattern);
+PUBLIC String * FileMgr_searchFile(FileMgr * this, String * name);
 #endif /* _FILEMGR_H_ */
