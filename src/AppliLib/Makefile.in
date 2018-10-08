@@ -5,7 +5,6 @@ CFLAGS = @CFLAGS@ -I./include -I../CommonLib/include
 LIB = libAppli
 
 SOURCES = \
-	./ErrorMgr/ErrorMgr.c \
 	./FileMgr/FileMgr.c \
 	./FileMgr/FileDesc.c \
 	./OptionMgr/OptionMgr.c \
