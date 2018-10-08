@@ -102,7 +102,7 @@ PUBLIC SdbMgr * SdbMgr_getRef()
 **************************************************/
 PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement, String *** result)
 {
-  //int rc = 0;
+  int rc = 0;
   sqlite3_stmt *res = 0;
   int step = 0;
   //void **rows = 0;
