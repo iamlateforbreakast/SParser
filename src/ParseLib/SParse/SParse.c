@@ -22,9 +22,11 @@
 typedef struct SParseDefault
 {
   char* extension;
-  void * (*function_new)(FileReader * fr, SdbMgr * sdbMgr);
+  //void * (*function_new)(FileReader * fr, SdbMgr * sdbMgr);
+  Constructor function_new;
   unsigned int (*function_process)(void * g);
-  void (*function_delete)(void * g);
+  //void (*function_delete)(void * g);
+  Destructor function_delete;
 } SParseDefault;
 
 /**********************************************//** 
@@ -38,11 +40,13 @@ struct SParse
 };
 
 static const SParseDefault SParse_default[] = 
-{{"*.c",&Grammar2_new, &Grammar2_process,&Grammar2_delete},
+{{"*.c",(Constructor)&Grammar2_new, &Grammar2_process,(Destructor)&Grammar2_delete},
  {"*.d",0,0,0/*&Grammar2_process*/}};
 
+ #if 0
 static const char * SParse_ignoreFiles[] = 
 {"test1.c"};
+#endif
 
 PRIVATE unsigned int SParse_parseFile(SParse * this, String * file);
 
@@ -140,6 +144,7 @@ PRIVATE unsigned int SParse_parseFile(SParse * this, String * file)
   return error;
 }
 
+#if 0
 /**********************************************//** 
   @brief Check if a file should be ignored..
   @memberof SParse
@@ -155,4 +160,5 @@ PRIVATE unsigned int SParse_isFileIgnored(SParse * this /* FileName * file */)
   
   return result;
 }
+#endif
 
