@@ -23,8 +23,8 @@ $(EXE): $(SUBDIRS) $(OBJECTS)
 	@CC@ $(OBJECTS) $(LIBRARIES) $(LDFLAGS) -o $(EXE)
 
 $(SUBDIRS):
-    echo "Building " $@
-    $(MAKE) -C $@ $(MAKECMDGOALS)
+	echo "Building " $@
+	$(MAKE) -C $@ $(MAKECMDGOALS)
 	
 clean:
 	@CLEAN@ $(LIBRARIES)
