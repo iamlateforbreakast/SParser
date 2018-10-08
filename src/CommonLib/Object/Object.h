@@ -7,6 +7,7 @@
 
 typedef struct Object Object;
 
+typedef struct Object * (*Constructor)();
 typedef void (*Destructor)(struct Object *);
 typedef struct Object * (*Copy_operator)(struct Object *);
 
