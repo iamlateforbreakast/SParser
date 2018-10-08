@@ -13,14 +13,14 @@ GRAMMAR_OBJECTS = ./Grammar2/Grammar2.parse.o ./Grammar2/Grammar2.lex.o ./Gramma
 
 OBJECTS = $(SOURCES:.c=.o)
 
-all: includes grammars libParse.a
+all: include grammars libParse.a
 
-libParse.a: includes $(OBJECTS)
+libParse.a: $(OBJECTS)
 
 	@MAKELIB@ $(OBJECTS) $(GRAMMAR_OBJECTS)
 	@RANLIB@ $@
 
-includes:
+include:
 	mkdir -p include
 	for f in $(HEADERS); do \
 	    ln -sf .$$f -t include; \
@@ -32,3 +32,5 @@ grammars:
 clean:
 	make clean -C ./Grammar2
 	@CLEAN@ include $(OBJECTS) libParse.a
+
+.PHONY:	clean all
