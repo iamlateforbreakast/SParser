@@ -6,7 +6,7 @@
 
 #include "Grammar2.parse.h"
 
-extern int Grammar2_parse (void * scanner, FileReader * fr, SdbMgr * sdbMgr);
+extern int Grammar2_parse (void * scanner, SdbMgr * sfbMgr, FileReader * fr);
 extern void * Grammar2_scan_string (const char * yystr , void * yyscanner);
 extern int Grammar2lex_init (void * scanner);
 extern int Grammar2lex_destroy  (void * yyscanner);
@@ -71,7 +71,7 @@ PUBLIC void Grammar2_process(Grammar2 * this)
   
   Grammar2_scan_string(FileReader_getBuffer(this->reader), this->scanner);
   //Grammar2set_in(FileReader_getBuffer(this->reader), this->scanner);
-  Grammar2_parse(this->scanner, this->reader, this->sdbMgr);
+  Grammar2_parse(this->scanner, this->sdbMgr, this->reader);
   
   SdbRequest_delete(insertTransUnit);
 }
