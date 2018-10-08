@@ -19,9 +19,9 @@ HEADERS = ./Types/Types.h $(SOURCES:.c=.h)
 
 OBJECTS = $(SOURCES:.c=.o)
 
-all: libCommon.a
+all: include libCommon.a
 
-libCommon.a: include $(OBJECTS)
+libCommon.a: $(OBJECTS)
 
 	@MAKELIB@ $(OBJECTS)
 	@RANLIB@ $@
