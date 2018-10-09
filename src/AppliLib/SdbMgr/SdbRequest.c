@@ -3,6 +3,7 @@
 #include "SdbMgr.h"
 #include "Memory.h"
 
+#include <stdio.h>
 #include <stdarg.h>
 
 struct SdbRequest
