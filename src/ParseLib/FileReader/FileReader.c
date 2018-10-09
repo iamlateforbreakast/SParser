@@ -11,8 +11,6 @@
 #include "String2.h"
 #include "FileMgr.h"
 #include "List.h"
-
-  char newBuffer[] = "//COmment 1\n void main()\n{\n}\n";
   
  /**********************************************//**
    @class FileReader
