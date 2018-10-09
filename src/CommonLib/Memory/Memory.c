@@ -95,7 +95,7 @@ PUBLIC unsigned int Memory_cmp(void * pointer, void * compared)
   return result;
 }
 
-PUBLIC unsigned int Memory_len(void * pointer)
+PUBLIC unsigned int Memory_len(const void * pointer)
 {
   return strlen(pointer);
 }
