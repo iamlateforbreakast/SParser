@@ -89,14 +89,19 @@ PUBLIC String * FileReader_getName(FileReader * this)
 PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
 {
   FileMgr * fileMgr = FileMgr_getRef();
+  String * fullPath = 0;
   String * newFileContent = 0;
   
   /* Search for files with name fileName */
-  newFileContent = FileMgr_load(fileMgr, String_getBuffer(fileName));
-  List_insertHead(this->buffers, newFileContent);
-  this->currentBuffer = newFileContent;
+  fullPath = FileMgr_searchFile(fileMgr, fileName);
+  if (fullPath != 0)
+  {
+    newFileContent = FileMgr_load(fileMgr, String_getBuffer(fullPath));
+    //List_insertHead(this->buffers, newFileContent);
+    this->currentBuffer = newFileContent;
+  }
   
   FileMgr_delete(fileMgr);
   
-  return newBuffer;
+  return String_getBuffer(newFileContent);
 }
