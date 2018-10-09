@@ -8,7 +8,9 @@
 #include "Grammar2.parse.h"
 #define YY_DECL int Grammar2_lex(YYSTYPE * yylval_param, void * yyscanner, SdbMgr * sdbMgr, FileReader * fileReader)
 #define YY_NO_INPUT
-//#include "Node.h"
+
+/* TODO: Define YY_USER_INIT */
+/* TODO: Define YY_USER_ACTION */
 
 //Node * currentNode;
 #define MAX_BUFFER_SIZE  (16384)
@@ -25,6 +27,7 @@ int add_node_comment(void * yyscanner);
 int add_node_code(void * yyscanner);
 int read_include(void * yyscanner, FileReader * fileReader);
 int end_of_file(void * yyscanner);
+YY_BUFFER_STATE get_current_buffer(void * yyscanner);
 %}
 
 %option noyywrap
@@ -32,57 +35,64 @@ int end_of_file(void * yyscanner);
 %option reentrant
 %option prefix="Grammar2"
 %option bison-bridge
+
+/* Defintions of states */
 %x IN_ML_COMMENT
 %x IN_SL_COMMENT
 %x IN_CODE
 %x IN_INCLUDE
 
+/* Definitions */
+
+/* Rules */
 %%
 <INITIAL>{
-"#"include[ \t]*[\"<] yy_push_state(IN_INCLUDE,yyscanner);
-"/*"		   printf("Char= %c\n",*yytext);printf("Start ML Comment Node\n");start_node_comment(yyscanner, 1);
-"//"          printf("Char= %c\n",*yytext); printf("Start SL Comment Node\n");start_node_comment(yyscanner, 2);
-<<EOF>>        printf("EOF1\n");yypop_buffer_state(yyscanner); return(0);
-.|\n           printf("Char= %x\n",*yytext);printf("Start Code Node\n");start_node_code(yyscanner);
-
+"#"include[ \t]* yy_push_state(IN_INCLUDE,yyscanner);
+"/*"		    start_node_comment(yyscanner, 1);
+"//"           start_node_comment(yyscanner, 2);
+<<EOF>> printf("<INITIAL> EOF\n");yypop_buffer_state(yyscanner); return(0);
+.|\n           start_node_code(yyscanner);
 }
+
 <IN_ML_COMMENT>{
 "*/"           finish_node_comment(yyscanner, sdbMgr); return COMMENT;
 <<EOF>>        printf("EOF2\n");finish_node_comment(yyscanner, sdbMgr);return COMMENT;
 .|\n           add_node_comment(yyscanner);
-
 }
+
 <IN_SL_COMMENT>{
 \n             finish_node_comment(yyscanner, sdbMgr); return COMMENT;
-<<EOF>>       printf("EOF3\n"); finish_node_comment(yyscanner, sdbMgr); yy_push_state(INITIAL, yyscanner);return COMMENT;
+<<EOF>>       printf("EOF3\n"); finish_node_comment(yyscanner, sdbMgr); return COMMENT;
 .              add_node_comment(yyscanner);
-
 }
+
 <IN_CODE>{
 "#include" finish_node_code(yyscanner, sdbMgr); yy_push_state(IN_INCLUDE,yyscanner); return CODE;
 "/*"           finish_node_code(yyscanner, sdbMgr);start_node_comment(yyscanner, 1);return CODE;
 "//"           finish_node_code(yyscanner, sdbMgr);start_node_comment(yyscanner, 2);return CODE;
-<<EOF>>        printf("EOF4\n");finish_node_code(yyscanner, sdbMgr);yypop_buffer_state(yyscanner);yy_push_state(INITIAL, yyscanner);return CODE;
-.|\n           printf("Char= %x\n",*yytext);printf("Add Node Code\n"); add_node_code(yyscanner);
-
+<<EOF>> {
+				  finish_node_code(yyscanner, sdbMgr);
+				  yypop_buffer_state(yyscanner);
+				  print_state_stack(yyscanner);
+				  if (!YY_CURRENT_BUFFER) yyterminate();
+				  //else yy_push_state(INITIAL, yyscanner);
+				  printf("EOF4\n");
+				  return CODE;
+				}
+.|\n           add_node_code(yyscanner);
 }
+
 <IN_INCLUDE>{
 [ \t]*
 <<EOF>>  printf("EOF6\n"); yyterminate();
-[^ \t\n\">]+  {
-                   printf("Char= %c\n",*yytext);
-				   printf("File = %s\n", yyget_text(yyscanner));
-				   //YY_BUFFER_STATE curBuf = YY_CURRENT_BUFFER;
-				   //yypush_buffer_state(curBuf,yyscanner);
-				   //read_include(yyscanner, fileReader); 
-				   yy_pop_state(yyscanner);
-				 }
+[^ \t\n]*  	{
+				   read_include(yyscanner, fileReader); 
+				}
 \n		printf("CR!\n");
 .		printf("Error char=%c\n",*yytext);
 }
 
 %%
-
 int start_node_comment(void * yyscanner, int type)
 {
   int result=0;
@@ -182,6 +192,8 @@ int finish_node_code(void * yyscanner, SdbMgr * sdbMgr)
   SdbRequest_execute(insertCodeNode, buffer);
   SdbRequest_delete(insertCodeNode);
   
+  print_state_stack(yyscanner);
+  
   yy_pop_state(yyscanner);
   
   return 0;
@@ -191,20 +203,43 @@ int read_include(void * yyscanner, FileReader * fileReader)
 {
   char * c = 0;
   String * fileName = String_new(0);
+  
+    print_state_stack(yyscanner);
+  YY_BUFFER_STATE curBuf = get_current_buffer(yyscanner);
   char * text = yyget_text(yyscanner);
-   printf("File name =%s\n", text);
+  printf("File name =%s\n", text);
   unsigned int l = Memory_len(text);
+  printf("Length =%d\n", l);
   char * buffer = Memory_alloc(l);
-  Memory_copy(buffer, &text[0], l);
-  //buffer[l-2] = 0;
+  Memory_copy(buffer, &text[1], l-2);
+  buffer[l-2] = 0;
   
   String_setBuffer(fileName, buffer);
   printf("INCLUDE %s!!!\n", buffer);
   c = FileReader_addFile(fileReader, fileName);
+  
+  yypush_buffer_state(curBuf,yyscanner);
   yy_scan_string(c, yyscanner);
-  //yy_pop_state(yyscanner);
-  //yy_push_state(INITIAL, yyscanner);
+  
+  yy_push_state(INITIAL, yyscanner);
+  
   return 0;
+}
+
+void print_state_stack(void * yyscanner)
+{
+  struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+  printf("Lexer State Stack Pointer = %d\n", yyg->yy_start_stack_ptr);
+}
+
+YY_BUFFER_STATE get_current_buffer(void * yyscanner)
+{
+  struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+  
+  if (yyg->yy_buffer_stack)
+    return yyg->yy_buffer_stack[yyg->yy_buffer_stack_top];
+  else
+    return NULL;
 }
 
 int end_of_file(void * yyscanner)
