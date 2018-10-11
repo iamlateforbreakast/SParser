@@ -95,7 +95,7 @@ PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
   if (fullPath != 0)
   {
     newFileContent = FileMgr_load(fileMgr, String_getBuffer(fullPath));
-    //List_insertHead(this->buffers, newFileContent);
+    List_insertHead(this->buffers, newFileContent);
     this->currentBuffer = newFileContent;
   }
   
