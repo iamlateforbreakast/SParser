@@ -169,7 +169,7 @@ PUBLIC unsigned int OptionMgr_readFromFile(OptionMgr * this)
   }
   /* TODO: Try home director */
   
-  //String_delete(fileName);
+  /* TODO: String_delete(fileName); */
   FileMgr_delete(fileMgr);
   
   return result;
