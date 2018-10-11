@@ -14,6 +14,9 @@
 #include "FileMgr.h"
 #include "Error.h"
 #include "SParse.h"
+#include "Memory.h"
+#include "ObjectMgr.h"
+
 #include <signal.h>
 
 struct sigaction action;
@@ -26,12 +29,13 @@ void sighandler(int signum, siginfo_t *info, void *ptr)
   exit(2);
 } 
 
-int main(int argc, char** argv)
+int main(const int argc, const char** argv)
 {
   SParse *sparse = 0;
   String * inDir = 0;
   OptionMgr *optionMgr = OptionMgr_getRef();
   FileMgr *fileMgr = FileMgr_getRef();
+  ObjectMgr * objMgr = ObjectMgr_getRef();
   
   action.sa_sigaction = sighandler;
   action.sa_flags = SA_SIGINFO;
@@ -49,7 +53,7 @@ int main(int argc, char** argv)
   OptionMgr_readFromCmdLine(optionMgr, argc, argv);
   
   /* Initialise OptionMgr from file */
-  /* OptionMgr_readFromFile(optionMgr, "options.txt"); */
+  OptionMgr_readFromFile(optionMgr);
    
   /* Add Directory to FileMgr */
   inDir = OptionMgr_getOption(optionMgr, "Input Directory");
@@ -67,6 +71,12 @@ int main(int argc, char** argv)
   FileMgr_delete(fileMgr);
 
   /* Generate Memory report */
+  objMgr = ObjectMgr_getRef();
+  
+  ObjectMgr_report(objMgr);
+  
+  ObjectMgr_delete(objMgr);
+  
   Memory_report();
   
   return 0;
