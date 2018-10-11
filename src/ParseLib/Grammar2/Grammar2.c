@@ -133,12 +133,14 @@ PRIVATE void Grammar2_initSdbTables(Grammar2 * this)
   SdbRequest_execute(createCommentNodeTable);
   SdbRequest_execute(dropCodeNodeTable);
   SdbRequest_execute(createCodeNodeTable);
+  
   SdbRequest_delete(dropCodeNodeTable);
+  SdbRequest_delete(createCodeNodeTable);
   SdbRequest_delete(dropNodeTable);
   SdbRequest_delete(createNodeTable);
   SdbRequest_delete(dropCommentNodeTable);
   SdbRequest_delete(createCommentNodeTable);
   SdbRequest_delete(dropTransUnitTable);
   SdbRequest_delete(createTransUnitTable);
-  SdbRequest_delete(createCodeNodeTable);
+
 }
