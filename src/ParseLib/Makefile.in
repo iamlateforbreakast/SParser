@@ -13,9 +13,9 @@ GRAMMAR_OBJECTS = ./Grammar2/Grammar2.parse.o ./Grammar2/Grammar2.lex.o ./Gramma
 
 OBJECTS = $(SOURCES:.c=.o)
 
-all: include grammars libParse.a
+all: include libParse.a
 
-libParse.a: $(OBJECTS)
+libParse.a: grammars $(OBJECTS)
 
 	@MAKELIB@ $(OBJECTS) $(GRAMMAR_OBJECTS)
 	@RANLIB@ $@
