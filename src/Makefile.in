@@ -30,7 +30,7 @@ clean:
 	@CLEAN@ $(LIBRARIES)
 	@CLEAN@ ./*/include
 	@CLEAN@ ./*/*/*.o
-	@CLEAN@ $(OBJECT) $(EXE)
+	@CLEAN@ $(OBJECTS) $(EXE)
 
 distclean:
 
