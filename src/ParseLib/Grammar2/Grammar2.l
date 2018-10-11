@@ -223,6 +223,8 @@ int read_include(void * yyscanner, FileReader * fileReader)
   
   yy_push_state(INITIAL, yyscanner);
   
+  String_delete(fileName);
+  
   return 0;
 }
 
