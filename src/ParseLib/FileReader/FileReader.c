@@ -10,6 +10,7 @@
 #include "Object.h"
 #include "String2.h"
 #include "FileMgr.h"
+#include "OptionMgr.h"
 #include "List.h"
   
  /**********************************************//**
@@ -22,6 +23,8 @@ struct FileReader
   String * fileName;
   String * currentBuffer;
 };
+
+PRIVATE List * FileReader_getListPreferredDir(FileReader * this);
 
 /**********************************************//** 
   @brief Create a new FileReader object.
@@ -87,11 +90,17 @@ PUBLIC String * FileReader_getName(FileReader * this)
 PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
 {
   FileMgr * fileMgr = FileMgr_getRef();
+
+  
+  
+  List * dirList = 0;
   String * fullPath = 0;
   String * newFileContent = 0;
   
   /* Search for files with name fileName */
-  fullPath = FileMgr_searchFile(fileMgr, fileName);
+  dirList = FileReader_getListPreferredDir(this);
+  
+  fullPath = FileMgr_searchFile(fileMgr, fileName, dirList);
   if (fullPath != 0)
   {
     newFileContent = FileMgr_load(fileMgr, String_getBuffer(fullPath));
@@ -102,4 +111,22 @@ PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
   FileMgr_delete(fileMgr);
   
   return String_getBuffer(newFileContent);
+}
+
+PRIVATE List * FileReader_getListPreferredDir(FileReader * this)
+{
+  OptionMgr * optionMgr = OptionMgr_getRef();
+  List * result = 0;
+  String * optionValue = 0;
+  
+  optionValue = OptionMgr_getOption(optionMgr, "Include Path");
+  
+  if (optionValue!=0)
+  {
+    printf("Include Path = %s\n", String_getBuffer(optionValue));
+  }
+  
+  OptionMgr_delete(optionMgr);
+  
+  return result;
 }
