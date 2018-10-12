@@ -187,7 +187,8 @@ PRIVATE MapEntry * Map_findEntry(Map* this, String * s)
     key = Map_hash(this, String_getBuffer(s), i);
     if (this->htable[key] != 0)
     {
-      while ((n = (MapEntry*)List_getNext(this->htable[key]))!= 0)
+      n = (MapEntry*)List_getNext(this->htable[key]);
+      while (n!= 0)
       {
         if (String_isEqual(MapEntry_getString(n), s))
         {
@@ -195,8 +196,9 @@ PRIVATE MapEntry * Map_findEntry(Map* this, String * s)
           result = n;
           break;
         }
+        n = (MapEntry*)List_getNext(this->htable[key]);
       }
-      n = (MapEntry*)List_getNext(this->htable[key]);
+      
     }
   }
   
