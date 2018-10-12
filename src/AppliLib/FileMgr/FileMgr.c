@@ -181,9 +181,9 @@ PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryN
   @memberof FileMgr
   @return Status.
 **************************************************/
-PUBLIC unsigned int FileMgr_addFile(FileMgr * this, const char * fileName)
+PUBLIC String * FileMgr_addFile(FileMgr * this, const char * fileName)
 {
-  unsigned int result = 0;
+  String * result = 0;
   FileDesc * fileDesc = 0;
   String * fullName = String_new(this->rootLocation);
   String * addedFile = String_new(fileName);
@@ -201,7 +201,7 @@ PUBLIC unsigned int FileMgr_addFile(FileMgr * this, const char * fileName)
       fileDesc = FileDesc_new();
       FileDesc_setFullName(fileDesc, fullName);
       List_insertHead(this->files, (void*)fileDesc);
-      result = 1;
+      result = fullName;
     }
     else
     {
@@ -421,7 +421,7 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
  @param [in]     name: String* - name of the file.
  @return: none
 **************************************************/
-PUBLIC String * FileMgr_searchFile(FileMgr * this, String * name)
+PUBLIC String * FileMgr_searchFile(FileMgr * this, String * name, List * preferredDir)
 {
   String * result = 0;
   String * temp = 0;
