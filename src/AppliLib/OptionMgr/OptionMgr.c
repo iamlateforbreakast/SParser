@@ -157,19 +157,21 @@ PUBLIC unsigned int OptionMgr_readFromFile(OptionMgr * this)
   String * fileName = 0;
   String * fileContent = 0;
   String * path1 = 0;
- 
+  String * fullPath = 0;
+  
   fileName = OptionMgr_getOption(this,"Config file name");
   path1 = String_copy(fileName);
   String_prepend(path1,"./");
-  if (FileMgr_addFile(fileMgr, String_getBuffer(path1)))
+  if (fullPath = FileMgr_addFile(fileMgr, String_getBuffer(path1)))
   {
     /* File exists and is managed */
-    fileContent = FileMgr_load(fileMgr, String_getBuffer(fileName));
+    fileContent = FileMgr_load(fileMgr, String_getBuffer(fullPath));
     OptionMgr_parseFile(this, fileContent);
   }
-  /* TODO: Try home director */
+  /* TODO: Try home directory */
   
-  /* TODO: String_delete(fileName); */
+  String_delete(path1);
+  String_delete(fileContent);
   FileMgr_delete(fileMgr);
   
   return result;
@@ -297,5 +299,6 @@ PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
       OptionMgr_setOption(optionMgr, String_getBuffer(optionName), optionValue);
     }
   
+  String_delete(optionName);
   return result;
 }
