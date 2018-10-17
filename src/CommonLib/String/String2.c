@@ -225,6 +225,14 @@ PUBLIC unsigned int String_isContained(String * this, String * s2)
   return result;
 } 
 
+/**************************************************
+ @brief String_prepend
+ 
+ This function add the prefix at the front of a String object
+ 
+ @param [in]     prefic: const char * - prefix
+ @return: unsigned int: 0 successfull
+**************************************************/
 PUBLIC unsigned int String_prepend(String * this, const char * prefix)
 {
   char * buffer;
