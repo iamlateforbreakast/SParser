@@ -1,4 +1,10 @@
-
+/**********************************************//** 
+  @file GRammar2.c
+  
+  @brief A test grammar class.
+  The Grammar2 class implements a test grammar
+  parsing comments code blocks and allowing includes files.
+**************************************************/
 #include "Grammar2.h"
 #include "Object.h"
 #include "FileReader.h"
