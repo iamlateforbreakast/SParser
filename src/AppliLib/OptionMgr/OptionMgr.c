@@ -79,8 +79,17 @@ PRIVATE OptionMgr * OptionMgr_new()
 **************************************************/
 PUBLIC void OptionMgr_delete(OptionMgr * this)
 {
-  Map_delete(this->options);
-  Object_delete(&this->object);
+  if (this!=0)
+  {
+    this->object.refCount = this->object.refCount - 1;
+  
+    if (this->object.refCount == 0)
+    {
+      Map_delete(this->options);
+      Object_delete(&this->object);
+      this = 0;
+    }
+  }    
 }
 
 /**********************************************//** 
