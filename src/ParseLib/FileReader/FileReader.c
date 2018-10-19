@@ -32,7 +32,8 @@ struct FileReader
   List * preferredDirs;
 };
 
-PRIVATE List * FileReader_getListPreferredDir(FileReader * this);
+PRIVATE void FileReader_getListPreferredDir(FileReader * this);
+PRIVATE void FileReader_deleteListPreferredDir(FileReader * this);
 
 /**********************************************//** 
   @brief Create a new FileReader object.
@@ -51,6 +52,9 @@ PUBLIC FileReader * FileReader_new(String * fileName)
   
   this->buffers = List_new();
   this->preferredDirs = List_new();
+  
+  /* Build list of all directories to be used to lookup additional files (include) */
+  FileReader_getListPreferredDir(this);
   
   /* associate buffer containing the file to the fileRead */
   newFileContent = FileMgr_load(fileMgr, String_getBuffer(fileName));
@@ -73,6 +77,8 @@ PUBLIC void FileReader_delete(FileReader * this)
   if (this!=0)
   {
     List_delete(this->buffers);
+    FileReader_deleteListPreferredDir(this);
+    List_delete(this->preferredDirs);
     Object_delete(&this->object);
   }
 }
@@ -103,16 +109,20 @@ PUBLIC String * FileReader_getName(FileReader * this)
 PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
 {
   FileMgr * fileMgr = FileMgr_getRef();
-
-  
-  
-  List * dirList = 0;
+  List * dirList = List_new();
   String * fullPath = 0;
   String * newFileContent = 0;
+  struct IncludeInfo * dirInfo = 0;
+
+  while ((dirInfo = (struct IncludeInfo *)List_getNext(this->preferredDirs))!=0)
+  {
+    if (String_matchWildcard(fileName,String_getBuffer(dirInfo->pattern )))
+    {
+      dirList = List_copy(dirInfo->dirs);
+    }
+  }
   
-  /* Search for files with name fileName */
-  /* if match pattern fileName
-  dirList = ; */
+  List_insertTail(dirList, String_new("./"));
   
   fullPath = FileMgr_searchFile(fileMgr, fileName, dirList);
   if (fullPath != 0)
@@ -121,16 +131,15 @@ PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
     List_insertHead(this->buffers, newFileContent);
     this->currentBuffer = newFileContent;
   }
-  
+
   FileMgr_delete(fileMgr);
   
   return String_getBuffer(newFileContent);
 }
 
-PRIVATE List * FileReader_getListPreferredDir(FileReader * this)
+PRIVATE void FileReader_getListPreferredDir(FileReader * this)
 {
   OptionMgr * optionMgr = OptionMgr_getRef();
-  List * result = 0;
   String * optionValue = 0;
   char * buf = 0;
   unsigned i, j, state = 0;
@@ -142,7 +151,7 @@ PRIVATE List * FileReader_getListPreferredDir(FileReader * this)
   {
     buf = String_getBuffer(optionValue);
   
-    for (i=0; i<String_getLength(optionValue);i++)
+    for (i=0; i<String_getLength(optionValue)-1;i++)
     {
       switch (state)
       {
@@ -167,13 +176,9 @@ PRIVATE List * FileReader_getListPreferredDir(FileReader * this)
           if (buf[i]==' ')
           { 
              prefDir = (struct IncludeInfo *)Object_new(sizeof(struct IncludeInfo), 0, 0);
-             prefDir->pattern = String_subString(optionValue, j, i);
-             List_new(prefDir->dirs);
+             prefDir->pattern = String_subString(optionValue, j, i-j);
+             prefDir->dirs = List_new();
              state = 3;
-          }
-          else
-          {
-            i++;
           }
           break;
         case 3:
@@ -186,7 +191,7 @@ PRIVATE List * FileReader_getListPreferredDir(FileReader * this)
         case 4:
           if (buf[i]==' ')
           {
-            List_insertHead(prefDir->dirs, String_subString(optionValue, j, i));
+            List_insertHead(prefDir->dirs, String_subString(optionValue, j, i-j));
             state = 5;
           }
           break;
@@ -195,28 +200,36 @@ PRIVATE List * FileReader_getListPreferredDir(FileReader * this)
           {
             state = 4;
             j = i;
+          }
+          else if (buf[i]==']')
+          {
+            state = 6;
           }          
           break;
         default:
           break;
       }
-      if (state==5)
-      {
-        List_insertHead(this->preferredDirs, prefDir);
-      }
-      else
-      {
-        /* TODO: Syntax error */
-      }
+    }
+    if (state==6)
+    {
+      List_insertHead(this->preferredDirs, prefDir);
+    }
+    else
+    {
+      /* TODO: Syntax error */
     }
   }
   
-  if (optionValue!=0)
-  {
-    printf("Include Path = %s\n", String_getBuffer(optionValue));
-  }
-  
   OptionMgr_delete(optionMgr);
+}
+
+PRIVATE void FileReader_deleteListPreferredDir(FileReader * this)
+{
+  struct IncludeInfo * dirInfo = 0;
   
-  return result;
+  while ((dirInfo = (struct IncludeInfo *)List_getNext(this->preferredDirs))!=0)
+  {
+    String_delete(dirInfo->pattern);
+    List_delete(dirInfo->dirs);
+  }
 }
