@@ -418,6 +418,7 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
  This function search for a file in the file of file by its name
  or by its partial path.
  
+ @memberof FileMgr
  @param [in]     name: String* - name of the file.
  @return: none
 **************************************************/
@@ -425,17 +426,24 @@ PUBLIC String * FileMgr_searchFile(FileMgr * this, String * name, List * preferr
 {
   String * result = 0;
   String * temp = 0;
+  String * d = 0;
   FileDesc * c = 0;
   unsigned int isFound = 0;
   
-   /* Find file in list */
-  while ((c = List_getNext(this->files))!=0)
+  /* For each directory in preferred list */
+  while (((d = List_getNext(preferredDir))!=0)&&(!isFound))
   {
-    temp = FileDesc_getFullName((FileDesc*)c);
-    if (String_isContained(temp, name))
+    FileMgr_mergePath(this, d, name);
+  
+    /* Find file in list */
+    while (((c = List_getNext(this->files))!=0)&&(!isFound))
     {
-      isFound ++;
-      result =temp;
+      temp = FileDesc_getFullName((FileDesc*)c);
+      if (String_isContained(temp, name))
+      {
+        isFound ++;
+        result =temp;
+      }
     }
   }
   
