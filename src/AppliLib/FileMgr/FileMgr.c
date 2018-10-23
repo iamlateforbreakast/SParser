@@ -429,12 +429,20 @@ PUBLIC String * FileMgr_searchFile(FileMgr * this, String * name, List * preferr
   String * d = 0;
   FileDesc * c = 0;
   unsigned int isFound = 0;
+  String * fullPath = String_new(this->rootLocation);
   
   /* For each directory in preferred list */
   while (((d = List_getNext(preferredDir))!=0)&&(!isFound))
   {
     FileMgr_mergePath(this, d, name);
-  
+    FileMgr_mergePath(this, fullPath, d);
+    
+    if ((c=FileMgr_isManaged(this, fullPath))!=0)
+    {
+      isFound = 1;
+    }
+    
+    #if 0
     /* Find file in list */
     while (((c = List_getNext(this->files))!=0)&&(!isFound))
     {
@@ -445,6 +453,7 @@ PUBLIC String * FileMgr_searchFile(FileMgr * this, String * name, List * preferr
         result =temp;
       }
     }
+    #endif
   }
   
   /* If more than one file was found matching return 0 */
