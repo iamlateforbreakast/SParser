@@ -440,6 +440,7 @@ PUBLIC String * FileMgr_searchFile(FileMgr * this, String * name, List * preferr
     if ((c=FileMgr_isManaged(this, fullPath))!=0)
     {
       isFound = 1;
+      result = FileDesc_getFullName((FileDesc*)c);
     }
     
     #if 0
