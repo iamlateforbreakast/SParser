@@ -265,6 +265,7 @@ PUBLIC unsigned int String_matchWildcard(String * this, const char * wildcard)
   unsigned int f_idx = 0;
   unsigned int w_idx = 0;
   unsigned int wlen = Memory_len(wildcard);
+  unsigned int isRange = 0;
   
   for (w_idx = 0; (w_idx < wlen) && (isMatch == 1); w_idx++)
   {
@@ -281,13 +282,23 @@ PUBLIC unsigned int String_matchWildcard(String * this, const char * wildcard)
     }
     else if (wildcard[w_idx]=='[')
     {
+      //f_idx++;
+      isRange = 1; 
     }
     else if (wildcard[w_idx]==']')
     {
+      isRange = 0;
     }
     else if (this->buffer[f_idx]!= wildcard[w_idx])
     {
-      isMatch = 0; 
+      if (!isRange)
+      {
+        isMatch = 0;
+      }
+     else
+     {
+        //f_idx++;
+     }     
     } else
     {
       if (f_idx < this->length) f_idx++;
