@@ -51,7 +51,7 @@ YY_BUFFER_STATE get_current_buffer(void * yyscanner);
 "/*"		    start_node_comment(yyscanner, 1);
 "//"           start_node_comment(yyscanner, 2);
 <<EOF>> printf("<INITIAL> EOF\n");yypop_buffer_state(yyscanner); return(0);
-.|\n           start_node_code(yyscanner);
+.              start_node_code(yyscanner);
 }
 
 <IN_ML_COMMENT>{
@@ -72,14 +72,21 @@ YY_BUFFER_STATE get_current_buffer(void * yyscanner);
 "//"           finish_node_code(yyscanner, sdbMgr);start_node_comment(yyscanner, 2);return CODE;
 <<EOF>> {
 				  finish_node_code(yyscanner, sdbMgr);
-				  yypop_buffer_state(yyscanner);
-				  print_state_stack(yyscanner);
-				  if (!YY_CURRENT_BUFFER) yyterminate();
-				  //else yy_push_state(INITIAL, yyscanner);
+				  if (!YY_CURRENT_BUFFER) 
+				  {
+				    printf("Terminate\n");
+				    yyterminate();
+				  }
+				  else
+				  {
+				    //yypop_buffer_state(yyscanner);
+				    print_state_stack(yyscanner);
+				  }
+				  yy_push_state(INITIAL, yyscanner);
 				  printf("EOF4\n");
 				  return CODE;
 				}
-.|\n           add_node_code(yyscanner);
+.              //printf("c=%x\n", *yytext);add_node_code(yyscanner);
 }
 
 <IN_INCLUDE>{
@@ -136,6 +143,7 @@ int finish_node_comment(void * yyscanner, SdbMgr * sdbMgr)
   );
   
   //yy_push_state(INITIAL, yyscanner);
+  print_state_stack(yyscanner);
   yy_pop_state(yyscanner);
   buffer[node_text_position] = 0;
   printf("\nComment found: %s\n", buffer);
@@ -217,6 +225,8 @@ int read_include(void * yyscanner, FileReader * fileReader)
   String_setBuffer(fileName, buffer);
   printf("INCLUDE %s!!!\n", buffer);
   c = FileReader_addFile(fileReader, fileName);
+  
+  /* TODO: Case where c == 0 */
   
   yypush_buffer_state(curBuf,yyscanner);
   yy_scan_string(c, yyscanner);
