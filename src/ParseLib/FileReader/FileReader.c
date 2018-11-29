@@ -113,7 +113,9 @@ PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
   String * fullPath = 0;
   String * newFileContent = 0;
   struct IncludeInfo * dirInfo = 0;
-
+  char * result = 0;
+  
+  /* Check in the fileName matches a pattern with a default search path */
   while ((dirInfo = (struct IncludeInfo *)List_getNext(this->preferredDirs))!=0)
   {
     if (String_matchWildcard(fileName,String_getBuffer(dirInfo->pattern )))
@@ -122,19 +124,26 @@ PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
     }
   }
   
+  /* In all cases make sure the current dir. is in the search path */
   List_insertTail(dirList, String_new("./"));
   
   fullPath = FileMgr_searchFile(fileMgr, fileName, dirList);
+  
   if (fullPath != 0)
   {
     newFileContent = FileMgr_load(fileMgr, String_getBuffer(fullPath));
     List_insertHead(this->buffers, newFileContent);
     this->currentBuffer = newFileContent;
+    result = String_getBuffer(newFileContent);
+  }
+  else
+  {
+    /* Error case: Can not find the include file */
   }
 
   FileMgr_delete(fileMgr);
   
-  return String_getBuffer(newFileContent);
+  return result;
 }
 
 PRIVATE void FileReader_getListPreferredDir(FileReader * this)
@@ -151,7 +160,7 @@ PRIVATE void FileReader_getListPreferredDir(FileReader * this)
   {
     buf = String_getBuffer(optionValue);
   
-    for (i=0; i<String_getLength(optionValue)-1;i++)
+    for (i=0; i<String_getLength(optionValue);i++)
     {
       switch (state)
       {
@@ -189,22 +198,26 @@ PRIVATE void FileReader_getListPreferredDir(FileReader * this)
           }
           break;
         case 4:
-          if (buf[i]==' ')
+          if (buf[i]==' ') 
           {
             List_insertHead(prefDir->dirs, String_subString(optionValue, j, i-j));
             state = 5;
           }
+          if (buf[i]==']')
+          {
+            List_insertHead(prefDir->dirs, String_subString(optionValue, j, i-j));
+            state = 6;
+          }
           break;
         case 5:
-          if ((buf[i]!=' ') && (buf[i]!=']'))
+          if (buf[i]!=' ')
           {
             state = 4;
             j = i;
-          }
-          else if (buf[i]==']')
-          {
-            state = 6;
-          }          
+          }      
+          break;
+        case 6:
+          List_insertHead(prefDir->dirs, String_subString(optionValue, j, i-j-1));
           break;
         default:
           break;
