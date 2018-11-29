@@ -164,6 +164,7 @@ PUBLIC void List_insertTail(List* this, void* item)
   if (this->nbNodes == 0)
   {
     this->head = newNode;
+    this->iterator = this->head;
   }
   else
   {
