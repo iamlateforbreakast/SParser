@@ -111,7 +111,7 @@ PUBLIC List* List_copy(List* this)
     }
   }
   
-  copy->iterator = copy->head;
+  copy->iterator = copy->tail;
   
   return copy;
 }
@@ -164,11 +164,11 @@ PUBLIC void List_insertTail(List* this, void* item)
   if (this->nbNodes == 0)
   {
     this->head = newNode;
-    this->iterator = this->head;
   }
   else
   {
     this->tail->prev = newNode;
+    if (this->iterator == this->tail)   this->iterator = newNode;
   }
   this->tail = newNode;
   this->nbNodes ++;
