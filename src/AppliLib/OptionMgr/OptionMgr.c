@@ -40,7 +40,7 @@ PRIVATE OptionMgr * optionMgr = 0;
 PRIVATE const struct OptionDefault optionDefault[] = 
 {
   {"DB Name","-o","test.db"},
-  {"Input directory","-d","."},
+  {"Input Directory","-d","."},
   {"Config file name","-c","sparse.txt"}
 };
 
