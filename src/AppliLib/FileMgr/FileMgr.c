@@ -129,6 +129,42 @@ PUBLIC FileMgr* FileMgr_getRef()
 }
 
 /**********************************************//** 
+  @brief TBD
+  @public
+  @memberof FileMgr
+  @return Status.
+**************************************************/
+PUBLIC unsigned int FileMgr_setRootLocation(FileMgr* this, const char * location)
+{
+  unsigned int result = 0;
+  
+  String * newLocation = String_new(location);
+  String * currentLocation = String_new(this->rootLocation);
+
+  FileMgr_mergePath(this, currentLocation, newLocation);
+  
+  Memory_copy(this->rootLocation, String_getBuffer(currentLocation), FILEMGR_MAX_PATH);
+  
+  String_delete(newLocation);
+  String_delete(currentLocation);
+  
+  return 0;
+}
+
+/**********************************************//** 
+  @brief TBD
+  @public
+  @memberof FileMgr
+  @return Status.
+**************************************************/
+PUBLIC char * FileMgr_getRootLocation(FileMgr* this)
+{
+  char * result = this->rootLocation;
+  
+  return result;
+}
+
+/**********************************************//** 
   @brief Add all files in the given directory to the list of managed files.
   @public
   @memberof FileMgr
@@ -437,24 +473,13 @@ PUBLIC String * FileMgr_searchFile(FileMgr * this, String * name, List * preferr
     FileMgr_mergePath(this, d, name);
     FileMgr_mergePath(this, fullPath, d);
     
-    if ((c=FileMgr_isManaged(this, fullPath))!=0)
+    c=FileMgr_isManaged(this, fullPath);
+    if (c!=0)
     {
       isFound = 1;
       result = FileDesc_getFullName((FileDesc*)c);
     }
     
-    #if 0
-    /* Find file in list */
-    while (((c = List_getNext(this->files))!=0)&&(!isFound))
-    {
-      temp = FileDesc_getFullName((FileDesc*)c);
-      if (String_isContained(temp, name))
-      {
-        isFound ++;
-        result =temp;
-      }
-    }
-    #endif
   }
   
   /* If more than one file was found matching return 0 */

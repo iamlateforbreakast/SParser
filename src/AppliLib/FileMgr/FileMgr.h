@@ -13,6 +13,8 @@ PUBLIC void FileMgr_delete(FileMgr * this);
 PUBLIC FileMgr * FileMgr_copy(FileMgr * this);
 PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName);
 PUBLIC void FileMgr_close(FileMgr* this, String* fileName);
+PUBLIC unsigned int FileMgr_setRootLocation(FileMgr* this, const char * location);
+PUBLIC char * FileMgr_getRootLocation(FileMgr* this);
 PUBLIC FileMgr* FileMgr_getRef();
 PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryName);
 PUBLIC String * FileMgr_addFile(FileMgr * this, const char * fileName);
