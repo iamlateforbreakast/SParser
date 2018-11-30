@@ -57,7 +57,9 @@ int main(const int argc, const char** argv)
    
   /* Add Directory to FileMgr */
   inDir = OptionMgr_getOption(optionMgr, "Input Directory");
-  FileMgr_addDirectory(fileMgr, String_getBuffer(inDir));
+
+  FileMgr_setRootLocation(fileMgr, String_getBuffer(inDir));
+  FileMgr_addDirectory(fileMgr, ".");
   
   sparse = SParse_new(OptionMgr_getOption(optionMgr, "DB Name"));
   
