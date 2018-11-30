@@ -24,6 +24,7 @@ int yylex(void * yylval_param, void * yyscanner, SdbMgr * sdbMgr, FileReader * f
 %token COMMENT 
 %token CODE
 %token INCLUDE
+%token END_OF_UNIT
 
 %start translation_unit
 %%

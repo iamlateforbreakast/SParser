@@ -47,72 +47,97 @@ YY_BUFFER_STATE get_current_buffer(void * yyscanner);
 /* Rules */
 %%
 <INITIAL>{
-"#"include[ \t]* yy_push_state(IN_INCLUDE,yyscanner);
-"/*"		    start_node_comment(yyscanner, 1);
-"//"           start_node_comment(yyscanner, 2);
-<<EOF>> printf("<INITIAL> EOF\n");yypop_buffer_state(yyscanner); return(0);
-.              start_node_code(yyscanner);
+<<EOF>> {
+                  printf("<INITIAL> EOF\n");
+				  yyterminate();
+				}
+.               {
+                  yyless(yyleng-1);
+				  yy_push_state(IN_CODE, yyscanner);
+				}  
 }
 
 <IN_ML_COMMENT>{
-"*/"           finish_node_comment(yyscanner, sdbMgr); return COMMENT;
-<<EOF>>        printf("EOF2\n");finish_node_comment(yyscanner, sdbMgr);return COMMENT;
+"*/"           {
+                  finish_node_comment(yyscanner, sdbMgr); 
+				  yy_pop_state(yyscanner); 
+				  return COMMENT;
+				}
+<<EOF>> {
+				  printf("<IN_ML_COMMENT> EOF\n");
+				  yyterminate();
+				}
 .|\n           add_node_comment(yyscanner);
 }
 
 <IN_SL_COMMENT>{
-\n             finish_node_comment(yyscanner, sdbMgr); return COMMENT;
-<<EOF>>       printf("EOF3\n"); finish_node_comment(yyscanner, sdbMgr); return COMMENT;
+\n             {
+                  finish_node_comment(yyscanner, sdbMgr); 
+				  yy_pop_state(yyscanner); 
+				  return COMMENT;
+				}
+<<EOF>> {
+                  printf("<IN_SL_COMMENT> EOF\n"); 
+				  finish_node_comment(yyscanner, sdbMgr);
+				  yy_pop_state(yyscanner); 
+				  return COMMENT;
+				}
 .              add_node_comment(yyscanner);
 }
 
 <IN_CODE>{
-"#include" finish_node_code(yyscanner, sdbMgr); yy_push_state(IN_INCLUDE,yyscanner); return CODE;
-"/*"           finish_node_code(yyscanner, sdbMgr);start_node_comment(yyscanner, 1);return CODE;
-"//"           finish_node_code(yyscanner, sdbMgr);start_node_comment(yyscanner, 2);return CODE;
+"#include" {
+                  finish_node_code(yyscanner, sdbMgr); 
+				  yy_push_state(IN_INCLUDE,yyscanner);
+				  return CODE;
+				}
+"/*"           {
+                  finish_node_code(yyscanner, sdbMgr);
+				  yy_push_state(IN_ML_COMMENT, yyscanner);
+				  start_node_comment(yyscanner, 1);
+				  return CODE;
+				}
+"//"           {
+                  finish_node_code(yyscanner, sdbMgr);
+				  yy_push_state(IN_SL_COMMENT, yyscanner);
+				  start_node_comment(yyscanner, 2);
+				  return CODE;
+				}
 <<EOF>> {
+                  printf("\n");
 				  finish_node_code(yyscanner, sdbMgr);
-				  if (!YY_CURRENT_BUFFER) 
+				  //if (!YY_CURRENT_BUFFER) 
+				  if (get_buffer_top(yyscanner) == 0)
 				  {
 				    printf("Terminate\n");
-				    yyterminate();
+					yy_push_state(INITIAL, yyscanner);
 				  }
 				  else
 				  {
-				    //yypop_buffer_state(yyscanner);
-				    print_state_stack(yyscanner);
+				    pop_buffer(yyscanner);
+		            printf("<CODE> EOF\n");
+				    return CODE;
 				  }
-				  yy_push_state(INITIAL, yyscanner);
-				  printf("EOF4\n");
-				  return CODE;
 				}
 .              //printf("c=%x\n", *yytext);add_node_code(yyscanner);
 }
 
 <IN_INCLUDE>{
 [ \t]*
-<<EOF>>  printf("EOF6\n"); yyterminate();
+<<EOF>> {
+                  printf("EOF6\n"); yyterminate();
+				}
 [^ \t\n]*  	{
-				   read_include(yyscanner, fileReader); 
+				   read_include(yyscanner, fileReader);
+				   yy_pop_state(yyscanner);
 				}
 \n		printf("CR!\n");
-.		printf("Error char=%c\n",*yytext);
 }
 
 %%
 int start_node_comment(void * yyscanner, int type)
 {
   int result=0;
-  
-  if (type==1)
-  {
-    yy_push_state(IN_ML_COMMENT, yyscanner);
-  }
-  if (type==2)
-  {
-    yy_push_state(IN_SL_COMMENT, yyscanner);
-  }
-  //node_text = malloc(node_max_size_bytes);
   
   return result;
 }
@@ -142,9 +167,7 @@ int finish_node_comment(void * yyscanner, SdbMgr * sdbMgr)
   "VALUES ('%s');"
   );
   
-  //yy_push_state(INITIAL, yyscanner);
   print_state_stack(yyscanner);
-  yy_pop_state(yyscanner);
   buffer[node_text_position] = 0;
   printf("\nComment found: %s\n", buffer);
   node_text_position = 0;
@@ -160,7 +183,6 @@ int start_node_code(void * yyscanner)
   int result = 0;
   char * text = yyget_text(yyscanner);
 
-  yy_push_state(IN_CODE, yyscanner);
   buffer[node_text_position] = text[0];
   node_text_position++;
   
@@ -187,22 +209,21 @@ int finish_node_code(void * yyscanner, SdbMgr * sdbMgr)
 {
   SdbRequest * insertCodeNode = 0;
   
-  insertCodeNode = SdbRequest_new(
-  "INSERT INTO Code_Nodes (Code) "
-  "VALUES ('%s');"
-  );
+  if (node_text_position)
+  {
+    insertCodeNode = SdbRequest_new(
+    "INSERT INTO Code_Nodes (Code) "
+    "VALUES ('%s');"
+    );
   
-  buffer[node_text_position] = 0;
-  node_text_position++;
-  printf("\nCode found: %s\n", buffer);
-  node_text_position = 0;
+    buffer[node_text_position] = 0;
+    node_text_position++;
+    printf("\nCode found: %s\n", buffer);
+    node_text_position = 0;
   
-  SdbRequest_execute(insertCodeNode, buffer);
-  SdbRequest_delete(insertCodeNode);
-  
-  print_state_stack(yyscanner);
-  
-  yy_pop_state(yyscanner);
+    SdbRequest_execute(insertCodeNode, buffer);
+    SdbRequest_delete(insertCodeNode);
+  }
   
   return 0;
 }
@@ -228,10 +249,8 @@ int read_include(void * yyscanner, FileReader * fileReader)
   
   /* TODO: Case where c == 0 */
   
-  yypush_buffer_state(curBuf,yyscanner);
+  push_buffer(curBuf,yyscanner);
   yy_scan_string(c, yyscanner);
-  
-  yy_push_state(INITIAL, yyscanner);
   
   String_delete(fileName);
   
@@ -240,8 +259,25 @@ int read_include(void * yyscanner, FileReader * fileReader)
 
 void print_state_stack(void * yyscanner)
 {
+
+}
+
+void push_buffer(YY_BUFFER_STATE new_buffer, void * yyscanner)
+{
   struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-  printf("Lexer State Stack Pointer = %d\n", yyg->yy_start_stack_ptr);
+  yypush_buffer_state(new_buffer,yyscanner);
+  printf("PUSH State Stack Pointer = %d\n", yyg->yy_start_stack_ptr);
+  printf("PUSH State Stack Top = %d\n", yyg->yy_buffer_stack_top);
+  printf("PUSH State Stack Max. = %d\n", yyg->yy_buffer_stack_max);
+}
+
+void pop_buffer(void * yyscanner)
+{
+  struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+  yypop_buffer_state(yyscanner);
+  printf("POP State Stack Pointer = %d\n", yyg->yy_start_stack_ptr);
+  printf("POP State Stack Top = %d\n", yyg->yy_buffer_stack_top);
+  printf("POP State Stack Max. = %d\n", yyg->yy_buffer_stack_max);
 }
 
 YY_BUFFER_STATE get_current_buffer(void * yyscanner)
@@ -254,6 +290,13 @@ YY_BUFFER_STATE get_current_buffer(void * yyscanner)
     return NULL;
 }
 
+int get_buffer_top(void * yyscanner)
+{
+  struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+  
+  return yyg->yy_buffer_stack_top;
+}
+	
 int end_of_file(void * yyscanner)
 {
   (void)yyunput;
