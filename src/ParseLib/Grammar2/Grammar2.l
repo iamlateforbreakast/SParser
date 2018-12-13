@@ -4,6 +4,7 @@
 #include "SdbMgr.h"
 #include "SdbRequest.h"
 #include "Memory.h"
+#include "Error.h"
 
 #include "Grammar2.parse.h"
 #define YY_DECL int Grammar2_lex(YYSTYPE * yylval_param, void * yyscanner, SdbMgr * sdbMgr, FileReader * fileReader)
@@ -246,12 +247,15 @@ int read_include(void * yyscanner, FileReader * fileReader)
   String_setBuffer(fileName, buffer);
   printf("INCLUDE %s!!!\n", buffer);
   c = FileReader_addFile(fileReader, fileName);
-  
-  /* TODO: Case where c == 0 */
-  
-  push_buffer(curBuf,yyscanner);
-  yy_scan_string(c, yyscanner);
-  
+  if (c!=0)
+  {
+    push_buffer(curBuf,yyscanner);
+    yy_scan_string(c, yyscanner);
+  }
+  else
+  {
+    Error_new(ERROR_NORMAL,"Cannot find %s\n", fileName);
+  }
   String_delete(fileName);
   
   return 0;
