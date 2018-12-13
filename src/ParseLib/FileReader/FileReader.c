@@ -125,7 +125,7 @@ PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
   }
   
   /* In all cases make sure the current dir. is in the search path */
-  List_insertTail(dirList, String_new("./"));
+  List_insertTail(dirList, String_new("."));
   
   fullPath = FileMgr_searchFile(fileMgr, fileName, dirList);
   
@@ -141,6 +141,7 @@ PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
     /* Error case: Can not find the include file */
   }
 
+  List_delete(dirList);
   FileMgr_delete(fileMgr);
   
   return result;
