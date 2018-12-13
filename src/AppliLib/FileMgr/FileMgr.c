@@ -465,11 +465,12 @@ PUBLIC String * FileMgr_searchFile(FileMgr * this, String * name, List * preferr
   String * d = 0;
   FileDesc * c = 0;
   unsigned int isFound = 0;
-  String * fullPath = String_new(this->rootLocation);
+  String * fullPath = 0;
   
   /* For each directory in preferred list */
   while (((d = List_getNext(preferredDir))!=0)&&(!isFound))
   {
+    fullPath = String_new(this->rootLocation);
     FileMgr_mergePath(this, d, name);
     FileMgr_mergePath(this, fullPath, d);
     
@@ -479,7 +480,7 @@ PUBLIC String * FileMgr_searchFile(FileMgr * this, String * name, List * preferr
       isFound = 1;
       result = FileDesc_getFullName((FileDesc*)c);
     }
-    
+    String_delete(fullPath);
   }
   
   /* If more than one file was found matching return 0 */
