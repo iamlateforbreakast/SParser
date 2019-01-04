@@ -120,7 +120,10 @@ YY_BUFFER_STATE get_current_buffer(void * yyscanner);
 				    return CODE;
 				  }
 				}
-.              //printf("c=%x\n", *yytext);add_node_code(yyscanner);
+.               {
+                  //printf("c=%x\n", *yytext);
+				  add_node_code(yyscanner);
+			    }
 }
 
 <IN_INCLUDE>{
