@@ -25,8 +25,7 @@ struct sigaction action;
 void sighandler(int signum, siginfo_t *info, void *ptr) 
 { 
   Error_new(ERROR_NORMAL, "Received signal %d\n", signum); 
-  Error_new(ERROR_NORMAL, "Signal originates from process %lu\n", (unsigned long)info->si_pid);
-  exit(2);
+  Error_new(ERROR_FATAL, "Signal originates from process %lu\n", (unsigned long)info->si_pid);;
 } 
 
 int main(const int argc, const char** argv)
