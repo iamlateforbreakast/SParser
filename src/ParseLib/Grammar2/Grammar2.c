@@ -9,22 +9,31 @@
 #include "Object.h"
 #include "FileReader.h"
 #include "SdbRequest.h"
+#include "Error.h"
 
 #include "Grammar2.parse.h"
 
-extern int Grammar2_parse (void * scanner, SdbMgr * sfbMgr, FileReader * fr);
+#define MAX_BUFFER_SIZE  (16384)
+
+extern int Grammar2_parse (void * scanner, Grammar2 * this);
 extern void * Grammar2_scan_string (const char * yystr , void * yyscanner);
 extern int Grammar2lex_init (void * scanner);
 extern int Grammar2lex_destroy  (void * yyscanner);
 
 PRIVATE void Grammar2_initSdbTables(Grammar2 * this);
-
+PRIVATE unsigned int nodeId = 0;
+PRIVATE unsigned int codeNodeId = 0;
+PRIVATE unsigned int commentNodeId = 0;
+  
 struct Grammar2
 {
   Object object;
   void * scanner;
   SdbMgr * sdbMgr;
   FileReader * reader;
+  char buffer[MAX_BUFFER_SIZE];
+  char * node_text;
+  int node_text_position;
 };
 
 Grammar2 * Grammar2_new(FileReader * fr, SdbMgr * sdbMgr)
@@ -76,8 +85,7 @@ PUBLIC void Grammar2_process(Grammar2 * this)
   SdbRequest_execute(insertTransUnit, String_getBuffer(FileReader_getName(this->reader)));
   
   Grammar2_scan_string(FileReader_getBuffer(this->reader), this->scanner);
-  //Grammar2set_in(FileReader_getBuffer(this->reader), this->scanner);
-  Grammar2_parse(this->scanner, this->sdbMgr, this->reader);
+  Grammar2_parse(this->scanner, this);
   
   SdbRequest_delete(insertTransUnit);
 }
@@ -108,6 +116,7 @@ PRIVATE void Grammar2_initSdbTables(Grammar2 * this)
    );
   createCommentNodeTable = SdbRequest_new(
    "CREATE TABLE Comment_Nodes ("
+   "NodeId integer PRIMARY_KEY,"
    "Comment text NOT NULL "
    ");");
    
@@ -117,6 +126,7 @@ PRIVATE void Grammar2_initSdbTables(Grammar2 * this)
    );
   createCodeNodeTable = SdbRequest_new(
    "CREATE TABLE Code_Nodes ("
+   "NodeId integer PRIMARY_KEY,"
    "Code text NOT NULL "
    ");");
   
@@ -126,9 +136,11 @@ PRIVATE void Grammar2_initSdbTables(Grammar2 * this)
    );
   createNodeTable = SdbRequest_new(
    "CREATE TABLE Nodes ("
-   "NodeId integre PRIMARY_KEY,"
+   "NodeId integer PRIMARY_KEY,"
    "NodeType integer NOT NULL,"
-   "NodePtr integer NOT NULL "
+   "NodePtr integer NOT NULL,"
+   "NodeNext integer,"
+   "NodePrev integer"
    ");");
    
   SdbRequest_execute(dropNodeTable);
@@ -149,4 +161,92 @@ PRIVATE void Grammar2_initSdbTables(Grammar2 * this)
   SdbRequest_delete(dropTransUnitTable);
   SdbRequest_delete(createTransUnitTable);
 
+}
+
+PUBLIC FileReader * Grammar2_getFileReader(Grammar2 * this)
+{
+  return this->reader;
+}
+
+PUBLIC SdbMgr * Grammar2_getSdbMgr(Grammar2 * this)
+{
+  return this->sdbMgr;
+}
+
+PUBLIC void Grammar2_addToBuffer(Grammar2 * this, char * text)
+{
+  this->buffer[this->node_text_position] = text[0];
+  this->node_text_position++;
+  if (this->node_text_position>(MAX_BUFFER_SIZE-1)) 
+  {
+    /* Error case: Cannot obtain the FileMgr root location. */
+    Error_new(ERROR_FATAL, "Grammar internal buffer too small");
+  }
+}
+
+PUBLIC void Grammar2_addNode(Grammar2 * this, unsigned int type, int nodePtr, int nodeNext, int nodePrev)
+{
+  SdbRequest * insertNode = 0;
+  
+  insertNode = SdbRequest_new(
+  "INSERT INTO Nodes (NodeId, NodeType, NodePtr, NodeNext, NodePrev) "
+  "VALUES (%d,%d,%d,%d,%d);"
+  );
+  nodeId++;
+  
+  SdbRequest_execute(insertNode, nodeId, type, nodePtr, nodeNext, nodePrev);
+  SdbRequest_delete(insertNode);
+}
+
+PUBLIC void Grammar2_addComment(Grammar2 * this)
+{
+  SdbRequest * insertCommentNode = 0;
+  
+  insertCommentNode = SdbRequest_new(
+  "INSERT INTO Comment_Nodes (NodeId, Comment) "
+  "VALUES (%d,'%s');"
+  );
+  
+  this->buffer[this->node_text_position] = 0;
+  //printf("\nComment found: %s\n", this->buffer);
+  this->node_text_position = 0;
+  commentNodeId++;
+  
+  Grammar2_addNode(this, 1, commentNodeId, 0, 0);
+  SdbRequest_execute(insertCommentNode, commentNodeId, this->buffer);
+  SdbRequest_delete(insertCommentNode);
+}
+
+PUBLIC void Grammar2_addCodeNode(Grammar2 * this)
+{
+  SdbRequest * insertCodeNode = 0;
+  
+  if (this->node_text_position!=0)
+  {
+    insertCodeNode = SdbRequest_new(
+      "INSERT INTO Code_Nodes (NodeId, Code) "
+      "VALUES (%d, '%s');"
+    );
+  
+    this->buffer[this->node_text_position] = 0;
+
+    //this->node_text_position++;
+    //printf("\nCode found: %s\n", this->buffer);
+      this->node_text_position = 0;
+      codeNodeId++;
+    
+      Grammar2_addNode(this, 2, codeNodeId, 0 , 0);
+    
+      SdbRequest_execute(insertCodeNode, codeNodeId, this->buffer);
+    SdbRequest_delete(insertCodeNode);
+  }
+}
+
+PUBLIC char * Grammar2_processNewFile(Grammar2 * this, String * fileName)
+{
+   char * result = 0;
+   
+   result = FileReader_addFile(this->reader, fileName);
+   
+   return result;
 }

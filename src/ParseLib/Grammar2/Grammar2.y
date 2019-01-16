@@ -1,21 +1,17 @@
 %{
-#include "FileReader.h"
-#include "SdbMgr.h"
-//void yyerror(int * p, const char *s);
-void yyerror(void * scanner, SdbMgr * sdbMgr, FileReader * fileReader, char const *s);
-int yylex(void * yylval_param, void * yyscanner, SdbMgr * sdbMgr, FileReader * fileReader);
-
+#include "Grammar2.h"
+void yyerror(void * scanner, Grammar2 * grammar, char const *s);
+//int yylex(void * yylval_param, void * yyscanner, SdbMgr * sdbMgr, FileReader * fileReader);
+int yylex(void * yylval_param, void * yyscanner, Grammar2 * grammar);
 %}
 
 %pure-parser
 %name-prefix "Grammar2_"
 %output "Grammar2.parse.c"
-%lex-param {void * scanner} 
-%lex-param {SdbMgr * sdbMgr}
-%lex-param {FileReader * fr}
+%lex-param {void * scanner}
+%lex-param {Grammar2 * grammar}
 %parse-param {void * scanner} 
-%parse-param {SdbMgr * sdbMgr}
-%parse-param {FileReader * fr}
+%parse-param {Grammar2 * grammar}
 
 %union {
   String * text;
@@ -30,11 +26,11 @@ int yylex(void * yylval_param, void * yyscanner, SdbMgr * sdbMgr, FileReader * f
 %%
 
 comment
-  : COMMENT
+  : COMMENT { Grammar2_addComment(grammar); }
   ;
 
 code
-  : CODE
+  : CODE { Grammar2_addCodeNode(grammar); }
   ;
 
 node
@@ -53,7 +49,7 @@ translation_unit
 extern char yytext[];
 extern int column;
 
-void yyerror(void * scanner, SdbMgr * sdbMgr, FileReader * fileReader, char const *s)
+void yyerror(void * scanner, Grammar2 * grammar, char const *s)
 {
   fflush(stdout);
   printf("\n%*s\n%*s\n", column, "^", column, s);

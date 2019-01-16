@@ -1,34 +1,24 @@
 %{
 #include <stdio.h>
-#include "FileReader.h"
-#include "SdbMgr.h"
+#include "Grammar2.h"
 #include "SdbRequest.h"
 #include "Memory.h"
 #include "Error.h"
 
 #include "Grammar2.parse.h"
-#define YY_DECL int Grammar2_lex(YYSTYPE * yylval_param, void * yyscanner, SdbMgr * sdbMgr, FileReader * fileReader)
+#define YY_DECL int Grammar2_lex(YYSTYPE * yylval_param, void * yyscanner, Grammar2 * grammar)
 #define YY_NO_INPUT
 
 /* TODO: Define YY_USER_INIT */
 /* TODO: Define YY_USER_ACTION */
 
-//Node * currentNode;
-#define MAX_BUFFER_SIZE  (16384)
-char buffer[MAX_BUFFER_SIZE];
-char * node_text = NULL;
-int node_text_position = 0;
-
 void count(void * yyscanner);
-int start_node_comment(void * yyscanner, int type);
-int finish_node_comment(void * yyscanner, SdbMgr * sdbMgr);
-int start_node_code(void * yyscanner);
-int finish_node_code(void * yyscanner, SdbMgr *sdbMgr);
-int add_node_comment(void * yyscanner);
-int add_node_code(void * yyscanner);
-int read_include(void * yyscanner, FileReader * fileReader);
+int read_include(void * yyscanner, Grammar2 * grammar);
 int end_of_file(void * yyscanner);
 YY_BUFFER_STATE get_current_buffer(void * yyscanner);
+void pop_buffer(void * yyscanner);
+void push_buffer(YY_BUFFER_STATE new_buffer, void * yyscanner);
+int get_buffer_top(void * yyscanner);
 %}
 
 %option noyywrap
@@ -60,7 +50,6 @@ YY_BUFFER_STATE get_current_buffer(void * yyscanner);
 
 <IN_ML_COMMENT>{
 "*/"           {
-                  finish_node_comment(yyscanner, sdbMgr); 
 				  yy_pop_state(yyscanner); 
 				  return COMMENT;
 				}
@@ -68,50 +57,43 @@ YY_BUFFER_STATE get_current_buffer(void * yyscanner);
 				  printf("<IN_ML_COMMENT> EOF\n");
 				  yyterminate();
 				}
-.|\n           add_node_comment(yyscanner);
+.|\n           Grammar2_addToBuffer(grammar, yyget_text(yyscanner));
 }
 
 <IN_SL_COMMENT>{
 \n             {
-                  finish_node_comment(yyscanner, sdbMgr); 
+                  //Grammar2_addComment(grammar); 
 				  yy_pop_state(yyscanner); 
 				  return COMMENT;
 				}
 <<EOF>> {
                   printf("<IN_SL_COMMENT> EOF\n"); 
-				  finish_node_comment(yyscanner, sdbMgr);
 				  yy_pop_state(yyscanner); 
 				  return COMMENT;
 				}
-.              add_node_comment(yyscanner);
+.              Grammar2_addToBuffer(grammar, yyget_text(yyscanner));
 }
 
 <IN_CODE>{
-"#include" {
-                  finish_node_code(yyscanner, sdbMgr); 
+"#include" { 
 				  yy_push_state(IN_INCLUDE,yyscanner);
 				  return CODE;
 				}
 "/*"           {
-                  finish_node_code(yyscanner, sdbMgr);
 				  yy_push_state(IN_ML_COMMENT, yyscanner);
-				  start_node_comment(yyscanner, 1);
 				  return CODE;
 				}
 "//"           {
-                  finish_node_code(yyscanner, sdbMgr);
 				  yy_push_state(IN_SL_COMMENT, yyscanner);
-				  start_node_comment(yyscanner, 2);
 				  return CODE;
 				}
 <<EOF>> {
                   printf("\n");
-				  finish_node_code(yyscanner, sdbMgr);
-				  //if (!YY_CURRENT_BUFFER) 
 				  if (get_buffer_top(yyscanner) == 0)
 				  {
 				    printf("Terminate\n");
 					yy_push_state(INITIAL, yyscanner);
+					return CODE;
 				  }
 				  else
 				  {
@@ -122,7 +104,7 @@ YY_BUFFER_STATE get_current_buffer(void * yyscanner);
 				}
 .               {
                   //printf("c=%x\n", *yytext);
-				  add_node_code(yyscanner);
+				  Grammar2_addToBuffer(grammar, yyget_text(yyscanner));
 			    }
 }
 
@@ -132,112 +114,19 @@ YY_BUFFER_STATE get_current_buffer(void * yyscanner);
                   printf("EOF6\n"); yyterminate();
 				}
 [^ \t\n]*  	{
-				   read_include(yyscanner, fileReader);
+				   read_include(yyscanner, grammar);
 				   yy_pop_state(yyscanner);
 				}
 \n		printf("CR!\n");
 }
 
 %%
-int start_node_comment(void * yyscanner, int type)
-{
-  int result=0;
-  
-  return result;
-}
-
-int add_node_comment(void * yyscanner)
-{
-  int result = 0;
-  char * text = yyget_text(yyscanner);
- 
-  buffer[node_text_position] = text[0];
-  node_text_position++;
-  if (node_text_position>(MAX_BUFFER_SIZE-1)) 
-  {
-    printf("Node text buffer too small\n");
-    exit(0);
-  }
-  
-  return result;
-}
-
-int finish_node_comment(void * yyscanner, SdbMgr * sdbMgr)
-{
-    SdbRequest * insertCommentNode = 0;
-  
-  insertCommentNode = SdbRequest_new(
-  "INSERT INTO Comment_Nodes (Comment) "
-  "VALUES ('%s');"
-  );
-  
-  print_state_stack(yyscanner);
-  buffer[node_text_position] = 0;
-  printf("\nComment found: %s\n", buffer);
-  node_text_position = 0;
-  
-  SdbRequest_execute(insertCommentNode, buffer);
-  SdbRequest_delete(insertCommentNode);
-  
-  return 0;
-}
-
-int start_node_code(void * yyscanner)
-{
-  int result = 0;
-  char * text = yyget_text(yyscanner);
-
-  buffer[node_text_position] = text[0];
-  node_text_position++;
-  
-  return result;
-}
-
-int add_node_code(void * yyscanner)
-{
-  int result = 0;
-  char * text = yyget_text(yyscanner);
-  
-  buffer[node_text_position] = text[0];
-  node_text_position++;
-  if (node_text_position>(MAX_BUFFER_SIZE-1)) 
-  {
-    printf("Node text buffer too small\n");
-    exit(0);
-  }
-  
-  return result;
-}
-
-int finish_node_code(void * yyscanner, SdbMgr * sdbMgr)
-{
-  SdbRequest * insertCodeNode = 0;
-  
-  if (node_text_position)
-  {
-    insertCodeNode = SdbRequest_new(
-    "INSERT INTO Code_Nodes (Code) "
-    "VALUES ('%s');"
-    );
-  
-    buffer[node_text_position] = 0;
-    node_text_position++;
-    printf("\nCode found: %s\n", buffer);
-    node_text_position = 0;
-  
-    SdbRequest_execute(insertCodeNode, buffer);
-    SdbRequest_delete(insertCodeNode);
-  }
-  
-  return 0;
-}
-
-int read_include(void * yyscanner, FileReader * fileReader)
+int read_include(void * yyscanner, Grammar2 * grammar)
 {
   char * c = 0;
   String * fileName = String_new(0);
   
-    print_state_stack(yyscanner);
+  //print_state_stack(yyscanner);
   YY_BUFFER_STATE curBuf = get_current_buffer(yyscanner);
   char * text = yyget_text(yyscanner);
   printf("File name =%s\n", text);
@@ -249,7 +138,9 @@ int read_include(void * yyscanner, FileReader * fileReader)
   
   String_setBuffer(fileName, buffer);
   printf("INCLUDE %s!!!\n", buffer);
-  c = FileReader_addFile(fileReader, fileName);
+  /* G2_changeFile */
+  //c = FileReader_addFile(Grammar2_getFileReader(grammar), fileName);
+  c = Grammar2_processNewFile(grammar, fileName);
   if (c!=0)
   {
     push_buffer(curBuf,yyscanner);
@@ -264,10 +155,12 @@ int read_include(void * yyscanner, FileReader * fileReader)
   return 0;
 }
 
+#if 0
 void print_state_stack(void * yyscanner)
 {
 
 }
+#endif
 
 void push_buffer(YY_BUFFER_STATE new_buffer, void * yyscanner)
 {
