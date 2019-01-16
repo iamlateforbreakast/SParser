@@ -148,7 +148,7 @@ PUBLIC unsigned int FileMgr_setRootLocation(FileMgr* this, const char * location
   String_delete(newLocation);
   String_delete(currentLocation);
   
-  return 0;
+  return result;
 }
 
 /**********************************************//** 
@@ -461,7 +461,7 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
 PUBLIC String * FileMgr_searchFile(FileMgr * this, String * name, List * preferredDir)
 {
   String * result = 0;
-  String * temp = 0;
+  //String * temp = 0;
   String * d = 0;
   FileDesc * c = 0;
   unsigned int isFound = 0;
