@@ -19,7 +19,6 @@ int yylex(void * yylval_param, void * yyscanner, Grammar2 * grammar);
 
 %token COMMENT 
 %token CODE
-%token INCLUDE
 %token END_OF_UNIT
 
 %start translation_unit
@@ -32,7 +31,7 @@ comment
 code
   : CODE { Grammar2_addCodeNode(grammar); }
   ;
-
+  
 node
   : comment
   | code
