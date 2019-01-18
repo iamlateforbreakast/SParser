@@ -10,6 +10,7 @@
 #include "FileReader.h"
 #include "SdbRequest.h"
 #include "Error.h"
+#include "List.h"
 
 #include "Grammar2.parse.h"
 
@@ -24,7 +25,17 @@ PRIVATE void Grammar2_initSdbTables(Grammar2 * this);
 PRIVATE unsigned int nodeId = 0;
 PRIVATE unsigned int codeNodeId = 0;
 PRIVATE unsigned int commentNodeId = 0;
-  
+PRIVATE unsigned int includeNodeId = 0;
+PRIVATE unsigned int isInitialised = 0;
+
+struct GrammarContext
+{
+  Object object;
+  unsigned int lastNode;
+};
+
+typedef struct GrammarContext GrammarContext;
+
 struct Grammar2
 {
   Object object;
@@ -34,29 +45,41 @@ struct Grammar2
   char buffer[MAX_BUFFER_SIZE];
   char * node_text;
   int node_text_position;
+  GrammarContext * current;
+  List * contexts;
 };
 
-Grammar2 * Grammar2_new(FileReader * fr, SdbMgr * sdbMgr)
+PUBLIC Grammar2 * Grammar2_new(FileReader * fr, SdbMgr * sdbMgr)
 {
   Grammar2 * this = 0;
-
+  
   this = (Grammar2*)Object_new(sizeof(Grammar2),(Destructor)&Grammar2_delete, (Copy_operator)&Grammar2_copy);
   this->reader = fr;
   this->sdbMgr = sdbMgr;
   Grammar2lex_init(&this->scanner);
-
-  Grammar2_initSdbTables(this);
+  
+  this->contexts = List_new(this->contexts);
+  this->current = (GrammarContext*)Object_new(sizeof(GrammarContext),0,0);
+  this->current->lastNode = 0;
+  List_insertHead(this->contexts, this->current);
+  
+  if (!isInitialised) Grammar2_initSdbTables(this);
 
   return this;
 }
 
-void Grammar2_delete(Grammar2 * this)
+PUBLIC void Grammar2_delete(Grammar2 * this)
 {
+  GrammarContext * o = 0;
+  
+  printf("Grammar delete start\n");
   if (this!=0)
   {
      if (this->object.refCount==1)
      {
        Grammar2lex_destroy(this->scanner);
+       o = (GrammarContext*)List_removeHead(this->contexts);
+       List_delete(this->contexts);
        Object_delete(&this->object);
      }
      else if (this->object.refCount>1)
@@ -64,6 +87,7 @@ void Grammar2_delete(Grammar2 * this)
        this->object.refCount--;
      }
   }
+  printf("Grammar delet end\n");
 }
 
 PUBLIC Grammar2 * Grammar2_copy(Grammar2 * this)
@@ -100,7 +124,9 @@ PRIVATE void Grammar2_initSdbTables(Grammar2 * this)
   SdbRequest * createCodeNodeTable = 0;
   SdbRequest * dropNodeTable = 0;
   SdbRequest * createNodeTable = 0;
-
+  SdbRequest * dropIncludeNodeTable = 0;
+  SdbRequest * createIncludeNodeTable = 0;
+  
   dropTransUnitTable = SdbRequest_new(
 	  "DROP TABLE "
 	  "IF EXIST Translation_Units;"
@@ -129,11 +155,23 @@ PRIVATE void Grammar2_initSdbTables(Grammar2 * this)
    "NodeId integer PRIMARY_KEY,"
    "Code text NOT NULL "
    ");");
+   
+   dropIncludeNodeTable = SdbRequest_new(
+   "DROP TABLE "
+   "IF EXIST Include_Nodes;"
+   );
+   
+  createIncludeNodeTable = SdbRequest_new(
+   "CREATE TABLE Include_Nodes ("
+   "NodeId integer PRIMARY_KEY,"
+   "EntryNode integer NOT NULL"
+   ");");
   
   dropNodeTable = SdbRequest_new(
    "DROP TABLE "
    "IF EXIST Nodes;"
    );
+   
   createNodeTable = SdbRequest_new(
    "CREATE TABLE Nodes ("
    "NodeId integer PRIMARY_KEY,"
@@ -151,7 +189,8 @@ PRIVATE void Grammar2_initSdbTables(Grammar2 * this)
   SdbRequest_execute(createCommentNodeTable);
   SdbRequest_execute(dropCodeNodeTable);
   SdbRequest_execute(createCodeNodeTable);
-  
+  SdbRequest_execute(dropIncludeNodeTable);
+  SdbRequest_execute(createIncludeNodeTable);
   SdbRequest_delete(dropCodeNodeTable);
   SdbRequest_delete(createCodeNodeTable);
   SdbRequest_delete(dropNodeTable);
@@ -160,7 +199,8 @@ PRIVATE void Grammar2_initSdbTables(Grammar2 * this)
   SdbRequest_delete(createCommentNodeTable);
   SdbRequest_delete(dropTransUnitTable);
   SdbRequest_delete(createTransUnitTable);
-
+  SdbRequest_delete(dropIncludeNodeTable);
+  SdbRequest_delete(createIncludeNodeTable);
 }
 
 PUBLIC FileReader * Grammar2_getFileReader(Grammar2 * this)
@@ -184,7 +224,7 @@ PUBLIC void Grammar2_addToBuffer(Grammar2 * this, char * text)
   }
 }
 
-PUBLIC void Grammar2_addNode(Grammar2 * this, unsigned int type, int nodePtr, int nodeNext, int nodePrev)
+PUBLIC void Grammar2_addNode(Grammar2 * this, unsigned int type, int nodePtr)
 {
   SdbRequest * insertNode = 0;
   
@@ -193,8 +233,11 @@ PUBLIC void Grammar2_addNode(Grammar2 * this, unsigned int type, int nodePtr, in
   "VALUES (%d,%d,%d,%d,%d);"
   );
   nodeId++;
+   
+  SdbRequest_execute(insertNode, nodeId, type, nodePtr, 0, this->current->lastNode);
   
-  SdbRequest_execute(insertNode, nodeId, type, nodePtr, nodeNext, nodePrev);
+  this->current->lastNode = nodeId;
+    
   SdbRequest_delete(insertNode);
 }
 
@@ -212,7 +255,7 @@ PUBLIC void Grammar2_addComment(Grammar2 * this)
   this->node_text_position = 0;
   commentNodeId++;
   
-  Grammar2_addNode(this, 1, commentNodeId, 0, 0);
+  Grammar2_addNode(this, 1, commentNodeId);
   SdbRequest_execute(insertCommentNode, commentNodeId, this->buffer);
   SdbRequest_delete(insertCommentNode);
 }
@@ -235,18 +278,58 @@ PUBLIC void Grammar2_addCodeNode(Grammar2 * this)
       this->node_text_position = 0;
       codeNodeId++;
     
-      Grammar2_addNode(this, 2, codeNodeId, 0 , 0);
+      Grammar2_addNode(this, 2, codeNodeId);
     
       SdbRequest_execute(insertCodeNode, codeNodeId, this->buffer);
     SdbRequest_delete(insertCodeNode);
   }
 }
 
+PUBLIC void Grammar2_addIncludeNode(Grammar2 * this, char * name)
+{
+  SdbRequest * insertIncludeNode = 0;
+  
+  insertIncludeNode = SdbRequest_new(
+      "INSERT INTO Include_Nodes (NodeId, EntryNode) "
+      "VALUES (%d, '%s');"
+    );
+  
+  includeNodeId++;
+    
+  Grammar2_addNode(this, 3, includeNodeId);
+    
+  SdbRequest_execute(insertIncludeNode, includeNodeId, name);
+  SdbRequest_delete(insertIncludeNode);
+}
+
 PUBLIC char * Grammar2_processNewFile(Grammar2 * this, String * fileName)
 {
    char * result = 0;
+   GrammarContext * o = 0;
+
+   Grammar2_addIncludeNode(this, String_getBuffer(fileName));
+   o = (GrammarContext*)Object_new(sizeof(GrammarContext),0,0);
+   this->current = o;
+   this->current->lastNode = 0;
+   
+   List_insertHead(this->contexts, o);
    
    result = FileReader_addFile(this->reader, fileName);
    
    return result;
+}
+
+PUBLIC void Grammar2_returnToFile(Grammar2 * this)
+{
+  GrammarContext * o = 0;
+  
+  o = (GrammarContext*)List_removeHead(this->contexts);
+  printf("o= %x\n", o);
+  printf("o->object= %x\n", &o->object);
+  
+  Object_delete(&(o->object));
+  
+  printf("o good\n");
+  this->current = (GrammarContext*)List_getHead(this);
+  
 }

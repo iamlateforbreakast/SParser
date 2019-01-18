@@ -15,4 +15,6 @@ PUBLIC SdbMgr * Grammar2_getSdbMgr(Grammar2 * grammar);
 PUBLIC void Grammar2_addToBuffer(Grammar2 * grammar, char * text);
 PUBLIC void Grammar2_addComment(Grammar2 * this);
 PUBLIC void Grammar2_addCodeNode(Grammar2 * this);
+PUBLIC void Grammar2_addIncludeNode(Grammar2 * this, char * name);
 PUBLIC char * Grammar2_processNewFile(Grammar2 * this, String * fileName);
+PUBLIC void Grammar2_returnToFile(Grammar2 * this);

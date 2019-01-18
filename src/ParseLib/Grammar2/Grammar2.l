@@ -97,6 +97,7 @@ int get_buffer_top(void * yyscanner);
 				  }
 				  else
 				  {
+                    Grammar2_returnToFile(grammar);
 				    pop_buffer(yyscanner);
 		            printf("<CODE> EOF\n");
 				    return CODE;
