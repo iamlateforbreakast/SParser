@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define LIST_SIZE (1)
+#define LIST_SIZE (10)
 
 typedef struct TestItem
 {
@@ -43,7 +43,7 @@ TestItem * TestItem_copy(TestItem * item)
   return copy;
 }
 
-void TestItem_print(TestItem * item)
+void TestItem_print(TestItem * item, void * p)
 {
   printf("x=%d y=%d\n", item->x, item->y);
 }
@@ -77,17 +77,17 @@ int step1()
   }
 
   printf("List1 ------------->\n");
-  List_forEach(testList1, &TestItem_print);
+  List_forEach(testList1, &TestItem_print, 0);
   printf("List2 ------------->\n");
-  List_forEach(testList2, &TestItem_print);
+  List_forEach(testList2, &TestItem_print, 0);
 
   List_merge(testList1, testList2);
   printf("List1 + List2 ----->\n");
-  List_forEach(testList1, &TestItem_print);
+  List_forEach(testList1, &TestItem_print, 0);
 
   testList3 = List_copy(testList1);
   printf("Copy of List1 ------>\n");
-  List_forEach(testList3, &TestItem_print);
+  List_forEach(testList3, &TestItem_print, 0);
 
   List_delete(testList1);
   List_delete(testList3);
@@ -99,12 +99,40 @@ int step1()
 
 int step2()
 {
+  List * testList1 = 0;
+  
+  TestItem * items[LIST_SIZE];
+  TestItem * output = 0;
+  int i;
+  
+  testList1 = List_new();
+
+  for (i=0; i<LIST_SIZE;i++)
+  {
+    items[i] = TestItem_new();
+    items[i]->x = i;
+    items[i]->y = LIST_SIZE - i;
+    List_insertHead(testList1, items[i]);
+    printf("Nb items %d\n", List_getSize(testList1));
+  }
+  
+  output = List_getHead(testList1);
+ 
+  for (i=0; i<LIST_SIZE; i++)
+  {
+    output = List_removeHead(testList1);
+    TestItem_delete(output);
+    printf("Nb items %d\n", List_getSize(testList1));
+  }
+
+  List_delete(testList1);
+
   return 0;
 }
 
 int main()
 {
-  step1();
+  //step1();
   step2();
   return 0;
 }
