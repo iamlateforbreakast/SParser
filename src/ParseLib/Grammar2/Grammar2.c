@@ -72,7 +72,6 @@ PUBLIC void Grammar2_delete(Grammar2 * this)
 {
   GrammarContext * o = 0;
   
-  printf("Grammar delete start\n");
   if (this!=0)
   {
      if (this->object.refCount==1)
@@ -87,7 +86,6 @@ PUBLIC void Grammar2_delete(Grammar2 * this)
        this->object.refCount--;
      }
   }
-  printf("Grammar delet end\n");
 }
 
 PUBLIC Grammar2 * Grammar2_copy(Grammar2 * this)
@@ -233,11 +231,9 @@ PUBLIC void Grammar2_addNode(Grammar2 * this, unsigned int type, int nodePtr)
   "VALUES (%d,%d,%d,%d,%d);"
   );
   nodeId++;
-   
+     
   SdbRequest_execute(insertNode, nodeId, type, nodePtr, 0, this->current->lastNode);
   
-  this->current->lastNode = nodeId;
-    
   SdbRequest_delete(insertNode);
 }
 
@@ -256,6 +252,8 @@ PUBLIC void Grammar2_addComment(Grammar2 * this)
   commentNodeId++;
   
   Grammar2_addNode(this, 1, commentNodeId);
+  this->current->lastNode = nodeId;
+  
   SdbRequest_execute(insertCommentNode, commentNodeId, this->buffer);
   SdbRequest_delete(insertCommentNode);
 }
@@ -272,15 +270,13 @@ PUBLIC void Grammar2_addCodeNode(Grammar2 * this)
     );
   
     this->buffer[this->node_text_position] = 0;
+    this->node_text_position = 0;
+    codeNodeId++;
 
-    //this->node_text_position++;
-    //printf("\nCode found: %s\n", this->buffer);
-      this->node_text_position = 0;
-      codeNodeId++;
     
-      Grammar2_addNode(this, 2, codeNodeId);
-    
-      SdbRequest_execute(insertCodeNode, codeNodeId, this->buffer);
+    Grammar2_addNode(this, 2, codeNodeId);
+    this->current->lastNode = nodeId;
+    SdbRequest_execute(insertCodeNode, codeNodeId, this->buffer);
     SdbRequest_delete(insertCodeNode);
   }
 }
@@ -295,9 +291,10 @@ PUBLIC void Grammar2_addIncludeNode(Grammar2 * this, char * name)
     );
   
   includeNodeId++;
-    
+   
+
   Grammar2_addNode(this, 3, includeNodeId);
-    
+  this->current->lastNode = nodeId;  
   SdbRequest_execute(insertIncludeNode, includeNodeId, name);
   SdbRequest_delete(insertIncludeNode);
 }
@@ -308,9 +305,10 @@ PUBLIC char * Grammar2_processNewFile(Grammar2 * this, String * fileName)
    GrammarContext * o = 0;
 
    Grammar2_addIncludeNode(this, String_getBuffer(fileName));
+   
    o = (GrammarContext*)Object_new(sizeof(GrammarContext),0,0);
+   o->lastNode = this->current->lastNode;
    this->current = o;
-   this->current->lastNode = 0;
    
    List_insertHead(this->contexts, o);
    
@@ -324,12 +322,7 @@ PUBLIC void Grammar2_returnToFile(Grammar2 * this)
   GrammarContext * o = 0;
   
   o = (GrammarContext*)List_removeHead(this->contexts);
-  printf("o= %x\n", o);
-  printf("o->object= %x\n", &o->object);
-  
   Object_delete(&(o->object));
-  
-  printf("o good\n");
-  this->current = (GrammarContext*)List_getHead(this);
-  
+  this->current = (GrammarContext*)List_getHead(this->contexts);
+   Error_new(ERROR_DBG,"Grammar2_returnToFile: %d\n", this->current->lastNode);
 }

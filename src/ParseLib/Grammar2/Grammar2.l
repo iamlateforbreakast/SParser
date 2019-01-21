@@ -40,7 +40,16 @@ int get_buffer_top(void * yyscanner);
 <INITIAL>{
 <<EOF>> {
                   printf("<INITIAL> EOF\n");
-				  yyterminate();
+                  if (get_buffer_top(yyscanner) == 0)
+				  {
+				    printf("Terminate\n");		
+					yyterminate();
+				  }
+				  else
+				  {
+                    Grammar2_returnToFile(grammar);
+				    pop_buffer(yyscanner);
+				  }
 				}
 .               {
                   yyless(yyleng-1);
@@ -88,20 +97,9 @@ int get_buffer_top(void * yyscanner);
 				  return CODE;
 				}
 <<EOF>> {
-                  printf("\n");
-				  if (get_buffer_top(yyscanner) == 0)
-				  {
-				    printf("Terminate\n");
-					yy_push_state(INITIAL, yyscanner);
-					return CODE;
-				  }
-				  else
-				  {
-                    Grammar2_returnToFile(grammar);
-				    pop_buffer(yyscanner);
-		            printf("<CODE> EOF\n");
-				    return CODE;
-				  }
+                  printf("<CODE> EOF\n");
+                  yy_push_state(INITIAL, yyscanner);
+				  return CODE;
 				}
 .               {
                   //printf("c=%x\n", *yytext);
