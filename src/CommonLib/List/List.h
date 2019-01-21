@@ -7,16 +7,16 @@
 
 typedef struct List List;
 
-PUBLIC List* List_new();
+PUBLIC List * List_new();
 PUBLIC void List_delete(List* this);
-PUBLIC List* List_copy(List* this);
+PUBLIC List * List_copy(List* this);
 PUBLIC void List_insertHead(List* this, void* item);
 PUBLIC void List_insertTail(List* this, void* item);
 PUBLIC void List_merge(List* this, List* l1);
 PUBLIC void List_forEach(List* this, void (*method)(void* o, void *p), void * object);
-PUBLIC void* List_getNext(List* this);
-
-//PUBLIC void* List_getHead(List* this);
+PUBLIC void * List_getNext(List* this);
+PUBLIC void * List_removeHead(List * this);
+PUBLIC void * List_getHead(List * this);
 PUBLIC unsigned int List_getSize(List * this);
 
 #endif /* _LIST_H_ */

@@ -245,3 +245,50 @@ PUBLIC void * List_getNext(List * this)
   
   return result;
 }
+
+/**********************************************//** 
+  @brief Remove the head item in an instance of LIst
+  @public
+  @memberof List.
+**************************************************/
+PUBLIC void * List_removeHead(List * this)
+{
+  ListNode * headNode = this->head;
+  void * item = this->head->item;
+  
+  if (this->head->prev!=0)
+  {
+    this->head = this->head->prev;
+    this->head->next = 0;
+
+  }
+  else
+  {
+    this->head = 0;
+    this->tail = 0;
+    this->iterator = 0;
+  }
+  this->nbNodes--;
+  //TODO: this->iterator;
+  Memory_free(headNode, sizeof(ListNode));
+  return item;
+}
+
+/**********************************************//** 
+  @brief Get the head item in an insatnce of LIst
+  @public
+  @memberof List.
+**************************************************/
+PUBLIC void * List_getHead(List * this)
+{
+  void * result = 0;
+  
+  if (this!=0)
+  {
+    if (this->head!=0)
+    {
+      result = this->head->item;
+    }
+  }
+  return result;
+}
