@@ -1,0 +1,5 @@
+all:
+	doxygen
+
+clean:
+	@CLEAN@ html latex
