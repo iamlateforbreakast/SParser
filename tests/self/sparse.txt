@@ -1,0 +1,2 @@
+[Input Directory] ../../src/CommonLib
+[Include Path] [ *.h ./include ]
