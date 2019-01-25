@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+<head>
+    <script type="text/javascript" src="./vis.min.js"></script>
+    <link href="./vis.min.css" rel="stylesheet" type="text/css" />
+
+    <style type="text/css">
+        #mynetwork {
+            width: 800px;
+            height: 600px;
+            border: 1px solid lightgray;
+        }
+    </style>
+</head>
+<body>
+<div id="mynetwork"></div>
+
+<script type="text/javascript">
+    function getData(){
+	    var request = new XMLHttpRequest();
+		request.open('GET', 'data.json', true);
+		request.send(null);
+		request.onreadystatechange = function () {
+        if (request.readyState === 4 && request.status === 200) {
+            var type = request.getResponseHeader('Content-Type');
+            if (type.indexOf("json") !== 1) {
+			    var data = JSON.parse(request.responseText);
+				var options = {};
+				// initialize your network!
+				var network = new vis.Network(container, data, options);
+                return request.responseText;
+            }
+        }
+    }}
+
+    // create a network
+    var container = document.getElementById('mynetwork');
+    getData();
+
+</script>
+</body>
+</html>
