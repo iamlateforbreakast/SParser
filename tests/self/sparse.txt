@@ -1,2 +1,2 @@
-[Input Directory] ../../src/CommonLib
-[Include Path] [ *.h ./include ]
+[Input Directory] ../../src
+[Include Path] [ *.h ./CommonLib/include ./AppliLib/include ./ParseLib/include]
