@@ -12,6 +12,7 @@
 #include "FileMgr.h"
 #include "OptionMgr.h"
 #include "List.h"
+#include "Error.h"
 
 struct IncludeInfo
 {
@@ -34,6 +35,7 @@ struct FileReader
 
 PRIVATE void FileReader_getListPreferredDir(FileReader * this);
 PRIVATE void FileReader_deleteListPreferredDir(FileReader * this);
+PRIVATE void FileReader_printListPreferredDir(FileReader * this);
 
 /**********************************************//** 
   @brief Create a new FileReader object.
@@ -53,6 +55,9 @@ PUBLIC FileReader * FileReader_new(String * fileName)
   this->buffers = List_new();
   this->preferredDirs = List_new();
   
+  this->fileName = fileName;
+  Error_new(ERROR_INFO, "FileReader_new: Processing file %s\n", String_getBuffer(this->fileName));
+  
   /* Build list of all directories to be used to lookup additional files (include) */
   FileReader_getListPreferredDir(this);
   
@@ -60,7 +65,6 @@ PUBLIC FileReader * FileReader_new(String * fileName)
   newFileContent = FileMgr_load(fileMgr, String_getBuffer(fileName));
   List_insertHead(this->buffers, newFileContent);
   this->currentBuffer = newFileContent;
-  this->fileName = fileName;
   
   FileMgr_delete(fileMgr);
   
@@ -83,6 +87,12 @@ PUBLIC void FileReader_delete(FileReader * this)
   }
 }
 
+/**********************************************//** 
+  @brief Copy an instance of a FileReader object.
+  @public
+  @memberof FileReader
+  @return New instance
+**************************************************/
 PUBLIC FileReader * FileReader_copy(FileReader * this)
 {
   FileReader * copy = 0;
@@ -92,6 +102,12 @@ PUBLIC FileReader * FileReader_copy(FileReader * this)
   return copy;
 }
 
+/**********************************************//** 
+  @brief Returns the buffer of a FileReader object.
+  @public
+  @memberof FileReader
+  @return Buffer of characters
+**************************************************/
 PUBLIC char * FileReader_getBuffer(FileReader * this)
 {
   char * result = 0;
@@ -101,6 +117,12 @@ PUBLIC char * FileReader_getBuffer(FileReader * this)
   return result;
 }
 
+/**********************************************//** 
+  @brief Returns the name of a FileReader object.
+  @public
+  @memberof FileReader
+  @return File name
+**************************************************/
 PUBLIC String * FileReader_getName(FileReader * this)
 {
   return this->fileName;
@@ -115,6 +137,10 @@ PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
   struct IncludeInfo * dirInfo = 0;
   char * result = 0;
   
+  if (List_getSize(this->preferredDirs)==0)
+  {
+    Error_new(ERROR_FATAL, "FileReader_addFile: preferred search dirs is empty %s\n", String_getBuffer(this->fileName));
+  }
   /* Check in the fileName matches a pattern with a default search path */
   while ((dirInfo = (struct IncludeInfo *)List_getNext(this->preferredDirs))!=0)
   {
@@ -154,6 +180,8 @@ PRIVATE void FileReader_getListPreferredDir(FileReader * this)
   char * buf = 0;
   unsigned i, j, state = 0;
   struct IncludeInfo * prefDir = 0;
+  
+  Error_new(ERROR_DBG,"FileReader_getLIstPreferredDir: Building preferred Dirs\n");
   
   optionValue = OptionMgr_getOption(optionMgr, "Include Path");
   
@@ -233,8 +261,24 @@ PRIVATE void FileReader_getListPreferredDir(FileReader * this)
       /* TODO: Syntax error */
     }
   }
+  FileReader_printListPreferredDir(this);
   
   OptionMgr_delete(optionMgr);
+}
+
+PRIVATE void FileReader_printListPreferredDir(FileReader * this)
+{
+  struct IncludeInfo * dirInfo = 0;
+  String * dir = 0;
+  
+  while ((dirInfo = (struct IncludeInfo *)List_getNext(this->preferredDirs))!=0)
+  {
+    Error_new(ERROR_DBG, "File search path for files of type %s\n",String_getBuffer(dirInfo->pattern));
+    while((dir = (String*)List_getNext(dirInfo->dirs))!=0)
+    {
+      Error_new(ERROR_DBG, "Directory: %s\n", String_getBuffer(dir));
+    }
+  }
 }
 
 PRIVATE void FileReader_deleteListPreferredDir(FileReader * this)
