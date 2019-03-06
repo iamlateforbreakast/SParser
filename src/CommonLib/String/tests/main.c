@@ -49,11 +49,27 @@ int step3()
   return 0;
 }
 
+int step4()
+{
+  String * testString = 0;
+  const char * testPattern = "*.[ch]";
+
+  testString = String_new("test.h");
+
+  if (String_matchWildcard(testString, testPattern))
+  {
+    printf("Passed\n");
+  }
+
+  return 0;
+}
+
 int main()
 {
   step1();
   step2();
   step3();
+  step4();
 
   return 0;
 }
