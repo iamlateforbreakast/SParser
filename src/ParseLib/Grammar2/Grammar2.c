@@ -28,6 +28,8 @@ PRIVATE unsigned int commentNodeId = 0;
 PRIVATE unsigned int includeNodeId = 0;
 PRIVATE unsigned int isInitialised = 0;
 
+PRIVATE unsigned int Grammar2_isFileToBeIgnored(Grammar2 * this, String * fileName);
+
 struct GrammarContext
 {
   Object object;
@@ -294,7 +296,8 @@ PUBLIC void Grammar2_addIncludeNode(Grammar2 * this, char * name)
    
 
   Grammar2_addNode(this, 3, includeNodeId);
-  this->current->lastNode = nodeId;  
+  this->current->lastNode = nodeId;
+  
   SdbRequest_execute(insertIncludeNode, includeNodeId, name);
   SdbRequest_delete(insertIncludeNode);
 }
@@ -304,6 +307,15 @@ PUBLIC char * Grammar2_processNewFile(Grammar2 * this, String * fileName)
    char * result = 0;
    GrammarContext * o = 0;
 
+   if (Grammar2_isFileToBeIgnored(this, fileName))
+   {
+     return 0;
+   }
+
+       if (Memory_ncmp(String_getBuffer(fileName), "FileDesc.h", 10)) 
+       {
+         printf("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
+       }
    Grammar2_addIncludeNode(this, String_getBuffer(fileName));
    
    o = (GrammarContext*)Object_new(sizeof(GrammarContext),0,0);
@@ -313,6 +325,12 @@ PUBLIC char * Grammar2_processNewFile(Grammar2 * this, String * fileName)
    List_insertHead(this->contexts, o);
    
    result = FileReader_addFile(this->reader, fileName);
+   
+   if (result==0)
+   {
+     Grammar2_returnToFile(this);
+     Error_new(ERROR_FATAL,"Grammar2_processNewFile: %s\n", String_getBuffer(fileName));
+   }
    
    return result;
 }
@@ -326,3 +344,14 @@ PUBLIC void Grammar2_returnToFile(Grammar2 * this)
   this->current = (GrammarContext*)List_getHead(this->contexts);
    Error_new(ERROR_DBG,"Grammar2_returnToFile: %d\n", this->current->lastNode);
 }
+
+PRIVATE unsigned int Grammar2_isFileToBeIgnored(Grammar2 * this, String * fileName)
+{
+    unsigned int result = 0;
+
+    char * buffer = String_getBuffer(fileName);
+    if (Memory_ncmp(buffer, "signal.h", 8)) return 1;
+    
+    return result;
+}
+
