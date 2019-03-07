@@ -187,6 +187,7 @@ PRIVATE MapEntry * Map_findEntry(Map* this, String * s)
     key = Map_hash(this, String_getBuffer(s), i);
     if (this->htable[key] != 0)
     {
+      List_resetIterator(this->htable[key]);
       n = (MapEntry*)List_getNext(this->htable[key]);
       while (n!= 0)
       {
@@ -203,4 +204,38 @@ PRIVATE MapEntry * Map_findEntry(Map* this, String * s)
   }
   
   return result;
+}
+
+PUBLIC void Map_print(Map * this)
+{
+  int i = 0;
+  MapEntry * n = 0;
+  int j = 0;
+  char * p = 0;
+  
+  if (this != 0)
+  {
+    for (i=0;i<HTABLE_SIZE;i++)
+    {
+      if (this->htable[i]!=0)
+      {
+        printf("Map.c: Map[%d] is used with %d elements.\n",i, List_getSize(this->htable[i]));
+        for (j=0; j<List_getSize(this->htable[i]);j++)
+        {
+          List_resetIterator(this->htable[i]);
+          n = (MapEntry*)List_getNext(this->htable[i]);
+          if  (n!=0)
+          {
+            p = (char*)(String_getBuffer((String*)MapEntry_getItem(n)));
+            printf("Item %d: %x %x %x %x\n", j+1, *p, *(p+1), *(p+2), *(p+3));
+          }
+          else
+          {
+            printf("Item %d: void\n");
+          }
+          n = (MapEntry*)List_getNext(this->htable[i]);
+        }
+      }
+    }
+  }
 }
