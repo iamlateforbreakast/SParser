@@ -292,3 +292,11 @@ PUBLIC void * List_getHead(List * this)
   }
   return result;
 }
+
+PUBLIC void List_resetIterator(List * this)
+{
+  if (this!=0)
+  {
+    this->iterator = this->head;
+  }
+}

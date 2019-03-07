@@ -18,5 +18,6 @@ PUBLIC void * List_getNext(List* this);
 PUBLIC void * List_removeHead(List * this);
 PUBLIC void * List_getHead(List * this);
 PUBLIC unsigned int List_getSize(List * this);
+PUBLIC void List_resetIterator(List * this);
 
 #endif /* _LIST_H_ */
