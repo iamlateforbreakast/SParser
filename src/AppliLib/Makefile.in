@@ -8,6 +8,7 @@ SOURCES = \
 	./FileMgr/FileMgr.c \
 	./FileMgr/FileDesc.c \
 	./OptionMgr/OptionMgr.c \
+	./TimeMgr/TimeMgr.c \
 	./TimeMgr/Timer.c \
 	./SdbMgr/SdbMgr.c \
 	./SdbMgr/SdbRequest.c
