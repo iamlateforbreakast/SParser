@@ -109,6 +109,10 @@ PUBLIC void Grammar2_process(Grammar2 * this)
   SdbRequest_execute(insertTransUnit, String_getBuffer(FileReader_getName(this->reader)));
   
   Grammar2_scan_string(FileReader_getBuffer(this->reader), this->scanner);
+  //if (Memory_ncmp(String_getBuffer(FileReader_getName(this->reader)),"Timer.c",7))
+  //{
+  //         printf("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
+  //}
   Grammar2_parse(this->scanner, this);
   
   SdbRequest_delete(insertTransUnit);
@@ -312,10 +316,10 @@ PUBLIC char * Grammar2_processNewFile(Grammar2 * this, String * fileName)
      return 0;
    }
 
-       if (Memory_ncmp(String_getBuffer(fileName), "FileDesc.h", 10)) 
-       {
-         printf("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
-       }
+       //if (Memory_ncmp(String_getBuffer(fileName), "SdbRequest.h", 12)) 
+       //{
+       //  printf("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
+       //}
    Grammar2_addIncludeNode(this, String_getBuffer(fileName));
    
    o = (GrammarContext*)Object_new(sizeof(GrammarContext),0,0);
@@ -351,6 +355,14 @@ PRIVATE unsigned int Grammar2_isFileToBeIgnored(Grammar2 * this, String * fileNa
 
     char * buffer = String_getBuffer(fileName);
     if (Memory_ncmp(buffer, "signal.h", 8)) return 1;
+    if (Memory_ncmp(buffer, "unistd.h", 8)) return 1;
+    if (Memory_ncmp(buffer, "dirent.h", 8)) return 1;
+    if (Memory_ncmp(buffer, "stdio.h", 7)) return 1;
+    if (Memory_ncmp(buffer, "sqlite3.h", 9)) return 1;
+    if (Memory_ncmp(buffer, "stdarg.h", 8)) return 1;
+    if (Memory_ncmp(buffer, "stdlib.h", 8)) return 1;
+    if (Memory_ncmp(buffer, "string.h", 8)) return 1;
+    if (Memory_ncmp(buffer, "Grammar2.parse.h", 16)) return 1;
     
     return result;
 }
