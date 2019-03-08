@@ -82,7 +82,7 @@ PUBLIC void FileReader_delete(FileReader * this)
   {
     List_delete(this->buffers);
     FileReader_deleteListPreferredDir(this);
-    List_delete(this->preferredDirs);
+    List_delete(this->preferredDirs); //PROBLEM
     Object_delete(&this->object);
   }
 }
@@ -128,14 +128,26 @@ PUBLIC String * FileReader_getName(FileReader * this)
   return this->fileName;
 }
 
+/**********************************************//** 
+  @brief Add a new file buffer for filename
+  @public
+  @memberof FileReader
+  @return File buffer
+**************************************************/
 PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
 {
   FileMgr * fileMgr = FileMgr_getRef();
+  // Not freed
   List * dirList = List_new();
   String * fullPath = 0;
   String * newFileContent = 0;
   struct IncludeInfo * dirInfo = 0;
   char * result = 0;
+  
+  if (Memory_ncmp(String_getBuffer(fileName), "SdbRequest.h", 12))
+  {
+     Error_new(ERROR_DBG, "FileREader_addFile: Reached SdbRequest.h\n");
+  }
   
   if (List_getSize(this->preferredDirs)==0)
   {
@@ -261,6 +273,7 @@ PRIVATE void FileReader_getListPreferredDir(FileReader * this)
       /* TODO: Syntax error */
     }
   }
+
   FileReader_printListPreferredDir(this);
   
   OptionMgr_delete(optionMgr);
@@ -271,6 +284,10 @@ PRIVATE void FileReader_printListPreferredDir(FileReader * this)
   struct IncludeInfo * dirInfo = 0;
   String * dir = 0;
   
+  if (List_getSize(this->preferredDirs)==0)
+  {
+    Error_new(ERROR_FATAL, "FileReader_addFile: preferred search dirs is empty %s\n", String_getBuffer(this->fileName));
+  }
   while ((dirInfo = (struct IncludeInfo *)List_getNext(this->preferredDirs))!=0)
   {
     Error_new(ERROR_DBG, "File search path for files of type %s\n",String_getBuffer(dirInfo->pattern));
