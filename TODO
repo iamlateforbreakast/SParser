@@ -1,0 +1,14 @@
+Grammar2: Buffer size is fixed to 16Kb. This should be dynamic
+
+Grammar2: Check if include file as already been processed
+
+Object: Add a print method
+
+Object: Add an equal method
+
+TimeMgr: Implement
+
+Object: IMplement refcount better
+
+Object: Check for memory leaks
+
