@@ -287,6 +287,7 @@ PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
           /* TODO: Case of windows file */
           optionValue = String_subString(fileContent, idx, length);
         OptionMgr_setOption(optionMgr, String_getBuffer(optionName), optionValue);
+        String_delete(optionName);
         }
         else
         {
@@ -306,8 +307,9 @@ PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
     {
       optionValue = String_subString(fileContent, idx, length);
       OptionMgr_setOption(optionMgr, String_getBuffer(optionName), optionValue);
+      String_delete(optionName);
     }
   
-  String_delete(optionName);
+  
   return result;
 }
