@@ -49,6 +49,7 @@ static const char * SParse_ignoreFiles[] =
 #endif
 
 PRIVATE unsigned int SParse_parseFile(SParse * this, String * file);
+PRIVATE void SParse_buildPreferredDirList(SParse * this, const char * extension);
 
 /**********************************************//** 
   @brief Create a new SParse object.
@@ -142,6 +143,10 @@ PRIVATE unsigned int SParse_parseFile(SParse * this, String * file)
   }
 
   return error;
+}
+
+PRIVATE void SParse_buildPreferredDirList(SParse * this, const char * extension)
+{
 }
 
 #if 0
