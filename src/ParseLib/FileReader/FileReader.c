@@ -138,7 +138,7 @@ PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
 {
   FileMgr * fileMgr = FileMgr_getRef();
   // Not freed
-  List * dirList = List_new();
+  List * dirList = 0;
   String * fullPath = 0;
   String * newFileContent = 0;
   struct IncludeInfo * dirInfo = 0;
@@ -302,9 +302,15 @@ PRIVATE void FileReader_deleteListPreferredDir(FileReader * this)
 {
   struct IncludeInfo * dirInfo = 0;
   
-  while ((dirInfo = (struct IncludeInfo *)List_getNext(this->preferredDirs))!=0)
+  Error_new(ERROR_DBG,"FileReader_deleteLIstPreferredDir:\n");
+  
+  dirInfo = List_removeHead(this->preferredDirs);
+
+  while (dirInfo!=0)
   {
     String_delete(dirInfo->pattern);
     List_delete(dirInfo->dirs);
+    Object_delete(dirInfo);
+    dirInfo = List_removeHead(this->preferredDirs);
   }
 }

@@ -28,7 +28,7 @@ PUBLIC void* Memory_alloc(unsigned int nbBytes)
   //if (Memory_nbBytesAllocated>Memory_maxNbBytesAllocated) Memory_maxNbBytesAllocated = Memory_nbBytesAllocated;
   Memory_allocRequestId++;
     
-  TRACE(("Memory: Malloc %d|%d %p\n", Memory_allocRequestId, nbBytes,p));
+  TRACE(("Memory: Malloc %d %d %p\n", Memory_allocRequestId, nbBytes,p));
 
    //if (p+nbBytes> (void*)Memory_maxAddress) Memory_maxAddress = p + nbBytes;
   return p;

@@ -253,24 +253,29 @@ PUBLIC void * List_getNext(List * this)
 **************************************************/
 PUBLIC void * List_removeHead(List * this)
 {
-  ListNode * headNode = this->head;
-  void * item = this->head->item;
-  
-  if (this->head->prev!=0)
-  {
-    this->head = this->head->prev;
-    this->head->next = 0;
+  ListNode * headNode = 0;
+  void * item = 0;
 
-  }
-  else
+  if ((this!=0) && (this->nbNodes!=0))
   {
-    this->head = 0;
-    this->tail = 0;
-    this->iterator = 0;
+    headNode = this->head;
+    item = this->head->item;
+    if (this->head->prev!=0)
+    {
+      this->head = this->head->prev;
+      this->head->next = 0;
+    }
+    else
+    {
+      this->head = 0;
+      this->tail = 0;
+      this->iterator = 0;
+    }
+    this->nbNodes--;
+    //TODO: this->iterator;
+    Memory_free(headNode, sizeof(ListNode));
   }
-  this->nbNodes--;
-  //TODO: this->iterator;
-  Memory_free(headNode, sizeof(ListNode));
+
   return item;
 }
 
