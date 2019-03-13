@@ -52,6 +52,7 @@ int get_buffer_top(void * yyscanner);
 				  }
 				}
 .               {
+                  printf("Here 1\n");
                   yyless(yyleng-1);
 				  yy_push_state(IN_CODE, yyscanner);
 				}  
@@ -71,8 +72,9 @@ int get_buffer_top(void * yyscanner);
 
 <IN_SL_COMMENT>{
 \n             {
-                  //Grammar2_addComment(grammar); 
+                  //Grammar2_addComment(grammar);
 				  yy_pop_state(yyscanner); 
+                  
 				  return COMMENT;
 				}
 <<EOF>> {
@@ -123,24 +125,22 @@ int get_buffer_top(void * yyscanner);
 unsigned int read_include(void * yyscanner, Grammar2 * grammar)
 {
   char * c = 0;
-  String * fileName = String_new(0);
+  String * fileName = 0; //String_new(0);
   unsigned int i = 0;
   unsigned int result = 0;
 
-  //print_state_stack(yyscanner);
   YY_BUFFER_STATE curBuf = get_current_buffer(yyscanner);
   char * text = yyget_text(yyscanner);
-  Error_new(ERROR_DBG, "File name =%s\n", text);
-
-  for (i=1; i<Memory_len(text); i++)
-  {
-    if ((text[i] == '"') || (text[i] == '>')) break;
-  }
-  Error_new(ERROR_DBG,"Length =%d\n", i);
-  char * buffer = Memory_alloc(i-1);
-  Memory_copy(buffer, &text[1], i-1);
-  buffer[i-1] = 0;
+  i = Memory_len(text);
   
+  Error_new(ERROR_DBG, "File name =%s\n", text);
+  Error_new(ERROR_DBG,"Length =%d\n", i);
+  
+  char * buffer = Memory_alloc(i-1);
+  Memory_set(buffer, 0, i-1);
+  Memory_copy(buffer, &text[1], i-2);
+  
+  fileName = String_new(0);
   String_setBuffer(fileName, buffer);
   Error_new(ERROR_DBG,"INCLUDE %s!!!\n", buffer);
 
@@ -160,13 +160,6 @@ unsigned int read_include(void * yyscanner, Grammar2 * grammar)
   
   return result;
 }
-
-#if 0
-void print_state_stack(void * yyscanner)
-{
-
-}
-#endif
 
 void push_buffer(YY_BUFFER_STATE new_buffer, void * yyscanner)
 {
