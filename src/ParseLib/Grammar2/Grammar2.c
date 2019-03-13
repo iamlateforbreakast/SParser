@@ -45,7 +45,7 @@ struct Grammar2
   SdbMgr * sdbMgr;
   FileReader * reader;
   char buffer[MAX_BUFFER_SIZE];
-  char * node_text;
+  //char * node_text;
   int node_text_position;
   GrammarContext * current;
   List * contexts;
@@ -65,6 +65,9 @@ PUBLIC Grammar2 * Grammar2_new(FileReader * fr, SdbMgr * sdbMgr)
   this->current->lastNode = 0;
   List_insertHead(this->contexts, this->current);
   
+  //Memory_set(this->buffer, 0, MAX_BUFFER_SIZE);
+  //this->node_text_position = 0;
+  
   if (!isInitialised) Grammar2_initSdbTables(this);
 
   return this;
@@ -80,6 +83,7 @@ PUBLIC void Grammar2_delete(Grammar2 * this)
      {
        Grammar2lex_destroy(this->scanner);
        o = (GrammarContext*)List_removeHead(this->contexts);
+       Object_delete(o);
        List_delete(this->contexts);
        Object_delete(&this->object);
      }
@@ -205,6 +209,8 @@ PRIVATE void Grammar2_initSdbTables(Grammar2 * this)
   SdbRequest_delete(createTransUnitTable);
   SdbRequest_delete(dropIncludeNodeTable);
   SdbRequest_delete(createIncludeNodeTable);
+  
+  isInitialised = 1;
 }
 
 PUBLIC FileReader * Grammar2_getFileReader(Grammar2 * this)
@@ -247,6 +253,7 @@ PUBLIC void Grammar2_addComment(Grammar2 * this)
 {
   SdbRequest * insertCommentNode = 0;
   
+  printf("Grammar2_addComment: 1\n");
   insertCommentNode = SdbRequest_new(
   "INSERT INTO Comment_Nodes (NodeId, Comment) "
   "VALUES (%d,'%s');"
@@ -258,16 +265,20 @@ PUBLIC void Grammar2_addComment(Grammar2 * this)
   commentNodeId++;
   
   Grammar2_addNode(this, 1, commentNodeId);
+  
   this->current->lastNode = nodeId;
   
   SdbRequest_execute(insertCommentNode, commentNodeId, this->buffer);
   SdbRequest_delete(insertCommentNode);
+  
+  printf("Grammar2_addComment: 2\n");
 }
 
 PUBLIC void Grammar2_addCodeNode(Grammar2 * this)
 {
   SdbRequest * insertCodeNode = 0;
   
+  printf("Grammar2_addCodeNode: 1\n");
   if (this->node_text_position!=0)
   {
     insertCodeNode = SdbRequest_new(
@@ -282,9 +293,11 @@ PUBLIC void Grammar2_addCodeNode(Grammar2 * this)
     
     Grammar2_addNode(this, 2, codeNodeId);
     this->current->lastNode = nodeId;
+    
     SdbRequest_execute(insertCodeNode, codeNodeId, this->buffer);
     SdbRequest_delete(insertCodeNode);
   }
+  printf("Grammar2_addCodeNode: 2\n");
 }
 
 PUBLIC void Grammar2_addIncludeNode(Grammar2 * this, char * name)
