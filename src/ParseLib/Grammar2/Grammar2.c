@@ -65,8 +65,8 @@ PUBLIC Grammar2 * Grammar2_new(FileReader * fr, SdbMgr * sdbMgr)
   this->current->lastNode = 0;
   List_insertHead(this->contexts, this->current);
   
-  //Memory_set(this->buffer, 0, MAX_BUFFER_SIZE);
-  //this->node_text_position = 0;
+  Memory_set(this->buffer, 0, MAX_BUFFER_SIZE);
+  this->node_text_position = 0;
   
   if (!isInitialised) Grammar2_initSdbTables(this);
 
