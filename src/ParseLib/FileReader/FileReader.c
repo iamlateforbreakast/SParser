@@ -161,7 +161,9 @@ PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
       dirList = List_copy(dirInfo->dirs);
     }
   }
-  
+ 
+  if (dirList==0) dirList=List_new();
+ 
   /* In all cases make sure the current dir. is in the search path */
   List_insertTail(dirList, String_new("."));
   
