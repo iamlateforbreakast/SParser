@@ -1,17 +1,20 @@
 /* Timer.c*/
 
-#include "TimerMgr.h"
+#include "TimeMgr.h"
+#include "Timer.h"
+#include "Object.h"
 
 struct Timer
 {
+  Object object;
 };
 
 Timer * Timer_new()
 {
   Timer * this = 0;
   
-  this = (SdbRequest*)Object_new(sizeof(SdbRequest),(Destructor)&SdbRequest_delete, (Copy_operator)&SdbRequest_copy);
-  this->object.size = sizeof(SdbRequest);
+  this = (Timer*)Object_new(sizeof(Timer),(Destructor)&Timer_delete, (Copy_operator)&Timer_copy);
+  this->object.size = sizeof(Timer);
   
   return this;
 }

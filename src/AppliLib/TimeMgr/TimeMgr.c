@@ -9,6 +9,7 @@
 #include "Timer.h"
 #include "String2.h"
 #include "Map.h"
+#include "Object.h"
 #include <time.h>
 
 /**********************************************//**
@@ -16,6 +17,7 @@
 **************************************************/
 struct TimeMgr
 {
+  Object object;
   Map * timers;
 }; 
 
