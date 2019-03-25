@@ -21,7 +21,7 @@ TestItem * TestItem_new()
 
   this = (TestItem*)malloc(sizeof(TestItem));
   this->object.delete = (Destructor)&TestItem_delete;
-  this->object.copy = (Copy_operator)&TestItem_copy;
+  this->object.copy = (Copy_Operator)&TestItem_copy;
   this->object.size = sizeof(TestItem);
 
   return this;
