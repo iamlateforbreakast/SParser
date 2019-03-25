@@ -32,8 +32,16 @@ PUBLIC Object * Object_new(unsigned int size, Class * class)
   }
   this = ObjectMgr_allocate(Object_objMgrPtr, size);
   this->class = class;
-  this->delete = class->f_delete;
-  this->copy = class->f_copy;
+  if (this->class!=0)
+  {
+    this->delete = class->f_delete;
+    this->copy = class->f_copy;
+  }
+  else
+  {
+    this->delete = (Destructor)0;
+    this->copy = (Copy_Operator)0;
+  }
   this->refCount = 1;
   this->size = size;
   
