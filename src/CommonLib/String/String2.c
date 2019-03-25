@@ -8,6 +8,7 @@
 **************************************************/
 
 #include "String2.h"
+#include "Class.h"
 #include "Object.h"
 #include "Memory.h"
 #include <stdlib.h>
@@ -22,6 +23,15 @@ struct String
   unsigned int length;
 };
 
+PRIVATE Class stringClass = 
+{
+  .f_new = NULL,
+  .f_delete = (Destructor)&String_delete,
+  .f_copy = (Copy_Operator)&String_copy,
+  .f_equal = (Equal_Operator)NULL,
+  .f_print = (Printer)NULL
+};
+
 /**********************************************//** 
   @brief Create a new String object.
   @public
@@ -32,7 +42,7 @@ PUBLIC String * String_new(const char* initString)
 {
   String * this = 0;
   
-  this = (String*)Object_new(sizeof(String),(Destructor)&String_delete, (Copy_operator)&String_copy);
+  this = (String*)Object_new(sizeof(String),(Destructor)&String_delete, (Copy_Operator)&String_copy);
   // TODO: Check if this is NULL
   if (initString!=0)
   {
