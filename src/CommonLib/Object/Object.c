@@ -68,6 +68,7 @@ PUBLIC Object * Object_copy(Object * this)
 {
   Object * copy;
   
+  // TODO: Check if this==0
   copy = ObjectMgr_allocate(Object_objMgrPtr, this->size);
   copy->delete = this->delete;
   copy->copy = this->copy;
@@ -75,6 +76,33 @@ PUBLIC Object * Object_copy(Object * this)
   copy->refCount = 1;
   
   return copy;
+}
+
+/**********************************************//** 
+  @brief Compare 2 instances of the class Object.
+  @public
+  @memberof Object
+  @return 1 if equal, 0 else.
+**************************************************/
+PUBLIC unsigned int Object_isEqual(Object * this, Object * compared)
+{
+  unsigned int result = 0;
+  
+  return result;
+}
+
+/**********************************************//** 
+  @brief Print an instance of the class Object into
+  a buffer of characters.
+  @public
+  @memberof Object
+  @return Buffer of characters
+**************************************************/
+PUBLIC char * Object_print(Object * this)
+{
+  char * result = 0;
+  
+  return result;
 }
 
 /**********************************************//** 
