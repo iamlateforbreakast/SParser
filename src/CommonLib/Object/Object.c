@@ -6,6 +6,7 @@
   The class Object is TBD
 **************************************************/
 
+#include "Class.h"
 #include "Object.h"
 #include "ObjectMgr.h"
 
@@ -17,11 +18,10 @@ PRIVATE ObjectMgr * Object_objMgrPtr = 0;
 /**********************************************//** 
   @brief Create an instance of the class Object.
   @public
-  @param[in] f_delete Destructor function.
-  @param[in] f_copy Copy_operator function.
+  @param[in] Class to instanciate
   @memberof Object
 **************************************************/
-PUBLIC Object * Object_new(unsigned int size, void (*f_delete)(Object*), Object * (*f_copy)(Object*))
+PUBLIC Object * Object_new(unsigned int size, Class * class)
 {
   Object * this = 0;
   
@@ -31,8 +31,9 @@ PUBLIC Object * Object_new(unsigned int size, void (*f_delete)(Object*), Object 
     Object_objMgrPtr = ObjectMgr_getRef();
   }
   this = ObjectMgr_allocate(Object_objMgrPtr, size);
-  this->delete = f_delete;
-  this->copy = f_copy;
+  this->class = class;
+  this->delete = class->f_delete;
+  this->copy = class->f_copy;
   this->refCount = 1;
   this->size = size;
   

@@ -4,6 +4,7 @@
    @brief A support class for theMap class.
 **************************************************/
 #include "MapEntry.h"
+#include "Class.h"
 #include "Object.h"
 #include "String2.h"
 
@@ -14,11 +15,20 @@ struct MapEntry
   void * item;
 };
 
+PRIVATE Class mapEntryClass = 
+{
+  .f_new = 0,
+  .f_delete = (Destructor)&MapEntry_delete,
+  .f_copy = (Copy_Operator)&MapEntry_copy,
+  .f_equal = (Equal_Operator)0,
+  .f_print = (Printer)0
+};
+
 PUBLIC MapEntry * MapEntry_new(String * s, void * item)
 {
   MapEntry * this = 0;
 
-  this = (MapEntry*)Object_new(sizeof(MapEntry),(Destructor)&MapEntry_delete,(Copy_operator)&MapEntry_copy);
+  this = (MapEntry*)Object_new(sizeof(MapEntry),&mapEntryClass);
   this->s = s;
   this->item = item;
 

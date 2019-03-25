@@ -26,7 +26,7 @@ typedef char * (*Printer)(struct Object *);
 
 
 
-PUBLIC Object * Object_new(unsigned int size, void (*f_delete)(Object*), Object * (*f_copy)(Object*));
+PUBLIC Object * Object_new(unsigned int size, Class * class);
 PUBLIC void Object_delete(Object * this);
 PUBLIC Object * Object_copy(Object * this);
 PUBLIC Object* Object_getRef(Object* this);

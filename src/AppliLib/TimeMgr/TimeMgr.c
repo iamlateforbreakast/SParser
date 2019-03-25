@@ -9,6 +9,7 @@
 #include "Timer.h"
 #include "String2.h"
 #include "Map.h"
+#include "Class.h"
 #include "Object.h"
 #include <time.h>
 
@@ -21,6 +22,15 @@ struct TimeMgr
   Map * timers;
 }; 
 
+PRIVATE Class timeMgrClass =
+{
+  .f_new = (Constructor)0,
+  .f_delete = (Destructor)&TimeMgr_delete,
+  .f_copy = (Copy_Operator)&TimeMgr_copy,
+  .f_equal = (Equal_Operator)0,
+  .f_print = (Printer)0
+};
+
 PRIVATE TimeMgr * timeMgr = 0;
 
 /**********************************************//**
@@ -30,7 +40,7 @@ PRIVATE TimeMgr * TimeMgr_new()
 {
   TimeMgr * this = 0;
   
-  this = (TimeMgr*)Object_new(sizeof(TimeMgr),(Destructor)&TimeMgr_delete, (Copy_operator)&TimeMgr_copy);
+  this = (TimeMgr*)Object_new(sizeof(TimeMgr), &timeMgrClass);
   this->object.size = sizeof(TimeMgr);
   
   this->timers = Map_new();

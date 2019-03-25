@@ -9,6 +9,7 @@
 #include "Map.h"
 #include "MapEntry.h"
 #include "List.h"
+#include "Class.h"
 #include "Object.h"
 #include "String2.h"
 #include "Memory.h"
@@ -30,6 +31,15 @@ struct Map
   List * htable[HTABLE_SIZE];
 };
 
+PRIVATE Class mapClass = 
+{
+  .f_new = 0,
+  .f_delete = (Destructor)&Map_delete,
+  .f_copy = (Copy_Operator)&Map_copy,
+  .f_equal = 0,
+  .f_print = 0
+};
+
 /**********************************************//** 
   @brief Create a new instance of the class Map.
   @public
@@ -40,7 +50,7 @@ PUBLIC Map* Map_new()
   Map * this = 0;
   unsigned int i = 0;
   
-  this = (Map*)Object_new(sizeof(Map),(Destructor)&Map_delete, (Copy_operator)&Map_copy);
+  this = (Map*)Object_new(sizeof(Map),&mapClass);
   
   for (i=0;i<HTABLE_SIZE;i++)
   {

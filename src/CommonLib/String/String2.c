@@ -42,7 +42,7 @@ PUBLIC String * String_new(const char* initString)
 {
   String * this = 0;
   
-  this = (String*)Object_new(sizeof(String),(Destructor)&String_delete, (Copy_Operator)&String_copy);
+  this = (String*)Object_new(sizeof(String),&stringClass);
   // TODO: Check if this is NULL
   if (initString!=0)
   {

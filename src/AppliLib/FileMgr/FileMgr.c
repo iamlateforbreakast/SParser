@@ -9,6 +9,7 @@
 
 #include "FileMgr.h"
 #include "String2.h"
+#include "Class.h"
 #include "Object.h"
 #include "List.h"
 #include "FileDesc.h"
@@ -33,6 +34,14 @@ struct FileMgr
   char rootLocation[FILEMGR_MAX_PATH];
 };
 
+PRIVATE Class fileMgrClass =
+{
+  .f_new = 0,
+  .f_delete = (Destructor)&FileMgr_delete,
+  .f_copy = (Copy_Operator)&FileMgr_copy,
+  .f_equal = (Equal_Operator)0,
+  .f_print = (Printer)0
+};
 
 /**********************************************//**
   @private
@@ -57,7 +66,7 @@ PRIVATE FileMgr * FileMgr_new()
 {
   FileMgr * this = 0;
   
-  this = (FileMgr*)Object_new(sizeof(FileMgr),(Destructor)&FileMgr_delete, (Copy_operator)&FileMgr_copy);
+  this = (FileMgr*)Object_new(sizeof(FileMgr), &fileMgrClass);
   this->files = List_new();
   this->directories = List_new();
   if (getcwd(this->rootLocation, FILEMGR_MAX_PATH)==0)

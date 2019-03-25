@@ -15,7 +15,7 @@ SOURCES = \
 	./Map/MapEntry.c \
 	./Error/Error.c
 
-HEADERS = ./Types/Types.h $(SOURCES:.c=.h)
+HEADERS = ./Types/Types.h ./Object/Class.h $(SOURCES:.c=.h)
 
 OBJECTS = $(SOURCES:.c=.o)
 

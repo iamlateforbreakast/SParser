@@ -7,6 +7,7 @@
 **************************************************/
 
 #include "OptionMgr.h"
+#include "Class.h"
 #include "Object.h"
 #include "String2.h"
 #include "Map.h"
@@ -27,6 +28,15 @@ struct OptionDefault{
   char * name;
   char * flag;
   char * value;
+};
+
+PRIVATE Class optionMgrClass =
+{
+  .f_new = (Constructor)0,
+  .f_delete = (Destructor)&OptionMgr_delete,
+  .f_copy = (Copy_Operator)&OptionMgr_copy,
+  .f_equal = (Equal_Operator)0,
+  .f_print = (Printer)0
 };
 
 /**********************************************//**
@@ -59,7 +69,7 @@ PRIVATE OptionMgr * OptionMgr_new()
   String * optionValue = 0;
   const int nbOptions = sizeof(optionDefault)/sizeof(struct OptionDefault);
 
-  this = (OptionMgr*)Object_new(sizeof(OptionMgr),(Destructor)&OptionMgr_delete, (Copy_operator)&OptionMgr_copy);
+  this = (OptionMgr*)Object_new(sizeof(OptionMgr), &optionMgrClass);
   this->options = Map_new();
   
   for (j=0; j<nbOptions; j++)

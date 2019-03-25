@@ -7,6 +7,7 @@
  **************************************************/
 
 #include "FileReader.h"
+#include "Class.h"
 #include "Object.h"
 #include "String2.h"
 #include "FileMgr.h"
@@ -33,6 +34,15 @@ struct FileReader
   List * preferredDirs;
 };
 
+PRIVATE Class fileReaderClass = 
+{
+  .f_new = (Constructor)0,
+  .f_delete = (Destructor)&FileReader_delete,
+  .f_copy = (Copy_Operator)&FileReader_copy,
+  .f_equal = (Equal_Operator)0,
+  .f_print = 0
+};
+
 PRIVATE void FileReader_getListPreferredDir(FileReader * this);
 PRIVATE void FileReader_deleteListPreferredDir(FileReader * this);
 PRIVATE void FileReader_printListPreferredDir(FileReader * this);
@@ -49,7 +59,7 @@ PUBLIC FileReader * FileReader_new(String * fileName)
   FileMgr * fileMgr = FileMgr_getRef();
   String * newFileContent = 0;
   
-  this = (FileReader*)Object_new(sizeof(FileReader), (Destructor)&FileReader_delete, (Copy_operator)&FileReader_copy);
+  this = (FileReader*)Object_new(sizeof(FileReader), &fileReaderClass);
   
   
   this->buffers = List_new();
@@ -227,7 +237,7 @@ PRIVATE void FileReader_getListPreferredDir(FileReader * this)
         case 2:
           if (buf[i]==' ')
           { 
-             prefDir = (struct IncludeInfo *)Object_new(sizeof(struct IncludeInfo), 0, 0);
+             prefDir = (struct IncludeInfo *)Object_new(sizeof(struct IncludeInfo), 0);
              prefDir->pattern = String_subString(optionValue, j, i-j);
              prefDir->dirs = List_new();
              state = 3;

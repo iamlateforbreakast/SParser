@@ -6,6 +6,7 @@
   parsing comments code blocks and allowing includes files.
 **************************************************/
 #include "Grammar2.h"
+#include "Class.h"
 #include "Object.h"
 #include "FileReader.h"
 #include "SdbRequest.h"
@@ -51,17 +52,26 @@ struct Grammar2
   List * contexts;
 };
 
+PRIVATE Class grammar2Class =
+{
+  .f_new = (Constructor)0,
+  .f_delete = (Destructor)&Grammar2_delete,
+  .f_copy = (Copy_Operator)&Grammar2_copy,
+  .f_equal = (Equal_Operator)0,
+  .f_print = (Printer)0
+};
+
 PUBLIC Grammar2 * Grammar2_new(FileReader * fr, SdbMgr * sdbMgr)
 {
   Grammar2 * this = 0;
   
-  this = (Grammar2*)Object_new(sizeof(Grammar2),(Destructor)&Grammar2_delete, (Copy_operator)&Grammar2_copy);
+  this = (Grammar2*)Object_new(sizeof(Grammar2), &grammar2Class);
   this->reader = fr;
   this->sdbMgr = sdbMgr;
   Grammar2lex_init(&this->scanner);
   
   this->contexts = List_new(this->contexts);
-  this->current = (GrammarContext*)Object_new(sizeof(GrammarContext),0,0);
+  this->current = (GrammarContext*)Object_new(sizeof(GrammarContext),0);
   this->current->lastNode = 0;
   List_insertHead(this->contexts, this->current);
   
@@ -335,7 +345,7 @@ PUBLIC char * Grammar2_processNewFile(Grammar2 * this, String * fileName)
        //}
    Grammar2_addIncludeNode(this, String_getBuffer(fileName));
    
-   o = (GrammarContext*)Object_new(sizeof(GrammarContext),0,0);
+   o = (GrammarContext*)Object_new(sizeof(GrammarContext),0);
    o->lastNode = this->current->lastNode;
    this->current = o;
    
@@ -375,6 +385,7 @@ PRIVATE unsigned int Grammar2_isFileToBeIgnored(Grammar2 * this, String * fileNa
     if (Memory_ncmp(buffer, "stdarg.h", 8)) return 1;
     if (Memory_ncmp(buffer, "stdlib.h", 8)) return 1;
     if (Memory_ncmp(buffer, "string.h", 8)) return 1;
+    if (Memory_ncmp(buffer, "time.h", 6)) return 1;
     if (Memory_ncmp(buffer, "Grammar2.parse.h", 16)) return 1;
     
     return result;

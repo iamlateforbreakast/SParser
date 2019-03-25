@@ -6,7 +6,8 @@
   The class SParse parses all files with extension .X
   and stores the result of the parsing in the SQLite DB name.
 **************************************************/
-
+#include "SParse.h"
+#include "Class.h"
 #include "Object.h"
 #include "FileReader.h"
 #include "SdbMgr.h"
@@ -14,7 +15,6 @@
 #include "Grammar2.h"
 #include "FileMgr.h"
 #include "List.h"
-#include "SParse.h"
 
 /**********************************************//** 
   @private
@@ -39,6 +39,15 @@ struct SParse
   SdbMgr * sdbMgr;
 };
 
+PRIVATE Class sparseClass =
+{
+  .f_new = (Constructor)0,
+  .f_delete = (Destructor)&SParse_delete,
+  .f_copy = (Copy_Operator)&SParse_copy,
+  .f_equal = (Equal_Operator)0,
+  .f_print = (Printer)0
+};
+
 static const SParseDefault SParse_default[] = 
 {{"*.c",(Constructor)&Grammar2_new, &Grammar2_process,(Destructor)&Grammar2_delete},
  {"*.d",0,0,0/*&Grammar2_process*/}};
@@ -61,7 +70,7 @@ PUBLIC SParse *SParse_new(String * sdbName)
 {
   SParse * this = 0;
 
-  this = (SParse*)Object_new(sizeof(SParse),(Destructor)&SParse_delete, (Copy_operator)&SParse_copy);
+  this = (SParse*)Object_new(sizeof(SParse), &sparseClass);
   this->object.size = sizeof(SParse);
   
   /* Initialise SdbMgr */

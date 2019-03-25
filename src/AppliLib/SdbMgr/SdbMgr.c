@@ -6,6 +6,7 @@
 **************************************************/
 
 #include "SdbMgr.h"
+#include "Class.h"
 #include "Object.h"
 #include "String2.h"
 #include "Memory.h"
@@ -22,6 +23,15 @@ struct SdbMgr
   sqlite3* db;
 };
 
+PRIVATE Class sdbMgrClass = 
+{
+  .f_new = (Constructor)0,
+  .f_delete = (Destructor)&SdbMgr_delete,
+  .f_copy = (Copy_Operator)&SdbMgr_copy,
+  .f_equal = (Equal_Operator)0,
+  .f_print = (Printer)0
+};
+
 PRIVATE SdbMgr * sdbMgr = 0;
 
 PRIVATE unsigned int SdbMgr_open(SdbMgr* this, String* sdbName);
@@ -33,7 +43,7 @@ PUBLIC SdbMgr* SdbMgr_new(String * name)
 {
   SdbMgr* this = 0;
 
-  this = (SdbMgr*)Object_new(sizeof(SdbMgr),(Destructor)&SdbMgr_delete, (Copy_operator)&SdbMgr_copy);
+  this = (SdbMgr*)Object_new(sizeof(SdbMgr), &sdbMgrClass);
   this->object.size = sizeof(SdbMgr);
   
   SdbMgr_open(this, name);

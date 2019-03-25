@@ -8,6 +8,7 @@
   - add
 **************************************************/
 #include "List.h"
+#include "Class.h"
 #include "Object.h"
 #include "Memory.h"
 
@@ -38,6 +39,15 @@ struct List
   unsigned int nbNodes;
 };
 
+PRIVATE Class listClass = 
+{
+  .f_new = 0,
+  .f_delete = (Destructor)&List_delete,
+  .f_copy = (Copy_Operator)&List_copy,
+  .f_equal = (Equal_Operator)&List_isEqual,
+  .f_print = (Printer)&List_print
+};
+
 /**********************************************//** 
   @brief Create a new instance of the class List.
   @public
@@ -48,7 +58,7 @@ PUBLIC List* List_new()
 {
   List * this = 0;
   
-  this = (List*)Object_new(sizeof(List),(Destructor)&List_delete, (Copy_operator)&List_copy);
+  this = (List*)Object_new(sizeof(List),&listClass);
   // TODO: Check if allocation failed
   this->head = 0;
   this->tail = 0;
@@ -114,6 +124,28 @@ PUBLIC List* List_copy(List* this)
   copy->iterator = copy->tail;
   
   return copy;
+}
+
+/**********************************************//** 
+  @brief Compare 2 instances of the class List.
+  @public
+  @memberof List
+  @return 0 if different, 1 if equal.
+**************************************************/
+PUBLIC unsigned int List_isEqual(List * this, List * compared)
+{
+  unsigned int result = 0;
+
+  return result;
+}
+
+/**********************************************//** 
+  @brief Print an instance of the class List.
+  @public
+  @memberof List
+**************************************************/
+PUBLIC void List_print(List * this)
+{
 }
 
 /**********************************************//** 

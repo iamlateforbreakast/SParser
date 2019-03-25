@@ -8,6 +8,7 @@
 
 #include "FileDesc.h"
 #include "String2.h"
+#include "Class.h"
 #include "Object.h"
 
 struct FileDesc
@@ -15,6 +16,15 @@ struct FileDesc
   Object object;
   String * name;
   String * fullName;
+};
+
+PRIVATE Class fileDescClass =
+{
+  .f_new = (Constructor)0,
+  .f_delete = (Destructor)&FileDesc_delete,
+  .f_copy = (Copy_Operator)&FileDesc_copy,
+  .f_equal = (Equal_Operator)0,
+  .f_print = (Printer)0
 };
 
 PRIVATE String * FileDesc_getBasename(FileDesc * this);
@@ -27,7 +37,7 @@ PUBLIC FileDesc * FileDesc_new()
 {
   FileDesc * this = 0;
   
-  this = (FileDesc*)Object_new(sizeof(FileDesc),(Destructor)&FileDesc_delete, (Copy_operator)&FileDesc_copy);
+  this = (FileDesc*)Object_new(sizeof(FileDesc), &fileDescClass);
   this->name = 0;
   this->fullName = 0;
   

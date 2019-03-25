@@ -1,4 +1,5 @@
 #include "SdbRequest.h"
+#include "Class.h"
 #include "Object.h"
 #include "SdbMgr.h"
 #include "Memory.h"
@@ -15,6 +16,15 @@ struct SdbRequest
   String ** result;
 };
 
+PRIVATE Class sdbRequestClass =
+{
+  .f_new = (Constructor)0,
+  .f_delete = (Destructor)&SdbRequest_delete,
+  .f_copy = (Copy_Operator)&SdbRequest_copy,
+  .f_equal = (Equal_Operator)0,
+  .f_print = (Printer)0
+};
+
 /**********************************************//** 
   @brief Create a new SdbRequest instance
   @memberof SdbRequest
@@ -26,7 +36,7 @@ PUBLIC SdbRequest * SdbRequest_new(const char * fmt)
 {
   SdbRequest * this = 0;
 
-  this = (SdbRequest*)Object_new(sizeof(SdbRequest),(Destructor)&SdbRequest_delete, (Copy_operator)&SdbRequest_copy);
+  this = (SdbRequest*)Object_new(sizeof(SdbRequest), &sdbRequestClass);
   this->object.size = sizeof(SdbRequest);
   
   this->fmt = fmt;

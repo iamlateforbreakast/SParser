@@ -10,6 +10,8 @@ typedef struct List List;
 PUBLIC List * List_new();
 PUBLIC void List_delete(List* this);
 PUBLIC List * List_copy(List* this);
+PUBLIC unsigned int List_isEqual(List * this, List * compared);
+PUBLIC void List_print(List * this);
 PUBLIC void List_insertHead(List* this, void* item);
 PUBLIC void List_insertTail(List* this, void* item);
 PUBLIC void List_merge(List* this, List* l1);
