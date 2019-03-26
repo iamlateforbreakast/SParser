@@ -11,7 +11,9 @@
 #include "Map.h"
 #include "Class.h"
 #include "Object.h"
-#include <time.h>
+#include <sys/time.h>
+
+#define USEC_IN_SEC (1.0E6)
 
 /**********************************************//**
   @class TimeMgr
@@ -22,6 +24,9 @@ struct TimeMgr
   Map * timers;
 }; 
 
+/**********************************************//**
+  @private Class Description
+**************************************************/
 PRIVATE Class timeMgrClass =
 {
   .f_new = (Constructor)0,
@@ -77,9 +82,7 @@ PUBLIC void TimeMgr_delete(TimeMgr * this)
 **************************************************/
 PUBLIC TimeMgr * TimeMgr_copy(TimeMgr * this)
 {
-  TimeMgr * copy = 0;
-  
-  return copy;
+  return this;
 }
 
 /**********************************************//**
@@ -89,49 +92,42 @@ PUBLIC TimeMgr * TimeMgr_copy(TimeMgr * this)
 **************************************************/
 PUBLIC TimeMgr * TimeMgr_getRef()
 {
-  TimeMgr * result = 0;
-  
-  return result;
-}
-
-/**********************************************//** 
-  @brief TBD
-  @public
-  @memberof TimeMgr
-**************************************************/
-PUBLIC void TimeMgr_createTimer(TimeMgr * this, String * s)
-{
-}
-
-/**********************************************//** 
-  @brief TBD
-  @public
-  @memberof TimeMgr
-**************************************************/
-PUBLIC void TimeMgr_timeStamp(TimeMgr * this, String * s)
-{
-  struct time_spec * t;
-  Timer * timer = 0;
-  
-  /* Find timer s */
-  #if 0
-  if (timeMgr == 0)
+  if (timeMgr==0)
   {
-  }
-  if ((timer = Map_find(s))!=0)
-  {
-    clock_gettime(CLOCK_REALTIME, &t);
-    timer = t;
-    Timer_clock(timer);
+    timeMgr = TimeMgr_new();
   }
   else
   {
-    timer = Timer_new();
-    Map_insert();
-    Timer_clock();
+    timeMgr->object.refCount++;
   }
-  #endif
   
+  return timeMgr;
+}
+
+/**********************************************//** 
+  @brief TBD
+  @public
+  @memberof TimeMgr
+**************************************************/
+PUBLIC void TimeMgr_latchTime(TimeMgr * this, String * s)
+{
+  struct timeval tv;
+  Timer * timer = 0;
+  double timeS = 0.0;
+  
+  if (timeMgr == 0) return;
+  
+  gettimeofday(&tv, 0);
+  /* Find timer s */
+  Map_find(this->timers, s, (void**)&timer);
+  if (!timer)
+  {
+    timer = Timer_new(s);
+    Map_insert(this->timers, s, timer);
+  }
+  timeS = (double)tv.tv_sec + (double)tv.tv_usec/1000000.0;
+  printf("TimeMgr.c: %f\n", timeS);
+  Timer_latchTime(timer, timeS);
 }
 
 /**********************************************//** 

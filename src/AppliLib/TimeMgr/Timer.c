@@ -5,30 +5,125 @@
 #include "Class.h"
 #include "Object.h"
 
+
+/**********************************************//**
+  @class Timer
+**************************************************/
 struct Timer
 {
   Object object;
+  unsigned int state;
+  unsigned int nbCalls;
+  float durationS;
+  float latchedTime;
 };
 
+/**********************************************//**
+  @private Class Description
+**************************************************/
 PRIVATE Class timerClass =
 {
   .f_new = (Constructor)0,
   .f_delete = (Destructor)&Timer_delete,
   .f_copy = (Copy_Operator)&Timer_copy,
-  .f_equal = (Equal_Operator)0,
-  .f_print = (Printer)0
+  .f_equal = (Equal_Operator)&Timer_isEqual,
+  .f_print = (Printer)&Timer_print
 };
 
-Timer * Timer_new()
+/**********************************************//** 
+  @brief Create an instance of the class Timer.
+  @public
+  @memberof Timer
+  @return New instance.
+**************************************************/
+PUBLIC Timer * Timer_new()
 {
   Timer * this = 0;
   
   this = (Timer*)Object_new(sizeof(Timer), &timerClass);
   this->object.size = sizeof(Timer);
   
+  this->state = 0;
+  this->nbCalls = 0;
+  this->durationS = (float)0.0;
+  this->latchedTime = (float)0.0;
+  
   return this;
 }
 
-void Timer_delete(Timer * this)
+/**********************************************//** 
+  @brief Delete an instance of the class Timer.
+  @public
+  @memberof Timer
+**************************************************/
+PUBLIC void Timer_delete(Timer * this)
 {
+  if (this!=0)
+  {
+    if (this->object.refCount==1)
+    {
+      Object_delete(&this->object);
+    }
+    else
+    {
+      this->object.refCount--;
+    }
+  }
+}
+
+/**********************************************//** 
+  @brief Copy an instance of the class Timer.
+  @public
+  @memberof Timer
+  @return Copied instance.
+**************************************************/
+PUBLIC Timer * Timer_copy(Timer * this)
+{
+  Timer * result = 0;
+  
+  return result;
+}
+
+/**********************************************//** 
+  @brief TBD
+  @public
+  @memberof Timer
+**************************************************/
+PUBLIC unsigned int Timer_isEqual(Timer * this, Timer * compared)
+{
+  unsigned int result = 0;
+
+  return result;
+}
+
+/**********************************************//** 
+  @brief TBD
+  @public
+  @memberof Timer
+**************************************************/
+PUBLIC char * Timer_print(Timer * this)
+{
+  char * result = 0;
+  
+  return result;
+}
+
+/**********************************************//** 
+  @brief TBD
+  @public
+  @memberof Timer
+**************************************************/
+PUBLIC void Timer_latchTime(Timer * this, double timeS)
+{ 
+  if (this->state == 0)
+  {
+    this->state = 1;
+    printf("Timer.c: %f\n", timeS);
+  }
+  else
+  {
+    this->state = 0;
+    this->nbCalls++;
+    printf("Timer.c: %f\n", timeS);
+  }
 }
