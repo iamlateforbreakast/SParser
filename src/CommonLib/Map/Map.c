@@ -249,3 +249,37 @@ PUBLIC void Map_print(Map * this)
     }
   }
 }
+
+/**********************************************//** 
+  @brief Get all the entries in an instance of a Map.
+  @public
+  @memberof Map
+  @return List of map 
+**************************************************/
+PUBLIC List * Map_getAll(Map * this)
+{
+  List * result = 0;
+  int i = 0;
+  void * pItem = 0;
+  void * pCopy = 0;
+  MapEntry * n = 0;
+  
+  result = List_new();
+  for (i=0; i<HTABLE_SIZE; i++)
+  {
+    if (this->htable[i]!=0)
+    {
+      List_resetIterator(this->htable[i]);
+      n = (MapEntry*)List_getNext(this->htable[i]);
+      while (n!= 0)
+      {
+        pItem =  MapEntry_getItem(n);
+        pCopy = Object_copy((Object*)pItem);
+        List_insertHead(result, pCopy);
+        n = (MapEntry*)List_getNext(this->htable[i]);
+      }
+    }
+  }
+  
+  return result;
+}
