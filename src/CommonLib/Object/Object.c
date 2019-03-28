@@ -67,14 +67,12 @@ PUBLIC void Object_delete(Object * this)
 PUBLIC Object * Object_copy(Object * this)
 {
   Object * copy;
+
   
-  // TODO: Check if this==0
-  copy = ObjectMgr_allocate(Object_objMgrPtr, this->size);
-  copy->delete = this->delete;
-  copy->copy = this->copy;
-  copy->size = this->size;
-  copy->refCount = 1;
-  
+  if ((this!=0) && (this->copy!=0))
+  {
+    this->copy((Object*)this);
+  }
   return copy;
 }
 
