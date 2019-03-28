@@ -53,6 +53,29 @@ int step4()
 
 int step5()
 {
+  int i = 0;
+  String * s = 0;
+  List * l = 0;
+  const char * testNames[] =
+  {
+    "banana", "strawberry", "cherry", "apple", "orange", "pear", "blackberry"
+  };
+
+  for (i=0; i<sizeof(testNames)/sizeof(const char *); i++)
+  {
+    s = String_new(testNames[i]);
+    Map_insert(testMap, s, s);
+  }
+
+  l = Map_getAll(testMap);
+
+  List_delete(l);
+
+  return 0;
+}
+
+int step6()
+{
   Map_delete(testMap);
   
   return 0;
@@ -65,6 +88,7 @@ int main()
   step3();
   step4();
   step5();
+  step6();
 
   Memory_report();
 
