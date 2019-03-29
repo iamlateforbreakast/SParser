@@ -66,12 +66,12 @@ PUBLIC void Object_delete(Object * this)
 **************************************************/
 PUBLIC Object * Object_copy(Object * this)
 {
-  Object * copy;
+  Object * copy = 0;
 
   
   if ((this!=0) && (this->copy!=0))
   {
-    this->copy((Object*)this);
+    copy = this->copy((Object*)this);
   }
   return copy;
 }
