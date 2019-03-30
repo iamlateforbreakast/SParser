@@ -34,6 +34,9 @@ struct FileReader
   List * preferredDirs;
 };
 
+/**********************************************//**
+  @private Class Description
+**************************************************/
 PRIVATE Class fileReaderClass = 
 {
   .f_new = (Constructor)0,

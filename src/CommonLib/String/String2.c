@@ -23,6 +23,9 @@ struct String
   unsigned int length;
 };
 
+/**********************************************//**
+  @private Class Description
+**************************************************/
 PRIVATE Class stringClass = 
 {
   .f_new = NULL,

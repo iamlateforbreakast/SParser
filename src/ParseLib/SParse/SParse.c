@@ -39,6 +39,9 @@ struct SParse
   SdbMgr * sdbMgr;
 };
 
+/**********************************************//**
+  @private Class Description
+**************************************************/
 PRIVATE Class sparseClass =
 {
   .f_new = (Constructor)0,

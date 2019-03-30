@@ -52,6 +52,9 @@ struct Grammar2
   List * contexts;
 };
 
+/**********************************************//**
+  @private Class Description
+**************************************************/
 PRIVATE Class grammar2Class =
 {
   .f_new = (Constructor)0,

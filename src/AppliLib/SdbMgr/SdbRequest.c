@@ -7,6 +7,9 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+/**********************************************//**
+  @class SdbRequest
+**************************************************/
 struct SdbRequest
 {
   Object object;
@@ -16,6 +19,9 @@ struct SdbRequest
   String ** result;
 };
 
+/**********************************************//**
+  @private Class Description
+**************************************************/
 PRIVATE Class sdbRequestClass =
 {
   .f_new = (Constructor)0,

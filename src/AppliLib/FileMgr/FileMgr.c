@@ -34,6 +34,9 @@ struct FileMgr
   char rootLocation[FILEMGR_MAX_PATH];
 };
 
+/**********************************************//**
+  @private Class Description
+**************************************************/
 PRIVATE Class fileMgrClass =
 {
   .f_new = 0,

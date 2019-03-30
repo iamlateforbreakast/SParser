@@ -31,6 +31,9 @@ struct Map
   List * htable[HTABLE_SIZE];
 };
 
+/**********************************************//**
+  @private Class Description
+**************************************************/
 PRIVATE Class mapClass = 
 {
   .f_new = 0,

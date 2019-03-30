@@ -15,6 +15,9 @@ struct MapEntry
   void * item;
 };
 
+/**********************************************//**
+  @private Class Description
+**************************************************/
 PRIVATE Class mapEntryClass = 
 {
   .f_new = 0,

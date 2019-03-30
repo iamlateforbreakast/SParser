@@ -11,6 +11,9 @@
 #include "Class.h"
 #include "Object.h"
 
+/**********************************************//**
+  @class FileDesc
+**************************************************/
 struct FileDesc
 {
   Object object;
@@ -18,6 +21,9 @@ struct FileDesc
   String * fullName;
 };
 
+/**********************************************//**
+  @private Class Description
+**************************************************/
 PRIVATE Class fileDescClass =
 {
   .f_new = (Constructor)0,

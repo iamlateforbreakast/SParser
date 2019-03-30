@@ -30,6 +30,9 @@ struct OptionDefault{
   char * value;
 };
 
+/**********************************************//**
+  @private Class Description
+**************************************************/
 PRIVATE Class optionMgrClass =
 {
   .f_new = (Constructor)0,

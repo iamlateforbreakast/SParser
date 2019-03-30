@@ -39,6 +39,9 @@ struct List
   unsigned int nbNodes;
 };
 
+/**********************************************//**
+  @private Class Description
+**************************************************/
 PRIVATE Class listClass = 
 {
   .f_new = 0,

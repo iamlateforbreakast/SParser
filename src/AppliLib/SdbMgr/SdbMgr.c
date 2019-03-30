@@ -23,6 +23,9 @@ struct SdbMgr
   sqlite3* db;
 };
 
+/**********************************************//**
+  @private Class Description
+**************************************************/
 PRIVATE Class sdbMgrClass = 
 {
   .f_new = (Constructor)0,
