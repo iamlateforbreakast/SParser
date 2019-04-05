@@ -390,6 +390,7 @@ PRIVATE unsigned int Grammar2_isFileToBeIgnored(Grammar2 * this, String * fileNa
     if (Memory_ncmp(buffer, "string.h", 8)) return 1;
     if (Memory_ncmp(buffer, "time.h", 6)) return 1;
     if (Memory_ncmp(buffer, "Grammar2.parse.h", 16)) return 1;
+    if (Memory_ncmp(buffer, "sys/time.h", 10)) return 1;
     
     return result;
 }

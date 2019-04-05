@@ -52,7 +52,6 @@ int get_buffer_top(void * yyscanner);
 				  }
 				}
 .               {
-                  printf("Here 1\n");
                   yyless(yyleng-1);
 				  yy_push_state(IN_CODE, yyscanner);
 				}  
@@ -72,7 +71,6 @@ int get_buffer_top(void * yyscanner);
 
 <IN_SL_COMMENT>{
 \n             {
-                  //Grammar2_addComment(grammar);
 				  yy_pop_state(yyscanner); 
                   
 				  return COMMENT;
@@ -133,8 +131,9 @@ unsigned int read_include(void * yyscanner, Grammar2 * grammar)
   char * text = yyget_text(yyscanner);
   i = Memory_len(text);
   
-  Error_new(ERROR_DBG, "File name =%s\n", text);
-  Error_new(ERROR_DBG,"Length =%d\n", i);
+  // TODO: in some cases on windows system the string text contains tes.h/r/n instead of test.h/n
+  Error_new(ERROR_DBG, "Gramar2.lex.c: Include file name =%s\n", text);
+  //Error_new(ERROR_DBG,"Length =%d\n", i);
   
   char * buffer = Memory_alloc(i-1);
   Memory_set(buffer, 0, i-1);
@@ -142,7 +141,7 @@ unsigned int read_include(void * yyscanner, Grammar2 * grammar)
   
   fileName = String_new(0);
   String_setBuffer(fileName, buffer);
-  Error_new(ERROR_DBG,"INCLUDE %s!!!\n", buffer);
+  //Error_new(ERROR_DBG,"INCLUDE %s!!!\n", buffer);
 
   c = Grammar2_processNewFile(grammar, fileName);
   if (c!=0)
