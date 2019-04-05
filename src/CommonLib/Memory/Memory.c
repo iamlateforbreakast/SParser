@@ -39,7 +39,7 @@ PUBLIC void Memory_free(void* pointer, unsigned int nbBytes)
   if (pointer!=0)
   {
     Memory_freeRequestId++;
-    TRACE(("Memory: Free %d|%d %p\n", Memory_freeRequestId, nbBytes,pointer));
+    TRACE(("Memory: Free %d %d %p\n", Memory_freeRequestId, nbBytes,pointer));
     free(pointer);
 
     Memory_nbBytesAllocated = Memory_nbBytesAllocated - nbBytes;
