@@ -164,7 +164,7 @@ PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
   
   if (List_getSize(this->preferredDirs)==0)
   {
-    Error_new(ERROR_FATAL, "FileReader_addFile: preferred search dirs is empty %s\n", String_getBuffer(this->fileName));
+    Error_new(ERROR_NORMAL, "FileReader_addFile: preferred search dirs is empty %s\n", String_getBuffer(this->fileName));
   }
   /* Check in the fileName matches a pattern with a default search path */
   while ((dirInfo = (struct IncludeInfo *)List_getNext(this->preferredDirs))!=0)
@@ -301,7 +301,7 @@ PRIVATE void FileReader_printListPreferredDir(FileReader * this)
   
   if (List_getSize(this->preferredDirs)==0)
   {
-    Error_new(ERROR_FATAL, "FileReader_addFile: preferred search dirs is empty %s\n", String_getBuffer(this->fileName));
+    Error_new(ERROR_NORMAL, "FileReader_addFile: preferred search dirs is empty %s\n", String_getBuffer(this->fileName));
   }
   while ((dirInfo = (struct IncludeInfo *)List_getNext(this->preferredDirs))!=0)
   {
