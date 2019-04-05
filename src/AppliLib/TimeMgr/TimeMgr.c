@@ -126,7 +126,7 @@ PUBLIC void TimeMgr_latchTime(TimeMgr * this, String * s)
     Map_insert(this->timers, s, timer);
   }
   timeS = (double)tv.tv_sec + (double)tv.tv_usec/1000000.0;
-  printf("TimeMgr.c: %f\n", timeS);
+  //printf("TimeMgr.c: %f\n", timeS);
   Timer_latchTime(timer, timeS);
 }
 
