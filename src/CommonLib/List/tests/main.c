@@ -125,6 +125,8 @@ int step2()
     printf("Nb items %d\n", List_getSize(testList1));
   }
 
+  output = List_removeHead(testList1);
+
   List_delete(testList1);
 
   return 0;
