@@ -10,5 +10,6 @@ PUBLIC SdbRequest * SdbRequest_new(const char * fmt);
 PUBLIC void SdbRequest_delete(SdbRequest * this);
 PUBLIC SdbRequest * SdbRequest_copy(SdbRequest * this);
 PUBLIC void SdbRequest_execute(SdbRequest * this, ...);
+PUBLIC unsigned int SdbRequest_getNbResult(SdbRequest * this);
 
 #endif /* _SDBREQUEST_H_ */

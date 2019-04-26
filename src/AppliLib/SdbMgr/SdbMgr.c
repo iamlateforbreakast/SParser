@@ -11,6 +11,7 @@
 #include "String2.h"
 #include "Memory.h"
 #include "Error.h"
+#include "List.h"
 
 #include <sqlite3.h>
 
@@ -113,7 +114,7 @@ PUBLIC SdbMgr * SdbMgr_getRef()
   @memberof SdbMgr
   @return status
 **************************************************/
-PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement, String *** result)
+PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement, List * result)
 {
   int rc = 0;
   sqlite3_stmt *res = 0;
@@ -121,6 +122,8 @@ PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement, String *
   //void **rows = 0;
   unsigned int count = 0;
   int i;
+  String * temp = 0;
+  unsigned int nbResults = 0;
   
   //printf("SdbMgr: %s\n", statement);
   Error_new(ERROR_DBG, "SdbMgr: %s\n", statement);
@@ -131,7 +134,7 @@ PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement, String *
   count = sqlite3_column_count(res);
   //printf("Count = %d\n", count);
   Error_new(ERROR_DBG, "Count = %d\n", count);
-   if (count>0)
+   if ((count>0) && (result!=0))
    {
     *result = (String**)Memory_alloc(sizeof(String*)*count);
     
@@ -140,14 +143,15 @@ PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement, String *
       for (i=0; i<count; i++)
       {
         //printf("SdbMgr: Query performed\n");
-        *result[i] = String_new((char *)sqlite3_column_text(res, i));
+        temp = String_new((char *)sqlite3_column_text(res, i));
+        List_insertHead(result, temp);
       }
     step = sqlite3_step(res);
     }
   }
   sqlite3_finalize(res);
   
-  return 0;
+  return nbResults;
 }
 
 /**********************************************//** 
@@ -159,7 +163,7 @@ PRIVATE unsigned int SdbMgr_open(SdbMgr* this, String* sdbName)
   String ** requestResult = 0;
   
   result = sqlite3_open(String_getBuffer(sdbName), &(this->db));
-  (void)SdbMgr_execute(this, "PRAGMA synchronous=NORMAL;", &requestResult);
+  (void)SdbMgr_execute(this, "PRAGMA synchronous=NORMAL;", &requestResult, 0);
   
   return result;
 }

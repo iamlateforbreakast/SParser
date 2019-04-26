@@ -185,6 +185,7 @@ PRIVATE void Grammar2_initSdbTables(Grammar2 * this)
   createIncludeNodeTable = SdbRequest_new(
    "CREATE TABLE Include_Nodes ("
    "NodeId integer PRIMARY_KEY,"
+   "Name text NOT NULL,"
    "EntryNode integer NOT NULL"
    ");");
   
@@ -318,8 +319,8 @@ PUBLIC void Grammar2_addIncludeNode(Grammar2 * this, char * name)
   SdbRequest * insertIncludeNode = 0;
   
   insertIncludeNode = SdbRequest_new(
-      "INSERT INTO Include_Nodes (NodeId, EntryNode) "
-      "VALUES (%d, '%s');"
+      "INSERT INTO Include_Nodes (NodeId, Name, EntryNode) "
+      "VALUES (%d, '%s', '%s');"
     );
   
   includeNodeId++;
@@ -328,7 +329,7 @@ PUBLIC void Grammar2_addIncludeNode(Grammar2 * this, char * name)
   Grammar2_addNode(this, 3, includeNodeId);
   this->current->lastNode = nodeId;
   
-  SdbRequest_execute(insertIncludeNode, includeNodeId, name);
+  SdbRequest_execute(insertIncludeNode, includeNodeId, name, 0);
   SdbRequest_delete(insertIncludeNode);
 }
 
@@ -342,10 +343,11 @@ PUBLIC char * Grammar2_processNewFile(Grammar2 * this, String * fileName)
      return 0;
    }
 
-       //if (Memory_ncmp(String_getBuffer(fileName), "SdbRequest.h", 12)) 
-       //{
-       //  printf("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
-       //}
+   if (Grammar2_isIncludeNodeProcessed(this, fileName))
+   {
+     return 0;
+   }
+       
    Grammar2_addIncludeNode(this, String_getBuffer(fileName));
    
    o = (GrammarContext*)Object_new(sizeof(GrammarContext),0);
@@ -395,3 +397,15 @@ PRIVATE unsigned int Grammar2_isFileToBeIgnored(Grammar2 * this, String * fileNa
     return result;
 }
 
+PRIVATE unsigned int Grammar2_isIncludeNodeProcessed(Grammar2 * this, String * name)
+{
+  unsigned int result = 0;
+  SdbRequest * checkIncludeNode = 0;
+  
+  checkIncludeNode = SdbRequest_new(
+    "SELECT * FROM Include_Nodes WHERE Name='%s';");
+  SdbRequest_execute(checkIncludeNode, String_getBuffer(name));
+  SdbRequest_delete(checkIncludeNode);
+  
+  return SdbRequest_getNbResult(checkIncludeNode);
+}

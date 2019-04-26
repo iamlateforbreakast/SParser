@@ -3,6 +3,7 @@
 #include "Object.h"
 #include "SdbMgr.h"
 #include "Memory.h"
+#include "List.h"
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -16,7 +17,9 @@ struct SdbRequest
   char * buffer;
   unsigned int size;
   const char * fmt;
-  String ** result;
+  List * result;
+  unsigned int nbResults;
+  unsigned int nbColumns;
 };
 
 /**********************************************//**
@@ -67,6 +70,7 @@ PUBLIC void SdbRequest_delete(SdbRequest * this)
     Memory_free(this->buffer, this->size);
     this->buffer = 0;
     this->size = 0;
+    List_delete(this->result);
   }
   Object_delete(&this->object);
 }
@@ -101,9 +105,16 @@ PUBLIC void SdbRequest_execute(SdbRequest * this, ...)
 
   va_end(args);
   
-  SdbMgr_execute(sdbMgr, 
+  this->result = List_new();
+  
+  this->nbResults = SdbMgr_execute(sdbMgr, 
                  this->buffer, 
                  &this->result);
-  
+  // TODO: nbColumns
   SdbMgr_delete(sdbMgr);
+}
+
+PUBLIC unsigned int SdbRequest_getNbResult(SdbRequest * this)
+{
+  return this->nbResults;
 }
