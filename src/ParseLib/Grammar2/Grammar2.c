@@ -30,6 +30,7 @@ PRIVATE unsigned int includeNodeId = 0;
 PRIVATE unsigned int isInitialised = 0;
 
 PRIVATE unsigned int Grammar2_isFileToBeIgnored(Grammar2 * this, String * fileName);
+PRIVATE unsigned int Grammar2_isIncludeNodeProcessed(Grammar2 * this, String * name);
 
 struct GrammarContext
 {
