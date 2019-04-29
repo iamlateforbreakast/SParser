@@ -52,6 +52,8 @@ PUBLIC SdbRequest * SdbRequest_new(const char * fmt)
   this->size = 0;
   this->buffer = 0;
   this->result = 0;
+  this->nbResults = 0;
+  this->nbColumns = 0;
   
   return this;
 }
@@ -109,7 +111,7 @@ PUBLIC void SdbRequest_execute(SdbRequest * this, ...)
   
   this->nbResults = SdbMgr_execute(sdbMgr, 
                  this->buffer, 
-                 &this->result);
+                 this->result);
   // TODO: nbColumns
   SdbMgr_delete(sdbMgr);
 }

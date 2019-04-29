@@ -2,6 +2,7 @@
 
 #include "TimeMgr.h"
 #include "Timer.h"
+#include "Memory.h"
 #include "Class.h"
 #include "Object.h"
 
@@ -12,10 +13,11 @@
 struct Timer
 {
   Object object;
+  String * name;
   unsigned int state;
   unsigned int nbCalls;
-  float durationS;
-  float latchedTime;
+  double durationS;
+  double latchedTime;
 };
 
 /**********************************************//**
@@ -36,13 +38,14 @@ PRIVATE Class timerClass =
   @memberof Timer
   @return New instance.
 **************************************************/
-PUBLIC Timer * Timer_new()
+PUBLIC Timer * Timer_new(String * name)
 {
   Timer * this = 0;
   
   this = (Timer*)Object_new(sizeof(Timer), &timerClass);
   this->object.size = sizeof(Timer);
   
+  this->name = String_getRef(name);
   this->state = 0;
   this->nbCalls = 0;
   this->durationS = (float)0.0;
@@ -62,6 +65,7 @@ PUBLIC void Timer_delete(Timer * this)
   {
     if (this->object.refCount==1)
     {
+      String_delete(this->name);
       Object_delete(&this->object);
     }
     else
@@ -80,6 +84,12 @@ PUBLIC void Timer_delete(Timer * this)
 PUBLIC Timer * Timer_copy(Timer * this)
 {
   Timer * result = 0;
+  
+  result = Timer_new(this->name);
+  result->state = this->state;
+  result->nbCalls = this->nbCalls;
+  result->durationS = this->durationS;
+  result->latchedTime = this->latchedTime;
   
   return result;
 }

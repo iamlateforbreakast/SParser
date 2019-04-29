@@ -196,7 +196,7 @@ PUBLIC Object * ObjectMgr_allocate(ObjectMgr * this, unsigned int size)
       //e.param = 0;
       
       //Error_raise(&e);
-      printf("Too many objects\n");
+      printf("Too many objects %d\n", this->nbAllocatedObjects);
       exit(1);
     }
   }

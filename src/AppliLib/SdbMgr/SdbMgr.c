@@ -136,8 +136,6 @@ PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement, List * r
   Error_new(ERROR_DBG, "Count = %d\n", count);
    if ((count>0) && (result!=0))
    {
-    *result = (String**)Memory_alloc(sizeof(String*)*count);
-    
     while (step != SQLITE_DONE)
     {
       for (i=0; i<count; i++)
@@ -147,6 +145,7 @@ PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement, List * r
         List_insertHead(result, temp);
       }
     step = sqlite3_step(res);
+    nbResults++;
     }
   }
   sqlite3_finalize(res);
@@ -163,7 +162,7 @@ PRIVATE unsigned int SdbMgr_open(SdbMgr* this, String* sdbName)
   String ** requestResult = 0;
   
   result = sqlite3_open(String_getBuffer(sdbName), &(this->db));
-  (void)SdbMgr_execute(this, "PRAGMA synchronous=NORMAL;", &requestResult, 0);
+  (void)SdbMgr_execute(this, "PRAGMA synchronous=NORMAL;", 0);
   
   return result;
 }
