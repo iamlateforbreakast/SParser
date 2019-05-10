@@ -2,23 +2,38 @@
 <html>
 <head>
     <script type="text/javascript" src="./vis.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="./vis.min.css" rel="stylesheet" type="text/css" />
-
+    <link href="./sparse.css" rel="stylesheet" type="text/css" />
     <style type="text/css">
-        #mynetwork {
-            width: 800px;
-            height: 600px;
-            border: 1px solid lightgray;
-        }
+
     </style>
 </head>
 <body>
-<div id="mynetwork"></div>
+
+<div class="topnav">
+  <a href="#">Home</a>
+  <a href="#">Link</a>
+  <a href="#">Link</a>
+  <button class="button">CLick Me!</button>
+</div>
+
+<div class="row">
+ <div class="column">
+  <div class="network" id="mynetwork" ></div>
+ </div>
+ <div class="column">
+  <div class="network" id="mynetwork1" ></div>
+ </div>
+</div>
+
+<div class="footer">
+</div>
 
 <script type="text/javascript">
     function getData(){
 	    var request = new XMLHttpRequest();
-		request.open('GET', 'data.json', true);
+		request.open('GET', 'unit.json', true);
 		request.send(null);
 		request.onreadystatechange = function () {
         if (request.readyState === 4 && request.status === 200) {
