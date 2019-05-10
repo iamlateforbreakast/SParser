@@ -114,6 +114,15 @@ PUBLIC unsigned int Timer_isEqual(Timer * this, Timer * compared)
 PUBLIC char * Timer_print(Timer * this)
 {
   char * result = 0;
+  unsigned int size = 0;
+  const char * format = "Timer %s : Total %lf Avg. %lfs";
+  double average_duration = 0;
+  
+  if (this->nbCalls>0) average_duration = this->duration/this->nbCalls;
+  
+  size = snprintf(0, 0, format, String_getBuffer(this->name), this->durationS, average_duration);
+  result = Memory_alloc(size);
+  snprintf(result, size, format, String_getBuffer(this->name), this->durationS, average_duration);
   
   return result;
 }
@@ -128,12 +137,14 @@ PUBLIC void Timer_latchTime(Timer * this, double timeS)
   if (this->state == 0)
   {
     this->state = 1;
-    printf("Timer.c: %f\n", timeS);
+    this->latchedTime = timeS;
+    //printf("Timer.c: %f\n", timeS);
   }
   else
   {
     this->state = 0;
     this->nbCalls++;
-    printf("Timer.c: %f\n", timeS);
+    //printf("Timer.c: %f\n", timeS);
+    this->durationS = this->durationS + timeS - this->latchedTime;
   }
 }
