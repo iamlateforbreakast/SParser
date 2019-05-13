@@ -27,6 +27,7 @@ PRIVATE unsigned int nodeId = 0;
 PRIVATE unsigned int codeNodeId = 0;
 PRIVATE unsigned int commentNodeId = 0;
 PRIVATE unsigned int includeNodeId = 0;
+PRIVATE unsigned int unitId = 0;
 PRIVATE unsigned int isInitialised = 0;
 
 PRIVATE unsigned int Grammar2_isFileToBeIgnored(Grammar2 * this, String * fileName);
@@ -119,12 +120,14 @@ PUBLIC void Grammar2_process(Grammar2 * this)
 {
   SdbRequest * insertTransUnit = 0;
   
+  unitId++;
+  
   insertTransUnit = SdbRequest_new(
-    "INSERT INTO Translation_Units(File_Name) "
-    "VALUES ('%s');"
+    "INSERT INTO Translation_Units(Unit_Id, File_Name) "
+    "VALUES (%d, '%s');"
     );
     
-  SdbRequest_execute(insertTransUnit, String_getBuffer(FileReader_getName(this->reader)));
+  SdbRequest_execute(insertTransUnit, unitId, String_getBuffer(FileReader_getName(this->reader)));
   
   Grammar2_scan_string(FileReader_getBuffer(this->reader), this->scanner);
   //if (Memory_ncmp(String_getBuffer(FileReader_getName(this->reader)),"Timer.c",7))
@@ -155,6 +158,7 @@ PRIVATE void Grammar2_initSdbTables(Grammar2 * this)
 	  );
   createTransUnitTable = SdbRequest_new(
 	 "CREATE TABLE Translation_Units ("
+   "Unit_Id integer PRIMARY_KEY,"
 	 "File_Name text NOT NULL "
 	 ");");
    
