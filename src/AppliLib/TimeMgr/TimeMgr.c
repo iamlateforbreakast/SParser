@@ -11,6 +11,7 @@
 #include "Map.h"
 #include "Class.h"
 #include "Object.h"
+#include "Error.h"
 #include <sys/time.h>
 
 #define USEC_IN_SEC (1.0E6)
@@ -126,7 +127,6 @@ PUBLIC void TimeMgr_latchTime(TimeMgr * this, String * s)
     Map_insert(this->timers, s, timer);
   }
   timeS = (double)tv.tv_sec + (double)tv.tv_usec/1000000.0;
-  //printf("TimeMgr.c: %f\n", timeS);
   Timer_latchTime(timer, timeS);
 }
 
@@ -137,4 +137,24 @@ PUBLIC void TimeMgr_latchTime(TimeMgr * this, String * s)
 **************************************************/
 PUBLIC void TimeMgr_report(TimeMgr * this)
 {
+  List * timers = 0;
+  Timer * timerInfo = 0;
+  char * buf = 0;
+  
+  timers = Map_getAll(this->timers);
+  
+  Error_new(ERROR_INFO, "TimeMgr Report:\n");
+  timerInfo = List_removeHead(timers);
+
+  while (timerInfo!=0)
+  {
+    buf = Timer_print(timerInfo);
+    Error_new(ERROR_INFO, "%s\n", buf);
+    Memory_free(buf);
+    Timer_delete(timerInfo);
+    timerInfo = List_removeHead(timers);
+  }
+  
+  List_delete(timers);
+  
 }
