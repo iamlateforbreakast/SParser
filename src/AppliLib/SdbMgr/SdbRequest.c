@@ -97,16 +97,18 @@ PUBLIC void SdbRequest_execute(SdbRequest * this, ...)
   SdbMgr * sdbMgr = SdbMgr_getRef();
   va_list args;
   
+  /* Determine the size needed for the buffer and allocate the buffer */
   va_start(args, this);
   size = vsnprintf(0, 0, this->fmt, args);
+  va_end(args);
   this->buffer = Memory_realloc(this->buffer, this->size + 1, size + 1);
   this->buffer[size] = 0;
-  
+  /* Print the formatted string in the buffer */
+  va_start(args, this);
   vsnprintf(this->buffer, size+1, this->fmt, args);
   this->size =size;
-
   va_end(args);
-  
+  /* Allocate the list of results */
   this->result = List_new();
   
   this->nbResults = SdbMgr_execute(sdbMgr, 
