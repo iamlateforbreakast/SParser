@@ -115,10 +115,10 @@ PUBLIC char * Timer_print(Timer * this)
 {
   char * result = 0;
   unsigned int size = 0;
-  const char * format = "Timer %s : Total %lf Avg. %lfs";
+  const char * format = "Timer %s : Total %lfs Avg. %lfs";
   double average_duration = 0;
   
-  if (this->nbCalls>0) average_duration = this->duration/this->nbCalls;
+  if (this->nbCalls>0) average_duration = this->durationS/this->nbCalls;
   
   size = snprintf(0, 0, format, String_getBuffer(this->name), this->durationS, average_duration);
   result = Memory_alloc(size);
@@ -146,5 +146,6 @@ PUBLIC void Timer_latchTime(Timer * this, double timeS)
     this->nbCalls++;
     //printf("Timer.c: %f\n", timeS);
     this->durationS = this->durationS + timeS - this->latchedTime;
+    this->latchedTime = timeS;
   }
 }
