@@ -35,7 +35,7 @@ int step2()
 
   testTimeMgr = TimeMgr_getRef();
 
-  for (i=0; i<20; i++)
+  for (i=0; i<10; i++)
   {
     TimeMgr_latchTime(testTimeMgr, testTimerName);
 
@@ -45,7 +45,9 @@ int step2()
   }
   TimeMgr_delete(testTimeMgr);
 
-  //String_delete(testTimerName);
+  TimerMgr_report(testTimeMgr);
+  
+  String_delete(testTimerName);
 
   Memory_report();
 
