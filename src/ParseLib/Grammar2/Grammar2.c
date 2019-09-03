@@ -41,6 +41,9 @@ struct GrammarContext
 
 typedef struct GrammarContext GrammarContext;
 
+/**********************************************//**
+  @class Grammar2
+**************************************************/
 struct Grammar2
 {
   Object object;
@@ -66,6 +69,12 @@ PRIVATE Class grammar2Class =
   .f_print = (Printer)0
 };
 
+/**********************************************//** 
+  @brief Create an instance of the class Grammar2.
+  @public
+  @memberof Grammar2
+  @return New instance.
+**************************************************/
 PUBLIC Grammar2 * Grammar2_new(FileReader * fr, SdbMgr * sdbMgr)
 {
   Grammar2 * this = 0;
@@ -88,6 +97,11 @@ PUBLIC Grammar2 * Grammar2_new(FileReader * fr, SdbMgr * sdbMgr)
   return this;
 }
 
+/**********************************************//** 
+  @brief Delete an instance of the class Grammar2.
+  @public
+  @memberof Grammar2
+**************************************************/
 PUBLIC void Grammar2_delete(Grammar2 * this)
 {
   GrammarContext * o = 0;
@@ -109,6 +123,12 @@ PUBLIC void Grammar2_delete(Grammar2 * this)
   }
 }
 
+/**********************************************//** 
+  @brief Copy an instance of the class Grammar2.
+  @public
+  @memberof Grammar2
+  @return Copied instance.
+**************************************************/
 PUBLIC Grammar2 * Grammar2_copy(Grammar2 * this)
 {
   Grammar2 * copy = 0;
@@ -352,21 +372,23 @@ PUBLIC char * Grammar2_processNewFile(Grammar2 * this, String * fileName)
    {
      return 0;
    }
-       
-   Grammar2_addIncludeNode(this, String_getBuffer(fileName));
-   
-   o = (GrammarContext*)Object_new(sizeof(GrammarContext),0);
-   o->lastNode = this->current->lastNode;
-   this->current = o;
-   
-   List_insertHead(this->contexts, o);
-   
+ 
    result = FileReader_addFile(this->reader, fileName);
    
    if (result==0)
    {
-     Grammar2_returnToFile(this);
-     Error_new(ERROR_FATAL,"Grammar2_processNewFile: %s\n", String_getBuffer(fileName));
+     //Grammar2_returnToFile(this);
+     Error_new(ERROR_FATAL,"Grammar2_processNewFile: Cannot find %s\n", String_getBuffer(fileName));
+   }
+   else
+   {
+    Grammar2_addIncludeNode(this, String_getBuffer(fileName));
+   
+    o = (GrammarContext*)Object_new(sizeof(GrammarContext),0);
+    o->lastNode = this->current->lastNode;
+    this->current = o;
+   
+   List_insertHead(this->contexts, o);
    }
    
    return result;
