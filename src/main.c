@@ -19,19 +19,21 @@
 
 #include <signal.h>
 
+/**********************************************//** 
+  @private
+**************************************************/
 struct sigaction action;
 
+PRIVATE void sighandler(int signum, siginfo_t *info, void *ptr) ;
 
-void sighandler(int signum, siginfo_t *info, void *ptr) 
-{ 
-  Error_new(ERROR_NORMAL, "Received signal %d\n", signum); 
-  Error_new(ERROR_FATAL, "Signal originates from process %lu\n", (unsigned long)info->si_pid);;
-} 
-
-int main(const int argc, const char** argv)
+/**********************************************//** 
+  @brief Inital entry point for SParse. This function creates
+  @public
+**************************************************/
+PUBLIC int main(const int argc, const char** argv)
 {
   SParse *sparse = 0;
-  String * inDir = 0;
+  String * inputDir = 0;
   OptionMgr *optionMgr = OptionMgr_getRef();
   FileMgr *fileMgr = FileMgr_getRef();
   ObjectMgr * objMgr = ObjectMgr_getRef();
@@ -55,9 +57,9 @@ int main(const int argc, const char** argv)
   OptionMgr_readFromFile(optionMgr);
    
   /* Add Directory to FileMgr */
-  inDir = OptionMgr_getOption(optionMgr, "Input Directory");
+  inputDir = OptionMgr_getOption(optionMgr, "Input Directory");
 
-  FileMgr_setRootLocation(fileMgr, String_getBuffer(inDir));
+  FileMgr_setRootLocation(fileMgr, String_getBuffer(inputDir));
   FileMgr_addDirectory(fileMgr, ".");
   
   sparse = SParse_new(OptionMgr_getOption(optionMgr, "DB Name"));
@@ -72,8 +74,6 @@ int main(const int argc, const char** argv)
   FileMgr_delete(fileMgr);
 
   /* Generate Memory report */
-  objMgr = ObjectMgr_getRef();
-  
   ObjectMgr_report(objMgr);
   
   ObjectMgr_delete(objMgr);
@@ -81,4 +81,16 @@ int main(const int argc, const char** argv)
   Memory_report();
   
   return 0;
+}
+
+/**********************************************//** 
+  @brief TBD
+  @public
+**************************************************/
+PRIVATE void sighandler(int signum, siginfo_t *info, void *ptr) 
+{ 
+  Error_new(ERROR_NORMAL, "Received signal %d\n", signum); 
+  Error_new(ERROR_FATAL, 
+                  "Signal originates from process %lu\n",
+                  (unsigned long)info->si_pid);
 }
