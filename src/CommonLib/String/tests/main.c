@@ -24,7 +24,11 @@ int step2()
 
   if (String_isContained(testString, testPattern))
   {
-    printf("Passed\n");
+    printf("Step 2: Passed\n");
+  }
+  else
+  {
+    printf("Step 2: Failed\n");
   }
 
   String_delete(testString);
@@ -41,7 +45,11 @@ int step3()
   
   if (String_matchWildcard(testString, testPattern))
   {
-    printf("Passed\n");
+    printf("Step 3: Passed\n");
+  }
+  else
+  {
+    printf("Step 3: Failed\n");
   }
   
   String_delete(testString);
@@ -49,16 +57,32 @@ int step3()
   return 0;
 }
 
+
 int step4()
 {
   String * testString = 0;
-  const char * testPattern = "*.[ch]";
-
-  testString = String_new("test.h");
-
-  if (String_matchWildcard(testString, testPattern))
+  const char * testPatterns[] = { "*.txt", "*.[ch]","*.c" };
+  const char * testStrings[] = {  "test.c", "test.h", "/cygdrive/c/Solo/CSW_3.0.3_19wk35/payload/pl/plParam.c" };
+  const unsigned int results[] = { 0, 1, 1 };
+  unsigned int nbChecksOk = 0;
+  int i = 0;
+  
+  for (i = 0; i<sizeof(results)/sizeof(results[0]); i++)
   {
-    printf("Passed\n");
+    testString = String_new(testStrings[i]);
+
+    if (String_matchWildcard(testString, testPatterns[i]) == results[i]) nbChecksOk++;
+    
+    String_delete(testString);
+  }
+  
+  if (nbChecksOk == sizeof(results)/sizeof(results[0]))
+  {
+    printf("Step 4: Passed\n");
+  }
+  else
+  {
+    printf("Step 4: Failed\n");
   }
 
   return 0;
@@ -70,6 +94,6 @@ int main()
   step2();
   step3();
   step4();
-
+  
   return 0;
 }
