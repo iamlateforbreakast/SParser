@@ -279,8 +279,9 @@ PUBLIC unsigned int String_matchWildcard(String * this, const char * wildcard)
   unsigned int w_idx = 0;
   unsigned int wlen = Memory_len(wildcard);
   unsigned int isRange = 0;
+  unsigned int possibleMatch = 0;
   
-  for (w_idx = 0; (w_idx < wlen) && (isMatch == 1); w_idx++)
+  while ((w_idx < wlen) && (isMatch == 1))
   {
     if ((wildcard[w_idx]=='*') && (w_idx + 1 < wlen))
     {  
@@ -289,6 +290,7 @@ PUBLIC unsigned int String_matchWildcard(String * this, const char * wildcard)
         f_idx++;
       }
       if (f_idx == this->length) isMatch = 0;
+      w_idx++;
     }
     else if (wildcard[w_idx]=='?')
     {
@@ -297,29 +299,38 @@ PUBLIC unsigned int String_matchWildcard(String * this, const char * wildcard)
     {
       //f_idx++;
       isRange = 1; 
+      w_idx++;
     }
     else if (wildcard[w_idx]==']')
     {
       isRange = 0;
+      w_idx++;
     }
     else if (this->buffer[f_idx]!= wildcard[w_idx])
     {
       if (!isRange)
       {
-        isMatch = 0;
+        //isMatch = 0;
+        if (possibleMatch>0) w_idx = w_idx - possibleMatch-1;
+        possibleMatch = 0;
+        f_idx++;
       }
      else
      {
         //f_idx++;
+        w_idx++;
      }     
-    } else
+    } 
+    else
     {
       if (f_idx < this->length) f_idx++;
+      w_idx++;
+      possibleMatch++;
     }
+    //printf("Possible match=%d\n", possibleMatch);
   }
   // Still some char in fileName not matched by filter
   if (f_idx < this->length) isMatch = 0;
   
   return isMatch;
 }
-
