@@ -12,6 +12,7 @@
 
 #include "OptionMgr.h"
 #include "FileMgr.h"
+#include "TimeMgr.h"
 #include "Error.h"
 #include "SParse.h"
 #include "Memory.h"
@@ -34,8 +35,10 @@ PUBLIC int main(const int argc, const char** argv)
 {
   SParse *sparse = 0;
   String * inputDir = 0;
+  String *totalExecutionTime = 0;
   OptionMgr *optionMgr = OptionMgr_getRef();
   FileMgr *fileMgr = FileMgr_getRef();
+  TimeMgr *timeMgr = TimeMgr_getRef();
   ObjectMgr * objMgr = ObjectMgr_getRef();
   
   action.sa_sigaction = sighandler;
@@ -55,24 +58,32 @@ PUBLIC int main(const int argc, const char** argv)
   
   /* Initialise OptionMgr from file */
   OptionMgr_readFromFile(optionMgr);
-   
+  
+  totalExecutionTime = String_new("Total Execuion Time");
+  
   /* Add Directory to FileMgr */
   inputDir = OptionMgr_getOption(optionMgr, "Input Directory");
 
   FileMgr_setRootLocation(fileMgr, String_getBuffer(inputDir));
   FileMgr_addDirectory(fileMgr, ".");
   
+  TimeMgr_latchTime(timeMgr, totalExecutionTime);
+  
   sparse = SParse_new(OptionMgr_getOption(optionMgr, "DB Name"));
   
   SParse_parse(sparse, "*.c");
+  
+  TimeMgr_latchTime(timeMgr, totalExecutionTime);
   
   SParse_delete(sparse);
   
   /* Cleanup */
   //String_delete(inDir);
+  String_delete(totalExecutionTime);
   OptionMgr_delete(optionMgr);
   FileMgr_delete(fileMgr);
-
+  TimeMgr_delete(timeMgr);
+  
   /* Generate Memory report */
   ObjectMgr_report(objMgr);
   
