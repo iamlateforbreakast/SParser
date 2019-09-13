@@ -79,10 +79,11 @@ PUBLIC int main(const int argc, const char** argv)
   
   /* Cleanup */
   //String_delete(inDir);
+  TimeMgr_delete(timeMgr);
   String_delete(totalExecutionTime);
   OptionMgr_delete(optionMgr);
   FileMgr_delete(fileMgr);
-  TimeMgr_delete(timeMgr);
+
   
   /* Generate Memory report */
   ObjectMgr_report(objMgr);
