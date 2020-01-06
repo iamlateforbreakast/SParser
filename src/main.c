@@ -59,7 +59,7 @@ PUBLIC int main(const int argc, const char** argv)
   /* Initialise OptionMgr from file */
   OptionMgr_readFromFile(optionMgr);
   
-  totalExecutionTime = String_new("Total Execuion Time");
+  totalExecutionTime = String_new("Total Execution Time");
   
   /* Add Directory to FileMgr */
   inputDir = OptionMgr_getOption(optionMgr, "Input Directory");
