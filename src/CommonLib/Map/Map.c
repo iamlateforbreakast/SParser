@@ -13,6 +13,7 @@
 #include "Object.h"
 #include "String2.h"
 #include "Memory.h"
+#include "Error.h"
 
 #define HTABLE_SIZE (50)
 
@@ -232,7 +233,7 @@ PUBLIC void Map_print(Map * this)
     {
       if (this->htable[i]!=0)
       {
-        printf("Map.c: Map[%d] is used with %d elements.\n",i, List_getSize(this->htable[i]));
+        Error_new(ERROR_INFO,"Map.c: Map[%d] is used with %d elements.\n",i, List_getSize(this->htable[i]));
         for (j=0; j<List_getSize(this->htable[i]);j++)
         {
           List_resetIterator(this->htable[i]);
@@ -240,11 +241,11 @@ PUBLIC void Map_print(Map * this)
           if  (n!=0)
           {
             p = (char*)(String_getBuffer((String*)MapEntry_getItem(n)));
-            printf("Item %d: %x %x %x %x\n", j+1, *p, *(p+1), *(p+2), *(p+3));
+            Error_new(ERROR_INFO,"Item %d: %x %x %x %x\n", j+1, *p, *(p+1), *(p+2), *(p+3));
           }
           else
           {
-            printf("Item %d: void\n");
+            Error_new("ERROR_INFO,"Item %d: void\n", j+1);
           }
           n = (MapEntry*)List_getNext(this->htable[i]);
         }
