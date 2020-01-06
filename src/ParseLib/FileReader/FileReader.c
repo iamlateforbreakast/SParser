@@ -325,7 +325,7 @@ PRIVATE void FileReader_deleteListPreferredDir(FileReader * this)
   {
     String_delete(dirInfo->pattern);
     List_delete(dirInfo->dirs);
-    Object_delete(dirInfo);
+    Object_delete((Object*)dirInfo);
     dirInfo = List_removeHead(this->preferredDirs);
   }
 }
