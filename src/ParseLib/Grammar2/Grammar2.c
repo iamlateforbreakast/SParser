@@ -269,7 +269,7 @@ PUBLIC void Grammar2_addToBuffer(Grammar2 * this, char * text)
   if (this->node_text_position>(MAX_BUFFER_SIZE-1)) 
   {
     /* Error case: Cannot obtain the FileMgr root location. */
-    Error_new(ERROR_FATAL, "Grammar internal buffer too small");
+    Error_new(ERROR_FATAL, "Grammar internal buffer too small %d\n", this->node_text_position);
   }
 }
 

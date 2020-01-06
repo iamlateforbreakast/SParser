@@ -43,10 +43,11 @@ int step2()
 
     TimeMgr_latchTime(testTimeMgr, testTimerName);
   }
+
+  TimeMgr_report(testTimeMgr);
+
   TimeMgr_delete(testTimeMgr);
 
-  TimerMgr_report(testTimeMgr);
-  
   String_delete(testTimerName);
 
   Memory_report();
