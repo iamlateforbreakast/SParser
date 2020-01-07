@@ -230,6 +230,7 @@ PRIVATE void FileReader_getListPreferredDir(FileReader * this)
             state = 1;
           }
           break;
+        /* Read file extension filter */
         case 1:
           if (buf[i]!=' ') 
           {
@@ -246,6 +247,7 @@ PRIVATE void FileReader_getListPreferredDir(FileReader * this)
              state = 3;
           }
           break;
+        /* Read include path */
         case 3:
           if (buf[i]!=' ')
           {
