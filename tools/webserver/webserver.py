@@ -63,14 +63,12 @@ class MyHandler(BaseHTTPRequestHandler):
         try:
             ctype, pdict = cgi.parse_header(self.headers.getheader('content-type'))
             if ctype == 'multipart/form-data':
-                query=cgi.parse_multipart(self.rfile, pdict)
-            self.send_response(301)
-            
+                postparam=cgi.parse_multipart(self.rfile, pdict)
+            self.send_response(200)
+            self.send_header('Content-type',	'text/json')
             self.end_headers()
-            upfilecontent = query.get('upfile')
-            print "filecontent", upfilecontent[0]
-            self.wfile.write("<HTML>POST OK.<BR><BR>");
-            self.wfile.write(upfilecontent[0]);
+            db_handler=MyDbHandler()
+            self.wfile.write(db_handler.getTransUnitList())
             
         except :
             pass
@@ -136,8 +134,6 @@ def main():
         keep_running = 1
         db_handler=MyDbHandler()
         handler = MyHandler
-        #handler.setDbHandler(MyDbHandler())
-        #handler.dbinfo = db_handler.get_data();
         server = HTTPServer(('', 80), handler)
         print 'started httpserver...'
         while keep_running:

@@ -1,31 +1,28 @@
 <!doctype html>
 <html>
 <head>
-    <script type="text/javascript" src="./vis.min.js"></script>
+    <script src="./vis.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="./vis.min.css" rel="stylesheet" type="text/css" />
     <link href="./sparse.css" rel="stylesheet" type="text/css" />
-    <style type="text/css">
-
-    </style>
 </head>
+
 <body>
+  <div class="topnav">
+    <a href="#">Home</a>
+    <a href="#">Link</a>
+    <a href="#">Link</a>
+    <button class="button">CLick Me!</button>
+  </div>
 
-<div class="topnav">
-  <a href="#">Home</a>
-  <a href="#">Link</a>
-  <a href="#">Link</a>
-  <button class="button">CLick Me!</button>
-</div>
-
-<div class="row">
- <div class="column">
-  <div class="network" id="mynetwork" ></div>
- </div>
- <div class="column">
-  <div class="network" id="mynetwork1" ></div>
- </div>
-</div>
+  <div class="row">
+   <div class="column">
+    <div class="network" id="mynetwork" ></div>
+   </div>
+   <div class="column">
+    <div class="network" id="mynetwork1" ></div>
+   </div>
+  </div>
 
 <div class="footer">
 </div>
@@ -47,10 +44,30 @@
             }
         }
     }}
-
+    function postData(){
+    var request = new XMLHttpRequest();
+    request.open('POST','load',true);
+    request.onreadystatechange = function () {
+    if (request.readyState === 4 && request.status === 200) {}
+    }
+    //  request.onload = function() {
+    //  };
+      request.send('node=0');
+    }
+    function postData1(){
+    var request = new XMLHttpRequest();
+    request.open('POST','load',true);
+    request.onreadystatechange = function () {
+    if (request.readyState === 4 && request.status === 200) {}
+    }
+    //  request.onload = function() {
+    //  };
+    //  request.send('node=0');
+    }
     // create a network
     var container = document.getElementById('mynetwork');
     getData();
+    postData();
 
 </script>
 </body>

@@ -77,13 +77,13 @@ PUBLIC int main(const int argc, const char** argv)
   
   SParse_delete(sparse);
   
+  TimeMgr_report(timeMgr);
+    
   /* Cleanup */
-  //String_delete(inDir);
-  TimeMgr_delete(timeMgr);
-  String_delete(totalExecutionTime);
   OptionMgr_delete(optionMgr);
   FileMgr_delete(fileMgr);
-
+  TimeMgr_delete(timeMgr);
+  String_delete(totalExecutionTime);
   
   /* Generate Memory report */
   ObjectMgr_report(objMgr);

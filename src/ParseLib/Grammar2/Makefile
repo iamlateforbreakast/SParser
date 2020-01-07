@@ -3,7 +3,7 @@ CFLAGS = -g -c -Wall -I../../AppliLib/include -I../include -I../../CommonLib/inc
 all: grammar
 
 grammar: Grammar2.y Grammar2.l
-	flex -o Grammar2.lex.c Grammar2.l
+	flex -F -o Grammar2.lex.c Grammar2.l
 	bison -dy Grammar2.y
 	gcc -c $(CFLAGS) Grammar2.lex.c Grammar2.parse.c Grammar2.c
 	
