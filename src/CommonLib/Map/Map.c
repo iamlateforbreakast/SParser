@@ -245,7 +245,7 @@ PUBLIC void Map_print(Map * this)
           }
           else
           {
-            Error_new("ERROR_INFO,"Item %d: void\n", j+1);
+            Error_new(ERROR_INFO,"Item %d: void\n", j+1);
           }
           n = (MapEntry*)List_getNext(this->htable[i]);
         }
