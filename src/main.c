@@ -17,6 +17,7 @@
 #include "SParse.h"
 #include "Memory.h"
 #include "ObjectMgr.h"
+#include "TimeMgr.h"
 
 #include <signal.h>
 
