@@ -15,7 +15,7 @@
 
 #include "Grammar2.parse.h"
 
-#define MAX_BUFFER_SIZE  (16384)
+#define MAX_BUFFER_SIZE  (32768)
 
 extern int Grammar2_parse (void * scanner, Grammar2 * this);
 extern void * Grammar2_scan_string (const char * yystr , void * yyscanner);
@@ -32,6 +32,7 @@ PRIVATE unsigned int isInitialised = 0;
 
 PRIVATE unsigned int Grammar2_isFileToBeIgnored(Grammar2 * this, String * fileName);
 PRIVATE unsigned int Grammar2_isIncludeNodeProcessed(Grammar2 * this, String * name);
+PRIVATE char internalBuffer[MAX_BUFFER_SIZE];
 
 struct GrammarContext
 {
@@ -50,7 +51,7 @@ struct Grammar2
   void * scanner;
   SdbMgr * sdbMgr;
   FileReader * reader;
-  char buffer[MAX_BUFFER_SIZE];
+  char * buffer;
   //char * node_text;
   int node_text_position;
   GrammarContext * current;
@@ -89,7 +90,9 @@ PUBLIC Grammar2 * Grammar2_new(FileReader * fr, SdbMgr * sdbMgr)
   this->current->lastNode = 0;
   List_insertHead(this->contexts, this->current);
   
+  this->buffer = &internalBuffer[0];
   Memory_set(this->buffer, 0, MAX_BUFFER_SIZE);
+  
   this->node_text_position = 0;
   
   if (!isInitialised) Grammar2_initSdbTables(this);
@@ -112,7 +115,7 @@ PUBLIC void Grammar2_delete(Grammar2 * this)
      {
        Grammar2lex_destroy(this->scanner);
        o = (GrammarContext*)List_removeHead(this->contexts);
-       Object_delete(o);
+       Object_delete((Object*)o);
        List_delete(this->contexts);
        Object_delete(&this->object);
      }
