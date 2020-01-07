@@ -90,6 +90,7 @@ PUBLIC Timer * Timer_copy(Timer * this)
   result->nbCalls = this->nbCalls;
   result->durationS = this->durationS;
   result->latchedTime = this->latchedTime;
+  result->name = String_getRef(this->name);
   
   return result;
 }
