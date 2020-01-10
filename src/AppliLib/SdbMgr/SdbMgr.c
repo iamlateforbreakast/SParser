@@ -22,6 +22,7 @@ struct SdbMgr
 {
   Object object;
   sqlite3* db;
+  String* name;
 };
 
 /**********************************************//**
@@ -67,6 +68,7 @@ PUBLIC void SdbMgr_delete(SdbMgr* this)
   {
     if (this->object.refCount==1)
     {
+      String_delete(this->name);
       SdbMgr_close(this);
       this->db = 0;
       Object_delete(&this->object);
@@ -125,14 +127,12 @@ PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement, List * r
   String * temp = 0;
   unsigned int nbResults = 0;
   
-  //printf("SdbMgr: %s\n", statement);
   Error_new(ERROR_DBG, "SdbMgr: %s\n", statement);
   rc = sqlite3_prepare_v2(this->db, statement, -1, &res, 0);
   
   step = sqlite3_step(res);
   
   count = sqlite3_column_count(res);
-  //printf("Count = %d\n", count);
   Error_new(ERROR_DBG, "Count = %d\n", count);
    if ((count>0) && (result!=0))
    {
@@ -161,7 +161,8 @@ PRIVATE unsigned int SdbMgr_open(SdbMgr* this, String* sdbName)
   unsigned int result = 0;
   String ** requestResult = 0;
   
-  result = sqlite3_open(String_getBuffer(sdbName), &(this->db));
+  this->name = String_getRef(sdbName);
+  result = sqlite3_open(":memory:", &(this->db));
   (void)SdbMgr_execute(this, "PRAGMA synchronous=NORMAL;", 0);
   
   return result;
@@ -172,5 +173,22 @@ PRIVATE unsigned int SdbMgr_open(SdbMgr* this, String* sdbName)
 **************************************************/
 PRIVATE void SdbMgr_close(SdbMgr* this)
 {
+  unsigned int result = 0;
+  sqlite3_backup* pBackup;
+  sqlite3* pFile;
+  sqlite3* pMemory = this->db;
+  
+  result = sqlite3_open(String_getBuffer(this->name), &pFile);
+  if (result==SQLITE_OK)
+  {
+    pBackup = sqlite3_backup_init(pFile, "main", pMemory, "main");
+    if (pBackup)
+    {
+      (void)sqlite3_backup_step(pBackup, -1);
+      (void)sqlite3_backup_finish(pBackup);
+      (void)sqlite3_close(pFile);
+    }
+    // sqlite3_ercode(pFile);
+  }
   sqlite3_close(this->db);
 }
