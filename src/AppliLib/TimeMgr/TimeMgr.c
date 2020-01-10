@@ -12,6 +12,7 @@
 #include "Class.h"
 #include "Object.h"
 #include "Error.h"
+#include "Memory.h"
 #include <sys/time.h>
 
 #define USEC_IN_SEC (1.0E6)
@@ -150,7 +151,7 @@ PUBLIC void TimeMgr_report(TimeMgr * this)
   {
     buf = Timer_print(timerInfo);
     Error_new(ERROR_INFO, "%s\n", buf);
-    Memory_free(buf);
+    Memory_free(buf,Memory_len(buf));
     Timer_delete(timerInfo);
     timerInfo = List_removeHead(timers);
   }

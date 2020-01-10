@@ -14,6 +14,7 @@
 #include "OptionMgr.h"
 #include "List.h"
 #include "Error.h"
+#include "Memory.h"
 
 struct IncludeInfo
 {
