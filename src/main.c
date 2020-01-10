@@ -26,6 +26,8 @@
 struct sigaction action;
 
 PRIVATE void sighandler(int signum, siginfo_t *info, void *ptr) ;
+PRIVATE void start_application(String * inputDir, String * dbName);
+PRIVATE void print_usage();
 
 /**********************************************//** 
   @brief Inital entry point for SParse. This function creates
@@ -33,13 +35,10 @@ PRIVATE void sighandler(int signum, siginfo_t *info, void *ptr) ;
 **************************************************/
 PUBLIC int main(const int argc, const char** argv)
 {
-  SParse *sparse = 0;
-  String * inputDir = 0;
-  String *totalExecutionTime = 0;
-  OptionMgr *optionMgr = OptionMgr_getRef();
-  FileMgr *fileMgr = FileMgr_getRef();
-  TimeMgr *timeMgr = TimeMgr_getRef();
+  OptionMgr *optionMgr = OptionMgr_getRef();  
   ObjectMgr * objMgr = ObjectMgr_getRef();
+  String * inputDir = 0;
+  String * dbName = 0;
   
   action.sa_sigaction = sighandler;
   action.sa_flags = SA_SIGINFO;
@@ -50,26 +49,61 @@ PUBLIC int main(const int argc, const char** argv)
   sigaction(SIGINT, &action, 0);
   sigaction(SIGTERM, &action, 0);
   sigaction(SIGHUP, &action, 0);
-
-
   
   /* Initialise OptionMgr from command line */
   OptionMgr_readFromCmdLine(optionMgr, argc, argv);
   
-  /* Initialise OptionMgr from file */
-  OptionMgr_readFromFile(optionMgr);
+  if (OptionMgr_isOptionEnabled(optionMgr, "Print help"))
+  {
+    print_usage();
+    OptionMgr_delete(optionMgr);
+    ObjectMgr_delete(objMgr);
+  }
+  else
+  {
+    /* Initialise OptionMgr from file */
+    OptionMgr_readFromFile(optionMgr);
+    
+    /* Retrieve database name */
+    dbName = OptionMgr_getOption(optionMgr, "DB Name");
+    
+    /* Add Directory to FileMgr */
+    inputDir = OptionMgr_getOption(optionMgr, "Input Directory");
+    
+    start_application(inputDir, dbName);
+    
+    OptionMgr_delete(optionMgr);
+  
+    ObjectMgr_report(objMgr);
+    ObjectMgr_delete(objMgr);
+    
+    /* Generate Memory report */
+    Memory_report();    
+  }
+  
+  
+  return 0;
+}
+
+/**********************************************//** 
+  @brief TBD
+  @public
+**************************************************/
+PRIVATE void start_application(String * inputDir, String * dbName)
+{
+  SParse *sparse = 0;
+  String *totalExecutionTime = 0;
+  FileMgr *fileMgr = FileMgr_getRef();
+  TimeMgr *timeMgr = TimeMgr_getRef();
   
   totalExecutionTime = String_new("Total Execution Time");
-  
-  /* Add Directory to FileMgr */
-  inputDir = OptionMgr_getOption(optionMgr, "Input Directory");
-
+    
   FileMgr_setRootLocation(fileMgr, String_getBuffer(inputDir));
   FileMgr_addDirectory(fileMgr, ".");
   
   TimeMgr_latchTime(timeMgr, totalExecutionTime);
   
-  sparse = SParse_new(OptionMgr_getOption(optionMgr, "DB Name"));
+  sparse = SParse_new(dbName);
   
   SParse_parse(sparse, "*.c");
   
@@ -80,19 +114,24 @@ PUBLIC int main(const int argc, const char** argv)
   TimeMgr_report(timeMgr);
     
   /* Cleanup */
-  OptionMgr_delete(optionMgr);
-  FileMgr_delete(fileMgr);
   TimeMgr_delete(timeMgr);
   String_delete(totalExecutionTime);
-  
-  /* Generate Memory report */
-  ObjectMgr_report(objMgr);
-  
-  ObjectMgr_delete(objMgr);
-  
-  Memory_report();
-  
-  return 0;
+  FileMgr_delete(fileMgr);
+}
+
+/**********************************************//** 
+  @brief TBD
+  @public
+**************************************************/
+PRIVATE void print_usage()
+{
+  printf("Usage: sparse [OPTION]\n");
+  printf("   Run SParse in the current directory.\n");
+  printf("\n");
+  printf("-o\t\tSQLite database Name\n");
+  printf("-d\t\tInput directory\n");
+  printf("-c\t\tConfiguration file name\n");
+  printf("-help\t\tDisplay this help and exit\n");
 }
 
 /**********************************************//** 
