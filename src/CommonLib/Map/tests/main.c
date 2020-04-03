@@ -55,16 +55,23 @@ int step5()
 {
   int i = 0;
   String * s = 0;
+  String * c = 0;
   List * l = 0;
   const char * testNames[] =
   {
     "banana", "strawberry", "cherry", "apple", "orange", "pear", "blackberry"
   };
 
+  const char * testColor[] =
+  {
+    "yellow", "red", "red", "yellow", "orange", "green",    "black"
+  };
+
   for (i=0; i<sizeof(testNames)/sizeof(const char *); i++)
   {
     s = String_new(testNames[i]);
-    Map_insert(testMap, s, s);
+    c = String_new(testColor[i]);
+    Map_insert(testMap, s, c);
   }
 
   l = Map_getAll(testMap);

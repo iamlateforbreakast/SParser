@@ -54,7 +54,8 @@ PRIVATE const struct OptionDefault optionDefault[] =
 {
   {"DB Name","-o","test.db"},
   {"Input Directory","-d","."},
-  {"Config file name","-c","sparse.txt"}
+  {"Config file name","-c","sparse.txt"},
+  {"Print help", "-help", 0}
 };
 
 PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent);
@@ -224,16 +225,23 @@ PUBLIC unsigned int OptionMgr_readFromCmdLine(OptionMgr * this, const int argc, 
       if (Memory_cmp(optionDefault[j].flag, (void*)argv[i]))
       {
         optionName = String_new(optionDefault[j].name);
-        if ((optionDefault[j].value!=0)&&((i+1)<=argc))
+        if (((i+1)<=argc))
         {
-          optionValue = String_new(argv[i+1]);
-          i++;
+          if (optionDefault[j].value!=0)
+          {
+            optionValue = String_new(argv[i+1]);
+          }
+          else
+          {
+            optionValue = String_new("Yes");
+          }
+          i++;  
         }
         isFound = 1;
         break;
       }
     }
-    if (isFound)
+    if ((isFound) && (optionValue!=0))
     {
       Map_insert(this->options, optionName, optionValue);
     }
@@ -243,6 +251,27 @@ PUBLIC unsigned int OptionMgr_readFromCmdLine(OptionMgr * this, const int argc, 
       Error_new(ERROR_FATAL, "Illegal argument\n");
     }
   }
+  
+  return result;
+}
+
+/**********************************************//** 
+  @brief TBD
+  @details TBD
+  @private
+  @memberof OptionMgr
+**************************************************/
+PUBLIC unsigned int OptionMgr_isOptionEnabled(OptionMgr* this, const char * optionName)
+{
+  unsigned int result = 0;
+  String* enabled = 0;
+  String* yes = String_new("Yes");
+  
+  enabled = OptionMgr_getOption(this, optionName);
+  if (String_isEqual(enabled,yes)) result = 1;
+  
+  String_delete(yes);
+  //String_delete(enabled);
   
   return result;
 }

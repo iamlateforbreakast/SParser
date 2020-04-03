@@ -131,7 +131,9 @@ unsigned int read_include(void * yyscanner, Grammar2 * grammar)
   char * text = yyget_text(yyscanner);
   i = Memory_len(text);
   
-  // TODO: in some cases on windows system the string text contains tes.h/r/n instead of test.h/n
+  // Windows End of Line case: \n\r
+  if (text[i-1]=='\r') i=i-1;
+  
   Error_new(ERROR_DBG, "Gramar2.lex.c: Include file name =%s\n", text);
   //Error_new(ERROR_DBG,"Length =%d\n", i);
   

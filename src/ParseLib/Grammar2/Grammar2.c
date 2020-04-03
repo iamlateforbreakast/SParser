@@ -12,6 +12,7 @@
 #include "SdbRequest.h"
 #include "Error.h"
 #include "List.h"
+#include "Memory.h"
 
 #include "Grammar2.parse.h"
 
