@@ -296,7 +296,7 @@ PUBLIC void Grammar2_addComment(Grammar2 * this)
 {
   SdbRequest * insertCommentNode = 0;
   
-  printf("Grammar2_addComment: 1\n");
+  //printf("Grammar2_addComment: 1\n");
   insertCommentNode = SdbRequest_new(
   "INSERT INTO Comment_Nodes (NodeId, Comment) "
   "VALUES (%d,'%s');"
@@ -314,7 +314,7 @@ PUBLIC void Grammar2_addComment(Grammar2 * this)
   SdbRequest_execute(insertCommentNode, commentNodeId, this->buffer);
   SdbRequest_delete(insertCommentNode);
   
-  printf("Grammar2_addComment: 2\n");
+  //printf("Grammar2_addComment: 2\n");
 }
 
 PUBLIC void Grammar2_addCodeNode(Grammar2 * this)
