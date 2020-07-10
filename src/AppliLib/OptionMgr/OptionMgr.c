@@ -291,6 +291,7 @@ PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
   String * optionName = 0;
   String * optionValue = 0;
   unsigned int state = 0;
+  unsigned int multiline = 0;
   
   for (p = String_getBuffer(fileContent);
        p < String_getBuffer(fileContent)+String_getLength(fileContent);
@@ -315,21 +316,30 @@ PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
         else length++;
         break;
       case 2:
-        if (*p!=' ') 
+        if ((*p!=' ') && (*p!='\n'))
         {
+          if (*p=='[') 
+          {
+            multiline = 1;
+          }
+          else
+          {
+            // Single line
+            multiline = 0;
+          }
           state = 3;
           idx = p - String_getBuffer(fileContent);
           length = 1;
         }
         break;
       case 3:
-        if (*p=='\n')
+        if (((!multiline) && (*p=='\n')) || ((multiline) && (*p==']')))
         {
           state = 0;
           /* TODO: Case of windows file */
-          optionValue = String_subString(fileContent, idx, length);
-        OptionMgr_setOption(optionMgr, String_getBuffer(optionName), optionValue);
-        String_delete(optionName);
+          optionValue = String_subString(fileContent, idx, length + multiline);
+          OptionMgr_setOption(optionMgr, String_getBuffer(optionName), optionValue);
+          String_delete(optionName);
         }
         else
         {
@@ -341,6 +351,7 @@ PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
         break;
       }
     }
+    #if 0
     if ((state == 1) || (state == 2))
     {
       /* Error case: Syntax error */
@@ -351,6 +362,7 @@ PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
       OptionMgr_setOption(optionMgr, String_getBuffer(optionName), optionValue);
       String_delete(optionName);
     }
+    #endif
   
   
   return result;
