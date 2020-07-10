@@ -233,14 +233,14 @@ PRIVATE void FileReader_getListPreferredDir(FileReader * this)
           break;
         /* Read file extension filter */
         case 1:
-          if (buf[i]!=' ') 
+          if ((buf[i]!=' ') && (buf[i]!='\n'))
           {
             state = 2;
             j = i;
           }
           break;
         case 2:
-          if (buf[i]==' ')
+          if ((buf[i]==' ') || (buf[i]=='\n'))
           { 
              prefDir = (struct IncludeInfo *)Object_new(sizeof(struct IncludeInfo), 0);
              prefDir->pattern = String_subString(optionValue, j, i-j);
@@ -250,14 +250,14 @@ PRIVATE void FileReader_getListPreferredDir(FileReader * this)
           break;
         /* Read include path */
         case 3:
-          if (buf[i]!=' ')
+          if ((buf[i]!=' ') && (buf[i]!='\n'))
           {
             state =4;
             j = i;
           }
           break;
         case 4:
-          if (buf[i]==' ') 
+          if ((buf[i]==' ') || (buf[i]=='\n')) 
           {
             List_insertHead(prefDir->dirs, String_subString(optionValue, j, i-j));
             state = 5;
@@ -269,10 +269,18 @@ PRIVATE void FileReader_getListPreferredDir(FileReader * this)
           }
           break;
         case 5:
-          if (buf[i]!=' ')
+          if ((buf[i]!=' ') && (buf[i]!='\n'))
           {
-            state = 4;
-            j = i;
+            if (buf[i]==']')
+            {
+              List_insertHead(prefDir->dirs, String_subString(optionValue, j, i-j));
+              state = 6;
+            }
+            else
+            {
+              state = 4;
+              j = i;
+            }
           }      
           break;
         case 6:
