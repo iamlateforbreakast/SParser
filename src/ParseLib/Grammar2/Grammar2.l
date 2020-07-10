@@ -123,27 +123,43 @@ int get_buffer_top(void * yyscanner);
 unsigned int read_include(void * yyscanner, Grammar2 * grammar)
 {
   char * c = 0;
+  char * name = 0;
   String * fileName = 0; //String_new(0);
-  unsigned int i = 0;
+  unsigned int i,j = 0;
   unsigned int result = 0;
 
   YY_BUFFER_STATE curBuf = get_current_buffer(yyscanner);
   char * text = yyget_text(yyscanner);
-  i = Memory_len(text);
-  
+  i = 0;
+  j = 0;
+  name =0;
+  while (i< Memory_len(text))
+  {
+    if ((name==0) && ((text[i]=='<')||(text[i]=='"')))
+	{
+	  name = &text[i];
+	  j = i;
+	} 
+	else if ((name!=0) && ((text[i]=='>')||(text[i]=='"')))
+	{
+	  j = i - j;
+      break;
+	}
+	i++;
+  }
   // Windows End of Line case: \n\r
-  if (text[i-1]=='\r') i=i-1;
+  //if (text[i-1]=='\r') i=i-1;
   
-  Error_new(ERROR_DBG, "Gramar2.lex.c: Include file name =%s\n", text);
+  Error_new(ERROR_DBG, "Grammar2.lex.c: Include file name =%s\n", text);
   //Error_new(ERROR_DBG,"Length =%d\n", i);
   
-  char * buffer = Memory_alloc(i-1);
-  Memory_set(buffer, 0, i-1);
-  Memory_copy(buffer, &text[1], i-2);
+  char * buffer = Memory_alloc(j);
+  Memory_set(buffer, 0, j);
+  Memory_copy(buffer, name+1, j-1);
   
   fileName = String_new(0);
   String_setBuffer(fileName, buffer);
-  //Error_new(ERROR_DBG,"INCLUDE %s!!!\n", buffer);
+  Error_new(ERROR_DBG,"INCLUDE %s!!!\n", buffer);
 
   c = Grammar2_processNewFile(grammar, fileName);
   if (c!=0)
