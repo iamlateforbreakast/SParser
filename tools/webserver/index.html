@@ -12,7 +12,8 @@
     <a href="#">Home</a>
     <a href="#">Link</a>
     <a href="#">Link</a>
-    <button class="button">CLick Me!</button>
+	<a href="#">Link</a>
+    <button class="button">Click Me!</button>
   </div>
 
   <div class="row">
@@ -58,16 +59,25 @@
     var request = new XMLHttpRequest();
     request.open('POST','load',true);
     request.onreadystatechange = function () {
-    if (request.readyState === 4 && request.status === 200) {}
-    }
+    if (request.readyState === 4 && request.status === 200) {
+	    var type = request.getResponseHeader('Content-Type');
+        if (type.indexOf("json") !== 1) {
+		    var data = JSON.parse(request.responseText);
+			var options = {};
+			// initialize your network!
+			var network = new vis.Network(container, data, options);
+            return request.responseText;
+		}
+    }}
+	request.send('node=0');
     //  request.onload = function() {
     //  };
     //  request.send('node=0');
     }
     // create a network
     var container = document.getElementById('mynetwork');
-    getData();
-    postData();
+    //getData();
+    postData1();
 
 </script>
 </body>

@@ -1,16 +1,18 @@
 #Copyright Jon Berg , turtlemeat.com
 
 import string,cgi,time,sqlite3
+import queries 
 from os import curdir, sep
 import os.path
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-#import pri
+from urlparse import parse_qs
 
 db_handler = None
     
 class MyHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         print(self.path)
+        print parse_qs(self.path[2:]) 
         try:
             if self.path.endswith(".html"):
                 f = open(curdir + sep + self.path) #self.path has /test.html
@@ -86,7 +88,9 @@ class MyDbHandler:
        self.cursor = self.db.cursor()
        self.nodes = "\"nodes\":["
        self.edges = "\"edges\":[{\"from\":\"1\", \"to\":\"2\"}]"
-       
+       queries.getNodeCount(self.cursor)
+       queries.getTransUnitCount(self.cursor)
+	   
     def __del__(self):
        self.db.close();
        
