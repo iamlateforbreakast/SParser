@@ -7,16 +7,24 @@
     <link href="./sparse.css" rel="stylesheet" type="text/css" />
 </head>
 
-<body>
+<body onbeforeunload="handleClose()">
   <div class="topnav">
     <a href="#">Home</a>
-    <a href="#">Link</a>
-    <a href="#">Link</a>
-	<a href="#">Link</a>
-    <button class="button">Click Me!</button>
+	<button class="tablink" onclick="openPage('Screen1', this, 'red')">Screen 1</button>
+	<button class="tablink"onclick="openPage('Screen2', this, 'blue')">Screen 2</button>
+    <button class="tablink"onclick="openPage('Help!', this, 'green')">Help!</button>
+	<button class="tablink"onclick="openPage('About', this, 'orange')">About</button>
   </div>
 
-  <div class="row">
+<div id="Screen2" class="tabcontent">
+  <h3>Home</h3>
+  <p>Home is where the heart is..</p>
+</div>
+
+<div id="Screen1" class="tabcontent">
+  <h3>News</h3>
+  <p>Some news this fine day!</p> 
+    <div class="row">
    <div class="column">
     <div class="network" id="mynetwork" ></div>
    </div>
@@ -24,14 +32,39 @@
     <div class="network" id="mynetwork1" ></div>
    </div>
   </div>
+</div>
+
+<div id="Help!" class="tabcontent">
+  <h3>Contact</h3>
+  <p>Get in touch, or swing by for a cup of coffee.</p>
+</div>
+
+<div id="About" class="tabcontent">
+  <h3>About</h3>
+  <p>Who we are and what we do.</p>
+</div>
+
 
 <div class="footer">
 </div>
 
 <script type="text/javascript">
+function openPage(pageName,elmnt,color) {
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablink");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].style.backgroundColor = "";
+  }
+  document.getElementById(pageName).style.display = "block";
+  elmnt.style.backgroundColor = color;
+}
     function getData(){
 	    var request = new XMLHttpRequest();
-		request.open('GET', 'unit.json', true);
+		request.open('GET', 'Node/show/0?depth=10', true);
 		request.send(null);
 		request.onreadystatechange = function () {
         if (request.readyState === 4 && request.status === 200) {
@@ -66,6 +99,11 @@
 			var options = {};
 			// initialize your network!
 			var network = new vis.Network(container, data, options);
+            network.on( 'click', function(properties) {
+                var ids = properties.nodes;
+                var clickedNodes = nodes.get(ids);
+                console.log('clicked nodes:', clickedNodes);
+            });
             return request.responseText;
 		}
     }}
@@ -74,10 +112,13 @@
     //  };
     //  request.send('node=0');
     }
+	function handleClose(){
+	   alert("Closing");
+	}
     // create a network
     var container = document.getElementById('mynetwork');
-    //getData();
-    postData1();
+    getData();
+    //postData1();
 
 </script>
 </body>
