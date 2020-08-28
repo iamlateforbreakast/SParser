@@ -122,3 +122,8 @@ PUBLIC unsigned int SdbRequest_getNbResult(SdbRequest * this)
 {
   return this->nbResults;
 }
+
+PUBLIC List * SdbRequest_getResults(SdbRequest * this)
+{
+  return this->result;
+}
