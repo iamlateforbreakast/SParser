@@ -184,6 +184,8 @@ PUBLIC int String_toInt(String* this)
 {
   int result = 0;
   
+  result = atoi(String_getBuffer(this));
+  
   return result;
 }
 
@@ -334,3 +336,4 @@ PUBLIC unsigned int String_matchWildcard(String * this, const char * wildcard)
   
   return isMatch;
 }
+
