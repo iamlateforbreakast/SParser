@@ -16,7 +16,7 @@
 
 #include "Grammar2.parse.h"
 
-#define MAX_BUFFER_SIZE  (32768)
+#define MAX_BUFFER_SIZE  (1024*1024)
 
 extern int Grammar2_parse (void * scanner, Grammar2 * this);
 extern void * Grammar2_scan_string (const char * yystr , void * yyscanner);
@@ -33,12 +33,15 @@ PRIVATE unsigned int isInitialised = 0;
 
 PRIVATE unsigned int Grammar2_isFileToBeIgnored(Grammar2 * this, String * fileName);
 PRIVATE unsigned int Grammar2_isIncludeNodeProcessed(Grammar2 * this, String * name);
+PRIVATE void Grammar2_storeIncludeStartNode(Grammar2 * this, unsigned int nodeId, unsigned int startNodeId);
+
 PRIVATE char internalBuffer[MAX_BUFFER_SIZE];
 
 struct GrammarContext
 {
   Object object;
   unsigned int lastNode;
+  unsigned int includeNodeBranch;
 };
 
 typedef struct GrammarContext GrammarContext;
@@ -89,6 +92,7 @@ PUBLIC Grammar2 * Grammar2_new(FileReader * fr, SdbMgr * sdbMgr)
   this->contexts = List_new(this->contexts);
   this->current = (GrammarContext*)Object_new(sizeof(GrammarContext),0);
   this->current->lastNode = 0;
+  this->current->includeNodeBranch = 0;
   List_insertHead(this->contexts, this->current);
   
   this->buffer = &internalBuffer[0];
@@ -273,22 +277,32 @@ PUBLIC void Grammar2_addToBuffer(Grammar2 * this, char * text)
   if (this->node_text_position>(MAX_BUFFER_SIZE-1)) 
   {
     /* Error case: Cannot obtain the FileMgr root location. */
-    Error_new(ERROR_FATAL, "Grammar internal buffer too small %d\n", this->node_text_position);
+    Error_new(ERROR_FATAL, "Grammar internal buffer too small %s %d\n", String_getBuffer(FileReader_getName(this->reader)), this->node_text_position);
   }
 }
 
 PUBLIC void Grammar2_addNode(Grammar2 * this, unsigned int type, int nodePtr)
 {
   SdbRequest * insertNode = 0;
+  SdbRequest * updatePrevNode = 0;
   
   insertNode = SdbRequest_new(
   "INSERT INTO Nodes (NodeId, NodeType, NodePtr, NodeNext, NodePrev) "
   "VALUES (%d,%d,%d,%d,%d);"
   );
+  updatePrevNode = SdbRequest_new(
+  "UPDATE Nodes SET NodeNext = %d WHERE NodeId = %d;"
+  );
+
   nodeId++;
      
   SdbRequest_execute(insertNode, nodeId, type, nodePtr, 0, this->current->lastNode);
-  
+  SdbRequest_execute(updatePrevNode, nodeId, this->current->lastNode);
+  if (this->current->includeNodeBranch!=0)
+  {
+    Grammar2_storeIncludeStartNode(this, this->current->lastNode, nodeId);
+     this->current->includeNodeBranch = 0;
+  }
   SdbRequest_delete(insertNode);
 }
 
@@ -296,7 +310,7 @@ PUBLIC void Grammar2_addComment(Grammar2 * this)
 {
   SdbRequest * insertCommentNode = 0;
   
-  //printf("Grammar2_addComment: 1\n");
+  printf("Grammar2_addComment: 1\n");
   insertCommentNode = SdbRequest_new(
   "INSERT INTO Comment_Nodes (NodeId, Comment) "
   "VALUES (%d,'%s');"
@@ -314,7 +328,7 @@ PUBLIC void Grammar2_addComment(Grammar2 * this)
   SdbRequest_execute(insertCommentNode, commentNodeId, this->buffer);
   SdbRequest_delete(insertCommentNode);
   
-  //printf("Grammar2_addComment: 2\n");
+  printf("Grammar2_addComment: 2\n");
 }
 
 PUBLIC void Grammar2_addCodeNode(Grammar2 * this)
@@ -357,7 +371,7 @@ PUBLIC void Grammar2_addIncludeNode(Grammar2 * this, char * name)
 
   Grammar2_addNode(this, 3, includeNodeId);
   this->current->lastNode = nodeId;
-  
+   
   SdbRequest_execute(insertIncludeNode, includeNodeId, name, 0);
   SdbRequest_delete(insertIncludeNode);
 }
@@ -382,7 +396,7 @@ PUBLIC char * Grammar2_processNewFile(Grammar2 * this, String * fileName)
    if (result==0)
    {
      //Grammar2_returnToFile(this);
-     Error_new(ERROR_FATAL,"Grammar2_processNewFile: Cannot find %s\n", String_getBuffer(fileName));
+     Error_new(ERROR_FATAL,"Grammar2_processNewFile: While processing % s cannot find %s\n", String_getBuffer(FileReader_getName(this->reader)), String_getBuffer(fileName));
    }
    else
    {
@@ -390,6 +404,7 @@ PUBLIC char * Grammar2_processNewFile(Grammar2 * this, String * fileName)
    
     o = (GrammarContext*)Object_new(sizeof(GrammarContext),0);
     o->lastNode = this->current->lastNode;
+    o->includeNodeBranch = 1;
     this->current = o;
    
    List_insertHead(this->contexts, o);
@@ -426,7 +441,89 @@ PRIVATE unsigned int Grammar2_isFileToBeIgnored(Grammar2 * this, String * fileNa
     if (Memory_ncmp(buffer, "sys/time.h", 10)) return 1;
     if (Memory_ncmp(buffer, "errno.h", 7)) return 1;
     if (Memory_ncmp(buffer, "inttypes.h", 10)) return 1;
+    if (Memory_ncmp(buffer, "stdint.h", 8)) return 1;
     
+    if (Memory_ncmp(buffer, "rtems/rtems/", 12)) return 1;
+    if (Memory_ncmp(buffer, "rtems/rtems/status.inl", 23)) return 1;
+    if (Memory_ncmp(buffer, "rtems/score/address.inl", 24)) return 1;
+    if (Memory_ncmp(buffer, "rtems/score/heap.inl", 21)) return 1;
+    if (Memory_ncmp(buffer, "rtems/score/chain.inl", 22)) return 1;
+    if (Memory_ncmp(buffer, "rtems/score/isr.inl", 20)) return 1;
+    if (Memory_ncmp(buffer, "rtems/score/object.inl", 23)) return 1;
+    if (Memory_ncmp(buffer, "rtems/score/objectmp.h", 23)) return 1;
+    if (Memory_ncmp(buffer, "rtems/score/priority.inl", 23)) return 1;
+    if (Memory_ncmp(buffer, "rtems/score/watchdog.inl", 23)) return 1;
+    if (Memory_ncmp(buffer, "rtems/score/tod.inl", 20)) return 1;
+    if (Memory_ncmp(buffer, "rtems/rtems/modes.inl", 22)) return 1;
+    if (Memory_ncmp(buffer, "rtems/score/mpci.h", 18)) return 1;
+    if (Memory_ncmp(buffer, "rtems/score/mppkt.h", 19)) return 1;
+    if (Memory_ncmp(buffer, "rtems/posix/config.h", 20)) return 1;
+    if (Memory_ncmp(buffer, "itron.h", 8)) return 1;
+    if (Memory_ncmp(buffer, "rtems/itron/config.h", 20)) return 1;
+    if (Memory_ncmp(buffer, "rtems/score/states.inl", 22)) return 1;
+    if (Memory_ncmp(buffer, "rtems/score/stack.inl", 21)) return 1;
+    if (Memory_ncmp(buffer, "rtems/score/tqdata.inl", 20)) return 1;
+    if (Memory_ncmp(buffer, "rtems/score/thread.inl", 20)) return 1;
+    if (Memory_ncmp(buffer, "rtems/score/threadmp.h", 20)) return 1;
+    if (Memory_ncmp(buffer, "rtems/score/coremsg.inl", 21)) return 1;
+    if (Memory_ncmp(buffer, "rtems/rtems/eventset.inl", 22)) return 1;
+    if (Memory_ncmp(buffer, "rtems/score/sysstate.inl", 22)) return 1;
+    if (Memory_ncmp(buffer, "rtems/score/coremutex.inl", 23)) return 1;
+    if (Memory_ncmp(buffer, "rtems/score/coresem.inl", 21)) return 1;
+    if (Memory_ncmp(buffer, "rtems/rtems/semmp.h", 19)) return 1;
+    if (Memory_ncmp(buffer, "rtems/rtems/asr.inl", 17)) return 1;
+    if (Memory_ncmp(buffer, "rtems/rtems/message.inl", 21)) return 1;
+    if (Memory_ncmp(buffer, "rtems/rtems/msgmp.h", 17)) return 1;
+    if (Memory_ncmp(buffer, "rtems/rtems/eventmp.h", 19)) return 1;
+    if (Memory_ncmp(buffer, "rtems/rtems/sem.inl", 17)) return 1;
+    if (Memory_ncmp(buffer, "rtems/rtems/attr.inl", 18)) return 1;
+    if (Memory_ncmp(buffer, "rtems/rtems/timer.inl", 19)) return 1;
+    if (Memory_ncmp(buffer, "rtems/rtems/event.inl", 19)) return 1;
+    if (Memory_ncmp(buffer, "rtems/rtems/support.inl", 21)) return 1;
+    if (Memory_ncmp(buffer, "rtems/rtems/signalmp.h", 20)) return 1;
+    if (Memory_ncmp(buffer, "rtems/rtems/tasks.inl", 19)) return 1;
+    if (Memory_ncmp(buffer, "rtems/rtems/taskmp.h", 18)) return 1;
+    if (Memory_ncmp(buffer, "rtems/score/userext.inl", 23)) return 1;
+    if (Memory_ncmp(buffer, "rtems/extension.inl", 17)) return 1;
+    if (Memory_ncmp(buffer, "rtems/rtems/options.inl", 23)) return 1;
+    if (Memory_ncmp(buffer, "rtems/system.h", 14)) return 1;
+    if (Memory_ncmp(buffer, "rtems/posix/cond.h", 18)) return 1;
+    if (Memory_ncmp(buffer, "rtems/posix/mqueue.h", 20)) return 1;
+    if (Memory_ncmp(buffer, "rtems/posix/mutex.h", 19)) return 1;
+    if (Memory_ncmp(buffer, "rtems/posix/key.h", 17)) return 1;
+    if (Memory_ncmp(buffer, "rtems/posix/psignal.h", 21)) return 1;
+    if (Memory_ncmp(buffer, "rtems/posix/semaphore.h", 23)) return 1;
+    if (Memory_ncmp(buffer, "rtems/posix/threadsup.h", 23)) return 1;
+    if (Memory_ncmp(buffer, "rtems/posix/timer.h", 19)) return 1;
+    if (Memory_ncmp(buffer, "rtems/itron/eventflags.h", 25)) return 1;
+    if (Memory_ncmp(buffer, "rtems/itron/fmempool.h", 22)) return 1;
+    if (Memory_ncmp(buffer, "rtems/itron", 11)) return 1;
+    if (Memory_ncmp(buffer, "reent.h", 7)) return 1; 
+    if (Memory_ncmp(buffer, "sys/types.h", 11)) return 1;
+    if (Memory_ncmp(buffer, "sys/stat.h", 10)) return 1;
+    if (Memory_ncmp(buffer, "sys/cdefs.h", 10)) return 1;
+    if (Memory_ncmp(buffer, "sys/ioctl_compat.h", 18)) return 1;
+    if (Memory_ncmp(buffer, "limits.h", 8)) return 1; 
+    if (Memory_ncmp(buffer, "hdsw.h", 6)) return 1;
+    if (Memory_ncmp(buffer, "stubs.h", 7)) return 1;
+    if (Memory_ncmp(buffer, "termios.h", 9)) return 1;
+    if (Memory_ncmp(buffer, "mpci.h", 6)) return 1;
+    if (Memory_ncmp(buffer, "mqueue.h", 8)) return 1;
+    if (Memory_ncmp(buffer, "HdswBTypes.h", 12)) return 1;
+    if (Memory_ncmp(buffer, "HdswCommon.h", 13)) return 1;
+    if (Memory_ncmp(buffer, "HdswTtrReg.h", 12)) return 1;
+    if (Memory_ncmp(buffer, "HdswVersion.h", 13)) return 1;
+    if (Memory_ncmp(buffer, "math.h", 6)) return 1;
+    if (Memory_ncmp(buffer, "comsDeconfTestsUtils.h", 22)) return 1;
+    if (Memory_ncmp(buffer, "localInclude.h", 15)) return 1; 
+    if (Memory_ncmp(buffer, "thermalStubs.h", 14)) return 1;
+    if (Memory_ncmp(buffer, "testUtilsTwta.h", 15)) return 1;
+    if (Memory_ncmp(buffer, "../common/testUtilsTwta.h", 15)) return 1;
+    if (Memory_ncmp(buffer, "leopSeqStepsHelper.h", 20)) return 1;
+    if (Memory_ncmp(buffer, "ssmmMgrPrivateFct.h", 19)) return 1;
+    if (Memory_ncmp(buffer, "sysFctStub.h", 12)) return 1;
+    if (Memory_ncmp(buffer, "stubCdhs.h", 10)) return 1;
+    //if (Memory_ncmp(buffer, "
     return result;
 }
 
@@ -441,4 +538,40 @@ PRIVATE unsigned int Grammar2_isIncludeNodeProcessed(Grammar2 * this, String * n
   SdbRequest_delete(checkIncludeNode);
   
   return SdbRequest_getNbResult(checkIncludeNode);
+}
+
+PRIVATE void Grammar2_storeIncludeStartNode(Grammar2 * this, unsigned int nodeId, unsigned int startNodeId)
+{
+  unsigned int result = 0;
+  unsigned int includeNodeId = 0;
+  unsigned int i = 0;
+  List * l = 0;
+  String * s[5] = { 0, 0 , 0, 0, 0};
+  
+  SdbRequest * updateIncludeNode = 0;
+  SdbRequest * findIncludeNode = 0; 
+  
+  findIncludeNode = SdbRequest_new(
+   "SELECT * FROM Nodes WHERE NodeId=%d;"
+   );
+  updateIncludeNode = SdbRequest_new(
+     "UPDATE Include_Nodes SET EntryNode = %d WHERE NodeId = %d;"
+  );
+  SdbRequest_execute(findIncludeNode, nodeId);
+  if (SdbRequest_getNbResult(findIncludeNode)!=0)
+  {
+    l = SdbRequest_getResults(findIncludeNode);
+    for (i=0; i<5; i++)
+    {
+      s[i] = List_getNext(l);
+    }
+    /* Retrieve NodePtr */
+    includeNodeId = String_toInt(s[2]);
+  }
+  SdbRequest_execute(updateIncludeNode, startNodeId, includeNodeId);
+  
+  SdbRequest_delete(findIncludeNode);
+  SdbRequest_delete(updateIncludeNode);
+  
+  return result;
 }
