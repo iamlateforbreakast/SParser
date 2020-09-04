@@ -74,10 +74,29 @@ function openPage(pageName,elmnt,color) {
 				var options = {};
 				// initialize your network!
 				var network = new vis.Network(container, data, options);
+                network.on( 'select', function(properties) {
+                    var ids = properties.nodes;
+                    getNodeData(ids);
+                    console.log('clicked nodes:', ids);
+                });
                 return request.responseText;
             }
         }
     }}
+    function getNodeData(ids){
+        var request = new XMLHttpRequest();
+		request.open('GET', 'Node/data/' + ids[0], true);
+		request.send(null);
+        request.onreadystatechange = function () {
+            if (request.readyState === 4 && request.status === 200) {
+                var type = request.getResponseHeader('Content-Type');
+                if (type.indexOf("json") !== 1) {
+                    console.log('Received:',request.responseText)
+                    return request.responseText;
+                }
+            }    
+        }
+    }
     function postData(){
     var request = new XMLHttpRequest();
     request.open('POST','load',true);

@@ -5,9 +5,10 @@ import string,cgi,time,sqlite3
 from router import Router
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import os.path
-from responses import Home, NodeShow,SparseCss,VisJs, VisCss
+from responses import Home, NodeShow,NodeData, SparseCss,VisJs, VisCss
 
 # GET Node/Show/0?depth=10
+# GET Node/Data/0
 # GET Node/List?first=10&last=20
 # GET Node/total
 # POST Node/add/3789?name=a+node&id=10
@@ -59,6 +60,7 @@ def main():
     app.addRoute(VisJs, "GET","/vis.min.js")
     app.addRoute(VisCss, "GET","/vis.min.css")
     app.addRoute(NodeShow, "GET", "/Node/show/<int:id>")
+    app.addRoute(NodeData, "GET","/Node/data/<int:id>")
     app.run()
 
 if __name__ == '__main__':
