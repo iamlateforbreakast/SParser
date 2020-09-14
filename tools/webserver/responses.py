@@ -159,7 +159,29 @@ class NodeData:
         nodeId = int(path.split('/')[3])
         handler.wfile.write(db_handler.getNodeData(nodeId))
         return
-      
+    
+class RainbowJs:
+    def __init__(self, handler, path):
+        print "RainbowJs Init:"
+        f = open("./rainbow-custom.min.js")
+        handler.send_response(200)
+        handler.send_header('Content-type',	'text/javascript')
+        handler.end_headers()
+        handler.wfile.write(f.read())
+        f.close()
+        return    
+
+class ThemeCss:
+    def __init__(self, handler, path):
+        print "ThemeCss Init:"
+        f = open("./github.css")
+        handler.send_response(200)
+        handler.send_header('Content-type',	'text/css')
+        handler.end_headers()
+        handler.wfile.write(f.read())
+        f.close()
+        return
+        
 class SparseCss:
     def __init__(self, handler, path):
         print "SparseCss Init:"

@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="./vis.min.css" rel="stylesheet" type="text/css" />
     <link href="./sparse.css" rel="stylesheet" type="text/css" />
+    <link href="./github.css" rel="stylesheet" type="text/css">
+    <script src="./rainbow-custom.min.js"></script>
 </head>
 
 <body onbeforeunload="handleClose()">
@@ -29,7 +31,11 @@
     <div class="network" id="mynetwork" ></div>
    </div>
    <div class="column">
-    <div class="network" id="mynetwork1" ></div>
+    <div class="network" id="mycontent" >
+         <span class="rightfloat">
+             <pre><code data-language="c"><span id="phone"></span></code></pre>
+        </span>
+    </div>
    </div>
   </div>
 </div>
@@ -91,7 +97,9 @@ function openPage(pageName,elmnt,color) {
             if (request.readyState === 4 && request.status === 200) {
                 var type = request.getResponseHeader('Content-Type');
                 if (type.indexOf("json") !== 1) {
+                    var data = JSON.parse(request.responseText);
                     console.log('Received:',request.responseText)
+                    document.getElementById("phone").innerHTML = data.data;
                     return request.responseText;
                 }
             }    
