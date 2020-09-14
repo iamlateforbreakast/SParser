@@ -29,34 +29,23 @@ h1 {
 /* The navbar container */
 .topnav {
   overflow: hidden;
-  background-color: #333;
+  background-color: #777;
 }
 
-/* Navbar links */
-.topnav a {
-  float: left;
-  display: block;
-  color: #f2f2f2;
-  text-align: center;
-  padding: 14px 16px;
-  text-decoration: none;
-}
-
-/* Links - change color on hover */
-.topnav a:hover {
-  background-color: #ddd;
-  color: black;
-} 
-
-.button {
+/* Style tab links */
+.tablink {
+  background-color: #555;
+  color: white;
   float: left;
   border: none;
-  display: inline-block;
-  color: #ddd;
-  background-color: #333;
-  text-align: center;
+  outline: none;
+  cursor: pointer;
   padding: 14px 16px;
-  text-decoration: none;
+  font-size: 17px;
+}
+
+.tablink:hover {
+  background-color: #777;
 }
 
 .footer {
