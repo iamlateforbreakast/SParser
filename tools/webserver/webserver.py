@@ -1,11 +1,12 @@
 #Copyright Jon Berg , turtlemeat.com
 
 import string,cgi,time,sqlite3
+import sys, getopt
 
 from router import Router
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import os.path
-from responses import Home, NodeShow,NodeData, SparseCss,VisJs, VisCss
+from responses import Home, NodeShow,NodeData, SparseCss,VisJs, RainbowJs, ThemeCss, VisCss
 
 # GET Node/Show/0?depth=10
 # GET Node/Data/0
@@ -35,7 +36,7 @@ from responses import Home, NodeShow,NodeData, SparseCss,VisJs, VisCss
 
 class App:
 
-    db = 0;
+    dbName = 0;
     cursor = 0;
 	
     def __init__(self):
@@ -53,15 +54,31 @@ class App:
     def addRoute(self, className, method, rule):
         self.router.addRoute(className, method, rule)
 
-def main():
+def main(argv):
+    try:
+       opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
+    except getopt.GetoptError:
+       print 'test.py -i <inputfile> -o <outputfile>'
+       sys.exit(2)
+    for opt, value in opts:
+        if opt == '-h':
+            print 'webserver.py -i <inputdb> -o <outputdb>'
+        elif opt in ("-i", "--ifile"):
+            inputDb = value
+        elif opt in ("-o", "--ofile"):
+            outputDb = value
+    print "Options: ", opts
+    print "Args:", args
     app=App()
     app.addRoute(Home, "GET","/index.html")
     app.addRoute(SparseCss, "GET","/sparse.css")
     app.addRoute(VisJs, "GET","/vis.min.js")
+    app.addRoute(RainbowJs,"GET","rainbow-custom.min.js")
+    app.addRoute(ThemeCss, "GET","/github.css")
     app.addRoute(VisCss, "GET","/vis.min.css")
     app.addRoute(NodeShow, "GET", "/Node/show/<int:id>")
     app.addRoute(NodeData, "GET","/Node/data/<int:id>")
     app.run()
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])
