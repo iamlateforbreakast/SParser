@@ -1,4 +1,24 @@
+To compile:
+-----------
 
+gh auth login
+
+gh repo clone iamlateforbreakast/SParse
+
+cd SParse
+
+git status
+
+touch test.txt
+
+git add .
+
+git commit -m "Created test.txt"
+
+git push
+
+autoreconf -- install
+--------------------------------
 git fetch --all
 
 git reset --hard origin/master
@@ -19,5 +39,5 @@ Apt install doxygen
 
 Fedora 35::
 ----------
-sudo dnf install autoconf automake
+sudo dnf install autoconf automake doxygen
 

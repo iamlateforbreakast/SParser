@@ -6,6 +6,7 @@
 #include "Class.h"
 #include "Object.h"
 
+#include <stdio.h>
 
 /**********************************************//**
   @class Timer
