@@ -145,7 +145,7 @@ class NodeShow:
         handler.end_headers()
         db_handler=MyDbHandler()
         #handler.wfile.write(db_handler.getTransUnitList())
-        handler.wfile.write(db_handler.getNodeZero(1, 50))
+        handler.wfile.write(db_handler.getNodeZero(1, 50).encode('utf-8'))
         #db_handler.getNodeZero()
         return
 
@@ -157,7 +157,7 @@ class NodeData:
         handler.end_headers()
         db_handler=MyDbHandler()
         nodeId = int(path.split('/')[3])
-        handler.wfile.write(db_handler.getNodeData(nodeId))
+        handler.wfile.write(db_handler.getNodeData(nodeId).encode('utf-8'))
         return
     
 class RainbowJs:
@@ -167,7 +167,7 @@ class RainbowJs:
         handler.send_response(200)
         handler.send_header('Content-type',	'text/javascript')
         handler.end_headers()
-        handler.wfile.write(f.read())
+        handler.wfile.write(f.read().encode('utf-8'))
         f.close()
         return    
 
@@ -178,7 +178,7 @@ class ThemeCss:
         handler.send_response(200)
         handler.send_header('Content-type',	'text/css')
         handler.end_headers()
-        handler.wfile.write(f.read())
+        handler.wfile.write(f.read().encode('utf-8'))
         f.close()
         return
         
@@ -189,7 +189,7 @@ class SparseCss:
         handler.send_response(200)
         handler.send_header('Content-type',	'text/css')
         handler.end_headers()
-        handler.wfile.write(f.read())
+        handler.wfile.write(f.read().encode('utf-8'))
         f.close()
         return
 
@@ -200,7 +200,7 @@ class VisCss:
         handler.send_response(200)
         handler.send_header('Content-type',	'text/css')
         handler.end_headers()
-        handler.wfile.write(f.read())
+        handler.wfile.write(f.read().encode('utf-8'))
         f.close()
         return
         
@@ -211,6 +211,6 @@ class VisJs:
         handler.send_response(200)
         handler.send_header('Content-type',	'text/javascript')
         handler.end_headers()
-        handler.wfile.write(f.read())
+        handler.wfile.write(f.read().encode('utf-8'))
         f.close()
         return
