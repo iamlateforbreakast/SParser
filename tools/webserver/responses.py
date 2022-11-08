@@ -133,7 +133,7 @@ class Home:
         handler.send_response(200)
         handler.send_header('Content-type',	'text/html')
         handler.end_headers()
-        handler.wfile.write(f.read())
+        handler.wfile.write(f.read().encode('utf-8'))
         f.close()
         return
 
