@@ -34,7 +34,7 @@ class HTTPHandler(BaseHTTPRequestHandler):
 class Router():
 
     def __init__(self):
-        self.server = HTTPServer(('', 80), HTTPHandler)
+        self.server = HTTPServer(('', 8080), HTTPHandler)
         
     def addRoute(self, className, method, rule):
         pattern = ''
