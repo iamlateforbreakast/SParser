@@ -429,8 +429,8 @@ PRIVATE void Node_stealLeftKey(Node* node, unsigned int idxChildStealFrom, unsig
 
 	//printf("Stealing Left Key from % to % d\n", idxChildStealFrom, idxChildGiveTo);
 	Node_shiftRight(giveToChild, 0);
-	giveToChild->children[0] = stealFromChild->children[stealFromChild->nbKeyUsed - 1];
-	giveToChild->leaves[0] = stealFromChild->leaves[stealFromChild->nbKeyUsed - 1];
+	giveToChild->children[0] = stealFromChild->children[stealFromChild->nbKeyUsed];
+	giveToChild->leaves[0] = stealFromChild->leaves[stealFromChild->nbKeyUsed];
 	giveToChild->keys[0] = node->keys[idxChildStealFrom];
 	node->keys[idxChildStealFrom] = stealFromChild->keys[stealFromChild->nbKeyUsed - 1];
 	//giveToChild->nbKeyUsed++;
