@@ -221,7 +221,7 @@ PUBLIC Object Node_remove(Node* node, Key key, unsigned int * keyToUpdate)
 			if (key <= node->keys[i])
 			{
 				// The key is found already while descending the tree, remember it
-				if (key <= node->keys[i]) keyToUpdate = &node->keys[i];
+				if (key <= node->keys[i]) keyToUpdate = &node->keys[i]; /* BUG: <= should be == */
 				object = Node_remove(node->children[i], key, keyToUpdate);
 				// Check if the number of children is at least ORDER
 				if (node->children[i]->nbKeyUsed < ORDER - 1)
@@ -360,7 +360,7 @@ PRIVATE void Node_shiftRight(Node* node, unsigned int idxKey)
 		node->children[j] = node->children[j - 1];
 		node->leaves[j] = node->leaves[j - 1];
 	}
-	node->nbKeyUsed++;
+	node->nbKeyUsed++; /* BUG: if idxKey == node->nbKeyUsed this incremented incorrectly */
 }
 
 PRIVATE void Node_shiftLeft(Node* node, unsigned int idxKey)
@@ -374,7 +374,7 @@ PRIVATE void Node_shiftLeft(Node* node, unsigned int idxKey)
 		node->children[j] = node->children[j + 1];
 		node->leaves[j] = node->leaves[j + 1];
 	}
-	node->nbKeyUsed--;
+	node->nbKeyUsed--; /* BUG: if idxKey == node->nbKeyUsed this decremented incorrectly */
 }
 
 /*********************************************************************************
@@ -393,7 +393,7 @@ PRIVATE Node * Node_mergeNodes(Node* node, unsigned int idxLeft, unsigned idxRig
 	// Demote the key from the parent node into the left child
 	leftChild->keys[leftChild->nbKeyUsed] = node->keys[idxLeft];
 	// Promote the last key of the right child to the parent node
-	node->keys[idxLeft] = node->keys[idxRight];
+	node->keys[idxLeft] = node->keys[idxRight]; /* BUG: Statement not useful */
 	leftChild->nbKeyUsed++;
 
 	// Move all key, children, leaves from the right child node to the left
