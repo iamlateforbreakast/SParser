@@ -11,7 +11,7 @@ typedef struct Pool
 	unsigned int isFile;
 } Pool;
 
-PUBLIC Pool * Pool_new();
+PUBLIC Pool * Pool_new(unsigned int nbMemChunk, unsigned int memChunkSize);
 PUBLIC Pool * Pool_newFromFile(char * fileName);
 PUBLIC void Pool_free(Pool * pool);
 PUBLIC void Pool_alloc(Pool * pool, unsigned int size);
