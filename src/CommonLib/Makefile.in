@@ -13,6 +13,8 @@ SOURCES = \
 	./String/String2.c \
 	./Map/Map.c \
 	./Map/MapEntry.c \
+	./BTree/BTree.c \
+	./BTree/Node.c \
 	./Error/Error.c
 
 HEADERS = ./Types/Types.h ./Object/Class.h $(SOURCES:.c=.h)
