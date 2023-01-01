@@ -3,7 +3,7 @@
 * 
 *********************************************************************************/
 #include <stdlib.h>
-#include "CommonTypes.h"
+#include "Types.h"
 #include "BTree.h"
 #include "BeamWeightRange.h"
 
