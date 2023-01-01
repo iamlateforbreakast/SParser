@@ -4,7 +4,7 @@
 #ifndef _NODE_
 #define _NODE_
 
-#include "CommonTypes.h"
+#include "Types.h"
 
 typedef struct Node Node;
 
