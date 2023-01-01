@@ -5,6 +5,8 @@
 #define _NODE_
 
 #include "Types.h"
+#include "CommonTypes.h"
+
 #define ORDER (3)
 
 typedef struct Node Node;
