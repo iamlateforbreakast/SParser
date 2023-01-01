@@ -4,7 +4,7 @@
 * BTree.h
 *
 *********************************************************************************/
-#include "CommonTypes.h"
+#include "Types.h"
 #include "Node.h"
 
 typedef struct BTree
