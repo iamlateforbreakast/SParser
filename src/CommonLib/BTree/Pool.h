@@ -4,7 +4,7 @@
 * Pool.h
 *
 *********************************************************************************/
-#include "CommonTypes.h"
+#include "Types.h"
 
 typedef struct Pool
 {
