@@ -72,14 +72,26 @@ PUBLIC void Pool_free(Pool * pool)
    }
 }
 
-PUBLIC void * Pool_alloc(Pool * pool)
+PUBLIC unsigned int Pool_alloc(Pool * pool)
 {
+   unisgned int idx = 0;
    // Check if free slots left
    // return nextFree
    // NextFree = nextFree next
-   return 0;
+   p = pool->pool + pool->nextAvailable * (sizeof(MemChunk) + pool->memChunkSize);
+   
+   return p;
 }
 
 PUBLIC void Pool_dealloc(Pool * pool, unsigned int p)
 {
+}
+
+PUBLIC void Pool_write(Pool * pool, void * p)
+{
+}
+
+PUBLIC void * Pool_read(Pool * pool, unsigned int idx)
+{
+   return 0;
 }
