@@ -9,7 +9,7 @@ typedef struct MemChunk
    unsigned int next;
    unsigned int prev;
    unsigned int isFree;
-}
+} MemChunk;
 
 PUBLIC Pool * Pool_new(unsigned int nbMemChunks, unsigned int memChunkSize)
 {
@@ -36,7 +36,6 @@ PUBLIC Pool * Pool_new(unsigned int nbMemChunks, unsigned int memChunkSize)
 PUBLIC Pool * Pool_newFromFile(char * fileName,unsigned int nbMemChunks, unsigned int memChunkSize)
 {
    Pool * newPool = 0;
-   FILE * file;
    
    newPool = (Pool *)malloc(sizeof(Pool));
    newPool->nbMemChunks = nbMemChunks;
@@ -47,7 +46,7 @@ PUBLIC Pool * Pool_newFromFile(char * fileName,unsigned int nbMemChunks, unsigne
    // If file exists
    // else
    newPool->file = fopen(fileName,"b");
-   for (i=0; i<nbMemChunks; i++)
+   for (int i=0; i<nbMemChunks; i++)
    {
       MemChunk * memChunk = newPool->pool + i * (sizeof(MemChunk) + memChunkSize);
       if (i>0) memChunk->prev = i - 1;
@@ -78,8 +77,9 @@ PUBLIC void * Pool_alloc(Pool * pool)
    // Check if free slots left
    // return nextFree
    // NextFree = nextFree next
+   return 0;
 }
 
-PUBLIC void Pool_dealloc(Pool * pool, void * p)
+PUBLIC void Pool_dealloc(Pool * pool, unsigned int p)
 {
 }
