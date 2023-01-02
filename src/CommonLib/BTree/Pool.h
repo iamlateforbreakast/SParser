@@ -5,6 +5,7 @@
 *
 *********************************************************************************/
 #include "Types.h"
+#include <stdlib.h>
 
 typedef struct Pool
 {
@@ -12,8 +13,9 @@ typedef struct Pool
     unsigned int nbMemChunks;
     unsigned int maxNbMemChunks;
     unsigned int memChunksSize;
+    unsigned int nbAllocatedChunks;
     void * pool;
-    // File
+    FILE * file;
 } Pool;
 
 PUBLIC Pool * Pool_new(unsigned int nbMemChunks, unsigned int memChunkSize);
