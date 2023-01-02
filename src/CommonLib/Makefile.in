@@ -15,6 +15,7 @@ SOURCES = \
 	./Map/MapEntry.c \
 	./BTree/BTree.c \
 	./BTree/Node.c \
+	./BTree/Pool.c \
 	./Error/Error.c
 
 HEADERS = ./Types/Types.h ./Object/Class.h $(SOURCES:.c=.h)
