@@ -18,6 +18,17 @@ PUBLIC Pool * Pool_new(unsigned int nbMemChunks, unsigned int memChunkSize)
    newPool = (Pool *)malloc(sizeof(Pool));
    newPool->nbMemChunks = nbMemChunks;
    newPool->memChunkSize = memChunkSize;
+   newPool->isFile = 0;
+   newPool->pool = (MemChunk *)malloc(sizeof(MemChunk) * newPool->nbMemChunks);
+   newPool->file = 0;
+   
+   for (int i=0; i<newPool->nbMemChunks; i++)
+   {
+      MemChunk * memChunk = newPool->pool + i * (sizeof(MemChunk) + memChunkSize);
+      if (i>0) memChunk->prev = i - 1;
+      if (i<newPool->nbMemChunks-1) memChunk->next = i + 1;
+      memChunk->isFree = 1;
+   }
    
    return newPool;
 }
@@ -30,12 +41,18 @@ PUBLIC Pool * Pool_newFromFile(char * fileName,unsigned int nbMemChunks, unsigne
    newPool = (Pool *)malloc(sizeof(Pool));
    newPool->nbMemChunks = nbMemChunks;
    newPool->memChunkSize = memChunkSize;
+   newPool->isFile = 1;
+   newPool->pool = 0;
+   
    // If file exists
    // else
-   file = fopen(fileName,"b");
+   newPool->file = fopen(fileName,"b");
    for (i=0; i<nbMemChunks; i++)
    {
-      
+      MemChunk * memChunk = newPool->pool + i * (sizeof(MemChunk) + memChunkSize);
+      if (i>0) memChunk->prev = i - 1;
+      if (i<newPool->nbMemChunks-1) memChunk->next = i + 1;
+      memChunk->isFree = 1;
    }
    
    return newPool;
@@ -48,6 +65,10 @@ PUBLIC void Pool_free(Pool * pool)
       // If is file
       // Close file
       // Else free mem
+      if (!pool->isFile) 
+         free(pool->pool);
+      else
+         fclose(pool->file);
       free(pool);
    }
 }
