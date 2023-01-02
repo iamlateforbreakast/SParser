@@ -30,7 +30,7 @@ BTree * BTree_new()
 * input: a beamweight range to store in the tree
 * output: A fully allocated beamweihgt tree
 *********************************************************************************/
-void BTree_add(BTree* tree, unsigned int key, Object object)
+void BTree_add(BTree* tree, Key key, Object object)
 {
 	if (tree->root == NULL)
 	{
@@ -64,7 +64,7 @@ void BTree_add(BTree* tree, unsigned int key, Object object)
 * input: key
 * output: A reference to a beamWeightRange
 *********************************************************************************/
-Object BTree_get(BTree* tree, unsigned int key)
+Object BTree_get(BTree* tree, Key key)
 {
 	Object object = NULL;
 
@@ -79,7 +79,7 @@ Object BTree_get(BTree* tree, unsigned int key)
 * input: a beamweight range to store in the tree
 * output: A fully allocated beamweihgt tree
 *********************************************************************************/
-Object BTree_remove(BTree* tree, unsigned int key)
+Object BTree_remove(BTree* tree, Key key)
 {
 	Object object = NULL;
 	Node* root = tree->root;
