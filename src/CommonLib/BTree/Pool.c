@@ -103,9 +103,9 @@ PUBLIC unsigned int Pool_alloc(Pool * pool)
    // Check if free slots left
    // return nextFree
    // NextFree = nextFree next
-   p = pool->pool + pool->nextAvailable * (sizeof(MemChunk) + pool->memChunkSize);
+   //p = pool->pool + pool->nextAvailable * (sizeof(MemChunk) + pool->memChunkSize);
    
-   return p;
+   return idx;
 }
 
 PUBLIC void Pool_dealloc(Pool * pool, unsigned int p)
