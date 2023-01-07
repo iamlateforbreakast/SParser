@@ -12,7 +12,7 @@ typedef struct Pool
     unsigned int isFile;
     unsigned int nbMemChunks;
     unsigned int maxNbMemChunks;
-    unsigned int memChunksSize;
+    unsigned int memChunkSize;
     unsigned int nbAllocatedChunks;
     void * pool;
     FILE * file;
