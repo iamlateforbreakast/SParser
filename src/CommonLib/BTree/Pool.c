@@ -58,13 +58,25 @@ PUBLIC Pool * Pool_newFromFile(char * fileName,unsigned int nbMemChunks, unsigne
    
    // If file exists
    // else
-   newPool->file = fopen(fileName,"b");
-   for (int i=0; i<nbMemChunks; i++)
+   newPool->file = fopen(fileName,"rb");
+   if (newPool->file)
    {
-      MemChunk * memChunk = newPool->pool + i * (sizeof(MemChunk) + memChunkSize);
-      if (i>0) memChunk->prev = i - 1;
-      if (i<newPool->nbMemChunks-1) memChunk->next = i + 1;
-      memChunk->isFree = 1;
+   }
+   else
+   {
+      // Create the file
+      newPool->file = fopen(fileName, "b");
+      for (int i=0; i<nbMemChunks; i++)
+      {
+         MemChunk memChunk;
+         //= newPool->pool + i * (sizeof(MemChunk) + memChunkSize);
+         if (i>0) 
+            memChunk->prev = i - 1;
+         if (i<newPool->nbMemChunks-1) 
+            memChunk->next = i + 1;
+         memChunk->isFree = 1;
+         fwrite(&memChunk, sizeof(MemChunk), 1, newPool->file);
+      }
    }
    
    return newPool;
