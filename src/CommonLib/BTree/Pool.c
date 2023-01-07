@@ -11,6 +11,12 @@ typedef struct MemChunk
    unsigned int isFree;
 } MemChunk;
 
+/*********************************************************************************
+* Pool_new
+* input: number of memory chunks to allocate
+* input: size of memory chunk
+* output: A pool of memory
+*********************************************************************************/
 PUBLIC Pool * Pool_new(unsigned int nbMemChunks, unsigned int memChunkSize)
 {
    Pool * newPool = 0;
@@ -33,6 +39,13 @@ PUBLIC Pool * Pool_new(unsigned int nbMemChunks, unsigned int memChunkSize)
    return newPool;
 }
 
+/*********************************************************************************
+* Pool_newFromFile
+* input: file name
+* input: number of memory chunks to allocate
+* input: size of memory chunk
+* output: A pool of memory
+*********************************************************************************/
 PUBLIC Pool * Pool_newFromFile(char * fileName,unsigned int nbMemChunks, unsigned int memChunkSize)
 {
    Pool * newPool = 0;
