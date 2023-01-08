@@ -71,10 +71,10 @@ PUBLIC Pool * Pool_newFromFile(char * fileName,unsigned int nbMemChunks, unsigne
          MemChunk memChunk;
          //= newPool->pool + i * (sizeof(MemChunk) + memChunkSize);
          if (i>0) 
-            memChunk->prev = i - 1;
+            memChunk.prev = i - 1;
          if (i<newPool->nbMemChunks-1) 
-            memChunk->next = i + 1;
-         memChunk->isFree = 1;
+            memChunk.next = i + 1;
+         memChunk.isFree = 1;
          fwrite(&memChunk, sizeof(MemChunk), 1, newPool->file);
       }
    }
