@@ -56,26 +56,36 @@ PUBLIC Pool * Pool_newFromFile(char * fileName,unsigned int nbMemChunks, unsigne
    newPool->isFile = 1;
    newPool->pool = 0;
    
+   newPool->file= fopen("test.pool","w");
+   fclose(newPool->file);
    // If file exists
    // else
-   newPool->file = fopen(fileName,"rb");
-   if (newPool->file)
+   //newPool->file = fopen(fileName,"rb+");
+   if (newPool->file != 0)
    {
    }
    else
    {
       // Create the file
-      newPool->file = fopen(fileName, "b");
-      for (int i=0; i<nbMemChunks; i++)
+      //newPool->file = fopen(fileName, "wb+");
+      if (newPool->file != 0)
       {
-         MemChunk memChunk;
-         //= newPool->pool + i * (sizeof(MemChunk) + memChunkSize);
-         if (i>0) 
-            memChunk.prev = i - 1;
-         if (i<newPool->nbMemChunks-1) 
-            memChunk.next = i + 1;
-         memChunk.isFree = 1;
-         fwrite(&memChunk, sizeof(MemChunk), 1, newPool->file);
+         for (int i=0; i<nbMemChunks; i++)
+         {
+            MemChunk memChunk;
+            //= newPool->pool + i * (sizeof(MemChunk) + memChunkSize);
+            if (i>0) 
+               memChunk.prev = i - 1;
+            if (i<newPool->nbMemChunks-1) 
+               memChunk.next = i + 1;
+            memChunk.isFree = 1;
+            //fwrite(&memChunk, sizeof(MemChunk), 1, newPool->file);
+         }
+      }
+      else
+      {
+         printf("Cannot create file %s\n", fileName);
+         exit(1);
       }
    }
    
@@ -99,7 +109,7 @@ PUBLIC void Pool_free(Pool * pool)
 
 PUBLIC unsigned int Pool_alloc(Pool * pool)
 {
-   unisgned int idx = 0;
+   unsigned int idx = 0;
    // Check if free slots left
    // return nextFree
    // NextFree = nextFree next
