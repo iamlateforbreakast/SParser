@@ -291,6 +291,23 @@ PUBLIC void Pool_report(Pool * pool)
       if (nbByteRead!=1) printf("Read failure\n");
       //printf("NbBYteRead %d\n", nbByteRead);
       fseek(pool->file, pool->memChunkSize, SEEK_CUR);
-      printf("MemChunk %d\n  prev: %d\n  next: %d\n isFree: %d\n",i, memChunk.prev, memChunk.next, memChunk.isFree);
+      printf("MemChunk %d\n",i);
+      switch (memChunk.prev)
+      {
+         case END_OF_QUEUE:
+            printf("   prev: END_OF_QUEUE\n");
+            break;
+         case END_OF_ALLOC:
+            printf("   prev: END_OF_ALLOC\n");
+            break;
+         case START_OF_AVAIL:
+            printf("   prev: START_OF_AVAIL\n");
+            break;
+         default:
+            printf("   prev: %d\n", memChunk.prev);
+            break;
+      }
+      printf("   next: %d\n", memChunk.next);
+      printf("   isFree: %d\n", memChunk.isFree);
    }
 }
