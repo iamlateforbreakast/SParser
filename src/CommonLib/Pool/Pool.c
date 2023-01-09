@@ -205,7 +205,7 @@ PUBLIC void Pool_dealloc(Pool * pool, unsigned int idx)
    long int allocatedOffset = idx * (sizeof(MemChunk) + pool->memChunkSize);
    long int firstAvailableOffset = pool->firstAvailable * (sizeof(MemChunk) + pool->memChunkSize);
    
-   if (pool->nbAllocatedChunks == pool->maxNbMemChunks)
+   /*if (pool->nbAllocatedChunks == pool->maxNbMemChunks)
    {
       MemChunk memChunk;
       fseek(pool->file, -sizeof(MemChunk) - pool->memChunkSize, SEEK_END);
@@ -220,14 +220,16 @@ PUBLIC void Pool_dealloc(Pool * pool, unsigned int idx)
       fwrite(&memChunk, sizeof(MemChunk), 1, pool->file);
       pool->nbAllocatedChunks = pool->maxNbMemChunks - 1;
       return;
-   }
+   }*/
    if (pool->nbAllocatedChunks > 0)
    {
       MemChunk memChunk;
-      fseek(pool->file, firstAvailableOffset + sizeof(unsigned int), SEEK_SET);
-      memChunk.prev = idx;
-      fwrite(&memChunk.prev, sizeof(unsigned int), 1, pool->file);
-      
+      if (pool->firstAvailable!=END_OF_QUEUE)
+      {
+         fseek(pool->file, firstAvailableOffset + sizeof(unsigned int), SEEK_SET);
+         memChunk.prev = idx;
+         fwrite(&memChunk.prev, sizeof(unsigned int), 1, pool->file);
+      }
       fseek(pool->file, allocatedOffset, SEEK_SET); 
       fread(&memChunk, sizeof(MemChunk), 1, pool->file);
       unsigned int prevIdx = memChunk.prev;
