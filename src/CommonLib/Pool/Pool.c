@@ -307,7 +307,22 @@ PUBLIC void Pool_report(Pool * pool)
             printf("   prev: %d\n", memChunk.prev);
             break;
       }
-      printf("   next: %d\n", memChunk.next);
+      switch (memChunk.next)
+      {
+         case END_OF_QUEUE:
+            printf("   next: END_OF_QUEUE\n");
+            break;
+         case END_OF_ALLOC:
+            printf("   next: END_OF_ALLOC\n");
+            break;
+         case START_OF_AVAIL:
+            printf("   next: START_OF_AVAIL\n");
+            break;
+         default:
+            printf("   next: %d\n", memChunk.next);
+            break;
+      }
+      
       printf("   isFree: %d\n", memChunk.isFree);
    }
 }
