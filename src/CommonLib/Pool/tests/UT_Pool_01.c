@@ -49,9 +49,4 @@ int main()
    step2(); 
    step3(); 
    step4(); 
-   //idx = Pool_alloc(testPool);
-   //Pool_report(testPool);
-   //idx = Pool_alloc(testPool);
-   //Pool_report(testPool);
-   Pool_free(testPool);
 }
