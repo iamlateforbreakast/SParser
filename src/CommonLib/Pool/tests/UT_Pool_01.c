@@ -38,6 +38,17 @@ int step3()
 
 int step4()
 {
+   unsigned int idx[] = {2, 0, 3, 1};
+
+   for (int i=0; i<NB_MEM_CHUNKS; i++)
+   {
+      Pool_dealloc(testPool, idx[i]);
+   }
+   Pool_report(testPool);
+}
+
+int step5()
+{
    Pool_free(testPool);
 }
 
@@ -49,4 +60,5 @@ int main()
    step2(); 
    step3(); 
    step4(); 
+   step5(); 
 }
