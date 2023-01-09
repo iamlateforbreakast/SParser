@@ -139,7 +139,6 @@ PUBLIC void Pool_free(Pool * pool)
 
 PUBLIC AllocStatus Pool_alloc(Pool * pool, unsigned int * ptrIdx)
 {
-   AllocStatus allocStatus = ALLOC_OK;
    unsigned int idx = 0;
    long int lastAllocatedOffset = pool->lastAllocated * (sizeof(MemChunk) + pool->memChunkSize);
    long int firstAvailableOffset = pool->firstAvailable * (sizeof(MemChunk) + pool->memChunkSize);
@@ -163,10 +162,10 @@ PUBLIC AllocStatus Pool_alloc(Pool * pool, unsigned int * ptrIdx)
       pool->nbAllocatedChunks = 1;
       fseek(pool->file, 0, SEEK_SET);
       *ptrIdx = 0;
-      return allocStatus;
+      return ALLOC_OK;
    }
    // Check if free slots left
-   if (pool->nbAllocatedChunks < pool->maxNbMemChunks)
+   if (pool->nbAllocatedChunks <= pool->maxNbMemChunks)
    {
       *ptrIdx = pool->firstAvailable;
       MemChunk memChunk;
@@ -187,16 +186,18 @@ PUBLIC AllocStatus Pool_alloc(Pool * pool, unsigned int * ptrIdx)
       fwrite(&memChunk, sizeof(MemChunk), 1, pool->file);
       
       // Update new first available
-      firstAvailableOffset = pool->firstAvailable * (sizeof(MemChunk) + pool->memChunkSize);
-      fseek(pool->file, firstAvailableOffset + sizeof(unsigned int), SEEK_SET);
-      memChunk.prev = START_OF_AVAIL;
-      fwrite(&memChunk.prev, sizeof(unsigned int), 1, pool->file);
-      
+      if (pool->firstAvailable!=END_OF_QUEUE)
+      {
+         firstAvailableOffset = pool->firstAvailable * (sizeof(MemChunk) + pool->memChunkSize);
+         fseek(pool->file, firstAvailableOffset + sizeof(unsigned int), SEEK_SET);
+         memChunk.prev = START_OF_AVAIL;
+         fwrite(&memChunk.prev, sizeof(unsigned int), 1, pool->file);
+      }
       pool->nbAllocatedChunks++;
-      return allocStatus;
+      return ALLOC_OK;
    }
    
-   return allocStatus;
+   return ALLOC_FAIL;
 }
 
 PUBLIC void Pool_dealloc(Pool * pool, unsigned int idx)
