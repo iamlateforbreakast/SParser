@@ -219,6 +219,7 @@ PUBLIC void Pool_dealloc(Pool * pool, unsigned int idx)
       fseek(pool->file, -sizeof(MemChunk) - pool->memChunkSize, SEEK_END);
       fwrite(&memChunk, sizeof(MemChunk), 1, pool->file);
       pool->nbAllocatedChunks = pool->maxNbMemChunks - 1;
+      return;
    }
    if (pool->nbAllocatedChunks > 0)
    {
