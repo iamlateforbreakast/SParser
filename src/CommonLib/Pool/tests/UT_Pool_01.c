@@ -49,6 +49,18 @@ int step4()
 
 int step5()
 {
+   unsigned int idx[NB_MEM_CHUNKS];
+   AllocStatus allocStatus = ALLOC_OK;
+
+   for (int i=0; i<1; i++)
+   {
+      allocStatus = Pool_alloc(testPool, &idx[i]);
+   }
+   Pool_report(testPool);   
+}
+
+int step6()
+{
    Pool_free(testPool);
 }
 
@@ -60,5 +72,6 @@ int main()
    step2(); 
    step3(); 
    step4(); 
-   step5(); 
+   step5();
+   step6();
 }
