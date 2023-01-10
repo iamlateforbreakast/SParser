@@ -4,13 +4,15 @@ A C to SQLite parser
 To compile:
 -----------
 
-gh auth login
-
-gh repo clone iamlateforbreakast/SParse
+git clone iamlateforbreakast/SParse
 
 cd SParse
 
 git status
+
+git branch update_test_file
+
+git checkout update_test_file
 
 touch test.txt
 
@@ -18,7 +20,7 @@ git add .
 
 git commit -m "Created test.txt"
 
-git push
+git push --set-upstream origin update_test_file
 
 autoreconf -- install
 --------------------------------
