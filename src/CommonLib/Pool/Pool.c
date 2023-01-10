@@ -122,6 +122,11 @@ PUBLIC Pool * Pool_newFromFile(char * fileName,unsigned int nbMemChunks, unsigne
    return newPool;
 }
 
+/*********************************************************************************
+* Pool_free
+* input: none
+* output: none
+*********************************************************************************/
 PUBLIC void Pool_free(Pool * pool)
 {
    if (pool)
