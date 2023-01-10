@@ -4,23 +4,21 @@ A C to SQLite parser
 To compile:
 -----------
 
-git clone iamlateforbreakast/SParse
+git clone https://github.com/iamlateforbreakast/SParse.git
 
 cd SParse
-
 git status
-
 git branch update_test_file
-
 git checkout update_test_file
-
 touch test.txt
-
 git add .
-
 git commit -m "Created test.txt"
-
 git push --set-upstream origin update_test_file
+
+git checkout master
+git pull origin master
+git merge update_test_file
+git push origin master
 
 autoreconf -- install
 --------------------------------
@@ -30,17 +28,14 @@ git reset --hard origin/master
 
 git push origin master
 
-git clone https://github.com/iamlateforbreakast/SParse.git
 
 gh auth login --with-token < token.txt
 
 Debian:
 -------
-Apt install autotools-dev
-Apt install autoconf
-Apt install sqlite3 libsqlite3-dev
-Apt install flex bison
-Apt install doxygen
+apt install autoconf autotools-dev doxygen
+apt install sqlite3 libsqlite3-dev
+apt install flex bison
 
 Fedora 35::
 ----------
