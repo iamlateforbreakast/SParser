@@ -14,9 +14,10 @@ typedef struct BTree
 	unsigned int depth;
 	unsigned short int nbObjects;
 	unsigned short int nbNodes;
+	unsigned int order;
 } BTree;
 
-PUBLIC BTree * BTree_new();
+PUBLIC BTree * BTree_new(unsigned int order);
 PUBLIC BTree * BTree_newFromFile(char* fileName);
 PUBLIC void BTree_free(BTree * tree);
 PUBLIC void BTree_add(BTree * tree, Key key, Object object);
