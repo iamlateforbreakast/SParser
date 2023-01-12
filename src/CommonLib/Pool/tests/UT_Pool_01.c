@@ -79,13 +79,11 @@ int step12()
 
     Pool_dealloc(testPool, idx);
     Pool_report(testPool);
-
-    Pool_free(testPool);
 }
 
 int step16()
 {
-
+    Pool_free(testPool);
 }
 
 int main()
@@ -98,4 +96,7 @@ int main()
     step4();
     step5();
     step6();
+    step11();
+    step12();
+    step16();
 }

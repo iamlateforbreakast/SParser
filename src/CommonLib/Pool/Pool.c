@@ -86,8 +86,7 @@ PUBLIC Pool* Pool_newFromFile(char* fileName, unsigned int nbMemChunks, unsigned
     //fclose(newPool->file);
     // If file exists
     // else
-    // MSVC specific
-    errno_t err = fopen_s(&newPool->file, fileName, "rb+");
+    newPool->file = fopen(fileName, "rb+");
     if (newPool->file != 0)
     {
         printf("File %s exists\n", fileName);
@@ -105,7 +104,7 @@ PUBLIC Pool* Pool_newFromFile(char* fileName, unsigned int nbMemChunks, unsigned
     {
         // Create the file
         printf("File %s is created\n", fileName);
-        errno_t err = fopen_s(&newPool->file, fileName, "rb+");
+        newPool->file = fopen(fileName, "wb+");
         //newPool->file = fopen("test.pool", "wb+");
         //newPool->file = fopen(fileName, "wb+");
         if (newPool->file != 0)
@@ -266,11 +265,39 @@ PRIVATE AllocStatus Pool_allocInMemory(Pool* pool, unsigned int* ptrIdx)
     long int lastAllocatedOffset = pool->lastAllocated * (sizeof(MemChunk) + pool->memChunkSize);
     long int firstAvailableOffset = pool->firstAvailable * (sizeof(MemChunk) + pool->memChunkSize);
 
+    if (pool->nbAllocatedChunks == 0)
+    {
+        *ptrIdx = pool->firstAvailable;
+        MemChunk * memChunk = pool->pool + firstAvailableOffset;
+        pool->lastAllocated = 0;
+        pool->firstAvailable = memChunk->next;
+        memChunk->prev = END_OF_QUEUE;
+        memChunk->next = END_OF_ALLOC;
+        memChunk->isFree = 0;
+        
+        memChunk = pool->pool + pool->firstAvailable * (sizeof(MemChunk) + pool->memChunkSize);
+        memChunk->prev = START_OF_AVAIL;
+        pool->nbAllocatedChunks = 1;
+        
+        return ALLOC_OK;
+    }
     // Check if free slots left
     if (pool->nbAllocatedChunks <= pool->maxNbMemChunks)
     {
+        *ptrIdx = pool->firstAvailable;
+        MemChunk * memChunk = pool->pool + lastAllocatedOffset;
+        memChunk->next = pool->firstAvailable;
+       
+        // Update old first available
+        memChunk = pool->pool + firstAvailableOffset;
+        memChunk->prev = pool->lastAllocated;
+        pool->lastAllocated = pool->firstAvailable;
+        pool->firstAvailable = memChunk->next;
+        memChunk->next = END_OF_ALLOC;
+        memChunk->isFree = 0;
+        return ALLOC_OK;
     }
-    return ALLOC_OK;
+    return ALLOC_FAIL;
 }
 
 PRIVATE AllocStatus Pool_allocInFile(Pool* pool, unsigned int* ptrIdx)
