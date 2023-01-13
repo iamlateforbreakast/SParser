@@ -46,6 +46,8 @@ PUBLIC Pool* Pool_new(unsigned int nbMemChunks, unsigned int memChunkSize)
     newPool->maxNbMemChunks = nbMemChunks; // TBC
     newPool->nbAllocatedChunks = 0;
     newPool->memChunkSize = memChunkSize;
+    newPool->firstAvailable = 0;
+    newPool->lastAllocated = 0;
     newPool->isFile = 0;
     newPool->pool = (MemChunk*)malloc(sizeof(MemChunk) * newPool->nbMemChunks);
     newPool->file = 0;
@@ -53,8 +55,23 @@ PUBLIC Pool* Pool_new(unsigned int nbMemChunks, unsigned int memChunkSize)
     for (int i = 0; i < newPool->nbMemChunks; i++)
     {
         MemChunk* memChunk = (char *)newPool->pool + i * (sizeof(MemChunk) + memChunkSize);
-        if (i > 0) memChunk->prev = i - 1;
         if (i < newPool->nbMemChunks - 1) memChunk->next = i + 1;
+        if (i > 0)
+        {
+            memChunk->prev = i - 1;
+        }
+        else
+        {
+            memChunk->prev = START_OF_AVAIL;
+        }
+        if (i == newPool->maxNbMemChunks - 1)
+        {
+            memChunk->next = END_OF_QUEUE;
+        }
+        else
+        {
+            memChunk->next = i + 1;
+        }
         memChunk->isFree = 1;
     }
 
