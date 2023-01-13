@@ -48,7 +48,7 @@ unsigned int main(void)
 
 	printf("Step 1 - Create a storage tree.\n");
 
-	testTree = BTree_new();
+	testTree = BTree_new(3);
 
 	printf("Step 2 - Add %d beamWeightRange\n", NB_ITEMS);
 

@@ -5,17 +5,19 @@
 #include "BTree.h"
 #include "Node.h"
 
+#define MAX_NODES (10)
+
 /*********************************************************************************
 * BTree_new
 * input: number of total beamweight ranges to store in tree
 * output: A fully allocated beamweihgt tree
 *********************************************************************************/
-BTree * BTree_new()
+BTree * BTree_new(unsigned int order)
 {
 	BTree* tree;
 
 	tree = (BTree*)malloc(sizeof(BTree));
-	tree->pool = NULL; //Pool_new(nodePool, nbObjects);
+	tree->pool = Pool_new(MAX_NODES, sizeof(Node));
 	tree->root = NULL;
 	tree->nbNodes = 0;
 	tree->depth = 0;

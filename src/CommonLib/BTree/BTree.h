@@ -6,11 +6,12 @@
 *********************************************************************************/
 #include "Types.h"
 #include "Node.h"
+#include "Pool.h"
 
 typedef struct BTree
 {
-	void* pool;
-	Node* root;
+	Pool * pool;
+	Node * root;
 	unsigned int depth;
 	unsigned short int nbObjects;
 	unsigned short int nbNodes;
@@ -27,4 +28,4 @@ PUBLIC void BTree_print(BTree * tree);
 PUBLIC unsigned int BTree_sizeof(BTree* tree);
 
 
-#endif _BTREE_
+#endif /* _BTREE_ */
