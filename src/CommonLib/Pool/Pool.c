@@ -424,9 +424,40 @@ PRIVATE AllocStatus Pool_allocInFile(Pool* pool, unsigned int* ptrIdx)
 
 PRIVATE void Pool_deallocInMemory(Pool* pool, unsigned int idx)
 {
-    MemChunk * memChunk = (char *)pool->pool + idx * (sizeof(MemChunk) + pool->memChunkSize);
+    long int allocatedOffset = idx * (sizeof(MemChunk) + pool->memChunkSize);
+    long int firstAvailableOffset = pool->firstAvailable * (sizeof(MemChunk) + pool->memChunkSize);
 
-    memChunk->isFree = 1;
+    if (pool->nbAllocatedChunks > 0)
+    {
+        MemChunk* memChunk = (char*)pool->pool + firstAvailableOffset;
+        if (pool->firstAvailable != END_OF_QUEUE)
+        {
+            memChunk->prev = idx;
+        }
+        memChunk = (char*)pool->pool + allocatedOffset;
+        unsigned int prevIdx = memChunk->prev;
+        unsigned int nextIdx = memChunk->next;
+
+        memChunk->prev = START_OF_AVAIL;
+        memChunk->next = pool->firstAvailable;
+        memChunk->isFree = 1;
+        pool->firstAvailable = idx;
+
+        if (prevIdx != END_OF_QUEUE)
+        {
+            long int prevOffset = prevIdx * (sizeof(MemChunk) + pool->memChunkSize);
+            memChunk = (char*)pool->pool + prevOffset;
+            memChunk->next = nextIdx;
+        }
+
+        if (nextIdx != END_OF_ALLOC)
+        {
+            long int nextOffset = nextIdx * (sizeof(MemChunk) + pool->memChunkSize);
+            memChunk = (char*)pool->pool + nextOffset;
+            memChunk->prev = prevIdx;
+        }
+        pool->nbAllocatedChunks--;
+    }
 }
 
 PRIVATE void Pool_deallocInFile(Pool* pool, unsigned int idx)
