@@ -201,7 +201,49 @@ PUBLIC void Pool_report(Pool* pool)
 
 PRIVATE void Pool_reportInMemory(Pool* pool)
 {
-
+    printf("Pool Report:\n");
+    printf("  maxNbMemChunks: %d\n", pool->maxNbMemChunks);
+    printf("  memChunkSize: %d\n", pool->memChunkSize);
+    printf("  nbAllocatedChunks: %d\n", pool->nbAllocatedChunks);
+    printf("  firstAvailable: %d\n", pool->firstAvailable);
+    printf("  lastAllocated: %d\n", pool->lastAllocated);
+    //fseek(pool->file, 0, SEEK_SET);
+    for (int i = 0; i < pool->maxNbMemChunks; i++)
+    {
+        MemChunk * memChunk = (char*)pool->pool + i * (sizeof(MemChunk) + pool->memChunkSize);
+        printf("MemChunk %d\n", i);
+        switch (memChunk->prev)
+        {
+        case END_OF_QUEUE:
+            printf("   prev: END_OF_QUEUE\n");
+            break;
+        case END_OF_ALLOC:
+            printf("   prev: END_OF_ALLOC\n");
+            break;
+        case START_OF_AVAIL:
+            printf("   prev: START_OF_AVAIL\n");
+            break;
+        default:
+            printf("   prev: %d\n", memChunk->prev);
+            break;
+        }
+        switch (memChunk->next)
+        {
+        case END_OF_QUEUE:
+            printf("   next: END_OF_QUEUE\n");
+            break;
+        case END_OF_ALLOC:
+            printf("   next: END_OF_ALLOC\n");
+            break;
+        case START_OF_AVAIL:
+            printf("   next: START_OF_AVAIL\n");
+            break;
+        default:
+            printf("   next: %d\n", memChunk->next);
+            break;
+        }
+        printf("   isFree: %d\n", memChunk->isFree);
+    }
 }
 
 PRIVATE void Pool_reportInFile(Pool* pool)
