@@ -320,40 +320,49 @@ PRIVATE void Pool_reportInFile(Pool* pool)
 
 PRIVATE AllocStatus Pool_allocInMemory(Pool* pool, unsigned int* ptrIdx)
 {
-    unsigned int idx = 0;
+unsigned int idx = 0;
     long int lastAllocatedOffset = pool->lastAllocated * (sizeof(MemChunk) + pool->memChunkSize);
     long int firstAvailableOffset = pool->firstAvailable * (sizeof(MemChunk) + pool->memChunkSize);
 
     if (pool->nbAllocatedChunks == 0)
     {
         *ptrIdx = pool->firstAvailable;
-        MemChunk * memChunk = pool->pool + firstAvailableOffset;
+        MemChunk* memChunk = (char *)pool->pool + firstAvailableOffset;
         pool->lastAllocated = 0;
         pool->firstAvailable = memChunk->next;
         memChunk->prev = END_OF_QUEUE;
         memChunk->next = END_OF_ALLOC;
         memChunk->isFree = 0;
-        
-        memChunk = pool->pool + pool->firstAvailable * (sizeof(MemChunk) + pool->memChunkSize);
+
+        memChunk = (char*)pool->pool + pool->firstAvailable * (sizeof(MemChunk) + pool->memChunkSize);
         memChunk->prev = START_OF_AVAIL;
         pool->nbAllocatedChunks = 1;
-        
+
         return ALLOC_OK;
     }
     // Check if free slots left
     if (pool->nbAllocatedChunks <= pool->maxNbMemChunks)
     {
         *ptrIdx = pool->firstAvailable;
-        MemChunk * memChunk = pool->pool + lastAllocatedOffset;
+        MemChunk* memChunk = (char*)pool->pool + lastAllocatedOffset;
         memChunk->next = pool->firstAvailable;
-       
+
         // Update old first available
-        memChunk = pool->pool + firstAvailableOffset;
+        memChunk = (char*)pool->pool + firstAvailableOffset;
         memChunk->prev = pool->lastAllocated;
         pool->lastAllocated = pool->firstAvailable;
         pool->firstAvailable = memChunk->next;
         memChunk->next = END_OF_ALLOC;
         memChunk->isFree = 0;
+        
+        // Update new first available
+        if (pool->firstAvailable != END_OF_QUEUE)
+        {
+            firstAvailableOffset = pool->firstAvailable * (sizeof(MemChunk) + pool->memChunkSize);
+            memChunk = (char*)pool->pool + firstAvailableOffset;
+            memChunk->prev = START_OF_AVAIL;
+        }
+        pool->nbAllocatedChunks++;
         return ALLOC_OK;
     }
     return ALLOC_FAIL;
