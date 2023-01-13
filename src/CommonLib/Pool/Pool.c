@@ -49,7 +49,7 @@ PUBLIC Pool* Pool_new(unsigned int nbMemChunks, unsigned int memChunkSize)
     newPool->firstAvailable = 0;
     newPool->lastAllocated = 0;
     newPool->isFile = 0;
-    newPool->pool = (MemChunk*)malloc(sizeof(MemChunk) * newPool->nbMemChunks);
+    newPool->pool = (MemChunk*)malloc(newPool->nbMemChunks * (sizeof(MemChunk) + newPool->memChunkSize));
     newPool->file = 0;
 
     for (int i = 0; i < newPool->nbMemChunks; i++)
