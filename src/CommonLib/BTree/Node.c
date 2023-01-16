@@ -5,18 +5,18 @@
 * Private Functions Declarations
 *
 *********************************************************************************/
-PRIVATE Node * Node_mergeNodes(Node* node, unsigned int idx1, unsigned int idx2);
-PRIVATE void Node_shiftRight(Node* node, unsigned int idxKey);
-PRIVATE void Node_shiftLeft(Node* node, unsigned int idxKey);
-PRIVATE void Node_stealLeftKey(Node* node, unsigned int idxChildStealFrom, unsigned int idxChildGiveTo);
-PRIVATE void Node_stealRightKey(Node* node, unsigned int idxKeyStealFrom, unsigned int idxKeyGiveTo);
+PRIVATE Node * Node_mergeNodes(Node* node, unsigned int idx1, unsigned int idx2, Pool * pool);
+PRIVATE void Node_shiftRight(Node* node, unsigned int idxKey, Pool * pool);
+PRIVATE void Node_shiftLeft(Node* node, unsigned int idxKey, Pool * pool);
+PRIVATE void Node_stealLeftKey(Node* node, unsigned int idxChildStealFrom, unsigned int idxChildGiveTo, Pool * pool);
+PRIVATE void Node_stealRightKey(Node* node, unsigned int idxKeyStealFrom, unsigned int idxKeyGiveTo, Pool * pool);
 
 /*********************************************************************************
 * Node_new
 * input: isLeaf TRUE if creating a terminal node
 * output: the newly created beam weight node
 *********************************************************************************/
-PUBLIC Node* Node_new(unsigned short int isLeaf)
+PUBLIC Node* Node_new(unsigned short int isLeaf, Pool * pool)
 {
 	Node* node = NULL;
 
@@ -42,7 +42,7 @@ PUBLIC Node* Node_new(unsigned short int isLeaf)
 * input: the key to look for
 * output: the beam weight range if found otherwise NULL 
 *********************************************************************************/
-PUBLIC Object Node_search(Node* node, Key key, unsigned int isFoundAlready)
+PUBLIC Object Node_search(Node* node, Key key, unsigned int isFoundAlready, Pool * pool)
 {
 	if (node == NULL)
 	{
@@ -90,7 +90,7 @@ PUBLIC Object Node_search(Node* node, Key key, unsigned int isFoundAlready)
 * input: none
 * output: none
 *********************************************************************************/
-PUBLIC void Node_free(Node* node)
+PUBLIC void Node_free(Node* node, Pool * pool)
 {
 	if (node->isLeaf == TRUE)
 	{
@@ -108,7 +108,7 @@ PUBLIC void Node_free(Node* node)
 * input: beamWeightRange
 * output: none
 *********************************************************************************/
-PUBLIC void Node_insert(Node* node, Key key, Object object)
+PUBLIC void Node_insert(Node* node, Key key, Object object, Pool * pool)
 {
 	if (node->isLeaf == TRUE) 
 	{
@@ -175,7 +175,7 @@ PUBLIC void Node_insert(Node* node, Key key, Object object)
 * input: the key to remove
 * output: none
 *********************************************************************************/
-PUBLIC Object Node_remove(Node* node, Key key, unsigned int * keyToUpdate)
+PUBLIC Object Node_remove(Node* node, Key key, unsigned int * keyToUpdate, Pool * pool)
 { 
 	Object object = NULL;
 
@@ -277,7 +277,7 @@ PUBLIC Object Node_remove(Node* node, Key key, unsigned int * keyToUpdate)
 * input: None
 * output: None
 *********************************************************************************/
-PUBLIC void Node_print(Node* node, unsigned int depth)
+PUBLIC void Node_print(Node* node, unsigned int depth, Pool * pool)
 {
 	if (node == NULL) return;
 	printf(" Node NbUsed: %d\n", node->nbKeyUsed);
@@ -306,7 +306,7 @@ PUBLIC void Node_print(Node* node, unsigned int depth)
 * input: the key that caused the split
 * output: The sub tree where the key should be inserted
 *********************************************************************************/
-PUBLIC Node* Node_splitNode(Node* node, Node* nodeToSplit, Key key)
+PUBLIC Node* Node_splitNode(Node* node, Node* nodeToSplit, Key key, Pool * pool)
 {
 	Node* newChild;
 
@@ -383,7 +383,7 @@ PRIVATE void Node_shiftLeft(Node* node, unsigned int idxKey)
 * input: index of the right node to merge
 * output: The merged node
 *********************************************************************************/
-PRIVATE Node * Node_mergeNodes(Node* node, unsigned int idxLeft, unsigned idxRight)
+PRIVATE Node * Node_mergeNodes(Node* node, unsigned int idxLeft, unsigned idxRight, Pool * pool)
 {
 	Node* mergedNode = NULL;
 
@@ -421,7 +421,7 @@ PRIVATE Node * Node_mergeNodes(Node* node, unsigned int idxLeft, unsigned idxRig
 * input: index of the child (left or right) to give to
 * output: none
 *********************************************************************************/
-PRIVATE void Node_stealLeftKey(Node* node, unsigned int idxChildStealFrom, unsigned int idxChildGiveTo)
+PRIVATE void Node_stealLeftKey(Node* node, unsigned int idxChildStealFrom, unsigned int idxChildGiveTo, Pool * pool)
 {
 	// Shift
 	Node * stealFromChild = node->children[idxChildStealFrom];
@@ -443,7 +443,7 @@ PRIVATE void Node_stealLeftKey(Node* node, unsigned int idxChildStealFrom, unsig
 * input: index of the child (left or right) to give to
 * output: none
 *********************************************************************************/
-PRIVATE void Node_stealRightKey(Node* node, unsigned int idxChildStealFrom, unsigned int idxChildGiveTo)
+PRIVATE void Node_stealRightKey(Node* node, unsigned int idxChildStealFrom, unsigned int idxChildGiveTo, Pool * pool)
 {
 	// Shift
 	Node* stealFromChild = node->children[idxChildStealFrom];
