@@ -541,7 +541,7 @@ PRIVATE void Pool_writeInMemory(Pool* pool, unsigned int idx, void* p)
 {
     long int offset = idx * (sizeof(MemChunk) + pool->memChunkSize) + sizeof(MemChunk);
 
-   //memcpy(pool->pool + offset, p, pool->memChunkSize);
+    memcpy((char*)pool->pool + offset, p, pool->memChunkSize);
 }
 
 PRIVATE void Pool_readInFile(Pool* pool, unsigned int idx, void* p)
@@ -556,7 +556,7 @@ PRIVATE void Pool_readInMemory(Pool* pool, unsigned int idx, void* p)
 {
     long int offset = idx * (sizeof(MemChunk) + pool->memChunkSize) + sizeof(MemChunk);
 
-    //p = pool->pool + offset;
+    memcpy(p, (char*)pool->pool + offset, pool->memChunkSize);
 }
 
 
