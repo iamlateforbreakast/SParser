@@ -1,4 +1,5 @@
 #include "Node.h"
+#include "Pool.h"
 
 /*********************************************************************************
 *
@@ -50,44 +51,46 @@ PUBLIC unsigned int Node_new(unsigned short int isLeaf, Pool * pool)
 * input: the key to look for
 * output: the beam weight range if found otherwise NULL 
 *********************************************************************************/
-PUBLIC Object Node_search(Node* node, Key key, unsigned int isFoundAlready, Pool * pool)
+PUBLIC void Node_search(unsigned int nodeIdx, Key key, Object * object, unsigned int isFoundAlready, Pool * pool)
 {
-	if (node == NULL)
+	Node node;
+ 	Pool_read(pool, nodeIdx, &node);
+
+	if (node.isLeaf == TRUE)
 	{
-		printf("ERROR: Node_search node== NULL\n");
-		exit(0);
-	}
-	if (node->isLeaf == TRUE)
-	{
-		for (int i = 0; i < node->nbKeyUsed; i++)
+		for (int i = 0; i < node.nbKeyUsed; i++)
 		{
-			if (node->keys[i] == key)
+			if (node.keys[i] == key)
 			{
-				return node->leaves[i];
+				*object = node.leaves[i];
+				return;
 			}
 		}
 		if (isFoundAlready)
-			return node->leaves[node->nbKeyUsed - 1];
+		{
+			*object = node.leaves[node.nbKeyUsed - 1];
+			return;
+		}
 		else
-			return NULL;
+			return;
 	}
 	else
 	{
-		for (int i = 0; i < node->nbKeyUsed; i++)
+		for (int i = 0; i < node.nbKeyUsed; i++)
 		{
-			if (key < node->keys[i])
+			if (key < node.keys[i])
 			{
-				if (node->children[i] == NULL)
-				{
-					printf("ERROR: Node_search node== NULL\n");
-					exit(0);
-				}
-				return Node_search(node->children[i], key, isFoundAlready, pool);
+				Node_search(node.children[i], key, object, isFoundAlready, pool);
+				return;
 			}
-			if (key == node->keys[i])
-				return Node_search(node->children[i], key, TRUE, pool);
+			if (key == node.keys[i])
+			{
+				Node_search(node.children[i], key, object, TRUE, pool);
+				return;
+			}
 		}
-		return Node_search(node->children[node->nbKeyUsed], key, isFoundAlready, pool);
+		Node_search(node.children[node.nbKeyUsed], key, object, isFoundAlready, pool);
+		return;
 	}
 
 	return NULL;
@@ -98,8 +101,9 @@ PUBLIC Object Node_search(Node* node, Key key, unsigned int isFoundAlready, Pool
 * input: none
 * output: none
 *********************************************************************************/
-PUBLIC void Node_free(Node* node, Pool * pool)
+PUBLIC void Node_free(unsigned int nodeIdx, Pool* pool)
 {
+#if 0
 	if (node->isLeaf == TRUE)
 	{
 		for (int i = 0; i < node->nbKeyUsed + 1; i++)
@@ -108,6 +112,7 @@ PUBLIC void Node_free(Node* node, Pool * pool)
 		}
 		return;
 	}
+#endif
 }
 
 /*********************************************************************************
@@ -152,27 +157,29 @@ PUBLIC void Node_insert(unsigned int nodeIdx, Key key, Object object, Pool* pool
 	{
 		/* TBC: Check if node is full */
 		int i = 0;
-		for (i = 0; i < node->nbKeyUsed; i++)
+		for (i = 0; i < node.nbKeyUsed; i++)
 		{
-			if (key < node->keys[i])
+			if (key < node.keys[i])
 				break;
 		}
-		if (node->children[i] == NULL)
+		/*if (node.children[i] == NULL)
 		{
 			printf("ERROR: insert key: %d\n", key);
 			Node_print(node, 3, pool);
 			exit(0);
-		}
-		if (node->children[i]->nbKeyUsed < ORDER * 2 - 1) //&& (node->nbKeyUsed < ORDER * 2 - 1))
+		}*/
+		Node child;
+		Pool_read(pool, node.children[i], &child);
+		if (child.nbKeyUsed < ORDER * 2 - 1) //&& (node->nbKeyUsed < ORDER * 2 - 1))
 		{
-			Node_insert(node->children[i], key, object, pool);
+			Node_insert(node.children[i], key, object, pool);
 			return;
 		}
 		else
 		{
 			printf("Splitting node.\n");
-			Node* newChild = Node_splitNode(node, node->children[i], key, pool);
-			Node_insert(newChild, key, object, pool);
+			unsigned int newChildIdx = Node_splitNode(nodeIdx, node.children[i], key, pool);
+			Node_insert(newChildIdx, key, object, pool);
 			return;
 		}
 	    //Node* childNode = Node_split(node, key);
@@ -189,7 +196,7 @@ PUBLIC void Node_insert(unsigned int nodeIdx, Key key, Object object, Pool* pool
 PUBLIC Object Node_remove(Node* node, Key key, unsigned int * keyToUpdate, Pool * pool)
 { 
 	Object object = NULL;
-
+#if 0
 	if (node->isLeaf == TRUE)
 	{
 		for (int i = 0; i < node->nbKeyUsed; i++)
@@ -254,7 +261,7 @@ PUBLIC Object Node_remove(Node* node, Key key, unsigned int * keyToUpdate, Pool 
 					return object;
 				}
 			}
-			/* SHould there be more checks here */
+			/* Should there be more checks here */
 		}
 		object = Node_remove(node->children[node->nbKeyUsed], key, keyToUpdate, pool);
 		// Now assess if the node needs to be re-balanced
@@ -279,7 +286,7 @@ PUBLIC Object Node_remove(Node* node, Key key, unsigned int * keyToUpdate, Pool 
 		}
 		
     }
-
+#endif
 	return NULL;
 }
 
@@ -321,47 +328,53 @@ PUBLIC void Node_print(unsigned int nodeIdx, unsigned int depth, Pool * pool)
 * input: the key that caused the split
 * output: The sub tree where the key should be inserted
 *********************************************************************************/
-PUBLIC Node* Node_splitNode(Node* node, Node* nodeToSplit, Key key, Pool * pool)
+PUBLIC unsigned int Node_splitNode(unsigned int nodeIdx, unsigned int nodeToSplitIdx, Key key, Pool* pool)
 {
-	Node* newChild;
-
-	newChild = Node_new(nodeToSplit->isLeaf, pool);
+	Node node;
+	Node nodeToSplit;
+	Node newChild;
+	Pool_read(pool, nodeIdx, &node);
+	Pool_read(pool, nodeToSplitIdx, &nodeToSplit);
+	unsigned int newChildIdx = Node_new(nodeToSplit.isLeaf, pool);
+	Pool_read(pool, newChildIdx, &newChild);
 
 	unsigned int k;
 
-	for (k = 0; k < node->nbKeyUsed; k++)
+	for (k = 0; k < node.nbKeyUsed; k++)
 	{
 		/* TBC: node->nbKeyUsed is assumed less than ORDER*2-1 */
-		if (nodeToSplit->keys[ORDER - 1] < node->keys[k]) break;
+		if (nodeToSplit.keys[ORDER - 1] < node.keys[k]) break;
 	}
-	for (unsigned int j = node->nbKeyUsed; j > k; j--)
-		node->keys[j] = node->keys[j - 1];
-	for (unsigned int j = node->nbKeyUsed + 1; j > k; j--)
+	for (unsigned int j = node.nbKeyUsed; j > k; j--)
+		node.keys[j] = node.keys[j - 1];
+	for (unsigned int j = node.nbKeyUsed + 1; j > k; j--)
 	{
-		node->leaves[j] = node->leaves[j - 1];
-		node->children[j] = node->children[j - 1];
+		node.leaves[j] = node.leaves[j - 1];
+		node.children[j] = node.children[j - 1];
 	}
-	node->keys[k] = nodeToSplit->keys[ORDER - 1];
-	node->children[k] = nodeToSplit;
-	node->children[k + 1] = newChild;
-	node->nbKeyUsed++;
+	node.keys[k] = nodeToSplit.keys[ORDER - 1];
+	node.children[k] = nodeToSplitIdx;
+	node.children[k + 1] = newChildIdx;
+	node.nbKeyUsed++;
 	for (int i = 0; i < ORDER - 1; i++)
-		newChild->keys[i] = nodeToSplit->keys[ORDER + i];
+		newChild.keys[i] = nodeToSplit.keys[ORDER + i];
 	for (int i = 0; i < ORDER; i++)
 	{
-		newChild->leaves[i] = nodeToSplit->leaves[ORDER + i];
-		newChild->children[i] = nodeToSplit->children[ORDER + i];
-		nodeToSplit->leaves[ORDER + i] = NULL;
-		nodeToSplit->children[ORDER + i] = NULL;
+		newChild.leaves[i] = nodeToSplit.leaves[ORDER + i];
+		newChild.children[i] = nodeToSplit.children[ORDER + i];
+		nodeToSplit.leaves[ORDER + i] = NULL;
+		nodeToSplit.children[ORDER + i] = 0;
 	}
-	newChild->nbKeyUsed = ORDER - 1;
-	nodeToSplit->nbKeyUsed = ORDER - 1;
+	newChild.nbKeyUsed = ORDER - 1;
+	nodeToSplit.nbKeyUsed = ORDER - 1;
+	Pool_write(pool, nodeIdx, &node);
+	Pool_write(pool, newChildIdx, &newChild);
+	Pool_write(pool, nodeToSplitIdx, &nodeToSplit);
 
-
-	if (key < node->keys[k])
-		return node->children[k];
+	if (key < node.keys[k])
+		return node.children[k];
 	else
-		return node->children[k + 1];
+		return node.children[k + 1];
 }
 
 PRIVATE void Node_shiftRight(Node* node, unsigned int idxKey, Pool* pool)
