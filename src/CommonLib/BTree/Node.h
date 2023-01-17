@@ -18,15 +18,15 @@ typedef struct Node
 	unsigned short int isLeaf;
 	unsigned int keys[ORDER * 2 - 1];
 	Object leaves[ORDER * 2];
-	Node* children[ORDER * 2];	
+	unsigned int children[ORDER * 2];	
 } Node;
 
-PUBLIC Node * Node_new(unsigned short int isLeaf, Pool * pool);
-PUBLIC Node* Node_splitNode(Node* node, Node* nodeToSplit, Key key, Pool * pool);
-PUBLIC void Node_insert(Node* node, Key key, Object object, Pool * pool);
-PUBLIC Object Node_remove(Node* node, Key key, unsigned int* keyToUpdate, Pool * pool);
-PUBLIC Object Node_search(Node* node, Key key, unsigned int isFoundAlready, Pool * pool);
-PUBLIC void Node_free(Node* node, Pool * pool);
-PUBLIC void Node_print(Node* node, unsigned int depth, Pool * pool);
+PUBLIC unsigned int Node_new(unsigned short int isLeaf, Pool* pool);
+PUBLIC unsigned int Node_splitNode(unsigned int nodeIdx, unsigned int nodeToSplitIdx, Key key, Pool* pool);
+PUBLIC void Node_insert(unsigned int nodeIdx, Key key, Object object, Pool* pool);
+PUBLIC Object Node_remove(unsigned int nodeIdx, Key key, unsigned int* keyToUpdate, Pool* pool);
+PUBLIC void Node_search(unsigned int nodeIdx, Key key, Object object, unsigned int isFoundAlready, Pool* pool);
+PUBLIC void Node_free(unsigned int nodeIdx, Pool* pool);
+PUBLIC void Node_print(unsigned int nodeIdx, unsigned int depth, Pool* pool);
 
 #endif /* _NODE_ */
