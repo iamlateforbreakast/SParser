@@ -531,7 +531,7 @@ PRIVATE void Pool_writeInFile(Pool* pool, unsigned int idx, void* p)
     long int offset = idx * (sizeof(MemChunk) + pool->memChunkSize) + sizeof(MemChunk);
 
     fseek(pool->file, offset, SEEK_SET);
-    fwrite(p, sizeof(MemChunk), 1, pool -> file);
+    fwrite(p, pool->memChunkSize, 1, pool -> file);
 }
 
 PRIVATE void Pool_writeInMemory(Pool* pool, unsigned int idx, void* p)
