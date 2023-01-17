@@ -165,9 +165,6 @@ PUBLIC void Pool_free(Pool* pool)
 {
     if (pool)
     {
-        // If is file
-        // Close file
-        // Else free mem
         if (!pool->isFile)
             free(pool->pool);
         else
@@ -320,7 +317,7 @@ PRIVATE void Pool_reportInFile(Pool* pool)
 
 PRIVATE AllocStatus Pool_allocInMemory(Pool* pool, unsigned int* ptrIdx)
 {
-unsigned int idx = 0;
+    unsigned int idx = 0;
     long int lastAllocatedOffset = pool->lastAllocated * (sizeof(MemChunk) + pool->memChunkSize);
     long int firstAvailableOffset = pool->firstAvailable * (sizeof(MemChunk) + pool->memChunkSize);
 
@@ -534,7 +531,7 @@ PRIVATE void Pool_writeInFile(Pool* pool, unsigned int idx, void* p)
     long int offset = idx * (sizeof(MemChunk) + pool->memChunkSize) + sizeof(MemChunk);
 
     fseek(pool->file, offset, SEEK_SET);
-    //fwrite(pool->file, offset
+    fwrite(p, sizeof(MemChunk), 1, pool -> file);
 }
 
 PRIVATE void Pool_writeInMemory(Pool* pool, unsigned int idx, void* p)
@@ -549,7 +546,7 @@ PRIVATE void Pool_readInFile(Pool* pool, unsigned int idx, void* p)
     long int offset = idx * (sizeof(MemChunk) + pool->memChunkSize) + sizeof(MemChunk);
 
     fseek(pool->file, offset, SEEK_SET);
-    //fread(p, pool->memChunkSize, 1, pool->file);
+    fread(p, pool->memChunkSize, 1, pool->file);
 }
 
 PRIVATE void Pool_readInMemory(Pool* pool, unsigned int idx, void* p)
@@ -558,5 +555,4 @@ PRIVATE void Pool_readInMemory(Pool* pool, unsigned int idx, void* p)
 
     memcpy(p, (char*)pool->pool + offset, pool->memChunkSize);
 }
-
 
