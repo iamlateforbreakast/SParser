@@ -19,7 +19,7 @@ BTree * BTree_new(unsigned int order)
 
 	tree = (BTree*)malloc(sizeof(BTree));
 	tree->pool = Pool_new(MAX_NODES, sizeof(Node));
-	tree->root = NULL;
+	tree->root = 0;
 	tree->nbNodes = 0;
 	tree->depth = 0;
 	tree->nbObjects = 0;
@@ -36,10 +36,11 @@ BTree * BTree_new(unsigned int order)
 *********************************************************************************/
 void BTree_add(BTree* tree, Key key, Object object)
 {
-	if (tree->root == NULL)
+	if (tree->nbObjects == 0)
 	{
 		Node newLeaf;
 		unsigned int newLeafIdx = Node_new(TRUE, tree->pool); //Node newLeaf
+		Pool_read(tree->pool, newLeafIdx, &newLeaf);
 		newLeaf.nbKeyUsed = 1;
 		newLeaf.leaves[0] = object;
 		newLeaf.keys[0] = key;
