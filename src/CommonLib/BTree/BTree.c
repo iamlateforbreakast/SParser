@@ -4,6 +4,7 @@
 *********************************************************************************/
 #include "BTree.h"
 #include "Node.h"
+#include "Pool.h"
 
 #define MAX_NODES (10)
 
@@ -22,6 +23,7 @@ BTree * BTree_new(unsigned int order)
 	tree->nbNodes = 0;
 	tree->depth = 0;
 	tree->nbObjects = 0;
+	tree->order = order;
 
 	return tree;
 }
@@ -36,28 +38,30 @@ void BTree_add(BTree* tree, Key key, Object object)
 {
 	if (tree->root == NULL)
 	{
-		Node* newLeaf = Node_new(TRUE);
-		newLeaf->nbKeyUsed = 1;
-		newLeaf->leaves[0] = object;
-		newLeaf->keys[0] = key;
+		Node newLeaf;
+		unsigned int newLeafIdx = Node_new(TRUE, tree->pool); //Node newLeaf
+		newLeaf.nbKeyUsed = 1;
+		newLeaf.leaves[0] = object;
+		newLeaf.keys[0] = key;
+		Pool_write(tree->pool, newLeafIdx, &newLeaf);
 		tree->depth = 1;
-		tree->root = newLeaf;
-		tree->nbObjects=1;
+		tree->root = newLeafIdx;
+		tree->nbObjects = 1;
 		return;
 	}
 	if (tree->root->nbKeyUsed == ORDER * 2 - 1)
 	{ 
 		printf("Splitting root\n");
-		Node* newRoot = Node_new(FALSE);
+		Node* newRoot = Node_new(FALSE, tree->pool);  //Node newLeaf
 		newRoot->children[0] = tree->root;
-		Node* childForInsertion = Node_splitNode(newRoot, tree->root, key);
-		Node_insert(childForInsertion, key, object);
+		Node* childForInsertion = Node_splitNode(newRoot, tree->root, key, tree->pool);
+		Node_insert(childForInsertion, key, object, tree->pool);
 		tree->root = newRoot;
 		tree->depth++;
 		tree->nbObjects++;
 		return;
 	}
-  	Node_insert(tree->root, key, object);
+  	Node_insert(tree->root, key, object, tree->pool);
 	tree->nbObjects++;
 }
 
@@ -70,7 +74,7 @@ Object BTree_get(BTree* tree, Key key)
 {
 	Object object = NULL;
 
-	object = Node_search(tree->root,key, FALSE);
+	object = Node_search(tree->root,key, FALSE, tree->pool);
 
 	return object;
 }
@@ -85,7 +89,7 @@ Object BTree_remove(BTree* tree, Key key)
 {
 	Object object = NULL;
 	Node* root = tree->root;
-
+	// Pool_read(root)
   	if (root->nbKeyUsed == 0) return NULL;
 
 	if (root->isLeaf)
@@ -112,14 +116,14 @@ Object BTree_remove(BTree* tree, Key key)
 	}
 	else
 	{
-		object = Node_remove(root, key, NULL);
+		object = Node_remove(root, key, NULL, tree->pool);
 		// Check the resulting tree so that there is at least 1 Key used at root level
 		if (tree->root->nbKeyUsed < 1)
 		{
 			printf("Tree should collapse\n");
 			tree->root = root->children[0];
 			tree->depth--;
-			Node_free(root);
+			Node_free(root, tree->pool);
 		}
 		// Check something was actually removed
 		if (object != NULL)
@@ -151,7 +155,7 @@ void BTree_print(BTree* tree)
 	if (tree->depth > 0)
 	{
 		printf("Root 0-0:\n");
-		Node_print(tree->root, tree->depth - 1);
+		Node_print(tree->root, tree->depth - 1, tree->pool);
 	}
 	    
 }
@@ -175,8 +179,9 @@ PUBLIC BTree * BTree_newFromFile(char * fileName)
 *********************************************************************************/
 PUBLIC void BTree_free(BTree* tree)
 {
-	Node_free(tree->root);
-	
+	Node_free(tree->root, tree->pool);
+	Pool_free(tree->pool);
+
 	free(tree);
 }
 	
