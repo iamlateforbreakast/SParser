@@ -50,14 +50,19 @@ void BTree_add(BTree* tree, Key key, Object object)
 		tree->nbObjects = 1;
 		return;
 	}
-	if (tree->root->nbKeyUsed == ORDER * 2 - 1)
+	Node root;
+	Pool_read(tree->pool, tree->root, &root);
+	if (root.nbKeyUsed == ORDER * 2 - 1)
 	{ 
 		printf("Splitting root\n");
-		Node* newRoot = Node_new(FALSE, tree->pool);  //Node newLeaf
-		newRoot->children[0] = tree->root;
-		Node* childForInsertion = Node_splitNode(newRoot, tree->root, key, tree->pool);
-		Node_insert(childForInsertion, key, object, tree->pool);
-		tree->root = newRoot;
+		Node newRoot;
+		unsigned int newRootIdx = Node_new(FALSE, tree->pool);  //Node newLeaf
+		Pool_read(tree->pool, newRootIdx, &newRoot);
+		newRoot.children[0] = tree->root;
+		Pool_write(tree->pool, newRootIdx, &newRoot);
+		unsigned int childForInsertionIdx = Node_splitNode(newRootIdx, tree->root, key, tree->pool);
+		Node_insert(childForInsertionIdx, key, object, tree->pool);
+		tree->root = newRootIdx;
 		tree->depth++;
 		tree->nbObjects++;
 		return;
@@ -73,11 +78,9 @@ void BTree_add(BTree* tree, Key key, Object object)
 *********************************************************************************/
 Object BTree_get(BTree* tree, Key key)
 {
-	Object object = NULL;
+	Node_search(tree->root, key, object, FALSE, tree->pool);
 
-	object = Node_search(tree->root,key, FALSE, tree->pool);
-
-	return object;
+	return;
 }
 
 /*********************************************************************************
@@ -89,6 +92,7 @@ Object BTree_get(BTree* tree, Key key)
 Object BTree_remove(BTree* tree, Key key)
 {
 	Object object = NULL;
+#if 0
 	Node* root = tree->root;
 	// Pool_read(root)
   	if (root->nbKeyUsed == 0) return NULL;
@@ -137,6 +141,7 @@ Object BTree_remove(BTree* tree, Key key)
 		}
 		return object;
 	}
+#endif
 	return object;
 }
 
