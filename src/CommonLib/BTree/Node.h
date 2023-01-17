@@ -6,7 +6,7 @@
 
 #include "Types.h"
 #include "CommonTypes.h"
-#include "Node.h"
+#include "Pool.h"
 
 #define ORDER (3)
 
@@ -30,4 +30,3 @@ PUBLIC void Node_free(Node* node, Pool * pool);
 PUBLIC void Node_print(Node* node, unsigned int depth, Pool * pool);
 
 #endif /* _NODE_ */
-
