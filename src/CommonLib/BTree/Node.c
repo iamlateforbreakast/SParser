@@ -116,33 +116,36 @@ PUBLIC void Node_free(Node* node, Pool * pool)
 * input: beamWeightRange
 * output: none
 *********************************************************************************/
-PUBLIC void Node_insert(Node* node, Key key, Object object, Pool * pool)
+PUBLIC void Node_insert(unsigned int nodeIdx, Key key, Object object, Pool* pool)
 {
-	if (node->isLeaf == TRUE) 
-	{
-		for (int i = 0; i < node->nbKeyUsed; i++)
+	Node node;
+ 	Pool_read(pool, nodeIdx, &node);
+	if (node.isLeaf == TRUE) 
+	{	
+		for (int i = 0; i < node.nbKeyUsed; i++)
 		{
-			if (key == node->keys[i])
+			if (key == node.keys[i])
 			{
 				printf("Error: Duplicate Key\n");
 				return;
 			}
-			if (key < node->keys[i])
+			if (key < node.keys[i])
 			{
-				for (int j = node->nbKeyUsed-1; j >= i; j--)
-					node->keys[j + 1] = node->keys[j];
-				for (int j = node->nbKeyUsed; j >= i; j--) 
-					node->leaves[j + 1] = node->leaves[j];
-				node->keys[i] = key;
-				node->leaves[i] = object;
-				node->nbKeyUsed++;
+				for (int j = node.nbKeyUsed-1; j >= i; j--)
+					node.keys[j + 1] = node.keys[j];
+				for (int j = node.nbKeyUsed; j >= i; j--) 
+					node.leaves[j + 1] = node.leaves[j];
+				node.keys[i] = key;
+				node.leaves[i] = object;
+				node.nbKeyUsed++;
 				return;
 			}
 		}
 		/* POsition to insrt is the last */
-		node->keys[node->nbKeyUsed] = key;
-		node->leaves[node->nbKeyUsed] = object;
-		node->nbKeyUsed++;
+		node.keys[node.nbKeyUsed] = key;
+		node.leaves[node.nbKeyUsed] = object;
+		node.nbKeyUsed++;
+		Pool_write(pool, nodeIdx, &node);
 		return;
 	}
 	else
