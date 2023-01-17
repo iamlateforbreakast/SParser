@@ -62,14 +62,14 @@ unsigned int main(void)
 	unsigned int nbNotFound = 0;
 	for (int i = 1; i <= NB_ITEMS; i++)
 	{
-		resultItem = (unsigned int *)BTree_get(testTree, keys[i-1]);
+		BTree_get(testTree, keys[i-1], &resultItem);
 		if (resultItem == NULL)
 		{
 			printf(" BTree_get %d:%d result is not found\n", i, keys[i - 1]);
 			nbNotFound++;
 		}
 	}
-	resultItem = (unsigned int *)BTree_get(testTree, 501);
+	BTree_get(testTree, 501, &resultItem);
 	if (resultItem == NULL)
 	{
 		printf(" BTree_get %d:%d result is not found\n", NB_ITEMS+1, 501);

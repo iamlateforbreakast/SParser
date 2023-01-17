@@ -76,7 +76,7 @@ void BTree_add(BTree* tree, Key key, Object object)
 * input: key
 * output: A reference to a beamWeightRange
 *********************************************************************************/
-Object BTree_get(BTree* tree, Key key)
+PUBLIC void BTree_get(BTree* tree, Key key, Object * object)
 {
 	Node_search(tree->root, key, object, FALSE, tree->pool);
 
