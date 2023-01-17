@@ -11,7 +11,7 @@
 typedef struct BTree
 {
 	Pool * pool;
-	Node * root;
+        unsigned int root;
 	unsigned int depth;
 	unsigned short int nbObjects;
 	unsigned short int nbNodes;
