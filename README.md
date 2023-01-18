@@ -7,17 +7,27 @@ To compile:
 git clone https://github.com/iamlateforbreakast/SParse.git
 
 cd SParse
+
 git status
+
 git branch update_test_file
+
 git checkout update_test_file
+
 touch test.txt
+
 git add .
+
 git commit -m "Created test.txt"
+
 git push --set-upstream origin update_test_file
 
 git checkout master
+
 git pull origin master
+
 git merge update_test_file
+
 git push origin master
 
 autoreconf -- install
