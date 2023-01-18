@@ -193,7 +193,7 @@ PUBLIC void Node_insert(unsigned int nodeIdx, Key key, Object object, Pool* pool
 * input: the key to remove
 * output: none
 *********************************************************************************/
-PUBLIC Object Node_remove(Node* node, Key key, unsigned int * keyToUpdate, Pool * pool)
+PUBLIC Object Node_remove(unsigned int nodeIdx, Key key, unsigned int * keyToUpdate, Pool * pool)
 { 
 	Object object = NULL;
 #if 0
