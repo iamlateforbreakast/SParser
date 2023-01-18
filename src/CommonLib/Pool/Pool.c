@@ -213,6 +213,11 @@ PUBLIC void Pool_report(Pool* pool)
         Pool_reportInMemory(pool);
 }
 
+PUBLIC unsigned int Pool_reportSizeInBytes(Pool* pool)
+{
+    return (pool->nbMemChunks * (sizeof(MemChunk) + pool->memChunkSize));
+}
+
 PRIVATE void Pool_reportInMemory(Pool* pool)
 {
     printf("Pool Report:\n");
@@ -531,7 +536,7 @@ PRIVATE void Pool_writeInFile(Pool* pool, unsigned int idx, void* p)
     long int offset = idx * (sizeof(MemChunk) + pool->memChunkSize) + sizeof(MemChunk);
 
     fseek(pool->file, offset, SEEK_SET);
-    fwrite(p, sizeof(MemChunk), 1, pool -> file);
+    fwrite(p, pool->memChunkSize, 1, pool -> file);
 }
 
 PRIVATE void Pool_writeInMemory(Pool* pool, unsigned int idx, void* p)
@@ -555,4 +560,3 @@ PRIVATE void Pool_readInMemory(Pool* pool, unsigned int idx, void* p)
 
     memcpy(p, (char*)pool->pool + offset, pool->memChunkSize);
 }
-
