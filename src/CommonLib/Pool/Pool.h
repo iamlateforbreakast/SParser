@@ -35,4 +35,6 @@ PUBLIC void Pool_dealloc(Pool * pool, unsigned int p);
 PUBLIC void Pool_write(Pool * pool, unsigned int idx, void * p);
 PUBLIC void Pool_read(Pool * pool, unsigned int idx, void * p);
 PUBLIC void Pool_report(Pool * pool);
+PUBLIC unsigned int Pool_reportSizeInBytes(Pool* pool);
+PUBLIC unsigned int Pool_reportNbNodes(Pool* pool);
 #endif
