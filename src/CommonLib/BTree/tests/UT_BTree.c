@@ -3,10 +3,58 @@
 * 
 *********************************************************************************/
 #include <stdlib.h>
+#include <time.h>
+
 #include "Types.h"
 #include "BTree.h"
 
 #define NB_ITEMS (10)
+
+//  Windows
+#ifdef _WIN32
+#include <Windows.h>
+double get_wall_time() {
+	LARGE_INTEGER time, freq;
+	if (!QueryPerformanceFrequency(&freq)) {
+		//  Handle error
+		return 0;
+	}
+	if (!QueryPerformanceCounter(&time)) {
+		//  Handle error
+		return 0;
+	}
+	return (double)time.QuadPart / freq.QuadPart;
+}
+double get_cpu_time() {
+	FILETIME a, b, c, d;
+	if (GetProcessTimes(GetCurrentProcess(), &a, &b, &c, &d) != 0) {
+		//  Returns total user time.
+		//  Can be tweaked to include kernel times as well.
+		return
+			(double)(d.dwLowDateTime |
+				((unsigned long long)d.dwHighDateTime << 32)) * 0.0000001;
+	}
+	else {
+		//  Handle error
+		return 0;
+	}
+}
+//  Posix/Linux
+#else
+#include <time.h>
+#include <sys/time.h>
+double get_wall_time() {
+	struct timeval time;
+	if (gettimeofday(&time, NULL)) {
+		//  Handle error
+		return 0;
+	}
+	return (double)time.tv_sec + (double)time.tv_usec * .000001;
+}
+double get_cpu_time() {
+	return (double)clock() / CLOCKS_PER_SEC;
+}
+#endif
 
 /*********************************************************************************
 * main
@@ -51,12 +99,20 @@ unsigned int main(void)
 	testTree = BTree_new();
 
 	printf("Step 2 - Add %d beamWeightRange\n", NB_ITEMS);
-
+	double cpu_time0 = get_cpu_time();
+	double wall_time0 = get_wall_time();
+	
 	for (int i = 0; i < NB_ITEMS; i++)
 	{
 		BTree_add(testTree, keys[i], items[i]);
 	}
-
+	
+	double cpu_time1 = get_cpu_time();
+	double wall_time1 = get_wall_time();
+	
+	printf("Insert CPU time %f\n", cpu_time1 - cpu_time0);
+	printf("Insert Wall time %f\n", wall_time1 - wall_time0);
+	
 	printf("Step 3 - Obtain a given item\n");
 
 	unsigned int nbNotFound = 0;
