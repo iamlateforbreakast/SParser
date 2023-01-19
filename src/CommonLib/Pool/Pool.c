@@ -213,6 +213,16 @@ PUBLIC void Pool_report(Pool* pool)
         Pool_reportInMemory(pool);
 }
 
+PUBLIC unsigned int Pool_reportSizeInBytes(Pool* pool)
+{
+    return (pool->nbMemChunks * (sizeof(MemChunk) + pool->memChunkSize));
+}
+
+PUBLIC unsigned int Pool_reportNbNodes(Pool* pool)
+{
+    return pool->nbAllocatedChunks;
+}
+
 PRIVATE void Pool_reportInMemory(Pool* pool)
 {
     printf("Pool Report:\n");
