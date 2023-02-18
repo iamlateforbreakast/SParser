@@ -16,6 +16,7 @@ SOURCES = \
 	./BTree/BTree.c \
 	./BTree/Node.c \
 	./Pool/Pool.c \
+        ./Array/Array.c \
 	./Error/Error.c
 
 HEADERS = ./Types/Types.h ./Object/Class.h $(SOURCES:.c=.h)
