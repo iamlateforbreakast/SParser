@@ -12,3 +12,9 @@ Object: IMplement refcount better
 
 Object: Check for memory leaks
 
+Metrics: Report LSC
+
+TimeMgr: implement wall clock portable funct.
+
+
+
