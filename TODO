@@ -14,7 +14,8 @@ Object: Check for memory leaks
 
 Metrics: Report LSC
 
-TimeMgr: implement wall clock portable funct.
+Time: implement wall clock portable funct.
 
+TimeMgr: Re implement Class
 
-
+Map: Use Pool class
