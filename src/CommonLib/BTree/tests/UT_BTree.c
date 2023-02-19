@@ -8,7 +8,7 @@
 #include "Types.h"
 #include "BTree.h"
 
-#define NB_ITEMS (100)
+#define NB_ITEMS (50)
 
 //  Windows
 #ifdef _WIN32
@@ -67,38 +67,39 @@ unsigned int main(void)
 	unsigned int isFailed = FALSE;
 
 	BTree * testTree;
-	unsigned int * items[NB_ITEMS];
-	unsigned int * resultItem = NULL;
+	unsigned int items[NB_ITEMS];
+	unsigned int * resultItem = 0;
 	unsigned int keys[NB_ITEMS];
 
-	for (int i = 0; i < NB_ITEMS; i++) keys[i] = i + 1;
-	int prev = 0;
+	/* Initialise keys and items to some default values*/
 	for (int i = 0; i < NB_ITEMS; i++)
 	{
-		unsigned int next = (NB_ITEMS * rand()/RAND_MAX);
-		unsigned int swap = keys[next];
-		keys[next] = keys[prev];
-		keys[prev] = swap;
-		prev = next;
-	}
-	//for (int i = 0; i < NB_ITEMS; i++) printf("Key[%d]=%d\n", i, keys[i]);
-	/* Initialise beamWeightRange to some default values*/
-	for (int i = 0; i < NB_ITEMS; i++)
-	{
-		items[i] = (unsigned int *)malloc(sizeof(unsigned int));
-		items[i] = i;
+                keys[i] = (i+1)*5;
+		items[i] = (i+1)*10;
 	}
 
 	printf("Step 1 - Create a storage tree.\n");
 
 	testTree = BTree_new(3);
 
-	printf("Step 2 - Add %d beamWeightRange\n", NB_ITEMS);
+	printf("Step 2 - Add %d tems\n", NB_ITEMS);
+
+        double cpu_time0, cpu_time1;
+        double wall_time0, wall_time1;
+
+        cpu_time0 = get_cpu_time();
+        wall_time0 = get_wall_time();
 
 	for (int i = 0; i < NB_ITEMS; i++)
 	{
-		BTree_add(testTree, keys[i], items[i]);
+		BTree_add(testTree, keys[i], &items[i]);
 	}
+
+        cpu_time1 = get_cpu_time();
+        wall_time1 = get_wall_time();
+
+        printf("Insert CPU time %f\n", cpu_time1-cpu_time0);
+        printf("Insert Wall time %f\n", wall_time1-wall_time0);
 
 	printf("Step 3 - Obtain a given item\n");
 

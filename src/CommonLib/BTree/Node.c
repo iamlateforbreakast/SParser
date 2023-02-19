@@ -177,7 +177,7 @@ PUBLIC void Node_insert(unsigned int nodeIdx, Key key, Object object, Pool* pool
 		}
 		else
 		{
-			printf("Splitting node.\n");
+			//printf("Splitting node.\n");
 			unsigned int newChildIdx = Node_splitNode(nodeIdx, node.children[i], key, pool);
 			Node_insert(newChildIdx, key, object, pool);
 			return;

@@ -3,6 +3,7 @@
 *
 *********************************************************************************/
 #include "Pool.h"
+#include "Memory.h"
 
 #define END_OF_QUEUE   (0xFFFFFFFF)
 #define END_OF_ALLOC   (0xFFFFFFFE)
@@ -548,7 +549,7 @@ PRIVATE void Pool_writeInMemory(Pool* pool, unsigned int idx, void* p)
 {
     long int offset = idx * (sizeof(MemChunk) + pool->memChunkSize) + sizeof(MemChunk);
 
-    memcpy((char*)pool->pool + offset, p, pool->memChunkSize);
+    Memory_copy((char*)pool->pool + offset, p, pool->memChunkSize);
 }
 
 PRIVATE void Pool_readInFile(Pool* pool, unsigned int idx, void* p)
@@ -563,6 +564,6 @@ PRIVATE void Pool_readInMemory(Pool* pool, unsigned int idx, void* p)
 {
     long int offset = idx * (sizeof(MemChunk) + pool->memChunkSize) + sizeof(MemChunk);
 
-    memcpy(p, (char*)pool->pool + offset, pool->memChunkSize);
+    Memory_copy(p, (char*)pool->pool + offset, pool->memChunkSize);
 }
 
