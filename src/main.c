@@ -1,9 +1,7 @@
 /**********************************************//** 
   \file main.c
      
-  \brief This file initialises:
-  1) The OptionMgr object
-  2) The FileMgr object
+  \brief Contains the main() function
         
   This file contains only one function main() 
   which initialises the OptionMgr and FileMgr objects.
@@ -32,8 +30,14 @@ PRIVATE void start_application(String * inputDir, String * dbName);
 PRIVATE void print_usage();
 
 /**********************************************//** 
-  \brief Inital entry point for SParse. This function creates
+  \brief Inital entry point for the application.
+  \param argc Number of arguments
+  \param argv Array of arguments
   \public
+
+  The main function:
+  1) Reads the options from command line or file
+  2) Starts the application for a DB name and an input file directory.
 **************************************************/
 PUBLIC int main(const int argc, const char** argv)
 {
@@ -88,8 +92,16 @@ PUBLIC int main(const int argc, const char** argv)
 }
 
 /**********************************************//** 
-  \brief TBD
-  @public
+  \brief Starts the application
+  \public
+  \param inputDir directory containing the files to parse
+  \param dbName DB file to output
+  \return
+
+  This functions starts the main application.\n
+  1) Creates a FileMgr object for input directory\n
+  2) Creates a SParse object\n
+  3) Measure the execution time\n
 **************************************************/
 PRIVATE void start_application(String * inputDir, String * dbName)
 {
@@ -122,8 +134,10 @@ PRIVATE void start_application(String * inputDir, String * dbName)
 }
 
 /**********************************************//** 
-  \brief TBD
-  @public
+  \brief Prints the application help
+  \private
+
+  Prints the usage information for the aplication.
 **************************************************/
 PRIVATE void print_usage()
 {
@@ -137,8 +151,13 @@ PRIVATE void print_usage()
 }
 
 /**********************************************//** 
-  \brief TBD
-  @public
+  \brief Display and exit when signal is received
+  \param signum TBC
+  \param info TBC
+  \param ptr TBC
+  \private
+
+  This function displays a signal and exit the application.
 **************************************************/
 PRIVATE void sighandler(int signum, siginfo_t *info, void *ptr) 
 { 

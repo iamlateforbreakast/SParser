@@ -1,3 +1,10 @@
+/**********************************************//** 
+  \file Error.c
+     
+  \brief Reports errors
+        
+  This file contains error reporting functions.
+**************************************************/
 #include "Error.h"
 #include "Debug.h"
 #include <stdarg.h>
@@ -6,6 +13,15 @@
 
 #define DEBUG (1)
 
+/**********************************************//** 
+  \brief Reports errors
+  \param severity Enum
+  \param msg Variable list of parameters
+  \public
+
+  This function reports errors using different
+  formatting according to severity.
+**************************************************/
 PUBLIC void Error_new(ErrorSeverity severity, char * msg, ...)
 {
   va_list args;
