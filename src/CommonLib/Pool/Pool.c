@@ -55,7 +55,7 @@ PUBLIC Pool* Pool_new(unsigned int nbMemChunks, unsigned int memChunkSize)
 
     for (int i = 0; i < newPool->nbMemChunks; i++)
     {
-        MemChunk* memChunk = (char *)newPool->pool + i * (sizeof(MemChunk) + memChunkSize);
+        MemChunk* memChunk = (MemChunk*)((char *)newPool->pool + i * (sizeof(MemChunk) + memChunkSize));
         if (i < newPool->nbMemChunks - 1) memChunk->next = i + 1;
         if (i > 0)
         {
@@ -235,7 +235,7 @@ PRIVATE void Pool_reportInMemory(Pool* pool)
     //fseek(pool->file, 0, SEEK_SET);
     for (int i = 0; i < pool->maxNbMemChunks; i++)
     {
-        MemChunk * memChunk = (char*)pool->pool + i * (sizeof(MemChunk) + pool->memChunkSize);
+        MemChunk * memChunk = (MemChunk*)((char*)pool->pool + i * (sizeof(MemChunk) + pool->memChunkSize));
         printf("MemChunk %d\n", i);
         switch (memChunk->prev)
         {
@@ -335,14 +335,14 @@ PRIVATE AllocStatus Pool_allocInMemory(Pool* pool, unsigned int* ptrIdx)
     if (pool->nbAllocatedChunks == 0)
     {
         *ptrIdx = pool->firstAvailable;
-        MemChunk* memChunk = (char *)pool->pool + firstAvailableOffset;
+        MemChunk* memChunk = (MemChunk*)((char *)pool->pool + firstAvailableOffset);
         pool->lastAllocated = 0;
         pool->firstAvailable = memChunk->next;
         memChunk->prev = END_OF_QUEUE;
         memChunk->next = END_OF_ALLOC;
         memChunk->isFree = 0;
 
-        memChunk = (char*)pool->pool + pool->firstAvailable * (sizeof(MemChunk) + pool->memChunkSize);
+        memChunk = (MemChunk*)((char*)pool->pool + pool->firstAvailable * (sizeof(MemChunk) + pool->memChunkSize));
         memChunk->prev = START_OF_AVAIL;
         pool->nbAllocatedChunks = 1;
 
@@ -352,11 +352,11 @@ PRIVATE AllocStatus Pool_allocInMemory(Pool* pool, unsigned int* ptrIdx)
     if (pool->nbAllocatedChunks <= pool->maxNbMemChunks)
     {
         *ptrIdx = pool->firstAvailable;
-        MemChunk* memChunk = (char*)pool->pool + lastAllocatedOffset;
+        MemChunk* memChunk = (MemChunk*)((char*)pool->pool + lastAllocatedOffset);
         memChunk->next = pool->firstAvailable;
 
         // Update old first available
-        memChunk = (char*)pool->pool + firstAvailableOffset;
+        memChunk = (MemChunk*)((char*)pool->pool + firstAvailableOffset);
         memChunk->prev = pool->lastAllocated;
         pool->lastAllocated = pool->firstAvailable;
         pool->firstAvailable = memChunk->next;
@@ -367,7 +367,7 @@ PRIVATE AllocStatus Pool_allocInMemory(Pool* pool, unsigned int* ptrIdx)
         if (pool->firstAvailable != END_OF_QUEUE)
         {
             firstAvailableOffset = pool->firstAvailable * (sizeof(MemChunk) + pool->memChunkSize);
-            memChunk = (char*)pool->pool + firstAvailableOffset;
+            memChunk = (MemChunk*)((char*)pool->pool + firstAvailableOffset);
             memChunk->prev = START_OF_AVAIL;
         }
         pool->nbAllocatedChunks++;
@@ -446,12 +446,12 @@ PRIVATE void Pool_deallocInMemory(Pool* pool, unsigned int idx)
 
     if (pool->nbAllocatedChunks > 0)
     {
-        MemChunk* memChunk = (char*)pool->pool + firstAvailableOffset;
+        MemChunk* memChunk = (MemChunk*)((char*)pool->pool + firstAvailableOffset);
         if (pool->firstAvailable != END_OF_QUEUE)
         {
             memChunk->prev = idx;
         }
-        memChunk = (char*)pool->pool + allocatedOffset;
+        memChunk = (MemChunk*)((char*)pool->pool + allocatedOffset);
         unsigned int prevIdx = memChunk->prev;
         unsigned int nextIdx = memChunk->next;
 
@@ -463,14 +463,14 @@ PRIVATE void Pool_deallocInMemory(Pool* pool, unsigned int idx)
         if (prevIdx != END_OF_QUEUE)
         {
             long int prevOffset = prevIdx * (sizeof(MemChunk) + pool->memChunkSize);
-            memChunk = (char*)pool->pool + prevOffset;
+            memChunk = (MemChunk*)((char*)pool->pool + prevOffset);
             memChunk->next = nextIdx;
         }
 
         if (nextIdx != END_OF_ALLOC)
         {
             long int nextOffset = nextIdx * (sizeof(MemChunk) + pool->memChunkSize);
-            memChunk = (char*)pool->pool + nextOffset;
+            memChunk = (MemChunk*)((char*)pool->pool + nextOffset);
             memChunk->prev = prevIdx;
         }
         pool->nbAllocatedChunks--;
