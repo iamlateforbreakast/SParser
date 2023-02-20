@@ -17,7 +17,7 @@ typedef struct BTree
 	unsigned int order;
 } BTree;
 
-PUBLIC BTree * BTree_new(unsigned int order);
+PUBLIC BTree * BTree_new();
 PUBLIC BTree * BTree_newFromFile(char* fileName);
 PUBLIC void BTree_free(BTree * tree);
 PUBLIC void BTree_add(BTree * tree, Key key, Object object);
