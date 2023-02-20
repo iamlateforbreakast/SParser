@@ -11,10 +11,14 @@
 #include "FileReader.h"
 #include "SdbRequest.h"
 #include "Error.h"
+#include "Debug.h"
 #include "List.h"
 #include "Memory.h"
+#include "String2.h"
 
 #include "Grammar2.parse.h"
+
+#define DEBUG (0)
 
 #define MAX_BUFFER_SIZE  (1024*1024)
 
@@ -160,7 +164,7 @@ PUBLIC void Grammar2_process(Grammar2 * this)
   Grammar2_scan_string(FileReader_getBuffer(this->reader), this->scanner);
   //if (Memory_ncmp(String_getBuffer(FileReader_getName(this->reader)),"Timer.c",7))
   //{
-  //         printf("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
+  //         TRACE(("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
   //}
   Grammar2_parse(this->scanner, this);
   
@@ -310,14 +314,14 @@ PUBLIC void Grammar2_addComment(Grammar2 * this)
 {
   SdbRequest * insertCommentNode = 0;
   
-  printf("Grammar2_addComment: 1\n");
+  TRACE(("Grammar2_addComment: 1\n"));
   insertCommentNode = SdbRequest_new(
   "INSERT INTO Comment_Nodes (NodeId, Comment) "
   "VALUES (%d,'%s');"
   );
   
   this->buffer[this->node_text_position] = 0;
-  //printf("\nComment found: %s\n", this->buffer);
+  //TRACE(("\nComment found: %s\n", this->buffer));
   this->node_text_position = 0;
   commentNodeId++;
   
@@ -328,14 +332,14 @@ PUBLIC void Grammar2_addComment(Grammar2 * this)
   SdbRequest_execute(insertCommentNode, commentNodeId, this->buffer);
   SdbRequest_delete(insertCommentNode);
   
-  printf("Grammar2_addComment: 2\n");
+  TRACE(("Grammar2_addComment: 2\n"));
 }
 
 PUBLIC void Grammar2_addCodeNode(Grammar2 * this)
 {
   SdbRequest * insertCodeNode = 0;
   
-  printf("Grammar2_addCodeNode: 1\n");
+  TRACE(("Grammar2_addCodeNode: 1\n"));
   if (this->node_text_position!=0)
   {
     insertCodeNode = SdbRequest_new(
@@ -354,7 +358,7 @@ PUBLIC void Grammar2_addCodeNode(Grammar2 * this)
     SdbRequest_execute(insertCodeNode, codeNodeId, this->buffer);
     SdbRequest_delete(insertCodeNode);
   }
-  printf("Grammar2_addCodeNode: 2\n");
+  TRACE(("Grammar2_addCodeNode: 2\n"));
 }
 
 PUBLIC void Grammar2_addIncludeNode(Grammar2 * this, char * name)
@@ -529,7 +533,6 @@ PRIVATE unsigned int Grammar2_isFileToBeIgnored(Grammar2 * this, String * fileNa
 
 PRIVATE unsigned int Grammar2_isIncludeNodeProcessed(Grammar2 * this, String * name)
 {
-  unsigned int result = 0;
   SdbRequest * checkIncludeNode = 0;
   
   checkIncludeNode = SdbRequest_new(
@@ -542,7 +545,6 @@ PRIVATE unsigned int Grammar2_isIncludeNodeProcessed(Grammar2 * this, String * n
 
 PRIVATE void Grammar2_storeIncludeStartNode(Grammar2 * this, unsigned int nodeId, unsigned int startNodeId)
 {
-  unsigned int result = 0;
   unsigned int includeNodeId = 0;
   unsigned int i = 0;
   List * l = 0;
@@ -573,5 +575,5 @@ PRIVATE void Grammar2_storeIncludeStartNode(Grammar2 * this, unsigned int nodeId
   SdbRequest_delete(findIncludeNode);
   SdbRequest_delete(updateIncludeNode);
   
-  return result;
+  return;
 }

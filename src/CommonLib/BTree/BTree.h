@@ -27,4 +27,4 @@ PUBLIC void BTree_print(BTree * tree);
 PUBLIC unsigned int BTree_sizeof(BTree* tree);
 
 
-#endif _BTREE_
+#endif /* _BTREE_ */

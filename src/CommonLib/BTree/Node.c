@@ -1,5 +1,8 @@
 #include "Node.h"
+#include "Error.h"
+#include "Debug.h"
 
+#define DEBUG (1)
 /*********************************************************************************
 *
 * Private Functions Declarations
@@ -46,8 +49,7 @@ PUBLIC Object Node_search(Node* node, Key key, unsigned int isFoundAlready)
 {
 	if (node == NULL)
 	{
-		printf("ERROR: Node_search node== NULL\n");
-		exit(0);
+		Error_new(ERROR_FATAL,"Node_search node== NULL\n");
 	}
 	if (node->isLeaf == TRUE)
 	{
@@ -71,8 +73,7 @@ PUBLIC Object Node_search(Node* node, Key key, unsigned int isFoundAlready)
 			{
 				if (node->children[i] == NULL)
 				{
-					printf("ERROR: Node_search node== NULL\n");
-					exit(0);
+					Error_new(ERROR_FATAL, "Node_search node== NULL\n");
 				}
 				return Node_search(node->children[i], key, isFoundAlready);
 			}
@@ -116,7 +117,7 @@ PUBLIC void Node_insert(Node* node, Key key, Object object)
 		{
 			if (key == node->keys[i])
 			{
-				printf("Error: Duplicate Key\n");
+				Error_new(ERROR_NORMAL, "Duplicate Key\n");
 				return;
 			}
 			if (key < node->keys[i])
@@ -148,9 +149,9 @@ PUBLIC void Node_insert(Node* node, Key key, Object object)
 		}
 		if (node->children[i] == NULL)
 		{
-			printf("ERROR: insert key: %d\n", key);
+			Error_new(ERROR_NORMAL, "insert key: %d\n", key);
 			Node_print(node, 3);
-			exit(0);
+			Error_new(ERROR_FATAL,"Exiting\n");
 		}
 		if (node->children[i]->nbKeyUsed < ORDER * 2 - 1) //&& (node->nbKeyUsed < ORDER * 2 - 1))
 		{
@@ -159,7 +160,7 @@ PUBLIC void Node_insert(Node* node, Key key, Object object)
 		}
 		else
 		{
-			printf("Splitting node.\n");
+			TRACE(("Splitting node.\n"));
 			Node* newChild = Node_splitNode(node, node->children[i], key);
 			Node_insert(newChild, key, object);
 			return;
@@ -252,7 +253,7 @@ PUBLIC Object Node_remove(Node* node, Key key, unsigned int * keyToUpdate)
 			if (node->children[node->nbKeyUsed - 1]->nbKeyUsed <= ORDER - 1)
 			{
 				// Merge node left and right
-				printf("ERROR: Need to merge\n");
+				TRACE(("ERROR: Need to merge\n"));
 				Node_mergeNodes(node, node->nbKeyUsed - 1, node->nbKeyUsed);
 			}
 			else
@@ -280,21 +281,21 @@ PUBLIC Object Node_remove(Node* node, Key key, unsigned int * keyToUpdate)
 PUBLIC void Node_print(Node* node, unsigned int depth)
 {
 	if (node == NULL) return;
-	printf(" Node NbUsed: %d\n", node->nbKeyUsed);
-	printf(" Keys: ");
+	TRACE((" Node NbUsed: %d\n", node->nbKeyUsed));
+	TRACE((" Keys: "));
 	for (int i = 0; i < ORDER * 2 - 1; i++)
 	{
 		if (i < node->nbKeyUsed)
-			printf("%d ", node->keys[i]);
+			PRINT(("%d ", node->keys[i]));
 		else
-			printf(".. ");
+			PRINT((".. "));
 	}
-	printf("\n");
+	TRACE(("\n"));
 	if ((node->isLeaf==FALSE) && (depth>0))
 	{
 		for (int i = 0; i <= node->nbKeyUsed; i++)
 		{
-			printf("Child %d-%d:\n", depth, i);
+			TRACE(("Child %d-%d:\n", depth, i));
 		    Node_print(node->children[i], depth - 1);
 		}
 	}
@@ -427,7 +428,7 @@ PRIVATE void Node_stealLeftKey(Node* node, unsigned int idxChildStealFrom, unsig
 	Node * stealFromChild = node->children[idxChildStealFrom];
 	Node * giveToChild = node->children[idxChildGiveTo];
 
-	//printf("Stealing Left Key from % to % d\n", idxChildStealFrom, idxChildGiveTo);
+	//TRACE(("Stealing Left Key from % to % d\n", idxChildStealFrom, idxChildGiveTo));
 	Node_shiftRight(giveToChild, 0);
 	giveToChild->children[0] = stealFromChild->children[stealFromChild->nbKeyUsed];
 	giveToChild->leaves[0] = stealFromChild->leaves[stealFromChild->nbKeyUsed];
@@ -449,7 +450,7 @@ PRIVATE void Node_stealRightKey(Node* node, unsigned int idxChildStealFrom, unsi
 	Node* stealFromChild = node->children[idxChildStealFrom];
 	Node* giveToChild = node->children[idxChildGiveTo];
 
-	//printf("Stealing Right Key from % to % d\n", idxChildStealFrom, idxChildGiveTo);
+	//TRACE(("Stealing Right Key from % to % d\n", idxChildStealFrom, idxChildGiveTo));
 	giveToChild->children[giveToChild->nbKeyUsed + 1] = stealFromChild->children[0];
 	giveToChild->leaves[giveToChild->nbKeyUsed + 1] = stealFromChild->leaves[0];
 	giveToChild->keys[giveToChild->nbKeyUsed] = node->keys[idxChildGiveTo];

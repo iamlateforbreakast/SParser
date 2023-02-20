@@ -6,7 +6,9 @@ int yylex(void * yylval_param, void * yyscanner, Grammar2 * grammar);
 %}
 
 %pure-parser
+//%define api.pure full
 %name-prefix "Grammar2_"
+//%define api.prefix {Grammar2_}
 %output "Grammar2.parse.c"
 %lex-param {void * scanner}
 %lex-param {Grammar2 * grammar}

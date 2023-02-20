@@ -14,6 +14,7 @@
 #include "FileMgr.h"
 #include "TimeMgr.h"
 #include "Error.h"
+#include "Debug.h"
 #include "SParse.h"
 #include "Memory.h"
 #include "ObjectMgr.h"
@@ -126,13 +127,13 @@ PRIVATE void start_application(String * inputDir, String * dbName)
 **************************************************/
 PRIVATE void print_usage()
 {
-  printf("Usage: sparse [OPTION]\n");
-  printf("   Run SParse in the current directory.\n");
-  printf("\n");
-  printf("-o\t\tSQLite database Name\n");
-  printf("-d\t\tInput directory\n");
-  printf("-c\t\tConfiguration file name\n");
-  printf("-help\t\tDisplay this help and exit\n");
+  PRINT(("Usage: sparse [OPTION]\n"));
+  PRINT(("   Run SParse in the current directory.\n"));
+  PRINT(("\n"));
+  PRINT(("-o\t\tSQLite database Name\n"));
+  PRINT(("-d\t\tInput directory\n"));
+  PRINT(("-c\t\tConfiguration file name\n"));
+  PRINT(("-help\t\tDisplay this help and exit\n"));
 }
 
 /**********************************************//** 

@@ -185,7 +185,7 @@ PUBLIC unsigned int OptionMgr_readFromFile(OptionMgr * this)
   fileName = OptionMgr_getOption(this,"Config file name");
   path1 = String_copy(fileName);
   String_prepend(path1,"./");
-  if (fullPath = FileMgr_addFile(fileMgr, String_getBuffer(path1)))
+  if ((fullPath = FileMgr_addFile(fileMgr, String_getBuffer(path1))) != 0)
   {
     /* File exists and is managed */
     fileContent = FileMgr_load(fileMgr, String_getBuffer(fullPath));
