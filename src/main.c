@@ -1,7 +1,7 @@
 /**********************************************//** 
-  @file main.c
+  \file main.c
      
-  @brief This file initialises:
+  \brief This file initialises:
   1) The OptionMgr object
   2) The FileMgr object
         
@@ -23,7 +23,7 @@
 #include <signal.h>
 
 /**********************************************//** 
-  @private
+  \private
 **************************************************/
 struct sigaction action;
 
@@ -32,8 +32,8 @@ PRIVATE void start_application(String * inputDir, String * dbName);
 PRIVATE void print_usage();
 
 /**********************************************//** 
-  @brief Inital entry point for SParse. This function creates
-  @public
+  \brief Inital entry point for SParse. This function creates
+  \public
 **************************************************/
 PUBLIC int main(const int argc, const char** argv)
 {
@@ -88,7 +88,7 @@ PUBLIC int main(const int argc, const char** argv)
 }
 
 /**********************************************//** 
-  @brief TBD
+  \brief TBD
   @public
 **************************************************/
 PRIVATE void start_application(String * inputDir, String * dbName)
@@ -122,7 +122,7 @@ PRIVATE void start_application(String * inputDir, String * dbName)
 }
 
 /**********************************************//** 
-  @brief TBD
+  \brief TBD
   @public
 **************************************************/
 PRIVATE void print_usage()
@@ -137,7 +137,7 @@ PRIVATE void print_usage()
 }
 
 /**********************************************//** 
-  @brief TBD
+  \brief TBD
   @public
 **************************************************/
 PRIVATE void sighandler(int signum, siginfo_t *info, void *ptr) 
