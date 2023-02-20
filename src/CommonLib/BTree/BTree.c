@@ -1,7 +1,13 @@
-/*********************************************************************************
-* BTree.c
-*
-*********************************************************************************/
+/**********************************************//**
+  @file BTree.c
+     
+  @brief This file contains the implementation of the class BTree.
+				        
+  The class BTree implements the BTree operations:
+  - init
+  - add
+  - remove
+****************************************************/
 #include "BTree.h"
 #include "Node.h"
 
