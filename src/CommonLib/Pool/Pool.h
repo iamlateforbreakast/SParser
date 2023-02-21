@@ -36,7 +36,7 @@ PUBLIC AllocStatus Pool_alloc(Pool * pool, unsigned int * idx);
 PUBLIC void Pool_dealloc(Pool * pool, unsigned int p);
 PUBLIC void Pool_write(Pool * pool, unsigned int idx, void * p);
 PUBLIC void Pool_read(Pool * pool, unsigned int idx, void * p);
-PUBLIC unsigned int Pool_getAddToChunkCache(Pool * pool, unsigned int length);
+PUBLIC unsigned int Pool_addToChunkCache(Pool * pool, unsigned int length);
 PUBLIC void Pool_report(Pool * pool);
 PUBLIC unsigned int Pool_reportSizeInBytes(Pool* pool);
 PUBLIC unsigned int Pool_reportNbNodes(Pool* pool);
