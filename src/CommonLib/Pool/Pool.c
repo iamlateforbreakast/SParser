@@ -200,6 +200,7 @@ PUBLIC void Pool_writeCache(Pool* pool, unsigned int idx)
         Pool_writeInFile(pool, idx, pool->chunkCache);
     else
         Pool_writeInMemory(pool, idx, pool->chunkCache);
+    pool->cacheUsed = 0;
 }
 
 PUBLIC void Pool_read(Pool* pool, unsigned int idx, void* p)
@@ -234,7 +235,7 @@ PUBLIC unsigned int Pool_addToChunkCache(Pool* pool, void * p, unsigned int leng
     if (pool->cacheUsed + length > pool->memChunkSize) length = pool->memChunkSize - pool->cacheUsed;
 
     memcpy(dest, p, length);
-    pool->cacheUsed = +length;
+    pool->cacheUsed += length;
 
     return length;
 }
