@@ -1,8 +1,8 @@
-#include "Types.h"
+#include "CommonTypes.h"
 #include "Pool.h"
 
 #define NB_MEM_CHUNKS (4)
-#define SIZE_MEM_CHUNK (4)
+#define SIZE_MEM_CHUNK (16)
 
 Pool* testPool = 0;
 
@@ -61,6 +61,23 @@ int step5()
 
 int step6()
 {
+    char testData[] = { 'A','B','C','D','E','F','G','H' };
+
+    char readData[9];
+
+    readData[8] = '\n';
+
+    for (int i=0;i<8;i++)
+    {
+        Pool_addToChunkCache(testPool, &testData[0] + i, 1);
+    }
+    Pool_writeCache(testPool, 0);
+    Pool_read(testPool, 0, &readData);
+    printf("data read back %s\n", & readData[0]);
+}
+
+int step7()
+{
     Pool_free(testPool);
 }
 
@@ -74,6 +91,7 @@ int step12()
     unsigned int idx = 0;
     AllocStatus allocStatus = ALLOC_OK;
 
+    allocStatus = Pool_alloc(testPool, &idx);
     allocStatus = Pool_alloc(testPool, &idx);
     Pool_report(testPool);
 
@@ -96,7 +114,7 @@ int main()
     step4();
     step5();
     step6();
-    step11();
+    /*step11();
     step12();
-    step16();
+    step16();*/
 }
