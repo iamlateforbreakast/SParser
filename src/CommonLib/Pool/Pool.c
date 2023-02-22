@@ -52,6 +52,8 @@ PUBLIC Pool* Pool_new(unsigned int nbMemChunks, unsigned int memChunkSize)
     newPool->isFile = 0;
     newPool->pool = (MemChunk*)malloc(newPool->nbMemChunks * (sizeof(MemChunk) + newPool->memChunkSize));
     newPool->file = 0;
+    newPool->chunkCache = (char*)malloc(sizeof(MemChunk) + newPool->memChunkSize);
+    newPool->cacheUsed = 0;
 
     for (int i = 0; i < newPool->nbMemChunks; i++)
     {
@@ -99,7 +101,8 @@ PUBLIC Pool* Pool_newFromFile(char* fileName, unsigned int nbMemChunks, unsigned
     newPool->nbAllocatedChunks = 0;
     newPool->isFile = 1;
     newPool->pool = 0;
-
+    newPool->chunkCache = (char*)malloc(sizeof(MemChunk) + newPool->memChunkSize);
+    newPool->cacheUsed = 0;
 
     //fclose(newPool->file);
     // If file exists
@@ -166,6 +169,7 @@ PUBLIC void Pool_free(Pool* pool)
 {
     if (pool)
     {
+        free(pool->chunkCache);
         if (!pool->isFile)
             free(pool->pool);
         else
@@ -190,12 +194,12 @@ PUBLIC void Pool_dealloc(Pool* pool, unsigned int idx)
         Pool_deallocInMemory(pool, idx);
 }
 
-PUBLIC void Pool_write(Pool* pool, unsigned int idx, void* p)
+PUBLIC void Pool_writeCache(Pool* pool, unsigned int idx)
 {
     if (pool->isFile)
-        Pool_writeInFile(pool, idx, p);
+        Pool_writeInFile(pool, idx, pool->chunkCache);
     else
-        Pool_writeInMemory(pool, idx, p);
+        Pool_writeInMemory(pool, idx, pool->chunkCache);
 }
 
 PUBLIC void Pool_read(Pool* pool, unsigned int idx, void* p)
@@ -222,6 +226,17 @@ PUBLIC unsigned int Pool_reportSizeInBytes(Pool* pool)
 PUBLIC unsigned int Pool_reportNbNodes(Pool* pool)
 {
     return pool->nbAllocatedChunks;
+}
+
+PUBLIC unsigned int Pool_addToChunkCache(Pool* pool, void * p, unsigned int length)
+{
+    char* dest = (char*)pool->chunkCache + pool->cacheUsed;
+    if (pool->cacheUsed + length > pool->memChunkSize) length = pool->memChunkSize - pool->cacheUsed;
+
+    memcpy(dest, p, length);
+    pool->cacheUsed = +length;
+
+    return length;
 }
 
 PRIVATE void Pool_reportInMemory(Pool* pool)
