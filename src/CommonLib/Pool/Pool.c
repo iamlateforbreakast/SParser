@@ -3,7 +3,7 @@
 *
 *********************************************************************************/
 #include "Pool.h"
-
+#include "Memory.h"
 
 #define END_OF_QUEUE   (0xFFFFFFFF)
 #define END_OF_ALLOC   (0xFFFFFFFE)
@@ -57,7 +57,7 @@ PUBLIC Pool* Pool_new(unsigned int nbMemChunks, unsigned int memChunkSize)
 
     for (int i = 0; i < newPool->nbMemChunks; i++)
     {
-        MemChunk* memChunk = (MemChunk*)((char*)newPool->pool + i * (sizeof(MemChunk) + memChunkSize));
+        MemChunk* memChunk = (char *)newPool->pool + i * (sizeof(MemChunk) + memChunkSize);
         if (i < newPool->nbMemChunks - 1) memChunk->next = i + 1;
         if (i > 0)
         {
@@ -101,13 +101,13 @@ PUBLIC Pool* Pool_newFromFile(char* fileName, unsigned int nbMemChunks, unsigned
     newPool->nbAllocatedChunks = 0;
     newPool->isFile = 1;
     newPool->pool = 0;
-
+    newPool->chunkCache = (char*)malloc(sizeof(MemChunk) + newPool->memChunkSize);
+    newPool->cacheUsed = 0;
 
     //fclose(newPool->file);
     // If file exists
     // else
-    // MSVC specific
-    errno_t err = fopen_s(&newPool->file, fileName, "rb+");
+    newPool->file = fopen(fileName, "rb+");
     if (newPool->file != 0)
     {
         printf("File %s exists\n", fileName);
@@ -125,7 +125,7 @@ PUBLIC Pool* Pool_newFromFile(char* fileName, unsigned int nbMemChunks, unsigned
     {
         // Create the file
         printf("File %s is created\n", fileName);
-        errno_t err = fopen_s(&newPool->file, fileName, "wb+");
+        newPool->file = fopen(fileName, "wb+");
         //newPool->file = fopen("test.pool", "wb+");
         //newPool->file = fopen(fileName, "wb+");
         if (newPool->file != 0)
@@ -235,7 +235,7 @@ PUBLIC unsigned int Pool_addToChunkCache(Pool* pool, void * p, unsigned int leng
     if (pool->cacheUsed + length > pool->memChunkSize) length = pool->memChunkSize - pool->cacheUsed;
 
     memcpy(dest, p, length);
-    pool->cacheUsed = +length;
+    pool->cacheUsed += length;
 
     return length;
 }
@@ -251,7 +251,7 @@ PRIVATE void Pool_reportInMemory(Pool* pool)
     //fseek(pool->file, 0, SEEK_SET);
     for (int i = 0; i < pool->maxNbMemChunks; i++)
     {
-        MemChunk* memChunk = (MemChunk*)((char*)pool->pool + i * (sizeof(MemChunk) + pool->memChunkSize));
+        MemChunk * memChunk = (char*)pool->pool + i * (sizeof(MemChunk) + pool->memChunkSize);
         printf("MemChunk %d\n", i);
         switch (memChunk->prev)
         {
@@ -351,14 +351,14 @@ PRIVATE AllocStatus Pool_allocInMemory(Pool* pool, unsigned int* ptrIdx)
     if (pool->nbAllocatedChunks == 0)
     {
         *ptrIdx = pool->firstAvailable;
-        MemChunk* memChunk = (MemChunk*)((char*)pool->pool + firstAvailableOffset);
+        MemChunk* memChunk = (char *)pool->pool + firstAvailableOffset;
         pool->lastAllocated = 0;
         pool->firstAvailable = memChunk->next;
         memChunk->prev = END_OF_QUEUE;
         memChunk->next = END_OF_ALLOC;
         memChunk->isFree = 0;
 
-        memChunk = (MemChunk*)((char*)pool->pool + pool->firstAvailable * (sizeof(MemChunk) + pool->memChunkSize));
+        memChunk = (char*)pool->pool + pool->firstAvailable * (sizeof(MemChunk) + pool->memChunkSize);
         memChunk->prev = START_OF_AVAIL;
         pool->nbAllocatedChunks = 1;
 
@@ -368,22 +368,22 @@ PRIVATE AllocStatus Pool_allocInMemory(Pool* pool, unsigned int* ptrIdx)
     if (pool->nbAllocatedChunks <= pool->maxNbMemChunks)
     {
         *ptrIdx = pool->firstAvailable;
-        MemChunk* memChunk = (MemChunk*)((char*)pool->pool + lastAllocatedOffset);
+        MemChunk* memChunk = (char*)pool->pool + lastAllocatedOffset;
         memChunk->next = pool->firstAvailable;
 
         // Update old first available
-        memChunk = (MemChunk*)((char*)pool->pool + firstAvailableOffset);
+        memChunk = (char*)pool->pool + firstAvailableOffset;
         memChunk->prev = pool->lastAllocated;
         pool->lastAllocated = pool->firstAvailable;
         pool->firstAvailable = memChunk->next;
         memChunk->next = END_OF_ALLOC;
         memChunk->isFree = 0;
-
+        
         // Update new first available
         if (pool->firstAvailable != END_OF_QUEUE)
         {
             firstAvailableOffset = pool->firstAvailable * (sizeof(MemChunk) + pool->memChunkSize);
-            memChunk = (MemChunk*)((char*)pool->pool + firstAvailableOffset);
+            memChunk = (char*)pool->pool + firstAvailableOffset;
             memChunk->prev = START_OF_AVAIL;
         }
         pool->nbAllocatedChunks++;
@@ -462,12 +462,12 @@ PRIVATE void Pool_deallocInMemory(Pool* pool, unsigned int idx)
 
     if (pool->nbAllocatedChunks > 0)
     {
-        MemChunk* memChunk = (MemChunk*)((char*)pool->pool + firstAvailableOffset);
+        MemChunk* memChunk = (char*)pool->pool + firstAvailableOffset;
         if (pool->firstAvailable != END_OF_QUEUE)
         {
             memChunk->prev = idx;
         }
-        memChunk = (MemChunk*)((char*)pool->pool + allocatedOffset);
+        memChunk = (char*)pool->pool + allocatedOffset;
         unsigned int prevIdx = memChunk->prev;
         unsigned int nextIdx = memChunk->next;
 
@@ -479,19 +479,18 @@ PRIVATE void Pool_deallocInMemory(Pool* pool, unsigned int idx)
         if (prevIdx != END_OF_QUEUE)
         {
             long int prevOffset = prevIdx * (sizeof(MemChunk) + pool->memChunkSize);
-            memChunk = (MemChunk*)((char*)pool->pool + prevOffset);
+            memChunk = (char*)pool->pool + prevOffset;
             memChunk->next = nextIdx;
         }
 
         if (nextIdx != END_OF_ALLOC)
         {
             long int nextOffset = nextIdx * (sizeof(MemChunk) + pool->memChunkSize);
-            memChunk = (MemChunk*)((char*)pool->pool + nextOffset);
+            memChunk = (char*)pool->pool + nextOffset;
             memChunk->prev = prevIdx;
         }
         pool->nbAllocatedChunks--;
     }
-
 }
 
 PRIVATE void Pool_deallocInFile(Pool* pool, unsigned int idx)
@@ -559,14 +558,14 @@ PRIVATE void Pool_writeInFile(Pool* pool, unsigned int idx, void* p)
     long int offset = idx * (sizeof(MemChunk) + pool->memChunkSize) + sizeof(MemChunk);
 
     fseek(pool->file, offset, SEEK_SET);
-    fwrite(p, pool->memChunkSize, 1, pool->file);
+    fwrite(p, pool->memChunkSize, 1, pool -> file);
 }
 
 PRIVATE void Pool_writeInMemory(Pool* pool, unsigned int idx, void* p)
 {
     long int offset = idx * (sizeof(MemChunk) + pool->memChunkSize) + sizeof(MemChunk);
 
-    memcpy((char*)pool->pool + offset, p, pool->memChunkSize);
+    Memory_copy((char*)pool->pool + offset, p, pool->memChunkSize);
 }
 
 PRIVATE void Pool_readInFile(Pool* pool, unsigned int idx, void* p)
@@ -581,7 +580,5 @@ PRIVATE void Pool_readInMemory(Pool* pool, unsigned int idx, void* p)
 {
     long int offset = idx * (sizeof(MemChunk) + pool->memChunkSize) + sizeof(MemChunk);
 
-    memcpy(p, (char*)pool->pool + offset, pool->memChunkSize);
+    Memory_copy(p, (char*)pool->pool + offset, pool->memChunkSize);
 }
-
-
