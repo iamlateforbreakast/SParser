@@ -63,9 +63,9 @@ int step6()
 {
     char testData[] = { 'A','B','C','D','E','F','G','H' };
 
-    char readData[9];
+    char readData[SIZE_MEM_CHUNK];
 
-    readData[8] = '\n';
+    readData[8] = 0;
 
     for (int i=0;i<8;i++)
     {
@@ -73,7 +73,8 @@ int step6()
     }
     Pool_writeCache(testPool, 0);
     Pool_read(testPool, 0, &readData);
-    printf("data read back %s\n", & readData[0]);
+    readData[sizeof(testData)] = 0;
+    printf("data read back %s\n", &readData[0]);
 }
 
 int step7()
