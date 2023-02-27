@@ -24,8 +24,8 @@ typedef struct Pool
     unsigned int firstAvailable;
     unsigned int lastAllocated;
     unsigned int cacheUsed;
-    void* chunkCache;
-    void* pool;
+    char * writeChunkCache;
+    void * pool;
     FILE* file;
 } Pool;
 
@@ -35,8 +35,8 @@ PUBLIC void Pool_free(Pool* pool);
 PUBLIC AllocStatus Pool_alloc(Pool* pool, unsigned int* idx);
 PUBLIC void Pool_dealloc(Pool* pool, unsigned int p);
 PUBLIC void Pool_writeCache(Pool* pool, unsigned int idx);
-PUBLIC void Pool_read(Pool* pool, unsigned int idx, void* p);
-PUBLIC unsigned int Pool_addToChunkCache(Pool* pool, void * p, unsigned int length);
+PUBLIC void * Pool_read(Pool* pool, unsigned int idx);
+PUBLIC unsigned int Pool_addToChunkCache(Pool* pool, void* p, unsigned int length);
 PUBLIC void Pool_report(Pool* pool);
 PUBLIC unsigned int Pool_reportSizeInBytes(Pool* pool);
 PUBLIC unsigned int Pool_reportNbNodes(Pool* pool);
