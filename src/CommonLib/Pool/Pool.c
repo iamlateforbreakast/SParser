@@ -582,4 +582,3 @@ PRIVATE void Pool_readInMemory(Pool* pool, unsigned int idx, void* p)
 
     Memory_copy(p, (char*)pool->pool + offset, pool->memChunkSize);
 }
-
