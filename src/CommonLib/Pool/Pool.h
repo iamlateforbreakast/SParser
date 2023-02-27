@@ -32,7 +32,7 @@ typedef struct Pool
 PUBLIC Pool* Pool_new(unsigned int nbMemChunks, unsigned int memChunkSize);
 PUBLIC Pool* Pool_newFromFile(char* fileName, unsigned int nbMemChunks, unsigned int memChunkSize);
 PUBLIC void Pool_free(Pool* pool);
-PUBLIC AllocStatus Pool_alloc(Pool* pool, unsigned int* idx);
+PUBLIC unsigned int Pool_alloc(Pool* pool);
 PUBLIC void Pool_dealloc(Pool* pool, unsigned int p);
 PUBLIC void Pool_writeCache(Pool* pool, unsigned int idx);
 PUBLIC void * Pool_read(Pool* pool, unsigned int idx);
