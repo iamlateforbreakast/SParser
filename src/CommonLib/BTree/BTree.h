@@ -16,6 +16,7 @@ typedef struct BTree
 	unsigned short int nbObjects;
 	unsigned short int nbNodes;
 	unsigned int order;
+	unsigned int nodeSize;
 } BTree;
 
 PUBLIC BTree * BTree_new(unsigned int order);
@@ -26,6 +27,6 @@ PUBLIC void BTree_get(BTree * tree, Key key, Object * object);
 PUBLIC Object BTree_remove(BTree * tree, Key key);
 PUBLIC void BTree_print(BTree * tree);
 PUBLIC unsigned int BTree_sizeof(BTree* tree);
-
+PUBLIC unsigned int BTree_reportSizeInBytes(BTree * tree);
 
 #endif /* _BTREE_ */
