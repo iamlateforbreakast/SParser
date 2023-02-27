@@ -183,12 +183,19 @@ PUBLIC void Pool_free(Pool* pool)
 * input: none
 * output: none
 *********************************************************************************/
-PUBLIC AllocStatus Pool_alloc(Pool* pool, unsigned int* ptrIdx)
+PUBLIC unsigned int Pool_alloc(Pool* pool)
 {
+    unsigned int ptrIdx;
     if (pool->isFile)
-        return Pool_allocInFile(pool, ptrIdx);
+    {
+        Pool_allocInFile(pool, &ptrIdx);
+        return ptrIdx;
+    }
     else
-        return Pool_allocInMemory(pool, ptrIdx);
+    {
+        Pool_allocInMemory(pool, &ptrIdx);
+        return ptrIdx;
+    }
 }
 
 /*********************************************************************************
