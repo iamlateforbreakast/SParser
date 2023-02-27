@@ -434,7 +434,7 @@ PRIVATE AllocStatus Pool_allocInMemory(Pool* pool, unsigned int* ptrIdx)
         pool->firstAvailable = memChunk->next;
         memChunk->next = END_OF_ALLOC;
         memChunk->isFree = 0;
-
+        
         // Update new first available
         if (pool->firstAvailable != END_OF_QUEUE)
         {
@@ -557,7 +557,6 @@ PRIVATE void Pool_deallocInMemory(Pool* pool, unsigned int idx)
         }
         pool->nbAllocatedChunks--;
     }
-
 }
 
 /*********************************************************************************
@@ -635,7 +634,7 @@ PRIVATE void Pool_writeInFile(Pool* pool, unsigned int idx, void* p)
     long int offset = idx * (sizeof(MemChunk) + pool->memChunkSize) + sizeof(MemChunk);
 
     fseek(pool->file, offset, SEEK_SET);
-    fwrite(p, pool->memChunkSize, 1, pool->file);
+    fwrite(p, pool->memChunkSize, 1, pool -> file);
 }
 
 /*********************************************************************************
@@ -647,7 +646,7 @@ PRIVATE void Pool_writeInMemory(Pool* pool, unsigned int idx, void* p)
 {
     long int offset = idx * (sizeof(MemChunk) + pool->memChunkSize) + sizeof(MemChunk);
 
-    memcpy((char*)pool->pool + offset, p, pool->memChunkSize);
+    Memory_copy((char*)pool->pool + offset, p, pool->memChunkSize);
 }
 
 /*********************************************************************************
@@ -660,7 +659,7 @@ PRIVATE void Pool_readInFile(Pool* pool, unsigned int idx, void* p)
     long int offset = idx * (sizeof(MemChunk) + pool->memChunkSize) + sizeof(MemChunk);
 
     fseek(pool->file, offset, SEEK_SET);
-    fread(p, 1, pool->memChunkSize, pool->file);
+    fread(p, pool->memChunkSize, 1, pool->file);
 }
 
 /*********************************************************************************
@@ -672,7 +671,5 @@ PRIVATE void Pool_readInMemory(Pool* pool, unsigned int idx, void* p)
 {
     long int offset = idx * (sizeof(MemChunk) + pool->memChunkSize) + sizeof(MemChunk);
 
-    memcpy(p, (char*)pool->pool + offset, pool->memChunkSize);
+    Memory_copy(p, (char*)pool->pool + offset, pool->memChunkSize);
 }
-
-
