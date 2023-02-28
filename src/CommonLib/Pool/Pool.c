@@ -405,7 +405,7 @@ PRIVATE void Pool_reportInFile(Pool* pool)
 *********************************************************************************/
 PRIVATE AllocStatus Pool_allocInMemory(Pool* pool, unsigned int* ptrIdx)
 {
-    unsigned int idx = 0;
+    //unsigned int idx = 0;
     long int lastAllocatedOffset = pool->lastAllocated * (sizeof(MemChunk) + pool->memChunkSize);
     long int firstAvailableOffset = pool->firstAvailable * (sizeof(MemChunk) + pool->memChunkSize);
 
@@ -460,7 +460,7 @@ PRIVATE AllocStatus Pool_allocInMemory(Pool* pool, unsigned int* ptrIdx)
 *********************************************************************************/
 PRIVATE AllocStatus Pool_allocInFile(Pool* pool, unsigned int* ptrIdx)
 {
-    unsigned int idx = 0;
+    //unsigned int idx = 0;
     long int lastAllocatedOffset = pool->lastAllocated * (sizeof(MemChunk) + pool->memChunkSize);
     long int firstAvailableOffset = pool->firstAvailable * (sizeof(MemChunk) + pool->memChunkSize);
 

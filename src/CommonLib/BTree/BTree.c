@@ -31,7 +31,7 @@ BTree * BTree_new(unsigned int order)
 	tree->nbObjects = Pool_reportNbNodes(tree->pool);
 
 
-	printf("Node size in bytes: %d\n", sizeof(Node));
+	//printf("Node size in bytes: %d\n", sizeof(Node));
 	return tree;
 }
 
@@ -53,7 +53,7 @@ void BTree_add(BTree* tree, Key key, void * object)
 	{
 		 unsigned int newLeafIdx;
 		 char* node = Pool_alloc(tree->pool, &newLeafIdx);
-		 short unsigned int * nbKeyUsed = node;
+		 short unsigned int * nbKeyUsed = (short unsigned int *)node;
 		 short unsigned int * isLeaf = nbKeyUsed + sizeof(short unsigned int);
 		 unsigned int * keys = isLeaf + sizeof(short unsigned int);
 		 void ** leaves = keys + sizeof(unsigned int) * (2 * tree->order - 1);
