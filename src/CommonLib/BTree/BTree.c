@@ -89,13 +89,13 @@ void BTree_add(BTree* tree, Key key, Object object)
 	else
 	{
 		Node root;
-		Pool_read(tree->pool, tree->root, &root);
+		//Pool_read(tree->pool, tree->root, &root);
 		if (root.nbKeyUsed == ORDER * 2 - 1)
 		{
 			//printf("Splitting root\n");
 			Node newRoot;
 			unsigned int newRootIdx = Node_new(tree->pool);  //Node newLeaf
-			Pool_read(tree->pool, newRootIdx, &newRoot);
+			//Pool_read(tree->pool, newRootIdx, &newRoot);
 			newRoot.children[0] = tree->root;
 			Pool_addToChunkCache(tree->pool, &newRoot.children[0], sizeof(newRoot.children[0]));
 			Pool_writeCache(tree->pool, newRootIdx);

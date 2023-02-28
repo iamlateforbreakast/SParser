@@ -39,9 +39,9 @@ PUBLIC unsigned int Node_new(Pool * pool)
 PUBLIC void Node_search(unsigned int nodeIdx, Key key, Object * object, unsigned int isFoundAlready, Pool * pool)
 {
 	Node node;
- 	Pool_read(pool, nodeIdx, &node);
+ 	//Pool_read(pool, nodeIdx, &node);
 
-	if (node.isLeaf == TRUE)
+	if (node.isLeaf)
 	{
 		for (int i = 0; i < node.nbKeyUsed; i++)
 		{
@@ -70,7 +70,7 @@ PUBLIC void Node_search(unsigned int nodeIdx, Key key, Object * object, unsigned
 			}
 			if (key == node.keys[i])
 			{
-				Node_search(node.children[i], key, object, TRUE, pool);
+				Node_search(node.children[i], key, object, 1, pool);
 				return;
 			}
 		}
@@ -78,7 +78,7 @@ PUBLIC void Node_search(unsigned int nodeIdx, Key key, Object * object, unsigned
 		return;
 	}
 
-	return NULL;
+	return 0;
  }
 
 /*********************************************************************************
@@ -89,7 +89,7 @@ PUBLIC void Node_search(unsigned int nodeIdx, Key key, Object * object, unsigned
 PUBLIC void Node_free(unsigned int nodeIdx, Pool* pool)
 {
 #if 0
-	if (node->isLeaf == TRUE)
+	if (node->isLeaf == 1)
 	{
 		for (int i = 0; i < node->nbKeyUsed + 1; i++)
 		{
@@ -115,7 +115,7 @@ PUBLIC void Node_insert(unsigned int nodeIdx, Key key, Object object, unsigned i
 	Object * leaves = keys + sizeof(unsigned int) * (2 * order - 1);
 	unsigned int * children = leaves + sizeof(unsigned int) * (2 * order);
 	
-	if (isLeaf == TRUE) 
+	if (isLeaf == 1) 
 	{	
 		for (int i = 0; i < *nbKeyUsed; i++)
 		{
@@ -182,11 +182,11 @@ PUBLIC void Node_insert(unsigned int nodeIdx, Key key, Object object, unsigned i
 * input: the key to remove
 * output: none
 *********************************************************************************/
-PUBLIC Object Node_remove(Node* node, Key key, unsigned int * keyToUpdate, Pool* pool)
-{ 
-	Object object = NULL;
+PUBLIC Object * Node_remove(unsigned int nodeIdx, Key key, unsigned int* keyToUpdate, Pool* pool)
+{
+	Object * object;
 #if 0
-	if (node->isLeaf == TRUE)
+	if (node->isLeaf == 1)
 	{
 		for (int i = 0; i < node->nbKeyUsed; i++)
 		{
@@ -276,7 +276,7 @@ PUBLIC Object Node_remove(Node* node, Key key, unsigned int * keyToUpdate, Pool*
 		
     }
 #endif
-	return NULL;
+	return object;
 }
 
 /*********************************************************************************
@@ -288,7 +288,7 @@ PUBLIC void Node_print(unsigned int nodeIdx, unsigned int order, unsigned int de
 {
 	Node node;
 
-	Pool_read(pool, nodeIdx, &node);
+	//Pool_read(pool, nodeIdx, &node);
 
 	//if (node == NULL) return;
 	printf(" Node NbUsed: %d\n", node.nbKeyUsed);
@@ -301,7 +301,7 @@ PUBLIC void Node_print(unsigned int nodeIdx, unsigned int order, unsigned int de
  			printf(".. ");
 	}
 	printf("\n");
-	if ((node.isLeaf==FALSE) && (depth>0))
+	if ((node.isLeaf==0) && (depth>0))
 	{
 		for (int i = 0; i <= node.nbKeyUsed; i++)
 		{
@@ -404,7 +404,7 @@ PRIVATE void Node_shiftLeft(Node* node, unsigned int idxKey, Pool* pool)
 *********************************************************************************/
 PRIVATE Node * Node_mergeNodes(Node* node, unsigned int idxLeft, unsigned idxRight, Pool* pool)
 {
-	Node* mergedNode = NULL;
+	Node* mergedNode = 0;
 
 	Node * leftChild = node->children[idxLeft];
 	Node * rightChild = node->children[idxRight];
