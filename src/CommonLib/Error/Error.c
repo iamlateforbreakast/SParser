@@ -15,7 +15,7 @@
 
 /**********************************************//** 
   \brief Reports errors
-  \param severity Enum
+  \param severity  Enum
   \param msg Variable list of parameters
   \public
 
