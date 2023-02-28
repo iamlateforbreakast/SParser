@@ -280,7 +280,7 @@ PUBLIC unsigned int Pool_addToChunkCache(Pool* pool, void * p, unsigned int leng
     char* dest = (char*)pool->writeChunkCache + pool->cacheUsed;
     if (pool->cacheUsed + length > pool->memChunkSize) length = pool->memChunkSize - pool->cacheUsed;
 
-    memcpy(dest, p, length);
+    Memory_copy(dest, p, length);
     pool->cacheUsed += length;
 
     return length;

@@ -15,9 +15,10 @@ int step1()
 int step2()
 {
     unsigned int idx = 0;
+    void * ptrBuffer;
     AllocStatus allocStatus = ALLOC_OK;
 
-    allocStatus = Pool_alloc(testPool, &idx);
+    ptrBuffer = Pool_alloc(testPool, &idx);
     Pool_report(testPool);
 
     Pool_dealloc(testPool, idx);
@@ -27,11 +28,11 @@ int step2()
 int step3()
 {
     unsigned int idx[NB_MEM_CHUNKS];
-    AllocStatus allocStatus = ALLOC_OK;
+    void * ptrBuffer;
 
     for (int i = 0; i < NB_MEM_CHUNKS; i++)
     {
-        allocStatus = Pool_alloc(testPool, &idx[i]);
+        ptrBuffer = Pool_alloc(testPool, &idx[i]);
     }
     Pool_report(testPool);
 }
@@ -50,11 +51,11 @@ int step4()
 int step5()
 {
     unsigned int idx[NB_MEM_CHUNKS];
-    AllocStatus allocStatus = ALLOC_OK;
+    void * ptrBuffer;
 
     for (int i = 0; i < 1; i++)
     {
-        allocStatus = Pool_alloc(testPool, &idx[i]);
+        ptrBuffer = Pool_alloc(testPool, &idx[i]);
     }
     Pool_report(testPool);
 }
@@ -88,10 +89,10 @@ int step11()
 int step12()
 {
     unsigned int idx = 0;
-    AllocStatus allocStatus = ALLOC_OK;
+    void * ptrBuffer;
 
-    allocStatus = Pool_alloc(testPool, &idx);
-    allocStatus = Pool_alloc(testPool, &idx);
+    ptrBuffer = Pool_alloc(testPool, &idx);
+    ptrBuffer = Pool_alloc(testPool, &idx);
     Pool_report(testPool);
 
     Pool_dealloc(testPool, idx);
