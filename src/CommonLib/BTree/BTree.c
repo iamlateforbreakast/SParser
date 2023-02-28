@@ -21,7 +21,7 @@ BTree * BTree_new(unsigned int order)
 	tree->order = order;
 	tree->nodeSize = sizeof(unsigned short int) * 2
 		+ sizeof(unsigned int) * (tree->order * 2 - 1)
-		+ sizeof(Object) * (tree->order * 2)
+		+ sizeof(void*) * (tree->order * 2)
 		+ sizeof(unsigned int) * (tree->order * 2);
 	//tree->pool = Pool_newFromFile("test.pool", MAX_NODES, tree->nodeSize);
 	tree->pool = Pool_new(MAX_NODES, tree->nodeSize);
@@ -41,7 +41,7 @@ BTree * BTree_new(unsigned int order)
 * input: a beamweight range to store in the tree
 * output: A fully allocated beamweihgt tree
 *********************************************************************************/
-void BTree_add(BTree* tree, Key key, Object object)
+void BTree_add(BTree* tree, Key key, void * object)
 {
 	if (tree->nbObjects == MAX_NODES)
 	{
@@ -56,7 +56,7 @@ void BTree_add(BTree* tree, Key key, Object object)
 		 short unsigned int * nbKeyUsed = node;
 		 short unsigned int * isLeaf = nbKeyUsed + sizeof(short unsigned int);
 		 unsigned int * keys = isLeaf + sizeof(short unsigned int);
-		 Object * leaves = keys + sizeof(unsigned int) * (2 * tree->order - 1);
+		 void ** leaves = keys + sizeof(unsigned int) * (2 * tree->order - 1);
 		 unsigned int * children = leaves + sizeof(unsigned int) * (2 * tree->order);
 
 		 *nbKeyUsed = 1;
@@ -69,7 +69,7 @@ void BTree_add(BTree* tree, Key key, Object object)
 			 //Pool_addToChunkCache(tree->pool, &null, sizeof(null));
 		 }
 		 leaves[0] = object;
-		 //Pool_addToChunkCache(tree->pool, (Object)object, sizeof(object)); //Object leaves[ORDER * 2];
+		 //Pool_addToChunkCache(tree->pool, (void*)object, sizeof(object)); //Object leaves[ORDER * 2];
 		 for (int i = 1; i < tree->order * 2; i++)
 		 {
 			 leaves[i] = 0;
@@ -116,7 +116,7 @@ void BTree_add(BTree* tree, Key key, Object object)
 * input: key
 * output: A reference to a beamWeightRange
 *********************************************************************************/
-PUBLIC void BTree_get(BTree* tree, Key key, Object * object)
+PUBLIC void BTree_get(BTree* tree, Key key, void ** object)
 {
 	Node_search(tree->root, key, object, FALSE, tree->pool);
 
@@ -129,9 +129,9 @@ PUBLIC void BTree_get(BTree* tree, Key key, Object * object)
 * input: a beamweight range to store in the tree
 * output: A fully allocated beamweihgt tree
 *********************************************************************************/
-Object BTree_remove(BTree* tree, Key key)
+void * BTree_remove(BTree* tree, Key key)
 {
-	Object object = NULL;
+	void * object = NULL;
 #if 0
 	Node* root = tree->root;
 	// Pool_read(root)

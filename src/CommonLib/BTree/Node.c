@@ -36,7 +36,7 @@ PUBLIC unsigned int Node_new(Pool * pool)
 * input: the key to look for
 * output: the beam weight range if found otherwise NULL 
 *********************************************************************************/
-PUBLIC void Node_search(unsigned int nodeIdx, Key key, Object * object, unsigned int isFoundAlready, Pool * pool)
+PUBLIC void Node_search(unsigned int nodeIdx, Key key, void ** object, unsigned int isFoundAlready, Pool * pool)
 {
 	Node node;
  	//Pool_read(pool, nodeIdx, &node);
@@ -106,13 +106,13 @@ PUBLIC void Node_free(unsigned int nodeIdx, Pool* pool)
 * input: beamWeightRange
 * output: none
 *********************************************************************************/
-PUBLIC void Node_insert(unsigned int nodeIdx, Key key, Object object, unsigned int order, Pool* pool)
+PUBLIC void Node_insert(unsigned int nodeIdx, Key key, void * object, unsigned int order, Pool* pool)
 {
 	char * node = Pool_read(pool, nodeIdx);
 	short unsigned int * nbKeyUsed = node;
 	short unsigned int * isLeaf = nbKeyUsed + sizeof(short unsigned int);
 	unsigned int * keys = isLeaf + sizeof(short unsigned int);
-	Object * leaves = keys + sizeof(unsigned int) * (2 * order - 1);
+	void ** leaves = keys + sizeof(unsigned int) * (2 * order - 1);
 	unsigned int * children = leaves + sizeof(unsigned int) * (2 * order);
 	
 	if (isLeaf == 1) 
@@ -182,9 +182,9 @@ PUBLIC void Node_insert(unsigned int nodeIdx, Key key, Object object, unsigned i
 * input: the key to remove
 * output: none
 *********************************************************************************/
-PUBLIC Object * Node_remove(unsigned int nodeIdx, Key key, unsigned int* keyToUpdate, Pool* pool)
+PUBLIC void ** Node_remove(unsigned int nodeIdx, Key key, unsigned int* keyToUpdate, Pool* pool)
 {
-	Object * object;
+	void ** object;
 #if 0
 	if (node->isLeaf == 1)
 	{
