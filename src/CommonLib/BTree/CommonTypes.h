@@ -7,7 +7,4 @@
 #define TRUE (1)
 #define FALSE (0)
 
-typedef void * Object;
-typedef void * Key;
-
 #endif /* _COMMONTYPES_ */
