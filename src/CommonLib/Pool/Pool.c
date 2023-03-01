@@ -1,19 +1,22 @@
-/*********************************************************************************
-* Pool.c
-*
-*********************************************************************************/
-#include "Pool.h"
-#include "Memory.h"
+/**********************************************//**
+  @file Pool.c
 
+  @brief This file contains the implementation of the class Pool.
+
+  The class List implement the Pool operations
+  - Alloc
+  - De-alloc
+**************************************************/
+#include "Pool.h"
+
+#define CACHE_NB (3)
 #define END_OF_QUEUE   (0xFFFFFFFF)
 #define END_OF_ALLOC   (0xFFFFFFFE)
 #define START_OF_AVAIL (0xFFFFFFFD)
 
-/*********************************************************************************
-*
-* Private Functions Declarations
-*
-*********************************************************************************/
+/**********************************************//**
+  @private
+**************************************************/
 PRIVATE AllocStatus Pool_allocInMemory(Pool* pool, unsigned int* ptrIdx);
 PRIVATE AllocStatus Pool_allocInFile(Pool* pool, unsigned int* ptrIdx);
 PRIVATE void Pool_deallocInMemory(Pool* pool, unsigned int idx);
@@ -25,6 +28,9 @@ PRIVATE void Pool_readInMemory(Pool* pool, unsigned int idx, void* p);
 PRIVATE void Pool_writeInFile(Pool* pool, unsigned int idx, void* p);
 PRIVATE void Pool_writeInMemory(Pool* pool, unsigned int idx, void* p);
 
+/**********************************************//**
+  @private
+**************************************************/
 typedef struct MemChunk
 {
     unsigned int next;
@@ -32,12 +38,31 @@ typedef struct MemChunk
     unsigned int isFree;
 } MemChunk;
 
-/*********************************************************************************
-* Pool_new
-* input: number of memory chunks to allocate
-* input: size of memory chunk
-* output: A pool of memory
-*********************************************************************************/
+/**********************************************//**
+  @private
+**************************************************/
+typedef struct Pool
+{
+    unsigned int isFile;
+    unsigned int nbMemChunks;
+    unsigned int maxNbMemChunks;
+    unsigned int memChunkSize;
+    unsigned int nbAllocatedChunks;
+    unsigned int firstAvailable;
+    unsigned int lastAllocated;
+    unsigned int cacheUsed;
+    char* writeChunkCache[CACHE_NB];
+    void* pool;
+    FILE* file;
+} Pool;
+
+/**********************************************//**
+  @brief Create a new instance of the class Pool in RAM
+  @public
+  @param[in] number of memory chunks to allocate.
+  @param[in] size of memory chunk.
+  @return New instance.
+**************************************************/
 PUBLIC Pool* Pool_new(unsigned int nbMemChunks, unsigned int memChunkSize)
 {
     Pool* newPool = 0;
@@ -52,10 +77,11 @@ PUBLIC Pool* Pool_new(unsigned int nbMemChunks, unsigned int memChunkSize)
     newPool->isFile = 0;
     newPool->pool = (MemChunk*)malloc(newPool->nbMemChunks * (sizeof(MemChunk) + newPool->memChunkSize));
     newPool->file = 0;
-    newPool->writeChunkCache = (char*)malloc(sizeof(MemChunk) + newPool->memChunkSize);
+    for (int i=0; i<CACHE_NB; i++)
+        newPool->writeChunkCache[i] = (char*)malloc(sizeof(MemChunk) + newPool->memChunkSize);
     newPool->cacheUsed = 0;
 
-    for (int i = 0; i < newPool->nbMemChunks; i++)
+    for (unsigned int i = 0; i < newPool->nbMemChunks; i++)
     {
         MemChunk* memChunk = (MemChunk*)((char*)newPool->pool + i * (sizeof(MemChunk) + memChunkSize));
         if (i < newPool->nbMemChunks - 1) memChunk->next = i + 1;
@@ -81,13 +107,14 @@ PUBLIC Pool* Pool_new(unsigned int nbMemChunks, unsigned int memChunkSize)
     return newPool;
 }
 
-/*********************************************************************************
-* Pool_newFromFile
-* input: file name
-* input: number of memory chunks to allocate
-* input: size of memory chunk
-* output: A pool of memory
-*********************************************************************************/
+/**********************************************//**
+* @brief Create a new instance of the class Pool in a file
+* @public
+* @param[in] File name
+* @param[in] Number of memory chunks to allocate
+* @param[in] Size of memory chunk
+* return A pool of memory
+**************************************************/
 PUBLIC Pool* Pool_newFromFile(char* fileName, unsigned int nbMemChunks, unsigned int memChunkSize)
 {
     Pool* newPool = 0;
@@ -101,7 +128,8 @@ PUBLIC Pool* Pool_newFromFile(char* fileName, unsigned int nbMemChunks, unsigned
     newPool->nbAllocatedChunks = 0;
     newPool->isFile = 1;
     newPool->pool = 0;
-    newPool->writeChunkCache = (char*)malloc(sizeof(MemChunk) + newPool->memChunkSize);
+    for (int i = 0; i < CACHE_NB; i++)
+        newPool->writeChunkCache[i] = (char*)malloc(sizeof(MemChunk) + newPool->memChunkSize);
     newPool->cacheUsed = 0;
 
     //fclose(newPool->file);
@@ -111,7 +139,7 @@ PUBLIC Pool* Pool_newFromFile(char* fileName, unsigned int nbMemChunks, unsigned
     if (newPool->file != 0)
     {
         printf("File %s exists\n", fileName);
-        for (int i = 0; i < nbMemChunks; i++)
+        for (unsigned int i = 0; i < nbMemChunks; i++)
         {
             MemChunk memChunk;
             fseek(newPool->file, 0, SEEK_SET);
@@ -130,7 +158,7 @@ PUBLIC Pool* Pool_newFromFile(char* fileName, unsigned int nbMemChunks, unsigned
         //newPool->file = fopen(fileName, "wb+");
         if (newPool->file != 0)
         {
-            for (int i = 0; i < nbMemChunks; i++)
+            for (unsigned int i = 0; i < nbMemChunks; i++)
             {
                 MemChunk memChunk;
                 char emptyByte = 0;
@@ -160,16 +188,17 @@ PUBLIC Pool* Pool_newFromFile(char* fileName, unsigned int nbMemChunks, unsigned
     return newPool;
 }
 
-/*********************************************************************************
-* Pool_free
-* input: none
-* output: none
-*********************************************************************************/
+/**********************************************//**
+  @brief Pool_free
+  @param[in] none
+  @return none
+**************************************************/
 PUBLIC void Pool_free(Pool* pool)
 {
     if (pool)
     {
-        free(pool->writeChunkCache);
+        for (int i = 0; i < CACHE_NB; i++)
+            free(pool->writeChunkCache[i]);
         if (!pool->isFile)
             free(pool->pool);
         else
@@ -178,12 +207,12 @@ PUBLIC void Pool_free(Pool* pool)
     }
 }
 
-/*********************************************************************************
-* Pool_alloc
-* input: none
-* output: none
-*********************************************************************************/
-PUBLIC void * Pool_alloc(Pool* pool, unsigned int * ptrIdx)
+/**********************************************//**
+  @brief Pool_alloc
+  @param[in] none
+  @return none
+**************************************************/
+PUBLIC void* Pool_alloc(Pool* pool, unsigned int* ptrIdx)
 {
     if (pool->isFile)
     {
@@ -196,11 +225,11 @@ PUBLIC void * Pool_alloc(Pool* pool, unsigned int * ptrIdx)
     return pool->writeChunkCache;
 }
 
-/*********************************************************************************
-* Pool_dealloc
-* input: none
-* output: none
-*********************************************************************************/
+/**********************************************//**
+  @brief Pool_dealloc
+  @param[in] none
+  @return none
+**************************************************/
 PUBLIC void Pool_dealloc(Pool* pool, unsigned int idx)
 {
     if (pool->isFile)
@@ -209,39 +238,39 @@ PUBLIC void Pool_dealloc(Pool* pool, unsigned int idx)
         Pool_deallocInMemory(pool, idx);
 }
 
-/*********************************************************************************
-* Pool_writeCache
-* input: none
-* output: none
-*********************************************************************************/
-PUBLIC void Pool_writeCache(Pool* pool, unsigned int idx)
+/**********************************************//**
+  @brief Pool_writeCache
+  @param[in] none
+  @return none none
+**************************************************/
+PUBLIC void Pool_write(Pool* pool, unsigned int idx, void * ptrContent)
 {
     if (pool->isFile)
-        Pool_writeInFile(pool, idx, pool->writeChunkCache);
+        Pool_writeInFile(pool, idx, ptrContent);
     else
-        Pool_writeInMemory(pool, idx, pool->writeChunkCache);
+        Pool_writeInMemory(pool, idx, ptrContent);
     pool->cacheUsed = 0;
 }
 
-/*********************************************************************************
-* Pool_read
-* input: none
-* output: none
-*********************************************************************************/
-PUBLIC void * Pool_read(Pool* pool, unsigned int idx)
+/**********************************************//**
+  @brief Pool_read
+  @param[in] none
+  @return none
+**************************************************/
+PUBLIC void* Pool_read(Pool* pool, unsigned int idx, void * ptrContent)
 {
     if (pool->isFile)
-        Pool_readInFile(pool, idx, pool->writeChunkCache);
+        Pool_readInFile(pool, idx, ptrContent);
     else
-        Pool_readInMemory(pool, idx, pool->writeChunkCache);
+        Pool_readInMemory(pool, idx, ptrContent);
     return pool->writeChunkCache;
 }
 
-/*********************************************************************************
-* Pool_report
-* input: none
-* output: none
-*********************************************************************************/
+/**********************************************//**
+  @brief Pool_report
+  @param[in] none
+  @return none
+**************************************************/
 PUBLIC void Pool_report(Pool* pool)
 {
     if (pool->isFile)
@@ -250,32 +279,32 @@ PUBLIC void Pool_report(Pool* pool)
         Pool_reportInMemory(pool);
 }
 
-/*********************************************************************************
-* Pool_reportSizeInBytes
-* input: none
-* output: none
-*********************************************************************************/
+/**********************************************//**
+  @brief Pool_reportSizeInBytes
+  input: none
+  @return none
+**************************************************/
 PUBLIC unsigned int Pool_reportSizeInBytes(Pool* pool)
 {
     return (pool->nbMemChunks * (sizeof(MemChunk) + pool->memChunkSize));
 }
 
-/*********************************************************************************
-* Pool_reportNbNodes
-* input: none
-* output: none
-*********************************************************************************/
+/**********************************************//**
+  @brief Pool_reportNbNodes
+  @param[in] none
+  @return none
+**************************************************/
 PUBLIC unsigned int Pool_reportNbNodes(Pool* pool)
 {
     return pool->nbAllocatedChunks;
 }
 
-/*********************************************************************************
-* Pool_addToChunkCache
-* input: none
-* output: none
-*********************************************************************************/
-PUBLIC unsigned int Pool_addToChunkCache(Pool* pool, void * p, unsigned int length)
+/**********************************************//**
+  @brief Pool_addToChunkCache
+  @param[in] none
+  @return none
+**************************************************/
+PUBLIC unsigned int Pool_addToChunkCache(Pool* pool, void* p, unsigned int length)
 {
     char* dest = (char*)pool->writeChunkCache + pool->cacheUsed;
     if (pool->cacheUsed + length > pool->memChunkSize) length = pool->memChunkSize - pool->cacheUsed;
@@ -286,11 +315,41 @@ PUBLIC unsigned int Pool_addToChunkCache(Pool* pool, void * p, unsigned int leng
     return length;
 }
 
-/*********************************************************************************
-* Pool_reportInMemory
-* input: none
-* output: none
-*********************************************************************************/
+/**********************************************//**
+  @brief Pool_getCache1
+  @param[in] none
+  @return none
+**************************************************/
+PUBLIC void* Pool_getCache1(Pool* pool)
+{
+    return pool->writeChunkCache[0];
+}
+
+/**********************************************//**
+  @brief Pool_getCache2
+  @param[in] none
+  @return none
+**************************************************/
+PUBLIC void* Pool_getCache2(Pool* pool)
+{
+    return pool->writeChunkCache[1];
+}
+
+/**********************************************//**
+  @brief Pool_getCache3
+  @param[in] none
+  @return none
+**************************************************/
+PUBLIC void* Pool_getCache3(Pool* pool)
+{
+    return pool->writeChunkCache[3];
+}
+
+/**********************************************//**
+  @brief Pool_reportInMemory
+  @param[in] none
+  @return none
+**************************************************/
 PRIVATE void Pool_reportInMemory(Pool* pool)
 {
     printf("Pool Report:\n");
@@ -300,7 +359,7 @@ PRIVATE void Pool_reportInMemory(Pool* pool)
     printf("  firstAvailable: %d\n", pool->firstAvailable);
     printf("  lastAllocated: %d\n", pool->lastAllocated);
     //fseek(pool->file, 0, SEEK_SET);
-    for (int i = 0; i < pool->maxNbMemChunks; i++)
+    for (unsigned int i = 0; i < pool->maxNbMemChunks; i++)
     {
         MemChunk* memChunk = (MemChunk*)((char*)pool->pool + i * (sizeof(MemChunk) + pool->memChunkSize));
         printf("MemChunk %d\n", i);
@@ -338,11 +397,11 @@ PRIVATE void Pool_reportInMemory(Pool* pool)
     }
 }
 
-/*********************************************************************************
-* Pool_reportInFile
-* input: none
-* output: none
-*********************************************************************************/
+/**********************************************//**
+  @brief Pool_reportInFile
+  @param[in] none
+  @return none
+**************************************************/
 PRIVATE void Pool_reportInFile(Pool* pool)
 {
     unsigned int nbByteRead = 0;
@@ -354,7 +413,7 @@ PRIVATE void Pool_reportInFile(Pool* pool)
     printf("  firstAvailable: %d\n", pool->firstAvailable);
     printf("  lastAllocated: %d\n", pool->lastAllocated);
     fseek(pool->file, 0, SEEK_SET);
-    for (int i = 0; i < pool->maxNbMemChunks; i++)
+    for (unsigned int i = 0; i < pool->maxNbMemChunks; i++)
     {
         MemChunk memChunk;
         //printf("Ftell %d\n",ftell(pool->file));
@@ -398,11 +457,11 @@ PRIVATE void Pool_reportInFile(Pool* pool)
     }
 }
 
-/*********************************************************************************
-* Pool_allocInMemory
-* input: none
-* output: none
-*********************************************************************************/
+/**********************************************//**
+  @brief Pool_allocInMemory
+  @param[in] none
+  @return none
+**************************************************/
 PRIVATE AllocStatus Pool_allocInMemory(Pool* pool, unsigned int* ptrIdx)
 {
     //unsigned int idx = 0;
@@ -453,11 +512,11 @@ PRIVATE AllocStatus Pool_allocInMemory(Pool* pool, unsigned int* ptrIdx)
     return ALLOC_FAIL;
 }
 
-/*********************************************************************************
-* Pool_allocInFile
-* input: none
-* output: none
-*********************************************************************************/
+/**********************************************//**
+  @brief Pool_allocInFile
+  @param[in] none
+  @return none
+**************************************************/
 PRIVATE AllocStatus Pool_allocInFile(Pool* pool, unsigned int* ptrIdx)
 {
     //unsigned int idx = 0;
@@ -521,11 +580,11 @@ PRIVATE AllocStatus Pool_allocInFile(Pool* pool, unsigned int* ptrIdx)
     return ALLOC_FAIL;
 }
 
-/*********************************************************************************
-* Pool_deallocInMemory
-* input: none
-* output: none
-*********************************************************************************/
+/**********************************************//**
+  @brief Pool_deallocInMemory
+  @param[in] none
+  @return none
+**************************************************/
 PRIVATE void Pool_deallocInMemory(Pool* pool, unsigned int idx)
 {
     long int allocatedOffset = idx * (sizeof(MemChunk) + pool->memChunkSize);
@@ -564,11 +623,11 @@ PRIVATE void Pool_deallocInMemory(Pool* pool, unsigned int idx)
     }
 }
 
-/*********************************************************************************
-* Pool_deallocInFile
-* input: none
-* output: none
-*********************************************************************************/
+/**********************************************//**
+  @brief Pool_deallocInFile
+  @param[in] none
+  @return none
+**************************************************/
 PRIVATE void Pool_deallocInFile(Pool* pool, unsigned int idx)
 {
     long int allocatedOffset = idx * (sizeof(MemChunk) + pool->memChunkSize);
@@ -629,11 +688,11 @@ PRIVATE void Pool_deallocInFile(Pool* pool, unsigned int idx)
 
 }
 
-/*********************************************************************************
-* Pool_writeInFile
-* input: none
-* output: none
-*********************************************************************************/
+/**********************************************//**
+  @brief Pool_writeInFile
+  @param[in] none
+  @return none
+**************************************************/
 PRIVATE void Pool_writeInFile(Pool* pool, unsigned int idx, void* p)
 {
     long int offset = idx * (sizeof(MemChunk) + pool->memChunkSize) + sizeof(MemChunk);
@@ -642,11 +701,11 @@ PRIVATE void Pool_writeInFile(Pool* pool, unsigned int idx, void* p)
     fwrite(p, pool->memChunkSize, 1, pool -> file);
 }
 
-/*********************************************************************************
-* Pool_writeInMemory
-* input: none
-* output: none
-*********************************************************************************/
+/**********************************************//**
+  @brief Pool_writeInMemory
+  @param[in] none
+  @return none
+**************************************************/
 PRIVATE void Pool_writeInMemory(Pool* pool, unsigned int idx, void* p)
 {
     long int offset = idx * (sizeof(MemChunk) + pool->memChunkSize) + sizeof(MemChunk);
@@ -654,11 +713,11 @@ PRIVATE void Pool_writeInMemory(Pool* pool, unsigned int idx, void* p)
     Memory_copy((char*)pool->pool + offset, p, pool->memChunkSize);
 }
 
-/*********************************************************************************
-* Pool_readInFile
-* input: none
-* output: none
-*********************************************************************************/
+/**********************************************//**
+  @brief Pool_readInFile
+  @param[in] none
+  @return none
+**************************************************/
 PRIVATE void Pool_readInFile(Pool* pool, unsigned int idx, void* p)
 {
     long int offset = idx * (sizeof(MemChunk) + pool->memChunkSize) + sizeof(MemChunk);
@@ -667,11 +726,11 @@ PRIVATE void Pool_readInFile(Pool* pool, unsigned int idx, void* p)
     fread(p, pool->memChunkSize, 1, pool->file);
 }
 
-/*********************************************************************************
-* Pool_readInMemory
-* input: none
-* output: none
-*********************************************************************************/
+/**********************************************//**
+  @brief Pool_readInMemory
+  @param[in] none
+  @return none
+**************************************************/
 PRIVATE void Pool_readInMemory(Pool* pool, unsigned int idx, void* p)
 {
     long int offset = idx * (sizeof(MemChunk) + pool->memChunkSize) + sizeof(MemChunk);
