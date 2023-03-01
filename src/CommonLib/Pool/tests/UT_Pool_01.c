@@ -10,30 +10,34 @@ int step1()
 {
     testPool = Pool_newFromFile("test.pool", NB_MEM_CHUNKS, SIZE_MEM_CHUNK);
     Pool_report(testPool);
+    return 0;
 }
 
 int step2()
 {
     unsigned int idx = 0;
+    void * ptrBuffer;
     AllocStatus allocStatus = ALLOC_OK;
 
-    allocStatus = Pool_alloc(testPool, &idx);
+    ptrBuffer = Pool_alloc(testPool, &idx);
     Pool_report(testPool);
 
     Pool_dealloc(testPool, idx);
     Pool_report(testPool);
+    return 0;
 }
 
 int step3()
 {
     unsigned int idx[NB_MEM_CHUNKS];
-    AllocStatus allocStatus = ALLOC_OK;
+    void * ptrBuffer;
 
     for (int i = 0; i < NB_MEM_CHUNKS; i++)
     {
-        allocStatus = Pool_alloc(testPool, &idx[i]);
+        ptrBuffer = Pool_alloc(testPool, &idx[i]);
     }
     Pool_report(testPool);
+    return 0;
 }
 
 int step4()
@@ -45,62 +49,69 @@ int step4()
         Pool_dealloc(testPool, idx[i]);
     }
     Pool_report(testPool);
+    return 0;
 }
 
 int step5()
 {
     unsigned int idx[NB_MEM_CHUNKS];
-    AllocStatus allocStatus = ALLOC_OK;
+    void * ptrBuffer;
 
     for (int i = 0; i < 1; i++)
     {
-        allocStatus = Pool_alloc(testPool, &idx[i]);
+        ptrBuffer = Pool_alloc(testPool, &idx[i]);
     }
     Pool_report(testPool);
+    return 0;
 }
 
 int step6()
 {
     char testData[] = { 'A','B','C','D','E','F','G','H' };
 
-    char * readData;
+    char * readData = Pool_getCache1(testPool);
 
-    for (int i=0;i<8;i++)
-    {
-        Pool_addToChunkCache(testPool, &testData[0] + i, 1);
-    }
-    Pool_writeCache(testPool, 0);
-    readData = Pool_read(testPool, 0);
+    //for (int i=0;i<8;i++)
+    //{
+    //    Pool_addToChunkCache(testPool, &testData[0] + i, 1);
+    //}
+    Pool_write(testPool, 0, testData);
+    Pool_read(testPool, 0, readData);
     readData[sizeof(testData)] = 0;
     printf("data read back %s\n", &readData[0]);
+    return 0;
 }
 
 int step7()
 {
     Pool_free(testPool);
+    return 0;
 }
 
 int step11()
 {
     testPool = Pool_new(NB_MEM_CHUNKS, SIZE_MEM_CHUNK);
+    return 0;
 }
 
 int step12()
 {
     unsigned int idx = 0;
-    AllocStatus allocStatus = ALLOC_OK;
+    void * ptrBuffer;
 
-    allocStatus = Pool_alloc(testPool, &idx);
-    allocStatus = Pool_alloc(testPool, &idx);
+    ptrBuffer = Pool_alloc(testPool, &idx);
+    ptrBuffer = Pool_alloc(testPool, &idx);
     Pool_report(testPool);
 
     Pool_dealloc(testPool, idx);
     Pool_report(testPool);
+    return 0;
 }
 
 int step16()
 {
     Pool_free(testPool);
+    return 0;
 }
 
 int main()
