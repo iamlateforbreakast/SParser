@@ -372,6 +372,14 @@ PUBLIC unsigned int Node_splitNode(unsigned int nodeIdx, unsigned int nodeToSpli
 #endif
 }
 
+PUBLIC unsigned int Node_getSize(unsigned int order)
+{
+   return sizeof(unsigned short int) * 2
+		+ sizeof(unsigned int) * (tree->order * 2 - 1)
+		+ sizeof(void*) * (tree->order * 2)
+		+ sizeof(unsigned int) * (tree->order * 2);
+}
+
 /*********************************************************************************
 * Node_read
 * input: index of node in pool
