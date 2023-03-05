@@ -29,4 +29,3 @@ unsigned int main()
 
    return result;
 }
-
