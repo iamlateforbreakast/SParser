@@ -108,6 +108,7 @@ PUBLIC void Node_free(unsigned int nodeIdx, Pool* pool)
 *********************************************************************************/
 PUBLIC void Node_insert(unsigned int nodeIdx, Key key, void * object, unsigned int order, Pool* pool)
 {
+	#if 0
 	char * node = Pool_read(pool, nodeIdx);
 	short unsigned int * nbKeyUsed = node;
 	short unsigned int * isLeaf = nbKeyUsed + sizeof(short unsigned int);
@@ -175,6 +176,7 @@ PUBLIC void Node_insert(unsigned int nodeIdx, Key key, void * object, unsigned i
 	    //Node_insert(childNode, key, beamWeightRange);
 	    return;
 	}
+	#endif
 }
 
 /*********************************************************************************
@@ -368,6 +370,21 @@ PUBLIC unsigned int Node_splitNode(unsigned int nodeIdx, unsigned int nodeToSpli
 #endif
 }
 
+/*********************************************************************************
+* Node_read
+* input: index of node in pool
+* input: pool
+* input: the content of the node at pool[index]
+* output: The sub tree where the key should be inserted
+*********************************************************************************/
+PUBLIC Node Node_read(unsigned int idx, Pool * pool, void * ptrContent)
+{
+	Node result;
+
+    result.idx = idx;
+
+	return result;
+}
 PRIVATE void Node_shiftRight(Node* node, unsigned int idxKey, Pool* pool)
 {
 	for (unsigned int j = node->nbKeyUsed; j > idxKey; j--)

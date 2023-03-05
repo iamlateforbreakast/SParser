@@ -90,7 +90,7 @@ void BTree_add(BTree* tree, Key key, void * object)
 	{
 		Node root;
 		//Pool_read(tree->pool, tree->root, &root);
-		if (root.nbKeyUsed == ORDER * 2 - 1)
+		if (root.nbKeyUsed == tree->order * 2 - 1)
 		{
 			//printf("Splitting root\n");
 			Node newRoot;
