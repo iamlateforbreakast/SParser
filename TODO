@@ -8,6 +8,8 @@ Object: Add an equal method
 
 TimeMgr: Implement
 
+FileMgr: Add accessor and create API
+
 Object: IMplement refcount better
 
 Object: Check for memory leaks
