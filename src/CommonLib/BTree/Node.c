@@ -1,5 +1,7 @@
 #include "Node.h"
 #include "Pool.h"
+#include "Error.h"
+#include "Debug.h"
 
 /*********************************************************************************
 *
