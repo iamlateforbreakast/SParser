@@ -52,6 +52,7 @@ typedef struct Pool
     unsigned int lastAllocated;
     unsigned int cacheUsed;
     char* writeChunkCache[CACHE_NB];
+    PoolCache chunkCache[CACHE_NB];
     void* pool;
     FILE* file;
 } Pool;
@@ -77,8 +78,13 @@ PUBLIC Pool* Pool_new(unsigned int nbMemChunks, unsigned int memChunkSize)
     newPool->isFile = 0;
     newPool->pool = (MemChunk*)malloc(newPool->nbMemChunks * (sizeof(MemChunk) + newPool->memChunkSize));
     newPool->file = 0;
-    for (int i=0; i<CACHE_NB; i++)
-        newPool->writeChunkCache[i] = (char*)malloc(sizeof(MemChunk) + newPool->memChunkSize);
+    for (int i = 0; i < CACHE_NB; i++)
+    {
+        //newPool->writeChunkCache[i] = (char*)malloc(sizeof(MemChunk) + newPool->memChunkSize);
+        newPool->chunkCache[i].idx = 0;
+        newPool->chunkCache[i].isUsed = 0;
+        newPool->chunkCache[i].cache = (char*)malloc(sizeof(MemChunk) + newPool->memChunkSize);
+    }
     newPool->cacheUsed = 0;
 
     for (unsigned int i = 0; i < newPool->nbMemChunks; i++)
@@ -129,8 +135,13 @@ PUBLIC Pool* Pool_newFromFile(char* fileName, unsigned int nbMemChunks, unsigned
     newPool->isFile = 1;
     newPool->pool = 0;
     for (int i = 0; i < CACHE_NB; i++)
-        newPool->writeChunkCache[i] = (char*)malloc(sizeof(MemChunk) + newPool->memChunkSize);
-    newPool->cacheUsed = 0;
+    {
+        //newPool->writeChunkCache[i] = (char*)malloc(sizeof(MemChunk) + newPool->memChunkSize);
+        newPool->chunkCache[i].idx = 0;
+        newPool->chunkCache[i].isUsed = 0;
+        newPool->chunkCache[i].cache = (char*)malloc(sizeof(MemChunk) + newPool->memChunkSize);
+        newPool->cacheUsed = 0;
+    }
 
     //fclose(newPool->file);
     // If file exists
@@ -210,19 +221,31 @@ PUBLIC void Pool_free(Pool* pool)
 /**********************************************//**
   @brief Pool_alloc
   @param[in] none
-  @return none
+  @return Reference to cache position, NULL is cache full
 **************************************************/
 PUBLIC void* Pool_alloc(Pool* pool, unsigned int* ptrIdx)
 {
     if (pool->isFile)
     {
         Pool_allocInFile(pool, ptrIdx);
+        // TBC: Consider failure
     }
     else
     {
         Pool_allocInMemory(pool, ptrIdx);     
     }
-    return pool->writeChunkCache;
+    for (int i = 0; i < CACHE_NB; i++)
+    {
+        if (pool->chunkCache[i].isUsed == 0)
+        {
+            pool->chunkCache[i].isUsed = 1;
+            pool->chunkCache[i].idx = *ptrIdx;
+            memset(pool->chunkCache[i].cache, 0, pool->memChunkSize);
+            return pool->chunkCache[i].cache;
+        }
+    }
+    // No cache position left
+    return NULL;
 }
 
 /**********************************************//**
@@ -232,6 +255,10 @@ PUBLIC void* Pool_alloc(Pool* pool, unsigned int* ptrIdx)
 **************************************************/
 PUBLIC void Pool_dealloc(Pool* pool, unsigned int idx)
 {
+    for (int i = 0; i < CACHE_NB; i++)
+    {
+        if (pool->chunkCache[i].idx == idx) pool->chunkCache[i].isUsed = 0;
+    }
     if (pool->isFile)
         Pool_deallocInFile(pool, idx);
     else
@@ -245,11 +272,21 @@ PUBLIC void Pool_dealloc(Pool* pool, unsigned int idx)
 **************************************************/
 PUBLIC void Pool_write(Pool* pool, unsigned int idx, void * ptrContent)
 {
+    for (int i = 0; i < CACHE_NB; i++)
+    {
+        // A node with index idx has been cached, use this position
+        if ((pool->chunkCache[i].idx == idx) && (pool->chunkCache[i].isUsed == 1))
+        {
+            // Release the cacke postion
+            pool->chunkCache[i].isUsed = 0;
+            break;
+        }
+    }
     if (pool->isFile)
         Pool_writeInFile(pool, idx, ptrContent);
     else
         Pool_writeInMemory(pool, idx, ptrContent);
-    pool->cacheUsed = 0;
+    //pool->cacheUsed = 0;
 }
 
 /**********************************************//**
@@ -257,13 +294,42 @@ PUBLIC void Pool_write(Pool* pool, unsigned int idx, void * ptrContent)
   @param[in] none
   @return none
 **************************************************/
-PUBLIC void* Pool_read(Pool* pool, unsigned int idx, void * ptrContent)
+PUBLIC void* Pool_read(Pool* pool, unsigned int idx /*, void * ptrContent*/)
 {
+    int foundPos = -1;
+    int freePos = -1;
+    for (int i = 0; i < CACHE_NB; i++)
+    {
+        // A node with index idx has been cached, use this position
+        if ((pool->chunkCache[i].idx == idx) && (pool->chunkCache[i].isUsed == 1))
+        {
+            foundPos = i;
+            break;
+        }
+        // Keep track of free cache position
+        if (pool->chunkCache[i].isUsed == 0)
+        {
+            freePos = i;
+        }
+    }
+    if (foundPos < 0) 
+        if (freePos < 0)
+        {
+            // No space left in cache
+            printf("Error\n");
+            return NULL;
+        }
+        else
+        {
+            foundPos = freePos;
+        }
+    // Read the pool vavlue in the cache found
     if (pool->isFile)
-        Pool_readInFile(pool, idx, ptrContent);
+        Pool_readInFile(pool, idx, pool->chunkCache[foundPos].cache);
     else
-        Pool_readInMemory(pool, idx, ptrContent);
-    return pool->writeChunkCache;
+        Pool_readInMemory(pool, idx, pool->chunkCache[foundPos].cache);
+
+    return pool->chunkCache[foundPos].cache;
 }
 
 /**********************************************//**
@@ -299,6 +365,7 @@ PUBLIC unsigned int Pool_reportNbNodes(Pool* pool)
     return pool->nbAllocatedChunks;
 }
 
+#if 0
 /**********************************************//**
   @brief Pool_addToChunkCache
   @param[in] none
@@ -314,7 +381,7 @@ PUBLIC unsigned int Pool_addToChunkCache(Pool* pool, void* p, unsigned int lengt
 
     return length;
 }
-
+#endif
 /**********************************************//**
   @brief Pool_getCache1
   @param[in] none
@@ -322,7 +389,7 @@ PUBLIC unsigned int Pool_addToChunkCache(Pool* pool, void* p, unsigned int lengt
 **************************************************/
 PUBLIC void* Pool_getCache1(Pool* pool)
 {
-    return pool->writeChunkCache[0];
+    return pool->chunkCache[0].cache;
 }
 
 /**********************************************//**
@@ -332,7 +399,7 @@ PUBLIC void* Pool_getCache1(Pool* pool)
 **************************************************/
 PUBLIC void* Pool_getCache2(Pool* pool)
 {
-    return pool->writeChunkCache[1];
+    return pool->chunkCache[1].cache;
 }
 
 /**********************************************//**
@@ -342,7 +409,15 @@ PUBLIC void* Pool_getCache2(Pool* pool)
 **************************************************/
 PUBLIC void* Pool_getCache3(Pool* pool)
 {
-    return pool->writeChunkCache[3];
+    return pool->chunkCache[2].cache;
+}
+
+PUBLIC void Pool_discardCache(Pool* pool, unsigned int idx)
+{
+    for (int i = 0; i < CACHE_NB; i++)
+    {
+        if (pool->chunkCache[i].idx == idx) pool->chunkCache[i].isUsed = 0;
+    }
 }
 
 /**********************************************//**
