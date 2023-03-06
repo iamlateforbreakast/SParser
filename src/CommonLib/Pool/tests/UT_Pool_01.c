@@ -35,6 +35,7 @@ int step3()
     for (int i = 0; i < NB_MEM_CHUNKS; i++)
     {
         ptrBuffer = Pool_alloc(testPool, &idx[i]);
+        Pool_discardCache(testPool, idx[i]);
     }
     Pool_report(testPool);
     return 0;
@@ -69,14 +70,14 @@ int step6()
 {
     char testData[] = { 'A','B','C','D','E','F','G','H' };
 
-    char * readData = Pool_getCache1(testPool);
+    //char * readData = Pool_getCache1(testPool);
 
     //for (int i=0;i<8;i++)
     //{
     //    Pool_addToChunkCache(testPool, &testData[0] + i, 1);
     //}
     Pool_write(testPool, 0, testData);
-    Pool_read(testPool, 0, readData);
+    char* readData = Pool_read(testPool, 0);
     readData[sizeof(testData)] = 0;
     printf("data read back %s\n", &readData[0]);
     return 0;
