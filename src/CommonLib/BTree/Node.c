@@ -38,13 +38,13 @@ PUBLIC unsigned int Node_new(Pool * pool)
 * input: the key to look for
 * output: the beam weight range if found otherwise NULL 
 *********************************************************************************/
-PUBLIC void Node_search(unsigned int nodeIdx, Key key, Object * object, unsigned int isFoundAlready, Pool * pool)
+PUBLIC void Node_search(unsigned int nodeIdx, Key key, void * object, unsigned int isFoundAlready, Pool * pool)
 {
 #if 0
 	Node node;
  	Pool_read(pool, nodeIdx, &node);
 
-	if (node.isLeaf == TRUE)
+	if (node.isLeaf == 1)
 	{
 		for (int i = 0; i < node.nbKeyUsed; i++)
 		{
@@ -73,7 +73,7 @@ PUBLIC void Node_search(unsigned int nodeIdx, Key key, Object * object, unsigned
 			}
 			if (key == node.keys[i])
 			{
-				Node_search(node.children[i], key, object, TRUE, pool);
+				Node_search(node.children[i], key, object, 1, pool);
 				return;
 			}
 		}
@@ -110,10 +110,9 @@ PUBLIC void Node_free(unsigned int nodeIdx, Pool* pool)
 * input: beamWeightRange
 * output: none
 *********************************************************************************/
-PUBLIC void Node_insert(unsigned int nodeIdx, Key key, Object object, unsigned int order, Pool* pool)
+PUBLIC void Node_insert(unsigned int nodeIdx, Key key, void * object, unsigned int order, Pool* pool)
 {
-	void* ptrBuffer = Pool_getCache1(pool);
-    Pool_read(pool, nodeIdx, ptrBuffer);
+	void* ptrBuffer = Pool_read(pool, nodeIdx);
 	Node node = Node_read(nodeIdx, order, ptrBuffer);
 	//short unsigned int * nbKeyUsed = node;
 	//short unsigned int * isLeaf = nbKeyUsed + sizeof(short unsigned int);
@@ -121,7 +120,7 @@ PUBLIC void Node_insert(unsigned int nodeIdx, Key key, Object object, unsigned i
 	//Object * leaves = keys + sizeof(unsigned int) * (2 * order - 1);
 	//unsigned int * children = leaves + sizeof(unsigned int) * (2 * order);
 	
-	if (*node.isLeaf == TRUE) 
+	if (*node.isLeaf == 1) 
 	{	
 		for (int i = 0; i < *node.nbKeyUsed; i++)
 		{
@@ -190,9 +189,9 @@ PUBLIC void Node_insert(unsigned int nodeIdx, Key key, Object object, unsigned i
 * input: the key to remove
 * output: none
 *********************************************************************************/
-PUBLIC Object Node_remove(Node* node, Key key, unsigned int * keyToUpdate, Pool* pool)
+PUBLIC void * Node_remove(unsigned int nodeIdx, Key key, unsigned int * keyToUpdate, Pool* pool)
 { 
-	Object object = NULL;
+	void * object = NULL;
 #if 0
 	if (node->isLeaf == TRUE)
 	{
@@ -313,7 +312,7 @@ PUBLIC void Node_print(unsigned int nodeIdx, unsigned int order, unsigned int de
  			printf(".. ");
 	}
 	printf("\n");
-	if ((*node.isLeaf==FALSE) && (depth>0))
+	if ((*node.isLeaf==0) && (depth>0))
 	{
 		for (int i = 0; i <= *node.nbKeyUsed; i++)
 		{
@@ -402,7 +401,7 @@ PUBLIC unsigned int Node_getSize(unsigned int order)
 {
 	return sizeof(unsigned short int) * 2
 		+ sizeof(unsigned int) * (order * 2 - 1)
-		+ sizeof(Object) * (order * 2)
+		+ sizeof(void*) * (order * 2)
 		+ sizeof(unsigned int) * (order * 2);
 }
 
