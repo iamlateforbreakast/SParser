@@ -19,10 +19,7 @@ BTree * BTree_new(unsigned int order)
 
 	tree = (BTree*)malloc(sizeof(BTree));
 	tree->order = order;
-	tree->nodeSize = sizeof(unsigned short int) * 2
-		+ sizeof(unsigned int) * (tree->order * 2 - 1)
-		+ sizeof(void*) * (tree->order * 2)
-		+ sizeof(unsigned int) * (tree->order * 2);
+	tree->nodeSize = Node_getSize(tree->order);
 	//tree->pool = Pool_newFromFile("test.pool", MAX_NODES, tree->nodeSize);
 	tree->pool = Pool_new(MAX_NODES, tree->nodeSize);
 	tree->root = 0;
@@ -41,7 +38,7 @@ BTree * BTree_new(unsigned int order)
 * input: a beamweight range to store in the tree
 * output: A fully allocated beamweihgt tree
 *********************************************************************************/
-void BTree_add(BTree* tree, Key key, void * object)
+void BTree_add(BTree* tree, unsigned int key, Object object)
 {
 	if (tree->nbObjects == MAX_NODES)
 	{
@@ -52,35 +49,31 @@ void BTree_add(BTree* tree, Key key, void * object)
  	if (tree->nbObjects == 0)
 	{
 		 unsigned int newLeafIdx;
-		 char* node = Pool_alloc(tree->pool, &newLeafIdx);
-		 short unsigned int * nbKeyUsed = (short unsigned int *)node;
-		 short unsigned int * isLeaf = nbKeyUsed + sizeof(short unsigned int);
-		 unsigned int * keys = isLeaf + sizeof(short unsigned int);
-		 void ** leaves = keys + sizeof(unsigned int) * (2 * tree->order - 1);
-		 unsigned int * children = leaves + sizeof(unsigned int) * (2 * tree->order);
+		 void* ptrBuffer = Pool_alloc(tree->pool, &newLeafIdx);
+		 Node node = Node_read(newLeafIdx, tree->order, ptrBuffer);
 
-		 *nbKeyUsed = 1;
-		 *isLeaf = 1;
-		 keys[0] = key;
+		 *node.nbKeyUsed = 1;
+		 *node.isLeaf = 1;
+		 node.keys[0] = key;
 		 //Pool_addToChunkCache(tree->pool, &key, sizeof(key)); //unsigned int keys[ORDER * 2 - 1];
 		 for (int i = 1; i < tree->order * 2 - 1; i++)
 		 {
-			 keys[i] = 0;
+			 node.keys[i] = 0;
 			 //Pool_addToChunkCache(tree->pool, &null, sizeof(null));
 		 }
-		 leaves[0] = object;
-		 //Pool_addToChunkCache(tree->pool, (void*)object, sizeof(object)); //Object leaves[ORDER * 2];
+		 node.leaves[0] = object;
+		 //Pool_addToChunkCache(tree->pool, (Object)object, sizeof(object)); //Object leaves[ORDER * 2];
 		 for (int i = 1; i < tree->order * 2; i++)
 		 {
-			 leaves[i] = 0;
+			 node.leaves[i] = 0;
 			 //Pool_addToChunkCache(tree->pool, &null, sizeof(null));
 		 }
 		 for (int i = 0; i < tree->order * 2; i++)
 		 {
-			 children[i] = 0;
+			 node.children[i] = 0;
 			 //Pool_addToChunkCache(tree->pool, &null, sizeof(null)); //unsigned int children[ORDER * 2];
 		 }
-		 Pool_writeCache(tree->pool, newLeafIdx);
+		 Pool_write(tree->pool, newLeafIdx, ptrBuffer);
 		 tree->depth = 1;
 		 tree->root = newLeafIdx;
 		 tree->nbObjects = 1;
@@ -88,27 +81,29 @@ void BTree_add(BTree* tree, Key key, void * object)
 	}
 	else
 	{
-		Node root;
-		//Pool_read(tree->pool, tree->root, &root);
-		if (root.nbKeyUsed == tree->order * 2 - 1)
+		Node node = Node_read(tree->root, tree->order, Pool_read(tree->pool, tree->root));
+
+		if (*node.nbKeyUsed == tree->order * 2 - 1)
 		{
-			//printf("Splitting root\n");
-			Node newRoot;
-			unsigned int newRootIdx = Node_new(tree->pool);  //Node newLeaf
-			//Pool_read(tree->pool, newRootIdx, &newRoot);
+			printf("Splitting root\n");
+			unsigned int newRootIdx;
+			void * ptrBuffer = Pool_alloc(tree->pool, &newRootIdx);  //Node newLeaf;
+			Node newRoot = Node_read(newRootIdx, tree->order, ptrBuffer);
+			*newRoot.nbKeyUsed = 0;
+			*newRoot.isLeaf = FALSE;
 			newRoot.children[0] = tree->root;
-			Pool_addToChunkCache(tree->pool, &newRoot.children[0], sizeof(newRoot.children[0]));
-			Pool_writeCache(tree->pool, newRootIdx);
-			unsigned int childForInsertionIdx = Node_splitNode(newRootIdx, tree->root, key, tree->pool);
+			Pool_write(tree->pool, newRootIdx, ptrBuffer);
+			
+			unsigned int childForInsertionIdx = Node_splitNode(newRootIdx, tree->root, key, tree->order, tree->pool);
 			Node_insert(childForInsertionIdx, key, object, tree->order, tree->pool);
 			tree->root = newRootIdx;
 			tree->depth++;
 			tree->nbObjects++;
 			return;
 		}
+		Node_insert(tree->root, key, object, tree->order, tree->pool);
+		tree->nbObjects++;
 	}
-  	Node_insert(tree->root, key, object, tree->order, tree->pool);
-	tree->nbObjects++;
 }
 
 /*********************************************************************************
@@ -116,7 +111,7 @@ void BTree_add(BTree* tree, Key key, void * object)
 * input: key
 * output: A reference to a beamWeightRange
 *********************************************************************************/
-PUBLIC void BTree_get(BTree* tree, Key key, void ** object)
+PUBLIC void BTree_get(BTree* tree, Key key, Object * object)
 {
 	Node_search(tree->root, key, object, FALSE, tree->pool);
 
@@ -129,9 +124,9 @@ PUBLIC void BTree_get(BTree* tree, Key key, void ** object)
 * input: a beamweight range to store in the tree
 * output: A fully allocated beamweihgt tree
 *********************************************************************************/
-void * BTree_remove(BTree* tree, Key key)
+Object BTree_remove(BTree* tree, unsigned int key)
 {
-	void * object = NULL;
+	Object object = NULL;
 #if 0
 	Node* root = tree->root;
 	// Pool_read(root)
@@ -154,7 +149,7 @@ void * BTree_remove(BTree* tree, Key key)
 					root->leaves[j] = root->leaves[j + 1];
 				}
 				root->nbKeyUsed--;
-				tree->nbObjects--;
+				tree->nbObjects--; // Pool_write();
 			}
 		}
 		return object;
