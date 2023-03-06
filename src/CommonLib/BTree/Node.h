@@ -14,8 +14,8 @@ typedef struct Node Node;
 typedef struct Node
 {
 	unsigned int idx;
-	unsigned short int nbKeyUsed;
-	unsigned short int isLeaf;
+	unsigned short int * nbKeyUsed;
+	unsigned short int * isLeaf;
 	unsigned int * keys;
 	void ** leaves;
 	unsigned int * children;	
