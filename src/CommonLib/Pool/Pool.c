@@ -9,7 +9,7 @@
 **************************************************/
 #include "Pool.h"
 
-#define CACHE_NB (3)
+#define CACHE_NB (5)
 #define END_OF_QUEUE   (0xFFFFFFFF)
 #define END_OF_ALLOC   (0xFFFFFFFE)
 #define START_OF_AVAIL (0xFFFFFFFD)
@@ -328,6 +328,9 @@ PUBLIC void* Pool_read(Pool* pool, unsigned int idx /*, void * ptrContent*/)
         Pool_readInFile(pool, idx, pool->chunkCache[foundPos].cache);
     else
         Pool_readInMemory(pool, idx, pool->chunkCache[foundPos].cache);
+
+    pool->chunkCache[foundPos].isUsed = 1;
+    pool->chunkCache[foundPos].idx = idx;
 
     return pool->chunkCache[foundPos].cache;
 }
