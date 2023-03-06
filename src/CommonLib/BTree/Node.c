@@ -343,6 +343,8 @@ PUBLIC unsigned int Node_splitNode(unsigned int nodeIdx, unsigned int nodeToSpli
 
 	unsigned int k;
 
+	if (*nodeToSplit.isLeaf) *newChild.isLeaf = 1;
+
 	for (k = 0; k < *node.nbKeyUsed; k++)
 	{
 		/* TBC: node->nbKeyUsed is assumed less than ORDER*2-1 */
@@ -372,11 +374,11 @@ PUBLIC unsigned int Node_splitNode(unsigned int nodeIdx, unsigned int nodeToSpli
 		nodeToSplit.children[order + i] = 0;
 	}
 
-	newChild.nbKeyUsed = order - 1;
-	nodeToSplit.nbKeyUsed = order - 1;
+	*newChild.nbKeyUsed = order - 1;
+	*nodeToSplit.nbKeyUsed = order - 1;
 
 	//Pool_addToChunkCache(pool, node, );
-	Pool_write(pool, nodeIdx, ptrBuffer1);
+	//Pool_write(pool, nodeIdx, ptrBuffer1);
 	//Pool_addToChunkCache(pool, nodeToSplit, );
 
 	//Pool_read(pool, newChildIdx, &newChild);
