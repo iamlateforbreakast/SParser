@@ -187,7 +187,7 @@ PUBLIC void Node_insert(unsigned int nodeIdx, Key key, void * object, unsigned i
 *********************************************************************************/
 PUBLIC void * Node_remove(unsigned int nodeIdx, Key key, unsigned int * keyToUpdate, Pool* pool)
 { 
-	void * object = NULL;
+	void * object = 0;
 #if 0
 	if (node->isLeaf == TRUE)
 	{
@@ -279,7 +279,7 @@ PUBLIC void * Node_remove(unsigned int nodeIdx, Key key, unsigned int * keyToUpd
 		
     }
 #endif
-	return NULL;
+	return 0;
 }
 
 /*********************************************************************************
@@ -365,7 +365,7 @@ PUBLIC unsigned int Node_splitNode(unsigned int nodeIdx, unsigned int nodeToSpli
 	{
 		newChild.leaves[i] = nodeToSplit.leaves[order + i];
 		newChild.children[i] = nodeToSplit.children[order + i];
-		nodeToSplit.leaves[order + i] = NULL;
+		nodeToSplit.leaves[order + i] = 0;
 		nodeToSplit.children[order + i] = 0;
 	}
 

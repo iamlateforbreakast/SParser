@@ -8,6 +8,7 @@
   - De-alloc
 **************************************************/
 #include "Pool.h"
+#include <stdio.h>
 
 #define CACHE_NB (5)
 #define END_OF_QUEUE   (0xFFFFFFFF)

@@ -131,7 +131,7 @@ PUBLIC void BTree_get(BTree* tree, Key key, void ** object)
 *********************************************************************************/
 void * BTree_remove(BTree* tree, unsigned int key)
 {
-	void * object = NULL;
+	void * object = 0;
 #if 0
 	Node* root = tree->root;
 	// Pool_read(root)
@@ -192,7 +192,7 @@ void * BTree_remove(BTree* tree, unsigned int key)
 *********************************************************************************/
 void BTree_print(BTree* tree)
 {
-	if (tree == NULL) return;
+	if (tree == 0) return;
 	printf("Tree:\n");
 	printf(" Nb items: %d\n", tree->nbObjects);
 	printf(" Nb Nodes: %d\n", tree->nbNodes);
@@ -213,7 +213,7 @@ void BTree_print(BTree* tree)
 *********************************************************************************/
 PUBLIC BTree * BTree_newFromFile(char * fileName)
 {
-	BTree* tree = NULL;
+	BTree* tree = 0;
 
 	return tree;
 }
