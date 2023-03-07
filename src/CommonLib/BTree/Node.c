@@ -114,11 +114,6 @@ PUBLIC void Node_insert(unsigned int nodeIdx, Key key, void * object, unsigned i
 {
 	void* ptrBuffer = Pool_read(pool, nodeIdx);
 	Node node = Node_read(nodeIdx, order, ptrBuffer);
-	//short unsigned int * nbKeyUsed = node;
-	//short unsigned int * isLeaf = nbKeyUsed + sizeof(short unsigned int);
-	//unsigned int * keys = isLeaf + sizeof(short unsigned int);
-	//Object * leaves = keys + sizeof(unsigned int) * (2 * order - 1);
-	//unsigned int * children = leaves + sizeof(unsigned int) * (2 * order);
 	
 	if (*node.isLeaf == 1) 
 	{	
@@ -163,21 +158,22 @@ PUBLIC void Node_insert(unsigned int nodeIdx, Key key, void * object, unsigned i
 			Node_print(node, 3, pool);
 			exit(0);
 		}*/
-#if 0
-		Pool_read(pool, children[i]);
-		if (nbKeyUsed < order * 2 - 1) //&& (node->nbKeyUsed < ORDER * 2 - 1))
+
+		void * ptrBuffer2 = Pool_read(pool, node.children[i]);
+		Node nodeForInsertion = Node_read(node.children[i], order, ptrBuffer2);
+		if (*nodeForInsertion.nbKeyUsed < order * 2 - 1) //&& (node->nbKeyUsed < ORDER * 2 - 1))
 		{
-			Node_insert(children[i], key, object, order, pool);
+			Node_insert(node.children[i], key, object, order, pool);
 			return;
 		}
 		else
 		{
 			//printf("Splitting node.\n");
-			unsigned int newChildIdx = Node_splitNode(nodeIdx, children[i], key, order, pool);
+			unsigned int newChildIdx = Node_splitNode(nodeIdx, node.children[i], key, order, pool);
 			Node_insert(newChildIdx, key, object, order, pool);
 			return;
 		}
-#endif
+
 	    //Node* childNode = Node_split(node, key);
 	    //Node_insert(childNode, key, beamWeightRange);
 	    return;
