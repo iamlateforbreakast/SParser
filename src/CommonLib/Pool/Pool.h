@@ -5,8 +5,6 @@
 *
 *********************************************************************************/
 #include "Types.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 typedef enum AllocStatus
 {
