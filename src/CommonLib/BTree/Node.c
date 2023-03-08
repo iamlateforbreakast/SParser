@@ -38,15 +38,14 @@ PUBLIC unsigned int Node_new(Pool * pool)
 * input: the key to look for
 * output: the beam weight range if found otherwise NULL 
 *********************************************************************************/
-PUBLIC void Node_search(unsigned int nodeIdx, Key key, void * object, unsigned int isFoundAlready, Pool * pool)
+PUBLIC void Node_search(unsigned int nodeIdx, unsigned int order, Key key, Object * object, unsigned int isFoundAlready, Pool * pool)
 {
-#if 0
-	Node node;
- 	Pool_read(pool, nodeIdx, &node);
+	void* ptrBuffer = Pool_read(pool, nodeIdx);
+ 	Node node = Node_read(nodeIdx, order, ptrBuffer);
 
-	if (node.isLeaf == 1)
+	if (*node.isLeaf == 1)
 	{
-		for (int i = 0; i < node.nbKeyUsed; i++)
+		for (int i = 0; i < *node.nbKeyUsed; i++)
 		{
 			if (node.keys[i] == key)
 			{
@@ -56,7 +55,7 @@ PUBLIC void Node_search(unsigned int nodeIdx, Key key, void * object, unsigned i
 		}
 		if (isFoundAlready)
 		{
-			*object = node.leaves[node.nbKeyUsed - 1];
+			*object = node.leaves[*node.nbKeyUsed - 1];
 			return;
 		}
 		else
@@ -64,25 +63,24 @@ PUBLIC void Node_search(unsigned int nodeIdx, Key key, void * object, unsigned i
 	}
 	else
 	{
-		for (int i = 0; i < node.nbKeyUsed; i++)
+		for (int i = 0; i < *node.nbKeyUsed; i++)
 		{
 			if (key < node.keys[i])
 			{
-				Node_search(node.children[i], key, object, isFoundAlready, pool);
+				Node_search(node.children[i], order, key, object, isFoundAlready, pool);
 				return;
 			}
 			if (key == node.keys[i])
 			{
-				Node_search(node.children[i], key, object, 1, pool);
+				Node_search(node.children[i], order, key, object, TRUE, pool);
 				return;
 			}
 		}
-		Node_search(node.children[node.nbKeyUsed], key, object, isFoundAlready, pool);
+		Node_search(node.children[*node.nbKeyUsed], order, key, object, isFoundAlready, pool);
 		return;
 	}
 
 	return NULL;
-#endif
  }
 
 /*********************************************************************************
