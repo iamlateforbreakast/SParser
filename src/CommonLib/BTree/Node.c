@@ -88,18 +88,27 @@ PUBLIC void Node_search(unsigned int nodeIdx, unsigned int order, Key key, Objec
 * input: none
 * output: none
 *********************************************************************************/
-PUBLIC void Node_free(unsigned int nodeIdx, Pool* pool)
+PUBLIC void Node_free(unsigned int nodeIdx, unsigned int order, Pool* pool)
 {
-#if 0
-	if (node->isLeaf == TRUE)
+        void* ptrBuffer = Pool_read(pool, nodeIdx);
+ 	Node node = Node_read(nodeIdx, order, ptrBuffer);
+
+	if (*node.isLeaf == TRUE)
 	{
-		for (int i = 0; i < node->nbKeyUsed + 1; i++)
+		for (int i = 0; i < *node.nbKeyUsed + 1; i++)
 		{
 			//free(node->leaves[i]);
 		}
+                // Pool_dealloc(pool, nodeIdx);
 		return;
 	}
-#endif
+        else
+        {
+                for (int i = 0; i < *node.nbKeyUsed + 1; i++)
+                {
+                // TODO: go through all children
+                }
+        }
 }
 
 /*********************************************************************************
