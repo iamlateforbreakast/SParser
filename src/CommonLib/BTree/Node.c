@@ -195,35 +195,38 @@ PUBLIC void Node_insert(unsigned int nodeIdx, Key key, void * object, unsigned i
 PUBLIC void * Node_remove(unsigned int nodeIdx, Key key, unsigned int * keyToUpdate, Pool* pool)
 { 
 	void * object = 0;
-#if 0
-	if (node->isLeaf == TRUE)
+        void * ptrContent = Pool_read(pool, nodeIdx);
+        Node node = Node_read(nodeIdx, order, ptrContent););
+
+	if (*node.isLeaf == TRUE)
 	{
-		for (int i = 0; i < node->nbKeyUsed; i++)
+#if 0
+		for (int i = 0; i < *node.nbKeyUsed; i++)
 		{
-			if (node->keys[i] == key)
+			if (node.keys[i] == key)
 			{
 				//Can we remove if node->nbKeyUsed => ORDER then can remove
-				object = node->leaves[i];
+				object = node.leaves[i];
 				// Shift all children and leaves left
-				for (int j = i; j < node->nbKeyUsed; j++)
+				for (int j = i; j < *node.nbKeyUsed; j++)
 				{
-					node->keys[j] = node->keys[j + 1];
+					node->keys[j] = node.keys[j + 1];
 				}
-				for (int j = i; j <= node->nbKeyUsed; j++)
+				for (int j = i; j <= *node.nbKeyUsed; j++)
 				{
-					node->children[j] = node->children[j + 1];
-					node->leaves[j] = node->leaves[j + 1];
+					node.children[j] = node.children[j + 1];
+					node.leaves[j] = node.leaves[j + 1];
 				}
-				node->nbKeyUsed--;
+				*node.nbKeyUsed--;
 				return object;
 			}
 		}
 		// Check the key was found will descending
 		if (keyToUpdate != NULL)
 		{
-			*keyToUpdate = node->keys[node->nbKeyUsed - 1];
+			*keyToUpdate = node.keys[*node.nbKeyUsed - 1];
 			node->nbKeyUsed--;
-			object = node->leaves[node->nbKeyUsed - 1];
+			object = node.leaves[*node.nbKeyUsed - 1];
 			return object;
 		}
 		else 
@@ -233,17 +236,17 @@ PUBLIC void * Node_remove(unsigned int nodeIdx, Key key, unsigned int * keyToUpd
 	else
 	{
 		// Search which child contains the key
-		for (int i = 0; i < node->nbKeyUsed; i++)
+		for (int i = 0; i < *node.nbKeyUsed; i++)
 		{
-			if (key <= node->keys[i])
+			if (key <= node.keys[i])
 			{
 				// The key is found already while descending the tree, remember it
-				if (key <= node->keys[i]) keyToUpdate = &node->keys[i]; /* BUG */
-				object = Node_remove(node->children[i], key, keyToUpdate, pool);
+				if (key <= node.keys[i]) keyToUpdate = &node.keys[i]; /* BUG */
+				object = Node_remove(node.children[i], key, keyToUpdate, pool);
 				// Check if the number of children is at least ORDER
-				if (node->children[i]->nbKeyUsed < ORDER - 1)
+				if (*node.children[i].nbKeyUsed < ORDER - 1)
 				{
-					if (node->children[i + 1]->nbKeyUsed <= ORDER - 1)
+					if (*node.children[i + 1].nbKeyUsed <= ORDER - 1)
 					{
 						// Merge node left and right
 						Node_mergeNodes(node, i, i + 1, pool);
@@ -262,11 +265,11 @@ PUBLIC void * Node_remove(unsigned int nodeIdx, Key key, unsigned int * keyToUpd
 			}
 			/* Should there be more checks here */
 		}
-		object = Node_remove(node->children[node->nbKeyUsed], key, keyToUpdate, pool);
+		object = Node_remove(node.children[*node.nbKeyUsed], key, keyToUpdate, pool);
 		// Now assess if the node needs to be re-balanced
-		if (node->children[node->nbKeyUsed]->nbKeyUsed < ORDER - 1)
+		if (*node.children[*node.nbKeyUsed].nbKeyUsed < ORDER - 1)
 		{
-			if (node->children[node->nbKeyUsed - 1]->nbKeyUsed <= ORDER - 1)
+			if (*node.children[*node.nbKeyUsed - 1].nbKeyUsed <= ORDER - 1)
 			{
 				// Merge node left and right
 				printf("ERROR: Need to merge\n");
@@ -283,10 +286,9 @@ PUBLIC void * Node_remove(unsigned int nodeIdx, Key key, unsigned int * keyToUpd
 		{
 			return object;
 		}
-		
-    }
 #endif
-	return 0;
+    }
+    return 0;
 }
 
 /*********************************************************************************
