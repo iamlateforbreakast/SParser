@@ -132,28 +132,28 @@ PUBLIC void BTree_get(BTree* tree, Key key, void ** object)
 void * BTree_remove(BTree* tree, unsigned int key)
 {
 	void * object = 0;
+        void * ptrContent = Pool_read(tree->pool, tree->root);
+        Node root = Node_read(tree->root, ptrContent);
 #if 0
-	Node* root = tree->root;
-	// Pool_read(root)
-  	if (root->nbKeyUsed == 0) return NULL;
+  	if (*root.nbKeyUsed == 0) return NULL;
 
-	if (root->isLeaf)
+	if (*root.isLeaf)
 	{
-		for (int i = 0; i < root->nbKeyUsed; i++)
+		for (int i = 0; i < *root.nbKeyUsed; i++)
 		{
-			if (key == root->keys[i])
+			if (key == root.keys[i])
 			{
-				object = root->leaves[i];
-				for (int j = i; j < root->nbKeyUsed; j++)
+				object = root.leaves[i];
+				for (int j = i; j < *root.nbKeyUsed; j++)
 				{
-					root->keys[j] = root->keys[j + 1];
+					root.keys[j] = root.keys[j + 1];
 				}
-				for (int j = 0; j <= root->nbKeyUsed; j++)
+				for (int j = 0; j <= *root.nbKeyUsed; j++)
 				{
-					root->children[j] = root->children[j + 1];
-					root->leaves[j] = root->leaves[j + 1];
+					root.children[j] = root.children[j + 1];
+					root.leaves[j] = root.leaves[j + 1];
 				}
-				root->nbKeyUsed--;
+				*root.nbKeyUsed--;
 				tree->nbObjects--; // Pool_write();
 			}
 		}
