@@ -52,23 +52,23 @@ void BTree_add(BTree* tree, unsigned int key, void * object)
 		 void* ptrBuffer = Pool_alloc(tree->pool, &newLeafIdx);
 		 Node node = Node_read(newLeafIdx, tree->order, ptrBuffer);
 
-		 *(node.nbKeyUsed) = 1;
+		 *node.nbKeyUsed = 1;
 		 *node.isLeaf = 1;
-		 node.keys[0] = key;
+		 node.keys[0] = (unsigned int)key;
 		 //Pool_addToChunkCache(tree->pool, &key, sizeof(key)); //unsigned int keys[ORDER * 2 - 1];
-		 for (int i = 1; i < tree->order * 2 - 1; i++)
+		 for (unsigned int i = 1; i < tree->order * 2 - 1; i++)
 		 {
 			 node.keys[i] = 0;
 			 //Pool_addToChunkCache(tree->pool, &null, sizeof(null));
 		 }
 		 node.leaves[0] = object;
 		 //Pool_addToChunkCache(tree->pool, (void*)object, sizeof(object)); //Object leaves[ORDER * 2];
-		 for (int i = 1; i < tree->order * 2; i++)
+		 for (unsigned int i = 1; i < tree->order * 2; i++)
 		 {
 			 node.leaves[i] = 0;
 			 //Pool_addToChunkCache(tree->pool, &null, sizeof(null));
 		 }
-		 for (int i = 0; i < tree->order * 2; i++)
+		 for (unsigned int i = 0; i < tree->order * 2; i++)
 		 {
 			 node.children[i] = 0;
 			 //Pool_addToChunkCache(tree->pool, &null, sizeof(null)); //unsigned int children[ORDER * 2];
@@ -133,8 +133,7 @@ void * BTree_remove(BTree* tree, unsigned int key)
 {
 	void * object = 0;
         void * ptrContent = Pool_read(tree->pool, tree->root);
-        Node root = Node_read(tree->root, ptrContent);
-#if 0
+        Node root = Node_read(tree->root, tree->order, ptrContent);
   	if (*root.nbKeyUsed == 0) return NULL;
 
 	if (*root.isLeaf)
@@ -153,12 +152,14 @@ void * BTree_remove(BTree* tree, unsigned int key)
 					root.children[j] = root.children[j + 1];
 					root.leaves[j] = root.leaves[j + 1];
 				}
-				*root.nbKeyUsed--;
+				(*root.nbKeyUsed)--;
 				tree->nbObjects--; // Pool_write();
+				Pool_write(tree->pool, tree->root, ptrContent);
 			}
 		}
 		return object;
 	}
+#if 0
 	else
 	{
 		object = Node_remove(root, key, NULL, tree->pool);
@@ -225,7 +226,7 @@ PUBLIC BTree * BTree_newFromFile(char * fileName)
 *********************************************************************************/
 PUBLIC void BTree_free(BTree* tree)
 {
-	Node_free(tree->root, tree->pool);
+	//Node_free(tree->root, tree->pool);
 	Pool_free(tree->pool);
 
 	free(tree);
