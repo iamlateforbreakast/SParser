@@ -47,7 +47,7 @@ PUBLIC void Node_search(unsigned int nodeIdx, unsigned int order, Key key, Objec
 	{
 		for (int i = 0; i < *node.nbKeyUsed; i++)
 		{
-			if (node.keys[i] == key)
+			if (node.keys[i] == (unsigned int)key)
 			{
 				*object = node.leaves[i];
 				return;
@@ -65,7 +65,7 @@ PUBLIC void Node_search(unsigned int nodeIdx, unsigned int order, Key key, Objec
 	{
 		for (int i = 0; i < *node.nbKeyUsed; i++)
 		{
-			if (key < node.keys[i])
+			if ((unsigned int)key < node.keys[i])
 			{
 				Node_search(node.children[i], order, key, object, isFoundAlready, pool);
 				return;
@@ -192,7 +192,7 @@ PUBLIC void Node_insert(unsigned int nodeIdx, Key key, void * object, unsigned i
 * input: the key to remove
 * output: none
 *********************************************************************************/
-PUBLIC void * Node_remove(unsigned int nodeIdx, Key key, unsigned int * keyToUpdate, Pool* pool)
+PUBLIC void * Node_remove(unsigned int nodeIdx, unsigned int order, Key key, unsigned int * keyToUpdate, Pool* pool)
 { 
 	void * object = 0;
         void * ptrContent = Pool_read(pool, nodeIdx);
@@ -200,7 +200,7 @@ PUBLIC void * Node_remove(unsigned int nodeIdx, Key key, unsigned int * keyToUpd
 
 	if (*node.isLeaf == TRUE)
 	{
-#if 0
+
 		for (int i = 0; i < *node.nbKeyUsed; i++)
 		{
 			if (node.keys[i] == key)
@@ -210,14 +210,14 @@ PUBLIC void * Node_remove(unsigned int nodeIdx, Key key, unsigned int * keyToUpd
 				// Shift all children and leaves left
 				for (int j = i; j < *node.nbKeyUsed; j++)
 				{
-					node->keys[j] = node.keys[j + 1];
+					node.keys[j] = node.keys[j + 1];
 				}
 				for (int j = i; j <= *node.nbKeyUsed; j++)
 				{
 					node.children[j] = node.children[j + 1];
 					node.leaves[j] = node.leaves[j + 1];
 				}
-				*node.nbKeyUsed--;
+				(*node.nbKeyUsed)--;
 				return object;
 			}
 		}
@@ -225,7 +225,7 @@ PUBLIC void * Node_remove(unsigned int nodeIdx, Key key, unsigned int * keyToUpd
 		if (keyToUpdate != NULL)
 		{
 			*keyToUpdate = node.keys[*node.nbKeyUsed - 1];
-			node->nbKeyUsed--;
+			(*node.nbKeyUsed)--;
 			object = node.leaves[*node.nbKeyUsed - 1];
 			return object;
 		}
@@ -235,6 +235,7 @@ PUBLIC void * Node_remove(unsigned int nodeIdx, Key key, unsigned int * keyToUpd
 	}
 	else
 	{
+#if 0
 		// Search which child contains the key
 		for (int i = 0; i < *node.nbKeyUsed; i++)
 		{
@@ -298,18 +299,13 @@ PUBLIC void * Node_remove(unsigned int nodeIdx, Key key, unsigned int * keyToUpd
 *********************************************************************************/
 PUBLIC void Node_print(unsigned int nodeIdx, unsigned int order, unsigned int depth, Pool * pool)
 {
-	//void* ptrBuffer = Pool_getCache1(pool);
-	Node node = Node_read(nodeIdx, order, Pool_read(pool, nodeIdx));
-	//short unsigned int * nbKeyUsed = node;
-	//short unsigned int * isLeaf = nbKeyUsed + sizeof(short unsigned int);
-	//unsigned int * keys = isLeaf + sizeof(short unsigned int);
-	//Object * leaves = keys + sizeof(unsigned int) * (2 * order - 1);
-	//unsigned int * children = leaves + sizeof(unsigned int) * (2 * order);
+	void* ptrBuffer = Pool_read(pool, nodeIdx);
+	Node node = Node_read(nodeIdx, order, ptrBuffer);
 
 	//if (node == NULL) return;
 	printf(" Node NbUsed: %d\n", *node.nbKeyUsed);
- 	printf(" Keys: ");
-	for (int i = 0; i < order * 2 - 1; i++)
+	printf(" Keys: ");
+	for (unsigned int i = 0; i < order * 2 - 1; i++)
 	{
 		if (i < *node.nbKeyUsed)
 			printf("%d ", node.keys[i]);
@@ -368,9 +364,9 @@ PUBLIC unsigned int Node_splitNode(unsigned int nodeIdx, unsigned int nodeToSpli
 	node.children[k + 1] = newChildIdx;
 	(*node.nbKeyUsed)++;
 
-	for (int i = 0; i < order - 1; i++)
+	for (unsigned int i = 0; i < order - 1; i++)
 		newChild.keys[i] = nodeToSplit.keys[order + i];
-	for (int i = 0; i < order; i++)
+	for (unsigned int i = 0; i < order; i++)
 	{
 		newChild.leaves[i] = nodeToSplit.leaves[order + i];
 		newChild.children[i] = nodeToSplit.children[order + i];
@@ -419,10 +415,10 @@ PUBLIC Node Node_read(unsigned int nodeIdx, unsigned int order, void * ptrConten
 {
 	Node resultNode;
 	resultNode.nbKeyUsed = ptrContent;
-	resultNode.isLeaf = resultNode.nbKeyUsed + sizeof(unsigned short int);
-	resultNode.keys = (unsigned int*)ptrContent + sizeof(unsigned short int) * 2;
-	resultNode.leaves = resultNode.keys + sizeof(unsigned int) * (2 * order - 1);
-	resultNode.children = resultNode.leaves + sizeof(unsigned int) * (2 * order);
+	resultNode.isLeaf = (unsigned int*)((char*)ptrContent + sizeof(unsigned int));
+	resultNode.keys = (unsigned int*)((char*)ptrContent + sizeof(unsigned int) * 2);
+	resultNode.children = (unsigned int*)((char*)ptrContent + sizeof(unsigned int) * 2 + sizeof(unsigned int) * (2 * order - 1));
+	resultNode.leaves = (Object*)((char*)ptrContent + sizeof(unsigned int) * 2 + sizeof(unsigned int) * (2 * order - 1) + sizeof(unsigned int) * (2 * order));
 	return resultNode;
 }
 PRIVATE void Node_shiftRight(Node* node, unsigned int idxKey, Pool* pool)
