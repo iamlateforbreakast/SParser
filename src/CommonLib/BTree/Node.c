@@ -38,7 +38,7 @@ PUBLIC unsigned int Node_new(Pool * pool)
 * input: the key to look for
 * output: the beam weight range if found otherwise NULL 
 *********************************************************************************/
-PUBLIC void Node_search(unsigned int nodeIdx, unsigned int order, Key key, Object * object, unsigned int isFoundAlready, Pool * pool)
+PUBLIC void Node_search(unsigned int nodeIdx, unsigned int order, Key key, void** object, unsigned int isFoundAlready, Pool * pool)
 {
 	void* ptrBuffer = Pool_read(pool, nodeIdx);
  	Node node = Node_read(nodeIdx, order, ptrBuffer);
@@ -80,7 +80,7 @@ PUBLIC void Node_search(unsigned int nodeIdx, unsigned int order, Key key, Objec
 		return;
 	}
 
-	return NULL;
+	return 0;
  }
 
 /*********************************************************************************
@@ -196,7 +196,7 @@ PUBLIC void * Node_remove(unsigned int nodeIdx, unsigned int order, Key key, uns
 { 
 	void * object = 0;
         void * ptrContent = Pool_read(pool, nodeIdx);
-        Node node = Node_read(nodeIdx, order, ptrContent););
+        Node node = Node_read(nodeIdx, order, ptrContent);
 
 	if (*node.isLeaf == 1)
 	{
@@ -222,7 +222,7 @@ PUBLIC void * Node_remove(unsigned int nodeIdx, unsigned int order, Key key, uns
 			}
 		}
 		// Check the key was found will descending
-		if (keyToUpdate != NULL)
+		if (keyToUpdate != 0)
 		{
 			*keyToUpdate = node.keys[*node.nbKeyUsed - 1];
 			(*node.nbKeyUsed)--;
@@ -230,7 +230,7 @@ PUBLIC void * Node_remove(unsigned int nodeIdx, unsigned int order, Key key, uns
 			return object;
 		}
 		else 
-			return NULL;
+			return 0;
 
 	}
 	else
@@ -418,7 +418,7 @@ PUBLIC Node Node_read(unsigned int nodeIdx, unsigned int order, void * ptrConten
 	resultNode.isLeaf = (unsigned int*)((char*)ptrContent + sizeof(unsigned int));
 	resultNode.keys = (unsigned int*)((char*)ptrContent + sizeof(unsigned int) * 2);
 	resultNode.children = (unsigned int*)((char*)ptrContent + sizeof(unsigned int) * 2 + sizeof(unsigned int) * (2 * order - 1));
-	resultNode.leaves = (Object*)((char*)ptrContent + sizeof(unsigned int) * 2 + sizeof(unsigned int) * (2 * order - 1) + sizeof(unsigned int) * (2 * order));
+	resultNode.leaves = (void**)((char*)ptrContent + sizeof(unsigned int) * 2 + sizeof(unsigned int) * (2 * order - 1) + sizeof(unsigned int) * (2 * order));
 	return resultNode;
 }
 PRIVATE void Node_shiftRight(Node* node, unsigned int idxKey, Pool* pool)

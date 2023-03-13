@@ -134,7 +134,7 @@ void * BTree_remove(BTree* tree, unsigned int key)
 	void * object = 0;
         void * ptrContent = Pool_read(tree->pool, tree->root);
         Node root = Node_read(tree->root, tree->order, ptrContent);
-  	if (*root.nbKeyUsed == 0) return NULL;
+  	if (*root.nbKeyUsed == 0) return 0;
 
 	if (*root.isLeaf)
 	{
@@ -162,7 +162,7 @@ void * BTree_remove(BTree* tree, unsigned int key)
 #if 0
 	else
 	{
-		object = Node_remove(root, key, NULL, tree->pool);
+		object = Node_remove(root, key, 0, tree->pool);
 		// Check the resulting tree so that there is at least 1 Key used at root level
 		if (tree->root->nbKeyUsed < 1)
 		{
@@ -172,7 +172,7 @@ void * BTree_remove(BTree* tree, unsigned int key)
 			Node_free(root, tree->pool);
 		}
 		// Check something was actually removed
-		if (object != NULL)
+		if (object != 0)
 		{
 			tree->nbObjects--;
 		}
