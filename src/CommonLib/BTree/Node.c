@@ -235,7 +235,6 @@ PUBLIC void * Node_remove(unsigned int nodeIdx, unsigned int order, Key key, uns
 	}
 	else
 	{
-#if 0
 		// Search which child contains the key
 		for (int i = 0; i < *node.nbKeyUsed; i++)
 		{
@@ -243,19 +242,23 @@ PUBLIC void * Node_remove(unsigned int nodeIdx, unsigned int order, Key key, uns
 			{
 				// The key is found already while descending the tree, remember it
 				if (key <= node.keys[i]) keyToUpdate = &node.keys[i]; /* BUG */
-				object = Node_remove(node.children[i], key, keyToUpdate, pool);
+				object = Node_remove(node.children[i], order, key, keyToUpdate, pool);
 				// Check if the number of children is at least ORDER
-				if (*node.children[i].nbKeyUsed < ORDER - 1)
+				void * ptrContent = Pool_read(pool, node.children[i]);
+				Node child = Node_read(node.children[i], order, ptrContent);
+				void * ptrContent2 = Pool_read(pool, node.children[i+1]);
+				Node nextChild = Node_read(node.children[i+1], order, ptrContent2);
+				if (*child.nbKeyUsed < order - 1)
 				{
-					if (*node.children[i + 1].nbKeyUsed <= ORDER - 1)
+					if (*nextChild.nbKeyUsed <= order - 1)
 					{
 						// Merge node left and right
-						Node_mergeNodes(node, i, i + 1, pool);
+						//Node_mergeNodes(node, i, i + 1, pool);
 					}
 					else
 					{
 						// Steal key right
-						Node_stealRightKey(node, i + 1, i, pool);
+						//Node_stealRightKey(node, i + 1, i, pool);
 					}
 					return object;
 				}
@@ -266,11 +269,12 @@ PUBLIC void * Node_remove(unsigned int nodeIdx, unsigned int order, Key key, uns
 			}
 			/* Should there be more checks here */
 		}
-		object = Node_remove(node.children[*node.nbKeyUsed], key, keyToUpdate, pool);
+#if 0
+		object = Node_remove(node.children[*node.nbKeyUsed], order, key, keyToUpdate, pool);
 		// Now assess if the node needs to be re-balanced
-		if (*node.children[*node.nbKeyUsed].nbKeyUsed < ORDER - 1)
+		if (*node.children[*node.nbKeyUsed].nbKeyUsed < order - 1)
 		{
-			if (*node.children[*node.nbKeyUsed - 1].nbKeyUsed <= ORDER - 1)
+			if (*node.children[*node.nbKeyUsed - 1].nbKeyUsed <= order - 1)
 			{
 				// Merge node left and right
 				printf("ERROR: Need to merge\n");
