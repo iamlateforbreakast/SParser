@@ -118,7 +118,7 @@ void BTree_add(BTree* tree, unsigned int key, void * object)
 *********************************************************************************/
 PUBLIC void BTree_get(BTree* tree, Key key, void ** object)
 {
-	Node_search(tree->root, tree->order, key, object, FALSE, tree->pool);
+	Node_search(tree->root, tree->order, key, object, 0, tree->pool);
 
 	return;
 }

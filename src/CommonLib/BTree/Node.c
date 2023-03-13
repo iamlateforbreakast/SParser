@@ -72,7 +72,7 @@ PUBLIC void Node_search(unsigned int nodeIdx, unsigned int order, Key key, Objec
 			}
 			if (key == node.keys[i])
 			{
-				Node_search(node.children[i], order, key, object, TRUE, pool);
+				Node_search(node.children[i], order, key, object, 1, pool);
 				return;
 			}
 		}
@@ -93,7 +93,7 @@ PUBLIC void Node_free(unsigned int nodeIdx, unsigned int order, Pool* pool)
         void* ptrBuffer = Pool_read(pool, nodeIdx);
  	Node node = Node_read(nodeIdx, order, ptrBuffer);
 
-	if (*node.isLeaf == TRUE)
+	if (*node.isLeaf == 1)
 	{
 		for (int i = 0; i < *node.nbKeyUsed + 1; i++)
 		{
@@ -198,7 +198,7 @@ PUBLIC void * Node_remove(unsigned int nodeIdx, unsigned int order, Key key, uns
         void * ptrContent = Pool_read(pool, nodeIdx);
         Node node = Node_read(nodeIdx, order, ptrContent););
 
-	if (*node.isLeaf == TRUE)
+	if (*node.isLeaf == 1)
 	{
 
 		for (int i = 0; i < *node.nbKeyUsed; i++)
