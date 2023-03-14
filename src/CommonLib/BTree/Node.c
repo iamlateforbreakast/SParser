@@ -140,6 +140,7 @@ PUBLIC void Node_insert(unsigned int nodeIdx, Key key, void * object, unsigned i
 				node.keys[i] = key;
 				node.leaves[i] = object;
 				*node.nbKeyUsed++;
+				Pool_write(pool, nodeIdx, ptrBuffer);
 				return;
 			}
 		}
@@ -325,6 +326,7 @@ PUBLIC void Node_print(unsigned int nodeIdx, unsigned int order, unsigned int de
 		    Node_print(node.children[i], order, depth - 1, pool);
 		}
 	}
+	Pool_discardCache(pool, nodeIdx);
 }
 
 /*********************************************************************************
