@@ -8,9 +8,10 @@
   - De-alloc
 **************************************************/
 #include "Pool.h"
+#include "Memory.h"
 #include <stdio.h>
 
-#define CACHE_NB (5)
+#define CACHE_NB (6)
 #define END_OF_QUEUE   (0xFFFFFFFF)
 #define END_OF_ALLOC   (0xFFFFFFFE)
 #define START_OF_AVAIL (0xFFFFFFFD)
@@ -28,6 +29,7 @@ PRIVATE void Pool_readInFile(Pool* pool, unsigned int idx, void* p);
 PRIVATE void Pool_readInMemory(Pool* pool, unsigned int idx, void* p);
 PRIVATE void Pool_writeInFile(Pool* pool, unsigned int idx, void* p);
 PRIVATE void Pool_writeInMemory(Pool* pool, unsigned int idx, void* p);
+PRIVATE unsigned int Pool_reportCacheUsed(Pool* pool);
 
 /**********************************************//**
   @private
@@ -141,9 +143,8 @@ PUBLIC Pool* Pool_newFromFile(char* fileName, unsigned int nbMemChunks, unsigned
         newPool->chunkCache[i].idx = 0;
         newPool->chunkCache[i].isUsed = 0;
         newPool->chunkCache[i].cache = (char*)malloc(sizeof(MemChunk) + newPool->memChunkSize);
-        newPool->cacheUsed = 0;
     }
-
+    newPool->cacheUsed = 0;
     //fclose(newPool->file);
     // If file exists
     // else
@@ -241,11 +242,14 @@ PUBLIC void* Pool_alloc(Pool* pool, unsigned int* ptrIdx)
         {
             pool->chunkCache[i].isUsed = 1;
             pool->chunkCache[i].idx = *ptrIdx;
-            memset(pool->chunkCache[i].cache, 0, pool->memChunkSize);
+            Memory_set(pool->chunkCache[i].cache, 0, pool->memChunkSize);
+            pool->cacheUsed = Pool_reportCacheUsed(pool);
             return pool->chunkCache[i].cache;
         }
     }
     // No cache position left
+    printf("Error: Pool out of cache\n");
+    exit(2);
     return NULL;
 }
 
@@ -258,7 +262,11 @@ PUBLIC void Pool_dealloc(Pool* pool, unsigned int idx)
 {
     for (int i = 0; i < CACHE_NB; i++)
     {
-        if (pool->chunkCache[i].idx == idx) pool->chunkCache[i].isUsed = 0;
+        if (pool->chunkCache[i].idx == idx) 
+        {
+            pool->chunkCache[i].isUsed = 0;
+            pool->cacheUsed = Pool_reportCacheUsed(pool);
+        }
     }
     if (pool->isFile)
         Pool_deallocInFile(pool, idx);
@@ -280,6 +288,7 @@ PUBLIC void Pool_write(Pool* pool, unsigned int idx, void * ptrContent)
         {
             // Release the cacke postion
             pool->chunkCache[i].isUsed = 0;
+            pool->cacheUsed = Pool_reportCacheUsed(pool);
             break;
         }
     }
@@ -287,6 +296,7 @@ PUBLIC void Pool_write(Pool* pool, unsigned int idx, void * ptrContent)
         Pool_writeInFile(pool, idx, ptrContent);
     else
         Pool_writeInMemory(pool, idx, ptrContent);
+    //printf("[Pool Cache] %d\n", pool->cacheUsed);
     //pool->cacheUsed = 0;
 }
 
@@ -332,6 +342,8 @@ PUBLIC void* Pool_read(Pool* pool, unsigned int idx /*, void * ptrContent*/)
 
     pool->chunkCache[foundPos].isUsed = 1;
     pool->chunkCache[foundPos].idx = idx;
+    pool->cacheUsed = Pool_reportCacheUsed(pool);
+    //printf("[Pool Cache] %d\n", pool->cacheUsed);
 
     return pool->chunkCache[foundPos].cache;
 }
@@ -386,41 +398,16 @@ PUBLIC unsigned int Pool_addToChunkCache(Pool* pool, void* p, unsigned int lengt
     return length;
 }
 #endif
-/**********************************************//**
-  @brief Pool_getCache1
-  @param[in] none
-  @return none
-**************************************************/
-PUBLIC void* Pool_getCache1(Pool* pool)
-{
-    return pool->chunkCache[0].cache;
-}
-
-/**********************************************//**
-  @brief Pool_getCache2
-  @param[in] none
-  @return none
-**************************************************/
-PUBLIC void* Pool_getCache2(Pool* pool)
-{
-    return pool->chunkCache[1].cache;
-}
-
-/**********************************************//**
-  @brief Pool_getCache3
-  @param[in] none
-  @return none
-**************************************************/
-PUBLIC void* Pool_getCache3(Pool* pool)
-{
-    return pool->chunkCache[2].cache;
-}
 
 PUBLIC void Pool_discardCache(Pool* pool, unsigned int idx)
 {
     for (int i = 0; i < CACHE_NB; i++)
     {
-        if (pool->chunkCache[i].idx == idx) pool->chunkCache[i].isUsed = 0;
+        if (pool->chunkCache[i].idx == idx) 
+        {
+            pool->chunkCache[i].isUsed = 0;
+            pool->cacheUsed = Pool_reportCacheUsed(pool);
+        }
     }
 }
 
@@ -815,4 +802,12 @@ PRIVATE void Pool_readInMemory(Pool* pool, unsigned int idx, void* p)
     long int offset = idx * (sizeof(MemChunk) + pool->memChunkSize) + sizeof(MemChunk);
 
     Memory_copy(p, (char*)pool->pool + offset, pool->memChunkSize);
+}
+
+PRIVATE unsigned int Pool_reportCacheUsed(Pool* pool)
+{
+    unsigned int count=0;
+    for (int i=0; i<CACHE_NB; i++)
+       if (pool->chunkCache[i].isUsed) count++;
+    return count;
 }
