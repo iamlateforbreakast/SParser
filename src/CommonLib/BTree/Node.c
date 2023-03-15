@@ -8,10 +8,10 @@
 * Private Functions Declarations
 *
 *********************************************************************************/
-PRIVATE Node * Node_mergeNodes(Node* node, unsigned int idx1, unsigned int idx2, Pool * pool);
+PRIVATE void Node_mergeNodes(Node node, unsigned int idx1, unsigned int idx2, unsigned int order, Pool * pool);
 PRIVATE void Node_shiftRight(Node node, unsigned int idxKey, Pool * pool);
 PRIVATE void Node_shiftLeft(Node node, unsigned int idxKey, Pool * pool);
-PRIVATE void Node_stealLeftKey(Node* node, unsigned int idxChildStealFrom, unsigned int idxChildGiveTo, Pool * pool);
+PRIVATE void Node_stealLeftKey(Node node, unsigned int idxChildStealFrom, unsigned int idxChildGiveTo, unsigned int order, Pool * pool);
 PRIVATE void Node_stealRightKey(Node node, unsigned int idxKeyStealFrom, unsigned int idxKeyGiveTo, unsigned int order, Pool * pool);
 
 /*********************************************************************************
@@ -90,7 +90,7 @@ PUBLIC void Node_search(unsigned int nodeIdx, unsigned int order, Key key, void*
 *********************************************************************************/
 PUBLIC void Node_free(unsigned int nodeIdx, unsigned int order, Pool* pool)
 {
-        void* ptrBuffer = Pool_read(pool, nodeIdx);
+    void* ptrBuffer = Pool_read(pool, nodeIdx);
  	Node node = Node_read(nodeIdx, order, ptrBuffer);
 
 	if (*node.isLeaf == 1)
@@ -255,7 +255,7 @@ PUBLIC void * Node_remove(unsigned int nodeIdx, unsigned int order, Key key, uns
 					if (*nextChild.nbKeyUsed <= order - 1)
 					{
 						// Merge node left and right
-						Node_mergeNodes(nodeIdx, i, i + 1, pool);
+						Node_mergeNodes(node, i, i + 1, order, pool);
 					}
 					else
 					{
@@ -462,38 +462,35 @@ PRIVATE void Node_shiftLeft(Node node, unsigned int idxKey, Pool* pool)
 * input: index of the right node to merge
 * output: The merged node
 *********************************************************************************/
-PRIVATE Node * Node_mergeNodes(Node* node, unsigned int idxLeft, unsigned idxRight, Pool* pool)
+PRIVATE void Node_mergeNodes(Node node, unsigned int idxLeft, unsigned idxRight, unsigned int order, Pool* pool)
 {
-#if 0
-	Node* mergedNode = NULL;
-
-	Node * leftChild = node->children[idxLeft];
-	Node * rightChild = node->children[idxRight];
+    void * ptrContent = Pool_read(pool,node.children[idxLeft]);
+	Node leftChild = Node_read(node.children[idxLeft], order, ptrContent);
+	void * ptrContent2 = Pool_read(pool, node.children[idxRight]);
+	Node rightChild = Node_read(node.children[idxRight], order, ptrContent2);
 
 	// Demote the key from the parent node into the left child
-	leftChild->keys[leftChild->nbKeyUsed] = node->keys[idxLeft];
+	leftChild.keys[*leftChild.nbKeyUsed] = node.keys[idxLeft];
 	// Promote the last key of the right child to the parent node
-	node->keys[idxLeft] = node->keys[idxRight]; /* BUG: Statement not useful */
-	leftChild->nbKeyUsed++;
+	node.keys[idxLeft] = node.keys[idxRight]; /* BUG: Statement not useful */
+	(*leftChild.nbKeyUsed)++;
 
 	// Move all key, children, leaves from the right child node to the left
-	for (int i = 0; i < rightChild->nbKeyUsed; i++)
+	for (int i = 0; i < rightChild.nbKeyUsed; i++)
 	{
-		leftChild->keys[leftChild->nbKeyUsed + i] = rightChild->keys[i];
+		leftChild.keys[*leftChild.nbKeyUsed + i] = rightChild.keys[i];
 	}
-	for (int i = 0; i <= rightChild->nbKeyUsed; i++)
+	for (int i = 0; i <= *rightChild.nbKeyUsed; i++)
 	{
-		leftChild->children[leftChild->nbKeyUsed + i] = rightChild->children[i];
-		leftChild->leaves[leftChild->nbKeyUsed + i] = rightChild->leaves[i];
+		leftChild.children[*leftChild.nbKeyUsed + i] = rightChild.children[i];
+		leftChild.leaves[*leftChild.nbKeyUsed + i] = rightChild.leaves[i];
 	}
-	leftChild->nbKeyUsed = leftChild->nbKeyUsed + rightChild->nbKeyUsed;
+	*leftChild.nbKeyUsed = *leftChild.nbKeyUsed + *rightChild.nbKeyUsed;
 
 	// Update parent node and discard right child
 	Node_shiftLeft(node, idxRight, pool);
-	Node_free(rightChild, pool);
+	Node_free(idxRight, order, pool);
 
-	return mergedNode;
-#endif
 }
 
 /*********************************************************************************
@@ -502,7 +499,7 @@ PRIVATE Node * Node_mergeNodes(Node* node, unsigned int idxLeft, unsigned idxRig
 * input: index of the child (left or right) to give to
 * output: none
 *********************************************************************************/
-PRIVATE void Node_stealLeftKey(Node* node, unsigned int idxChildStealFrom, unsigned int idxChildGiveTo, Pool* pool)
+PRIVATE void Node_stealLeftKey(Node node, unsigned int idxChildStealFrom, unsigned int idxChildGiveTo, unsigned int order, Pool* pool)
 {
 #if 0
 	// Shift
