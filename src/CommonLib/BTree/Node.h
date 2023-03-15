@@ -14,11 +14,11 @@ typedef struct Node Node;
 typedef struct Node
 {
 	unsigned int idx;
-	unsigned short int * nbKeyUsed;
-	unsigned short int * isLeaf;
+	unsigned int * nbKeyUsed;
+	unsigned int * isLeaf;
 	unsigned int * keys;
-	void ** leaves;
-	unsigned int * children;	
+	unsigned int * children;
+	void ** leaves;	
 } Node;
 
 PUBLIC unsigned int Node_new(Pool* pool);
