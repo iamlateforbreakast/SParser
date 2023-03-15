@@ -6,7 +6,7 @@
 #include "Node.h"
 #include "Pool.h"
 
-#define MAX_NODES (100)
+#define MAX_NODES (10000)
 
 /*********************************************************************************
 * BTree_new
@@ -132,8 +132,9 @@ PUBLIC void BTree_get(BTree* tree, Key key, void ** object)
 void * BTree_remove(BTree* tree, unsigned int key)
 {
 	void * object = 0;
-        void * ptrContent = Pool_read(tree->pool, tree->root);
-        Node root = Node_read(tree->root, tree->order, ptrContent);
+    void * ptrContent = Pool_read(tree->pool, tree->root);
+    Node root = Node_read(tree->root, tree->order, ptrContent);
+
   	if (*root.nbKeyUsed == 0) return 0;
 
 	if (*root.isLeaf)
@@ -155,21 +156,22 @@ void * BTree_remove(BTree* tree, unsigned int key)
 				(*root.nbKeyUsed)--;
 				tree->nbObjects--; // Pool_write();
 				Pool_write(tree->pool, tree->root, ptrContent);
+				return object;
 			}
 		}
-		return object;
+		Pool_discardCache(tree->pool, tree->root);
+		return 0;
 	}
-#if 0
 	else
 	{
-		object = Node_remove(root, key, 0, tree->pool);
+		object = Node_remove(tree->root, tree->order, key, 0, tree->pool);
 		// Check the resulting tree so that there is at least 1 Key used at root level
-		if (tree->root->nbKeyUsed < 1)
+		if (*root.nbKeyUsed < 1)
 		{
 			printf("Tree should collapse\n");
-			tree->root = root->children[0];
+			tree->root = root.children[0];
 			tree->depth--;
-			Node_free(root, tree->pool);
+			Node_free(tree->root, tree->order, tree->pool);
 		}
 		// Check something was actually removed
 		if (object != 0)
@@ -182,7 +184,6 @@ void * BTree_remove(BTree* tree, unsigned int key)
 		}
 		return object;
 	}
-#endif
 	return object;
 }
 

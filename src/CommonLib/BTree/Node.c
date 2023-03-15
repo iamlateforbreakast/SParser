@@ -9,10 +9,10 @@
 *
 *********************************************************************************/
 PRIVATE Node * Node_mergeNodes(Node* node, unsigned int idx1, unsigned int idx2, Pool * pool);
-PRIVATE void Node_shiftRight(Node* node, unsigned int idxKey, Pool * pool);
-PRIVATE void Node_shiftLeft(Node* node, unsigned int idxKey, Pool * pool);
+PRIVATE void Node_shiftRight(Node node, unsigned int idxKey, Pool * pool);
+PRIVATE void Node_shiftLeft(Node node, unsigned int idxKey, Pool * pool);
 PRIVATE void Node_stealLeftKey(Node* node, unsigned int idxChildStealFrom, unsigned int idxChildGiveTo, Pool * pool);
-PRIVATE void Node_stealRightKey(Node* node, unsigned int idxKeyStealFrom, unsigned int idxKeyGiveTo, Pool * pool);
+PRIVATE void Node_stealRightKey(Node node, unsigned int idxKeyStealFrom, unsigned int idxKeyGiveTo, unsigned int order, Pool * pool);
 
 /*********************************************************************************
 * Node_new
@@ -184,6 +184,7 @@ PUBLIC void Node_insert(unsigned int nodeIdx, Key key, void * object, unsigned i
 
 	    //Node* childNode = Node_split(node, key);
 	    //Node_insert(childNode, key, beamWeightRange);
+		Pool_discard(pool, nodeIdx);
 	    return;
 	}
 }
@@ -196,12 +197,11 @@ PUBLIC void Node_insert(unsigned int nodeIdx, Key key, void * object, unsigned i
 PUBLIC void * Node_remove(unsigned int nodeIdx, unsigned int order, Key key, unsigned int * keyToUpdate, Pool* pool)
 { 
 	void * object = 0;
-        void * ptrContent = Pool_read(pool, nodeIdx);
-        Node node = Node_read(nodeIdx, order, ptrContent);
+    void * ptrContent = Pool_read(pool, nodeIdx);
+    Node node = Node_read(nodeIdx, order, ptrContent);
 
 	if (*node.isLeaf == 1)
 	{
-
 		for (int i = 0; i < *node.nbKeyUsed; i++)
 		{
 			if (node.keys[i] == key)
@@ -219,6 +219,7 @@ PUBLIC void * Node_remove(unsigned int nodeIdx, unsigned int order, Key key, uns
 					node.leaves[j] = node.leaves[j + 1];
 				}
 				(*node.nbKeyUsed)--;
+				Pool_write(pool, nodeIdx, ptrContent);
 				return object;
 			}
 		}
@@ -254,12 +255,12 @@ PUBLIC void * Node_remove(unsigned int nodeIdx, unsigned int order, Key key, uns
 					if (*nextChild.nbKeyUsed <= order - 1)
 					{
 						// Merge node left and right
-						//Node_mergeNodes(node, i, i + 1, pool);
+						Node_mergeNodes(nodeIdx, i, i + 1, pool);
 					}
 					else
 					{
 						// Steal key right
-						//Node_stealRightKey(node, i + 1, i, pool);
+						Node_stealRightKey(node, i + 1, i, order, pool);
 					}
 					return object;
 				}
@@ -427,32 +428,32 @@ PUBLIC Node Node_read(unsigned int nodeIdx, unsigned int order, void * ptrConten
 	resultNode.leaves = (void**)((char*)ptrContent + sizeof(unsigned int) * 2 + sizeof(unsigned int) * (2 * order - 1) + sizeof(unsigned int) * (2 * order));
 	return resultNode;
 }
-PRIVATE void Node_shiftRight(Node* node, unsigned int idxKey, Pool* pool)
+PRIVATE void Node_shiftRight(Node node, unsigned int idxKey, Pool* pool)
 {
-	for (unsigned int j = node->nbKeyUsed; j > idxKey; j--)
+	for (unsigned int j = *node.nbKeyUsed; j > idxKey; j--)
 	{
-		node->keys[j] = node->keys[j - 1];
+		node.keys[j] = node.keys[j - 1];
 	}
-	for (unsigned int j = node->nbKeyUsed + 1; j > idxKey; j--)
+	for (unsigned int j = *node.nbKeyUsed + 1; j > idxKey; j--)
 	{
-		node->children[j] = node->children[j - 1];
-		node->leaves[j] = node->leaves[j - 1];
+		node.children[j] = node.children[j - 1];
+		node.leaves[j] = node.leaves[j - 1];
 	}
-	node->nbKeyUsed++;
+	(*node.nbKeyUsed)++;
 }
 
-PRIVATE void Node_shiftLeft(Node* node, unsigned int idxKey, Pool* pool)
+PRIVATE void Node_shiftLeft(Node node, unsigned int idxKey, Pool* pool)
 {
-	for (int j = idxKey; j < node->nbKeyUsed; j++)
+	for (int j = idxKey; j < *node.nbKeyUsed; j++)
 	{
-		node->keys[j] = node->keys[j + 1];
+		node.keys[j] = node.keys[j + 1];
 	}
-	for (int j = idxKey; j <= node->nbKeyUsed; j++)
+	for (int j = idxKey; j <= *node.nbKeyUsed; j++)
 	{
-		node->children[j] = node->children[j + 1];
-		node->leaves[j] = node->leaves[j + 1];
+		node.children[j] = node.children[j + 1];
+		node.leaves[j] = node.leaves[j + 1];
 	}
-	node->nbKeyUsed--; /* BUG: if idxKey == node->nbKeyUsed this decremented incorrectly */
+	(*node.nbKeyUsed)--; /* BUG: if idxKey == node->nbKeyUsed this decremented incorrectly */
 }
 
 /*********************************************************************************
@@ -525,19 +526,19 @@ PRIVATE void Node_stealLeftKey(Node* node, unsigned int idxChildStealFrom, unsig
 * input: index of the child (left or right) to give to
 * output: none
 *********************************************************************************/
-PRIVATE void Node_stealRightKey(Node* node, unsigned int idxChildStealFrom, unsigned int idxChildGiveTo, Pool* pool)
+PRIVATE void Node_stealRightKey(Node node, unsigned int idxChildStealFrom, unsigned int idxChildGiveTo, unsigned int order, Pool* pool)
 {
-#if 0
 	// Shift
-	Node* stealFromChild = node->children[idxChildStealFrom];
-	Node* giveToChild = node->children[idxChildGiveTo];
+	void * ptrContent = Pool_read(pool, node.children[idxChildStealFrom]);
+	Node stealFromChild = Node_read(node.children[idxChildStealFrom], order, ptrContent);
+	void * ptrContent2 = Pool_read(pool, node.children[idxChildGiveTo]); 
+	Node giveToChild = Node_read(node.children[idxChildGiveTo], order, ptrContent2);
 
 	//printf("Stealing Right Key from % to % d\n", idxChildStealFrom, idxChildGiveTo);
-	giveToChild->children[giveToChild->nbKeyUsed + 1] = stealFromChild->children[0];
-	giveToChild->leaves[giveToChild->nbKeyUsed + 1] = stealFromChild->leaves[0];
-	giveToChild->keys[giveToChild->nbKeyUsed] = node->keys[idxChildGiveTo];
-	node->keys[idxChildGiveTo] = stealFromChild->keys[0];
-	giveToChild->nbKeyUsed++;
+	giveToChild.children[*giveToChild.nbKeyUsed + 1] = stealFromChild.children[0];
+	giveToChild.leaves[*giveToChild.nbKeyUsed + 1] = stealFromChild.leaves[0];
+	giveToChild.keys[*giveToChild.nbKeyUsed] = node.keys[idxChildGiveTo];
+	node.keys[idxChildGiveTo] = stealFromChild.keys[0];
+	(*giveToChild.nbKeyUsed)++;
 	Node_shiftLeft(stealFromChild, 0, pool);
-#endif
 }
