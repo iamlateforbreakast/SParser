@@ -54,7 +54,6 @@ typedef struct Pool
     unsigned int firstAvailable;
     unsigned int lastAllocated;
     unsigned int cacheUsed;
-    char* writeChunkCache[CACHE_NB];
     PoolCache chunkCache[CACHE_NB];
     void* pool;
     FILE* file;
@@ -210,8 +209,6 @@ PUBLIC void Pool_free(Pool* pool)
 {
     if (pool)
     {
-        for (int i = 0; i < CACHE_NB; i++)
-            free(pool->writeChunkCache[i]);
         if (!pool->isFile)
             free(pool->pool);
         else
@@ -327,7 +324,8 @@ PUBLIC void* Pool_read(Pool* pool, unsigned int idx /*, void * ptrContent*/)
         if (freePos < 0)
         {
             // No space left in cache
-            printf("Error\n");
+            printf("Error: No space in cache\n");
+            exit(2);
             return NULL;
         }
         else
@@ -409,6 +407,15 @@ PUBLIC void Pool_discardCache(Pool* pool, unsigned int idx)
             pool->cacheUsed = Pool_reportCacheUsed(pool);
         }
     }
+}
+
+PUBLIC void Pool_discardAllCache(Pool* pool)
+{
+    for (int i = 0; i < CACHE_NB; i++)
+    {
+        pool->chunkCache[i].isUsed = 0;
+    }
+    pool->cacheUsed = Pool_reportCacheUsed(pool);
 }
 
 /**********************************************//**
