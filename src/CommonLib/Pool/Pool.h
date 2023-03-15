@@ -5,6 +5,7 @@
 *
 *********************************************************************************/
 #include "Types.h"
+#include "Pool.h"
 
 typedef enum AllocStatus
 {
@@ -32,7 +33,6 @@ PUBLIC unsigned int Pool_addToChunkCache(Pool* pool, void* p, unsigned int lengt
 PUBLIC void Pool_report(Pool* pool);
 PUBLIC unsigned int Pool_reportSizeInBytes(Pool* pool);
 PUBLIC unsigned int Pool_reportNbNodes(Pool* pool);
-PUBLIC void* Pool_getCache1(Pool* pool);
-PUBLIC void* Pool_getCache2(Pool* pool);
 PUBLIC void Pool_discardCache(Pool* pool, unsigned int idx);
+PUBLIC void Pool_discardAllCache(Pool* pool);
 #endif /* _POOL_ */
