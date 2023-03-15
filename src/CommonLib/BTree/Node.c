@@ -184,7 +184,7 @@ PUBLIC void Node_insert(unsigned int nodeIdx, Key key, void * object, unsigned i
 
 	    //Node* childNode = Node_split(node, key);
 	    //Node_insert(childNode, key, beamWeightRange);
-		Pool_discard(pool, nodeIdx);
+		Pool_discardCache(pool, nodeIdx);
 	    return;
 	}
 }
