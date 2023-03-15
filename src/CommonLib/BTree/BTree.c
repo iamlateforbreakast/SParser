@@ -107,6 +107,7 @@ void BTree_add(BTree* tree, unsigned int key, void * object)
 			return;
 		}
 		Node_insert(tree->root, key, object, tree->order, tree->pool);
+		Pool_discardCache(tree->pool, tree->root);
 		tree->nbObjects++;
 	}
 }
@@ -169,6 +170,7 @@ void * BTree_remove(BTree* tree, unsigned int key)
 		if (*root.nbKeyUsed < 1)
 		{
 			printf("Tree should collapse\n");
+			Node_free(tree->root, tree->order, tree->pool);
 			tree->root = root.children[0];
 			tree->depth--;
 			Node_free(tree->root, tree->order, tree->pool);
@@ -227,7 +229,7 @@ PUBLIC BTree * BTree_newFromFile(char * fileName)
 *********************************************************************************/
 PUBLIC void BTree_free(BTree* tree)
 {
-	//Node_free(tree->root, tree->pool);
+	Node_free(tree->root, tree->order, tree->pool);
 	Pool_free(tree->pool);
 
 	free(tree);
