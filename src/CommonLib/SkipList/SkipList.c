@@ -82,7 +82,7 @@ PUBLIC void SkipList_free(SkipList* this)
 PUBLIC void SkipList_add(SkipList* this, unsigned int key, void* object)
  {
     unsigned int update[SKIPLIST_MAX_LEVEL + 1];
-    unsigned int iteratorIdx = this->headerIdx;
+    unsigned int currentNodeIdx = this->headerIdx;
     unsigned int prevNodeIdx = this->headerIdx;
     SkipNode* prevNode = Pool_read(this->pool, this->headerIdx);
     SkipNode* currentNode = Pool_read(this->pool, this->headerIdx);
@@ -91,14 +91,16 @@ PUBLIC void SkipList_add(SkipList* this, unsigned int key, void* object)
     {
         while (currentNode->key < key)
         {
+            prevNodeIdx = currentNodeIdx;
             prevNode = currentNode;
-            currentNode = Pool_read(this->pool, currentNode->forward[i]);   
+            currentNodeIdx = currentNode->forward[1];
+            currentNode = Pool_read(this->pool, currentNodeIdx);   
         }
         update[i] = prevNode->forward[i];
     }
-    prevNode = Pool_read(this->pool, prevNode->forward[1]);
-    prevNodeIdx = prevNode->forward[1];
-
+    //prevNodeIdx = prevNode->forward[1];
+    //prevNode = Pool_read(this->pool, prevNodeIdx);
+    
     if (key == currentNode->key)
     {
         currentNode->object = object;
@@ -228,6 +230,8 @@ PUBLIC void SkipList_print(SkipList* this)
             printf(" Forward[%d]: %d", j, skipNode->forward[i]);
         }
         printf("\n");
+        skipNode = Pool_read(this->pool, skipNode->forward[1]);
+        Pool_discardCache(this->pool, skipNode->forward[1]);
     }
 }
 
