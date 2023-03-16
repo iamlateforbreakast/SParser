@@ -15,6 +15,7 @@ SOURCES = \
 	./Map/MapEntry.c \
 	./BTree/BTree.c \
 	./BTree/Node.c \
+	./SkipList/SkipList.c \
 	./Pool/Pool.c \
 	./Error/Error.c
 
