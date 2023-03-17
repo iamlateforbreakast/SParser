@@ -111,8 +111,7 @@ PUBLIC void SkipList_add(SkipList* this, unsigned int key, void* object)
     }
     else
     {
-        unsigned int level = this->level;
-        if (update[0] != 0) level = SkipList_randLevel(this);
+        unsigned int level = SkipList_randLevel(this);
         if (level > this->level)
         {
             this->level = level;
@@ -304,6 +303,7 @@ PUBLIC void SkipList_print(SkipList* this)
     for (int i = 0; i < this->nbObjects; i++)
     {
         printf("SkipNode: %d ", i);
+        printf(" Index: %d ", currentNodeIdx);
         printf(" Level: %d ", skipNode->level);
         printf(" Key: %d ", skipNode->key);
         for (int j = 0; j < skipNode->level; j++)

@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "SkipList.h"
 
-#define NB_OBJECTS (3)
+#define NB_OBJECTS (6)
 
 SkipList* testList;
 
@@ -17,11 +17,15 @@ int step1()
 
 int step2()
 {
-    unsigned int keys[NB_OBJECTS] = { 55, 30, 80 };
-    unsigned int value[NB_OBJECTS] = { 1972, 2005, 1945 };
+    unsigned int keys[] = { 55, 30, 80, 10, 40, 120 };
+    unsigned int value[] = { 1972, 2005, 1945, 1875, 2001, 1515 };
 
     for (int i = 0; i < NB_OBJECTS; i++)
+    {
         SkipList_add(testList, keys[i], &value);
+        SkipList_print(testList);
+    }
+        
 
     return 1;
 }
