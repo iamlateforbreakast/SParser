@@ -136,7 +136,10 @@ PUBLIC void SkipList_add(SkipList* this, unsigned int key, void* object)
             else
             {
                 //header->forward[i] = insertIdx;
-                insert->forward[i] = this->headerIdx;
+                if (level <= header->level)
+                   insert->forward[i] = this->headerIdx;
+                else
+                   insert->forward[i] = header->forward[i];
             }
         }
         if (update[0] == 0) this->headerIdx = insertIdx;
