@@ -84,20 +84,21 @@ PUBLIC void SkipList_add(SkipList* this, unsigned int key, void* object)
     unsigned int update[SKIPLIST_MAX_LEVEL];
     unsigned int currentNodeIdx = this->headerIdx;
     
-    for (int i = 0; i < SKIPLIST_MAX_LEVEL; i++) update[i] = 0;
+    unsigned int nextNodeIdx = this->headerIdx;
+    SkipNode* nextNode = Pool_read(this->pool, this->headerIdx);
 
+    for (int i = 0; i < SKIPLIST_MAX_LEVEL; i++) update[i] = 0;
+    
     for (int i = this->level - 1; i >= 0; i--)
     {
-        unsigned int nextNodeIdx = this->headerIdx;
-        SkipNode* nextNode = Pool_read(this->pool, this->headerIdx);
         while (nextNode->key < key)
         {
             update[i] = nextNodeIdx;
             nextNodeIdx = nextNode->forward[i];
             Pool_discardCache(this->pool, update[i]);
-            nextNode = Pool_read(this->pool, nextNode->forward[i]);         
+            nextNode = Pool_read(this->pool, nextNode->forward[i]);        
         }
-        Pool_discardCache(this->pool, nextNode->forward[i]);
+        //Pool_discardCache(this->pool, nextNode->forward[i]);
     }
 
     SkipNode * currentNode = Pool_read(this->pool, update[0]);
@@ -136,7 +137,7 @@ PUBLIC void SkipList_add(SkipList* this, unsigned int key, void* object)
             else
             {
                 //header->forward[i] = insertIdx;
-                if (level <= header->level)
+                if (level < header->level)
                    insert->forward[i] = this->headerIdx;
                 else
                    insert->forward[i] = header->forward[i];
@@ -144,6 +145,7 @@ PUBLIC void SkipList_add(SkipList* this, unsigned int key, void* object)
         }
         if (update[0] == 0) this->headerIdx = insertIdx;
         Pool_write(this->pool, insertIdx, insert);
+        Pool_discardCache(this->pool, this->headerIdx);
         this->nbObjects++;
 
         return 0;
