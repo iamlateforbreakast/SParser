@@ -15,3 +15,7 @@ src/ParseLib/Grammar2/Grammar2.parse.h
 doc/html/*
 doc/latex/*
 .vscode
+UT_Pool_01
+UT_SkipList_01
+UT_Debug_01
+UT_BTree
