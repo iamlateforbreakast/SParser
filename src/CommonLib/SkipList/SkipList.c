@@ -323,10 +323,11 @@ PUBLIC void SkipList_print(SkipList* this)
             printf(" Forward[%d]: %d", j, skipNode->forward[j]);
         }
         printf("\n");
-        currentNodeIdx = skipNode->forward[0];
         Pool_discardCache(this->pool, currentNodeIdx);
+        currentNodeIdx = skipNode->forward[0];
         skipNode = Pool_read(this->pool, skipNode->forward[0]);
     }
+    Pool_discardCache(this->pool, this->headerIdx);
     Pool_discardCache(this->pool, currentNodeIdx);
 }
  
