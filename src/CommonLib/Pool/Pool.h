@@ -35,4 +35,5 @@ PUBLIC unsigned int Pool_reportSizeInBytes(Pool* pool);
 PUBLIC unsigned int Pool_reportNbNodes(Pool* pool);
 PUBLIC void Pool_discardCache(Pool* pool, unsigned int idx);
 PUBLIC void Pool_discardAllCache(Pool* pool);
+PUBLIC unsigned int Pool_reportCacheUsed(Pool * pool);
 #endif /* _POOL_ */

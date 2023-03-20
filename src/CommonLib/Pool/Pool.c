@@ -29,7 +29,6 @@ PRIVATE void Pool_readInFile(Pool* pool, unsigned int idx, void* p);
 PRIVATE void Pool_readInMemory(Pool* pool, unsigned int idx, void* p);
 PRIVATE void Pool_writeInFile(Pool* pool, unsigned int idx, void* p);
 PRIVATE void Pool_writeInMemory(Pool* pool, unsigned int idx, void* p);
-PRIVATE unsigned int Pool_reportCacheUsed(Pool* pool);
 
 /**********************************************//**
   @private
@@ -811,7 +810,7 @@ PRIVATE void Pool_readInMemory(Pool* pool, unsigned int idx, void* p)
     Memory_copy(p, (char*)pool->pool + offset, pool->memChunkSize);
 }
 
-PRIVATE unsigned int Pool_reportCacheUsed(Pool* pool)
+PUBLIC unsigned int Pool_reportCacheUsed(Pool* pool)
 {
     unsigned int count=0;
     for (int i=0; i<CACHE_NB; i++)
