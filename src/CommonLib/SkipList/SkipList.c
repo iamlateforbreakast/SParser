@@ -13,7 +13,7 @@
 #include <stdlib.h>
 
 
-#define MAX_OBJECTS (20)
+#define MAX_OBJECTS (150)
 #define SKIPLIST_MAX_LEVEL (6)
 
 typedef struct SkipNode SkipNode;
@@ -35,6 +35,7 @@ typedef struct SkipList
 } SkipList;
 
 PRIVATE unsigned int SkipList_randLevel(SkipList* this);
+PRIVATE unsigned int SkipList_reportCache(SkipList* this);
 
 /**********************************************//**
   @brief SkipList_new
@@ -84,10 +85,13 @@ PUBLIC void SkipList_add(SkipList* this, unsigned int key, void* object)
     unsigned int update[SKIPLIST_MAX_LEVEL];
     unsigned int currentNodeIdx = this->headerIdx;
     
+    //printf("[Cache usage] Add start %d\n", SkipList_reportCache(this));
     for (int i = 0; i < SKIPLIST_MAX_LEVEL; i++) update[i] = 0;
 
     unsigned int nextNodeIdx = this->headerIdx;
+    
     SkipNode* nextNode = Pool_read(this->pool, this->headerIdx);
+    //unsigned int nextKey = nextNode->key;
 
     for (int i = this->level - 1; i >= 0; i--)
     {
@@ -99,6 +103,7 @@ PUBLIC void SkipList_add(SkipList* this, unsigned int key, void* object)
             nextNode = Pool_read(this->pool, nextNode->forward[i]);
         }
         Pool_discardCache(this->pool, nextNode->forward[i]);
+        Pool_discardCache(this->pool, nextNodeIdx);
         nextNode = Pool_read(this->pool, update[i]);
         nextNodeIdx = update[i];
     }
@@ -107,7 +112,7 @@ PUBLIC void SkipList_add(SkipList* this, unsigned int key, void* object)
     unsigned int currentKey = currentNode->key;
     Pool_discardCache(this->pool, update[0]);
 
-    printf("[Pool Usage]: %d\n", Pool_reportCacheUsed(this->pool));
+    //printf("[Pool Usage]: %d\n", Pool_reportCacheUsed(this->pool));
     if (key == currentKey)
     {
         currentNode->object = object;
@@ -151,10 +156,11 @@ PUBLIC void SkipList_add(SkipList* this, unsigned int key, void* object)
                 insert->forward[i] = this->headerIdx;
             }
         }
-        if (update[0] == 0) this->headerIdx = insertIdx;
         Pool_write(this->pool, this->headerIdx, header);
+        if (update[0] == 0) this->headerIdx = insertIdx;
         Pool_write(this->pool, insertIdx, insert);
         this->nbObjects++;
+        //printf("[Cache usage] Add end %d\n", SkipList_reportCache(this));
 
         return 0;
     }
@@ -337,4 +343,9 @@ PRIVATE unsigned int SkipList_randLevel(SkipList* this)
     while (rand() < RAND_MAX / 2 && level < SKIPLIST_MAX_LEVEL)
         level++;
     return level;
+}
+
+PRIVATE unsigned int SkipList_reportCache(SkipList* this)
+{
+    return Pool_reportCacheUsed(this->pool);
 }
