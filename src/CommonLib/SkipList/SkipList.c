@@ -13,7 +13,6 @@
 #include <stdlib.h>
 
 
-#define MAX_OBJECTS (150)
 #define SKIPLIST_MAX_LEVEL (6)
 
 typedef struct SkipNode SkipNode;
@@ -30,6 +29,7 @@ typedef struct SkipList
 {
     unsigned int level;
     unsigned int nbObjects;
+    unsigned int maxObjectNb;
     Pool* pool;
     unsigned int headerIdx;
 } SkipList;
@@ -42,14 +42,16 @@ PRIVATE unsigned int SkipList_reportCache(SkipList* this);
   @param[in] none
   @return New instance of class SkipList.
 **************************************************/
-PUBLIC SkipList* SkipList_new()
+PUBLIC SkipList* SkipList_new(unsigned int maxObjectNb)
 {
     SkipList* newSkipList = 0;
 
     newSkipList = (SkipList*)malloc(sizeof(SkipList));
-    newSkipList->pool = Pool_new(MAX_OBJECTS, sizeof(SkipNode));
+    newSkipList->maxObjectNb = maxObjectNb;
+    newSkipList->pool = Pool_new(newSkipList->maxObjectNb, sizeof(SkipNode));
     newSkipList->level = 1;
     newSkipList->nbObjects = 0;
+
     SkipNode* skipNode = Pool_alloc(newSkipList->pool, &newSkipList->headerIdx);
     for (int i = 0; i < SKIPLIST_MAX_LEVEL; i++)
     {
@@ -114,7 +116,7 @@ PUBLIC void SkipList_add(SkipList* this, unsigned int key, void* object)
     if (key == currentKey)
     {
         currentNode->object = object;
-        return 0;
+        return;
     }
     else
     {
@@ -160,7 +162,7 @@ PUBLIC void SkipList_add(SkipList* this, unsigned int key, void* object)
         this->nbObjects++;
         //printf("[Cache usage] Add end %d\n", SkipList_reportCache(this));
 
-        return 0;
+        return;
     }
 }
 
