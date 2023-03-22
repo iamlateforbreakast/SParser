@@ -7,7 +7,7 @@
 
 #include "SkipList.h"
 
-#define NB_OBJECTS (10)
+#define NB_OBJECTS (100)
 
 SkipList* testList;
 
