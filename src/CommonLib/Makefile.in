@@ -17,7 +17,8 @@ SOURCES = \
 	./BTree/Node.c \
 	./SkipList/SkipList.c \
 	./Pool/Pool.c \
-	./Error/Error.c
+	./Error/Error.c \
+	./Time/Time.c
 
 HEADERS = ./Types/Types.h ./Object/Class.h $(SOURCES:.c=.h)
 
