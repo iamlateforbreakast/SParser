@@ -27,6 +27,9 @@ typedef struct SkipNode
 
 typedef struct SkipList
 {
+    unsigned int (*isEqual)(unsigned int, unsigned int);
+    unsigned int (*isGreaterOrEqual)(unsigned int, unsigned int);
+    unsigned int (*isGreater)(unsigned int, unsigned int);
     unsigned int level;
     unsigned int nbObjects;
     unsigned int maxObjectNb;
@@ -36,6 +39,9 @@ typedef struct SkipList
 
 PRIVATE unsigned int SkipList_randLevel(SkipList* this);
 PRIVATE unsigned int SkipList_reportCache(SkipList* this);
+PRIVATE unsigned int myGreateOrEqual(unsigned int k1, unsigned int k2);
+PRIVATE unsigned int myGreater(unsigned int k1, unsigned int k2);
+PRIVATE unsigned int myEqual(unsigned int k1, unsigned int k2);
 
 /**********************************************//**
   @brief SkipList_new
@@ -51,6 +57,9 @@ PUBLIC SkipList* SkipList_new(unsigned int maxObjectNb)
     newSkipList->pool = Pool_new(newSkipList->maxObjectNb, sizeof(SkipNode));
     newSkipList->level = 1;
     newSkipList->nbObjects = 0;
+    newSkipList->isGreaterOrEqual = &myGreateOrEqual;
+    newSkipList->isGreater = &myGreater;
+    newSkipList->isEqual = &myEqual;
 
     SkipNode* skipNode = Pool_alloc(newSkipList->pool, &newSkipList->headerIdx);
     for (int i = 0; i < SKIPLIST_MAX_LEVEL; i++)
@@ -95,7 +104,7 @@ PUBLIC void SkipList_add(SkipList* this, unsigned int key, void* object)
 
     for (int i = this->level - 1; i >= 0; i--)
     {
-        while (nextNode->key < key)
+        while ((*this->isGreater)(nextNode->key,key))
         {
             update[i] = nextNodeIdx;
             nextNodeIdx = nextNode->forward[i];
@@ -384,4 +393,19 @@ PRIVATE unsigned int SkipList_randLevel(SkipList* this)
 PRIVATE unsigned int SkipList_reportCache(SkipList* this)
 {
     return Pool_reportCacheUsed(this->pool);
+}
+
+PRIVATE unsigned int myGreateOrEqual(unsigned int k1, unsigned int k2)
+{
+    return (k1 <= k2);
+}
+
+PRIVATE unsigned int myGreater(unsigned int k1, unsigned int k2)
+{
+    return (k1 < k2);
+}
+
+PRIVATE unsigned int myEqual(unsigned int k1, unsigned int k2)
+{
+    return (k1 == k2);
 }
