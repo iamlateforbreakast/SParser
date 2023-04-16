@@ -1,9 +1,7 @@
 /**********************************************//** 
-  @file main.c
+  \file main.c
      
-  @brief This file initialises:
-  1) The OptionMgr object
-  2) The FileMgr object
+  \brief Contains the main() function
         
   This file contains only one function main() 
   which initialises the OptionMgr and FileMgr objects.
@@ -14,6 +12,7 @@
 #include "FileMgr.h"
 #include "TimeMgr.h"
 #include "Error.h"
+#include "Debug.h"
 #include "SParse.h"
 #include "Memory.h"
 #include "ObjectMgr.h"
@@ -22,7 +21,7 @@
 #include <signal.h>
 
 /**********************************************//** 
-  @private
+  \private
 **************************************************/
 struct sigaction action;
 
@@ -31,8 +30,14 @@ PRIVATE void start_application(String * inputDir, String * dbName);
 PRIVATE void print_usage();
 
 /**********************************************//** 
-  @brief Inital entry point for SParse. This function creates
-  @public
+  \brief Inital entry point for the application.
+  \param argc Number of arguments
+  \param argv Array of arguments
+  \public
+
+  The main function:
+  1) Reads the options from command line or file
+  2) Starts the application for a DB name and an input file directory.
 **************************************************/
 PUBLIC int main(const int argc, const char** argv)
 {
@@ -87,8 +92,16 @@ PUBLIC int main(const int argc, const char** argv)
 }
 
 /**********************************************//** 
-  @brief TBD
-  @public
+  \brief Starts the application
+  \public
+  \param inputDir directory containing the files to parse
+  \param dbName DB file to output
+  \return
+
+  This functions starts the main application.\n
+  1) Creates a FileMgr object for input directory\n
+  2) Creates a SParse object\n
+  3) Measure the execution time\n
 **************************************************/
 PRIVATE void start_application(String * inputDir, String * dbName)
 {
@@ -121,23 +134,30 @@ PRIVATE void start_application(String * inputDir, String * dbName)
 }
 
 /**********************************************//** 
-  @brief TBD
-  @public
+  \brief Prints the application help
+  \private
+
+  Prints the usage information for the aplication.
 **************************************************/
 PRIVATE void print_usage()
 {
-  printf("Usage: sparse [OPTION]\n");
-  printf("   Run SParse in the current directory.\n");
-  printf("\n");
-  printf("-o\t\tSQLite database Name\n");
-  printf("-d\t\tInput directory\n");
-  printf("-c\t\tConfiguration file name\n");
-  printf("-help\t\tDisplay this help and exit\n");
+  PRINT(("Usage: sparse [OPTION]\n"));
+  PRINT(("   Run SParse in the current directory.\n"));
+  PRINT(("\n"));
+  PRINT(("-o\t\tSQLite database Name\n"));
+  PRINT(("-d\t\tInput directory\n"));
+  PRINT(("-c\t\tConfiguration file name\n"));
+  PRINT(("-help\t\tDisplay this help and exit\n"));
 }
 
 /**********************************************//** 
-  @brief TBD
-  @public
+  \brief Display and exit when signal is received
+  \param signum TBC
+  \param info TBC
+  \param ptr TBC
+  \private
+
+  This function displays a signal and exit the application.
 **************************************************/
 PRIVATE void sighandler(int signum, siginfo_t *info, void *ptr) 
 { 

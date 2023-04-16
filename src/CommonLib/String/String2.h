@@ -19,4 +19,5 @@ PUBLIC unsigned int String_prepend(String * this, const char * prefix);
 PUBLIC unsigned int String_isEqual(String * this, String * compared);
 PUBLIC String * String_subString(String * this, unsigned int idx, unsigned int length);
 PUBLIC unsigned int String_matchWildcard(String * this, const char * wildcard);
+PUBLIC int String_toInt(String* this);
 #endif /* _STRING2_H_ */
