@@ -49,6 +49,7 @@ PRIVATE unsigned int myEqual(unsigned int k1, unsigned int k2);
   @return New instance of class SkipList.
 **************************************************/
 PUBLIC SkipList* SkipList_new(unsigned int maxObjectNb)
+// PUBLIC SkipList * SkipList_new(Storage * storage)
 {
     SkipList* newSkipList = 0;
 
@@ -75,7 +76,7 @@ PUBLIC SkipList* SkipList_new(unsigned int maxObjectNb)
 }
 
 /**********************************************//**
-  @brief SkipList_new
+  @brief SkipList_free
   @param[in] Instance to destroy
   @return None
 **************************************************/
