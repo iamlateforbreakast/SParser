@@ -111,6 +111,13 @@ unsigned int main(void)
 	printf("Search CPU time %f\n", cpu_time1 - cpu_time0);
 	printf("Search Wall time %f\n", wall_time1 - wall_time0);
 
+    for (int i = 0; i< NB_ITEMS; i++)
+	{
+		void * ptrRemoved = BTree_remove(testTree, keys[i]);
+		printf("test item = %i %x %x\n", i, ptrRemoved, &items[i]);
+		BTree_print(testTree);
+	}
+
 	BTree_free(testTree);
 
 	return 0;

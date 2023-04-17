@@ -7,7 +7,7 @@
 
 #include "SkipList.h"
 
-#define NB_OBJECTS (100)
+#define NB_OBJECTS (10000)
 
 SkipList* testList;
 
@@ -83,9 +83,9 @@ int step5()
 
 int main()
 {
-    step1();
-    step2();
-    step3();
-    step4();
+    //step1();
+    //step2();
+    //step3();
+    //step4();
     step5();
 }
