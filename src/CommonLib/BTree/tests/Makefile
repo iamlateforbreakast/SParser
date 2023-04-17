@@ -1,9 +1,9 @@
-all: UT_BTree UT_Pool
+all: clean default
 
-UT_BTree: UT_BTree.c ../BTree.c ../BTree.h ../Node.c ../Node.h ../Pool.c ../Pool.h
+default: UT_BTree.c ../BTree.c ../BTree.h ../Node.c ../Node.h
 	gcc -g UT_BTree.c ../BTree.c -I../../include -I.. ../../libCommon.a -o UT_Btree
 
-UT_Pool: UT_Pool.c ../Pool.c ../Pool.h
-	gcc -g UT_Pool.c ../Pool.c -I../../include -I.. ../../libCommon.a -o UT_Pool
 clean:
-	rm -rf UT_BTree UT_Pool ../*.o
+	rm -rf UT_BTree ../*.o
+
+.PHONY: all clean test default

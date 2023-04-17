@@ -31,15 +31,15 @@ double get_cpu_time() {
 #else
 #include <time.h>
 #include <sys/time.h>
-double get_wall_time() {
+long double get_wall_time() {
 	struct timeval time;
 	if (gettimeofday(&time, NULL)) {
 		//  Handle error
 		return 0;
 	}
-	return (double)time.tv_sec + (double)time.tv_usec * .000001;
+	return (long double)time.tv_sec * 1000000 + (long double)time.tv_usec;
 }
-double get_cpu_time() {
-	return (double)clock() / CLOCKS_PER_SEC;
+long double get_cpu_time() {
+	return (long double)clock() / CLOCKS_PER_SEC;
 }
 #endif
