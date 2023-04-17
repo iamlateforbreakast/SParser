@@ -16,7 +16,7 @@
 * input: number of total beamweight ranges to store in tree
 * output: A fully allocated beamweihgt tree
 *********************************************************************************/
-BTree * BTree_new()
+BTree * BTree_new(unsigned int order)
 {
 	BTree* tree;
 
