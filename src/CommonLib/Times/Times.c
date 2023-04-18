@@ -37,7 +37,7 @@ long double get_wall_time() {
 		//  Handle error
 		return 0;
 	}
-	return (long double)time.tv_sec * 1000000 + (long double)time.tv_usec;
+	return (long double)time.tv_sec + (long double)time.tv_usec/1000000;
 }
 long double get_cpu_time() {
 	return (long double)clock() / CLOCKS_PER_SEC;
