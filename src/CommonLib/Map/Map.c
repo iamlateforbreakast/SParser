@@ -40,7 +40,7 @@ PRIVATE Class mapClass =
   .f_new = 0,
   .f_delete = (Destructor)&Map_delete,
   .f_copy = (Copy_Operator)&Map_copy,
-  .f_equal = 0,
+  .f_comp = 0,
   .f_print = 0
 };
 
@@ -211,7 +211,7 @@ PRIVATE MapEntry * Map_findEntry(Map* this, String * s)
       n = (MapEntry*)List_getNext(this->htable[key]);
       while (n!= 0)
       {
-        if (String_isEqual(MapEntry_getString(n), s))
+        if (String_compare(MapEntry_getString(n), s)==0)
         {
           isFound = 1;
           result = n;

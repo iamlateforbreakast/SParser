@@ -19,6 +19,11 @@ PRIVATE unsigned int Memory_allocRequestId = 0;
 PRIVATE unsigned int Memory_freeRequestId = 0;
 PRIVATE unsigned int Memory_nbBytesAllocated = 0;
 
+/**********************************************//** 
+  @brief TBD
+  @public
+  @memberof Memory
+**************************************************/
 PUBLIC void* Memory_alloc(unsigned int nbBytes)
 {    
   void* p = 0;
@@ -34,6 +39,11 @@ PUBLIC void* Memory_alloc(unsigned int nbBytes)
   return p;
 }
 
+/**********************************************//** 
+  @brief TBD
+  @public
+  @memberof Memory
+**************************************************/
 PUBLIC void Memory_free(void* pointer, unsigned int nbBytes)
 {
   if (pointer!=0)
@@ -50,6 +60,11 @@ PUBLIC void Memory_free(void* pointer, unsigned int nbBytes)
     }
 }
 
+/**********************************************//** 
+  @brief TBD
+  @public
+  @memberof Memory
+**************************************************/
 PUBLIC void * Memory_realloc(void * pointer, unsigned int prevSizeBytes, unsigned int newSizeBytes)
 {
   if (pointer!=0)
@@ -61,6 +76,11 @@ PUBLIC void * Memory_realloc(void * pointer, unsigned int prevSizeBytes, unsigne
   return pointer;
 }
 
+/**********************************************//** 
+  @brief TBD
+  @public
+  @memberof Memory
+**************************************************/
 PUBLIC void Memory_set(void * pointer, unsigned char val, unsigned int nbBytes)
 {
   if (pointer!=0)
@@ -69,6 +89,11 @@ PUBLIC void Memory_set(void * pointer, unsigned char val, unsigned int nbBytes)
   }
 }
 
+/**********************************************//** 
+  @brief TBD
+  @public
+  @memberof Memory
+**************************************************/
 PUBLIC void Memory_copy(void * pointer, void * src, unsigned int nbBytes)
 {
   if ((pointer!=0) && (src!=0))
@@ -77,7 +102,12 @@ PUBLIC void Memory_copy(void * pointer, void * src, unsigned int nbBytes)
   }
 }
 
-PUBLIC unsigned int Memory_ncmp(void * pointer, void * compared, unsigned int nbBytes)
+/**********************************************//** 
+  @brief TBD
+  @public
+  @memberof Memory
+**************************************************/
+PUBLIC int Memory_ncmp(void * pointer, void * compared, unsigned int nbBytes)
 {
   unsigned int result = 0;
   
@@ -86,20 +116,33 @@ PUBLIC unsigned int Memory_ncmp(void * pointer, void * compared, unsigned int nb
   return result;
 }
 
-PUBLIC unsigned int Memory_cmp(void * pointer, void * compared)
+/**********************************************//** 
+  @brief TBD
+  @public
+  @memberof Memory
+**************************************************/
+PUBLIC int Memory_cmp(void * pointer, void * compared)
 {
-  unsigned int result = 0;
   
-  if (strcmp(pointer, compared)==0) result=1;
+  return strcmp(pointer, compared);
   
-  return result;
 }
 
+/**********************************************//** 
+  @brief TBD
+  @public
+  @memberof Memory
+**************************************************/
 PUBLIC unsigned int Memory_len(const void * pointer)
 {
   return strlen(pointer);
 }
 
+/**********************************************//** 
+  @brief TBD
+  @public
+  @memberof Memory
+**************************************************/
 PUBLIC void Memory_report()
 {
   Error_new(ERROR_INFO, "Memory Usage Report:\n"

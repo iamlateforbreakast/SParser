@@ -82,10 +82,15 @@ PUBLIC Object * Object_copy(Object * this)
   @memberof Object
   @return 1 if equal, 0 else.
 **************************************************/
-PUBLIC unsigned int Object_isEqual(Object * this, Object * compared)
+PUBLIC int Object_comp(Object * this, Object * compared)
 {
-  unsigned int result = 0;
+  int result = 0;
   
+  if ((this!=0) && (this->class->f_comp!=0))
+  {
+    return this->class->f_comp(this, compared);
+  }
+  // TBC: Need an error
   return result;
 }
 

@@ -10,7 +10,7 @@ struct Class
   Constructor f_new;
   Destructor f_delete;
   Copy_Operator f_copy;
-  Equal_Operator f_equal;
+  Comp_Operator f_comp;
   Printer f_print;
 };
 

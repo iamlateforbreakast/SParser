@@ -47,7 +47,7 @@ PRIVATE Class listClass =
   .f_new = 0,
   .f_delete = (Destructor)&List_delete,
   .f_copy = (Copy_Operator)&List_copy,
-  .f_equal = (Equal_Operator)&List_isEqual,
+  .f_comp = (Comp_Operator)&List_compare,
   .f_print = (Printer)&List_print
 };
 
@@ -135,7 +135,7 @@ PUBLIC List* List_copy(List* this)
   @memberof List
   @return 0 if different, 1 if equal.
 **************************************************/
-PUBLIC unsigned int List_isEqual(List * this, List * compared)
+PUBLIC int List_compare(List * this, List * compared)
 {
   unsigned int result = 0;
 

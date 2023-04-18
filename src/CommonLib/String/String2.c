@@ -31,7 +31,7 @@ PRIVATE Class stringClass =
   .f_new = NULL,
   .f_delete = (Destructor)&String_delete,
   .f_copy = (Copy_Operator)&String_copy,
-  .f_equal = (Equal_Operator)NULL,
+  .f_comp = (Comp_Operator)&String_compare,
   .f_print = (Printer)NULL
 };
 
@@ -137,9 +137,9 @@ PUBLIC String * String_getRef(String * this)
   @public
   @memberof String
 **************************************************/
-PUBLIC unsigned int String_isEqual(String * this, String * compared)
+PUBLIC int String_compare(String * this, String * compared)
 {
-  unsigned int result = 0;
+  int result = 0;
   
   if (this->length!=compared->length) return 0;
   result = Memory_ncmp(this->buffer, compared->buffer, this->length);

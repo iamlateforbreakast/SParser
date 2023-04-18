@@ -21,7 +21,7 @@ struct Object
 typedef struct Object * (*Constructor)();
 typedef void (*Destructor)(struct Object *);
 typedef struct Object * (*Copy_Operator)(struct Object *);
-typedef unsigned int (*Equal_Operator)(struct Object *, struct Object *);
+typedef int (*Comp_Operator)(struct Object *, struct Object *);
 typedef char * (*Printer)(struct Object *);
 
 

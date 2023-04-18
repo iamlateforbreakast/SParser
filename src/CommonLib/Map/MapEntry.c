@@ -23,7 +23,7 @@ PRIVATE Class mapEntryClass =
   .f_new = 0,
   .f_delete = (Destructor)&MapEntry_delete,
   .f_copy = (Copy_Operator)&MapEntry_copy,
-  .f_equal = (Equal_Operator)0,
+  .f_comp = (Comp_Operator)0,
   .f_print = (Printer)0
 };
 
