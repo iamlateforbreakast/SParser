@@ -29,26 +29,24 @@ int step2()
 {
   TimeMgr * testTimeMgr = 0;
   String * testTimerName = 0;
-  int i = 0;
 
   testTimerName = String_new("timer1");
 
   testTimeMgr = TimeMgr_getRef();
 
-  for (i=0; i<10; i++)
+  for (int i=0; i<10; i++)
   {
     TimeMgr_latchTime(testTimeMgr, testTimerName);
 
     sleep(1);
-
-    TimeMgr_latchTime(testTimeMgr, testTimerName);
   }
+  TimeMgr_latchTime(testTimeMgr, testTimerName);  
 
   TimeMgr_report(testTimeMgr);
 
   TimeMgr_delete(testTimeMgr);
 
-  String_delete(testTimerName);
+  //String_delete(testTimerName);
 
   Memory_report();
 

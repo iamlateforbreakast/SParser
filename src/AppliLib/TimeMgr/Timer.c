@@ -156,18 +156,20 @@ PUBLIC void Timer_latchTime(Timer * this)
   
   if (this->state == 0)
   {
+    this->nbCalls++;
     this->state = 1;
     this->wallLatchedTimeS = wallTimeS;
     this->cpuLatchedTimeS = cpuTimeS;
     this->wallDurationS = 0;
     this->cpuDurationS = 0;
-    //printf("Timer.c: %Lf\n", get_wall_time());
+    printf("Timer.c: %Lf\n", this->cpuLatchedTimeS);
+    printf("Timer.c: %Lf\n", get_wall_time());
   }
   else
-  {
-    this->state = 0;
+  { 
     this->nbCalls++;
-    //printf("Timer.c: %Lf\n", this->cpuLatchedTimeS);
+    printf("Timer.c: %Lf\n", this->cpuLatchedTimeS);
+    printf("Timer.c: %Lf\n", get_wall_time());
     this->wallDurationS = this->wallDurationS + wallTimeS - this->wallLatchedTimeS;
     this->cpuDurationS = this->cpuDurationS + cpuTimeS - this->cpuLatchedTimeS;
     this->wallLatchedTimeS = wallTimeS;
