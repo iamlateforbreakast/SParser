@@ -157,6 +157,12 @@ PUBLIC unsigned int Map_find(Map* this, String* s, void** p)
   if (n!=0)
   {
     *p = (MapEntry_getItem(n));
+    result = 1;
+  }
+  else
+  {
+    *p = 0;
+    result = 0;
   }
   
   return result;

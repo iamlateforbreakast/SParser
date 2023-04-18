@@ -2,6 +2,7 @@
 
 #include "TimeMgr.h"
 #include "Timer.h"
+#include "Times.h"
 #include "Memory.h"
 #include "Class.h"
 #include "Object.h"
@@ -17,8 +18,10 @@ struct Timer
   String * name;
   unsigned int state;
   unsigned int nbCalls;
-  double durationS;
-  double latchedTime;
+  long double cpuDurationS;
+  long double wallDurationS;
+  long double cpuLatchedTimeS;
+  long double wallLatchedTimeS;
 };
 
 /**********************************************//**
@@ -49,9 +52,11 @@ PUBLIC Timer * Timer_new(String * name)
   this->name = String_getRef(name);
   this->state = 0;
   this->nbCalls = 0;
-  this->durationS = (float)0.0;
-  this->latchedTime = (float)0.0;
-  
+  this->wallDurationS = (long double)0.0;
+  this->wallLatchedTimeS = (long double)0.0;
+  this->cpuDurationS = (long double)0.0;
+  this->cpuLatchedTimeS = (long double)0.0;
+
   return this;
 }
 
@@ -89,8 +94,12 @@ PUBLIC Timer * Timer_copy(Timer * this)
   result = Timer_new(this->name);
   result->state = this->state;
   result->nbCalls = this->nbCalls;
-  result->durationS = this->durationS;
-  result->latchedTime = this->latchedTime;
+  result->wallDurationS = this->wallDurationS;
+  result->wallLatchedTimeS = this->wallLatchedTimeS;
+
+  result->cpuDurationS = this->cpuDurationS;
+  result->cpuLatchedTimeS = this->cpuLatchedTimeS;
+
   result->name = String_getRef(this->name);
   
   return result;
@@ -113,20 +122,25 @@ PUBLIC unsigned int Timer_isEqual(Timer * this, Timer * compared)
   @public
   @memberof Timer
 **************************************************/
-PUBLIC char * Timer_print(Timer * this)
+PUBLIC void Timer_print(Timer * this)
 {
-  char * result = 0;
   unsigned int size = 0;
-  const char * format = "Timer %s : NbCalls %d Total %lfs Avg. %lfs";
-  double average_duration = 0;
-  
-  if (this->nbCalls>0) average_duration = this->durationS/this->nbCalls;
-  
-  size = snprintf(0, 0, format, String_getBuffer(this->name), this->nbCalls, this->durationS, average_duration);
-  result = Memory_alloc(size);
-  snprintf(result, size, format, String_getBuffer(this->name), this->nbCalls, this->durationS, average_duration);
-  
-  return result;
+  const char * format = "Timer %s : NbCalls %d\n"
+                        "\tWall Total %Lfs Wall Avg. %Lfs\n"
+                        "\tCPU Total %Lf CPU Avg. %Lfs\n";
+  long double wallAverageDuration = 0.0;
+  long double cpuAverageDuration = 0.0;
+
+  if (this->nbCalls>0) 
+  {
+    wallAverageDuration = this->wallDurationS/this->nbCalls;
+    cpuAverageDuration = this->cpuDurationS/this->nbCalls;
+  }
+  //size = snprintf(0, 0, format, String_getBuffer(this->name), this->nbCalls, this->durationS, average_duration);
+  //result = Memory_alloc(size);
+  printf(format, String_getBuffer(this->name), this->nbCalls, 
+         this->wallDurationS, wallAverageDuration,
+         this->cpuDurationS, cpuAverageDuration);
 }
 
 /**********************************************//** 
@@ -134,20 +148,29 @@ PUBLIC char * Timer_print(Timer * this)
   @public
   @memberof Timer
 **************************************************/
-PUBLIC void Timer_latchTime(Timer * this, double timeS)
-{ 
+PUBLIC void Timer_latchTime(Timer * this)
+{
+   
+  long double wallTimeS = get_wall_time();
+  long double cpuTimeS = get_cpu_time();
+  
   if (this->state == 0)
   {
     this->state = 1;
-    this->latchedTime = timeS;
-    //printf("Timer.c: %f\n", timeS);
+    this->wallLatchedTimeS = wallTimeS;
+    this->cpuLatchedTimeS = cpuTimeS;
+    this->wallDurationS = 0;
+    this->cpuDurationS = 0;
+    //printf("Timer.c: %Lf\n", get_wall_time());
   }
   else
   {
     this->state = 0;
     this->nbCalls++;
-    //printf("Timer.c: %f\n", timeS);
-    this->durationS = this->durationS + timeS - this->latchedTime;
-    this->latchedTime = timeS;
+    //printf("Timer.c: %Lf\n", this->cpuLatchedTimeS);
+    this->wallDurationS = this->wallDurationS + wallTimeS - this->wallLatchedTimeS;
+    this->cpuDurationS = this->cpuDurationS + cpuTimeS - this->cpuLatchedTimeS;
+    this->wallLatchedTimeS = wallTimeS;
+    this->cpuDurationS = cpuTimeS;
   }
 }
