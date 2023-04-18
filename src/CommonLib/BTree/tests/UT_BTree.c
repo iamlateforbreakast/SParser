@@ -76,9 +76,9 @@ unsigned int main(void)
 	}
 
 	testTree = BTree_new(3);
-	printf("Btree size of pool in   bytes: %d\n", BTree_reportSizeInBytes(testTree));
-	printf("Btree size of pool in Kibytes: %d\n", BTree_reportSizeInBytes(testTree) / 1024);
-	printf("Btree size of pool in Mibytes: %d\n", BTree_reportSizeInBytes(testTree) / (1024 * 1024));
+	//printf("Btree size of pool in   bytes: %d\n", BTree_reportSizeInBytes(testTree));
+	//printf("Btree size of pool in Kibytes: %d\n", BTree_reportSizeInBytes(testTree) / 1024);
+	//printf("Btree size of pool in Mibytes: %d\n", BTree_reportSizeInBytes(testTree) / (1024 * 1024));
 	//BTree_print(testTree);
 
 	double cpu_time0 = get_cpu_time();
