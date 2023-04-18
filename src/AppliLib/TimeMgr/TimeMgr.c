@@ -7,8 +7,10 @@
 **************************************************/
 
 #include "TimeMgr.h"
+#include "Timer.h"
 #include "Class.h"
 #include "Object.h"
+#include "Map.h"
 
 /**********************************************//**
   @class TimeMgr
@@ -16,6 +18,7 @@
 struct TimeMgr
 {
   Object object;
+  Map * timers;
 };
 
 /**********************************************//**
@@ -43,6 +46,8 @@ PRIVATE TimeMgr * TimeMgr_new()
   TimeMgr * this = 0;
 
   this = (TimeMgr*)Object_new(sizeof(TimeMgr),&timeMgrClass);
+ 
+  this->timers = Map_new();
 
   return this;
 }
@@ -57,6 +62,7 @@ PUBLIC void TimeMgr_delete(TimeMgr * this)
 {
   if (this != 0)
   {
+    Map_delete(this->timers);
     if (this->object.refCount==1)
     {
       Object_delete(&this->object);
@@ -110,8 +116,23 @@ PUBLIC TimeMgr * TimeMgr_getRef()
 **************************************************/
 PUBLIC void TimeMgr_latchTime(TimeMgr * this, String * s)
 {
+  Timer * timer = 0;
+  
+  Map_find(this->timers, s, (void**)&timer);
+  if (timer)
+  {
+    Timer_latchTime(timer);
+  }
+  else
+  {
+    timer = Timer_new();
+    Map_insert(this->timers, s, (void**)timer);
+  }
 }
 
 PUBLIC void TimeMgr_report(TimeMgr * this)
 {
+  List * timers = Map_getAll(this->timers);
+
+  List_forEach(timers, &Timer_print);
 }
