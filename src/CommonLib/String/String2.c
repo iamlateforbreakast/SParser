@@ -133,17 +133,25 @@ PUBLIC String * String_getRef(String * this)
 }
 
 /**********************************************//** 
-  @brief TBD
+  @brief Compare this String with another String
   @public
+  @param [in]     compared: String to compare
   @memberof String
+  @return 0 if S1=S2, negative if S1<S2, positive if S1>S2
 **************************************************/
 PUBLIC int String_compare(String * this, String * compared)
-{
+{ 
+  int i = 0;
   int result = 0;
-  
-  if (this->length!=compared->length) return 0;
-  result = Memory_ncmp(this->buffer, compared->buffer, this->length);
-  
+
+  while ((i < (int)this->length)&&(i < (int)compared->length))
+  {
+     result = (int)this->buffer[i] - (int)compared->buffer[i];
+     if (result != 0) break;
+     i++;
+  }
+  if (result == 0) result = (int)this->length - (int)compared->length;
+  //result = Memory_ncmp(this->buffer, compared->buffer, this->length);
   return result;
 }
 
@@ -189,6 +197,11 @@ PUBLIC int String_toInt(String* this)
   return result;
 }
 
+/**********************************************//**
+  @brief TBD
+  @public
+  @memberof String
+**************************************************/
 PUBLIC unsigned int String_getLength(String * this)
 {
   if (this!=0)
@@ -198,6 +211,11 @@ PUBLIC unsigned int String_getLength(String * this)
   return 0;
 }
 
+/**********************************************//**
+  @brief TBD
+  @public
+  @memberof String
+**************************************************/
 PUBLIC char * String_getBuffer(String * this)
 {
   if (this!=0)
@@ -207,6 +225,11 @@ PUBLIC char * String_getBuffer(String * this)
   return 0;
 }
 
+/**********************************************//**
+  @brief TBD
+  @public
+  @memberof String
+**************************************************/
 PUBLIC void String_setBuffer(String * this, char * buffer)
 {
   if (this!=0)
@@ -221,6 +244,11 @@ PUBLIC void String_setBuffer(String * this, char * buffer)
   }
 }
 
+/**********************************************//**
+  @brief TBD
+  @public
+  @memberof String
+**************************************************/
 PUBLIC unsigned int String_isContained(String * this, String * s2)
 {
   unsigned int result = 0;
