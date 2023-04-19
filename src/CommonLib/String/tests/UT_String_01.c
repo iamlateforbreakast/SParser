@@ -1,6 +1,7 @@
 #include "ObjectMgr.h"
 #include "Object.h"
 #include "String2.h"
+#include <stdio.h>
 
 int step1()
 {
@@ -88,12 +89,33 @@ int step4()
   return 0;
 }
 
+int step5()
+{
+    String* testString = String_new("TestString");
+    String* compareString = 0;
+
+    char* compareText[] = {"AestString", "U", "test", "TestString5", "TestString"};
+
+    int comp = 0;
+
+    for(int i = 0; i < 5; i++)
+    {
+        compareString = String_new(compareText[i]);
+        comp = String_compare(testString, compareString);
+        printf("Compare %s with %s result = %d\n", String_getBuffer(testString), String_getBuffer(compareString), comp);
+        String_delete(compareString);
+    }
+
+    return 0;
+}
+
 int main()
 {
   step1();
   step2();
   step3();
   step4();
-  
+  step5();
+
   return 0;
 }
