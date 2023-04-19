@@ -1,9 +1,35 @@
 #include <time.h>
+#include <stdio.h>
 #include <errno.h>
 #include "Times.h"
 
 #define MAX_LOOP (10)
 
+#ifdef _WIN32
+#include <windows.h>	/* WinAPI */
+
+/* Windows sleep in 100ns units */
+int msleep(long msec) {
+	/* Declarations */
+	HANDLE timer;	/* Timer handle */
+	LARGE_INTEGER li;	/* Time definition */
+	/* Create timer */
+	if (!(timer = CreateWaitableTimer(NULL, 1, NULL)))
+		return 0;
+	/* Set timer properties */
+	li.QuadPart = -10000LL * msec;
+	if (!SetWaitableTimer(timer, &li, 0, NULL, NULL, 0)) {
+		CloseHandle(timer);
+		return 0;
+	}
+	/* Start & wait for timer */
+	WaitForSingleObject(timer, 0xFFFFFFFF);
+	/* Clean resources */
+	CloseHandle(timer);
+	/* Slept without problems */
+	return 1;
+}
+#else
 int msleep(long msec)
 {
     struct timespec ts;
@@ -24,6 +50,7 @@ int msleep(long msec)
 
     return res;
 }
+#endif
 
 int step1()
 {
