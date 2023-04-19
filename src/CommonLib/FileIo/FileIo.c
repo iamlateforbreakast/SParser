@@ -28,7 +28,7 @@ PUBLIC void FileIo_openFile(FileIo * this, String * fullFileName)
 #ifdef _WIN32
 	errno_t err = fopen_s(&this->f, String_getBuffer(fullFileName), "rb+");
 #else
-	this->f = fopen(String_getBuffer(fullFileName), "rb"));
+	this->f = fopen(String_getBuffer(fullFileName), "rb");
 #endif
 	if (this->f)
 	{
