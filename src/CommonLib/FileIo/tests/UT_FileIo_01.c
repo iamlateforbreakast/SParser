@@ -6,7 +6,7 @@ FileIo * f = 0;
 FileIo * d = 0;
 const char* testFileName[5] = { "test1.file","test2.file","test3.file","test4.file","test5.file" };
 char testBuffer[BUFFER_SIZE];
-char* readBuffer;
+char readBuffer[BUFFER_SIZE];
 
 int step1()
 {
@@ -16,14 +16,23 @@ int step1()
 
 int step2()
 {
-  FileIo_write(f, testBuffer, BUFFER_SIZE);
+  FileIo_createFile(f, "test.file");
+  FileIo_write(f, &testBuffer, BUFFER_SIZE);
   FileIo_delete(f);
 }
 
 int step3()
 {
+  int isOK = 1;
   f = FileIo_new(testFileName);
-  FileIo_read(f, readBuffer, BUFFER_SIZE);
+  FileIo_openFile(f, "test.file");
+  FileIo_read(f, &readBuffer, BUFFER_SIZE);
+  for (int i = 0; i < 10; i++)
+  {
+	  isOK = isOK && (testBuffer[i] == readBuffer[i]);
+	  printf("%d %d\n", testBuffer[i], readBuffer[i]);
+  }
+  printf("%d\n", isOK);
   FileIo_delete(f);
 }
 
@@ -38,6 +47,12 @@ int step5()
 	//d = FileIo_newDir("testDir");
 }
 
+int step6()
+{
+	FileIo* f = 0;
+	FileIo_listDir(f);
+}
+
 void main()
 {
 	for (int i = 0; i < BUFFER_SIZE; i++)
@@ -49,4 +64,6 @@ void main()
 	step2();
 	step3();
 	step4();
+	step5();
+	step6();
 }
