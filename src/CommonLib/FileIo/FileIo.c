@@ -57,7 +57,7 @@ PUBLIC void FileIo_createFile(FileIo* this, String* fullFileName)
 	errno_t err = fopen_s(&this->f, "test.file" /*String_getBuffer(fullFileName)*/, "wb");
 	printf("Errno: %d\n", err);
 #else
-	this->f = fopen(String_getBuffer(fullFileName), "wb");
+	this->f = fopen("test.file" /*String_getBuffer(fullFileName)*/, "wb");
 #endif
 	if (this->f)
 	{

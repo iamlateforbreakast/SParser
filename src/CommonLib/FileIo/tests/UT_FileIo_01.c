@@ -16,7 +16,8 @@ int step1()
 
 int step2()
 {
-  FileIo_createFile(f, "test.file");
+  String * testFileName = String_new("test.file");
+  FileIo_createFile(f, testFileName);
   FileIo_write(f, &testBuffer, BUFFER_SIZE);
   FileIo_delete(f);
 }
@@ -24,8 +25,9 @@ int step2()
 int step3()
 {
   int isOK = 1;
-  f = FileIo_new(testFileName);
-  FileIo_openFile(f, "test.file");
+  String * testFileName = String_new("test.file");
+  f = FileIo_new();
+  FileIo_openFile(f, testFileName);
   FileIo_read(f, &readBuffer, BUFFER_SIZE);
   for (int i = 0; i < 10; i++)
   {
