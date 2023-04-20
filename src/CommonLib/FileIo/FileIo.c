@@ -43,7 +43,7 @@ PUBLIC void FileIo_openFile(FileIo * this, String * fullFileName)
   errno_t err = fopen_s(&this->f, "test.file" /*String_getBuffer(fullFileName)*/, "rb+");
   printf("Errno: %d\n", err);
 #else
-  this->f = fopen(String_getBuffer(fullFileName), "wb");
+  this->f = fopen(String_getBuffer(fullFileName), "rb+");
 #endif
   if (this->f)
   {
@@ -61,7 +61,7 @@ PUBLIC void FileIo_createFile(FileIo* this, String* fullFileName)
 #endif
 	if (this->f)
 	{
-		this->status = 1;
+		this->status = FILE_OPEN;
 	}
 }
 
@@ -83,7 +83,7 @@ PUBLIC void FileIo_write(FileIo* this, char * buffer, int length)
   }
 }
 
-PUBLIC void FileIo_read(FileIo* this, char * buffer, size_t length)
+PUBLIC void FileIo_read(FileIo* this, char * buffer, int length)
 {
   if ((this) && (this->status == FILE_OPEN))
   {

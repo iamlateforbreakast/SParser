@@ -18,7 +18,8 @@ SOURCES = \
 	./SkipList/SkipList.c \
 	./Pool/Pool.c \
 	./Error/Error.c \
-	./Times/Times.c
+	./Times/Times.c \
+	./FileIo/FileIo.c
 
 HEADERS = ./Types/Types.h ./Object/Class.h $(SOURCES:.c=.h)
 
