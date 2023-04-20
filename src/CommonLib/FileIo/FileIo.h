@@ -1,5 +1,7 @@
 #ifndef _FILEIO_H_
 #define _FILEIO_H_
+#include "String2.h"
+#include "Types.h"
 
 typedef enum FileIoStatus
 {
@@ -10,10 +12,13 @@ typedef enum FileIoStatus
 
 typedef struct FileIo FileIo;
 
-FileIo * FileIo_new();
-void FileIo_delete();
-void FileIo_read();
-void FileIo_write();
+PUBLIC FileIo * FileIo_new();
+PUBLIC void FileIo_delete();
+PUBLIC void FileIo_openFile(FileIo* this, String* fullFileName);
+PUBLIC void FileIo_openDir(FileIo* this, String* fullFileName);
+PUBLIC void FileIo_write(FileIo* this, char* buffer);
+PUBLIC void FileIo_read(FileIo* this, char* buffer, int length);
+PUBLIC void FileIo_remove(FileIo* this);
 //Opendir
 //Readdir
 
