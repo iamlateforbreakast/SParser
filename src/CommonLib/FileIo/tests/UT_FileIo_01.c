@@ -49,7 +49,7 @@ int step3()
 int step4()
 {
 	f = FileIo_new(testFileName);
-	FileIo_remove(testFileName);
+	FileIo_remove(f, testFileName);
 
 	return 1;
 }
