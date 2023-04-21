@@ -122,7 +122,7 @@ PUBLIC unsigned int SParse_parse(SParse * this, const char * extension)
   fileList = FileMgr_filterFiles(fileMgr, extension);
 
   //List_forEach(fileList, (void (*)(void* , void *))&SParse_parseFile, (void*)this);
-  while ((fileName = list_getNext(fileList))!=0)
+  while ((fileName = List_getNext(fileList))!=0)
     SParse_parseFile(this, fileName);
   FileMgr_delete(fileMgr);
   List_delete(fileList);

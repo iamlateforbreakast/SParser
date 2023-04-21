@@ -268,7 +268,7 @@ PUBLIC unsigned int OptionMgr_isOptionEnabled(OptionMgr* this, const char * opti
   String* yes = String_new("Yes");
   
   enabled = OptionMgr_getOption(this, optionName);
-  if (String_isEqual(enabled,yes)) result = 1;
+  if (String_compare(enabled,yes)==0) result = 1;
   
   String_delete(yes);
   //String_delete(enabled);
