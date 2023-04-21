@@ -15,10 +15,13 @@ typedef struct FileIo FileIo;
 PUBLIC FileIo * FileIo_new();
 PUBLIC void FileIo_delete();
 PUBLIC void FileIo_openFile(FileIo* this, String* fullFileName);
+PUBLIC void FileIo_createFile(FileIo* this, String* fullFileName);
 PUBLIC void FileIo_openDir(FileIo* this, String* fullFileName);
+PUBLIC void FileIo_createDir(FileIo* this, String* fullDirName);
 PUBLIC void FileIo_write(FileIo* this, char* buffer, int length);
 PUBLIC void FileIo_read(FileIo* this, char* buffer, int length);
-PUBLIC void FileIo_remove(FileIo* this);
+PUBLIC void FileIo_remove(FileIo* this, String* fullFileName);
+
 //Opendir
 //Readdir
 
