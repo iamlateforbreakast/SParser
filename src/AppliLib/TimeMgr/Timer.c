@@ -32,7 +32,7 @@ PRIVATE Class timerClass =
   .f_new = (Constructor)0,
   .f_delete = (Destructor)&Timer_delete,
   .f_copy = (Copy_Operator)&Timer_copy,
-  .f_equal = (Equal_Operator)&Timer_isEqual,
+  .f_comp = (Comp_Operator)&Timer_isEqual,
   .f_print = (Printer)&Timer_print
 };
 

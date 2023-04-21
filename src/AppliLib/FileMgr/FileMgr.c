@@ -43,7 +43,7 @@ PRIVATE Class fileMgrClass =
   .f_new = 0,
   .f_delete = (Destructor)&FileMgr_delete,
   .f_copy = (Copy_Operator)&FileMgr_copy,
-  .f_equal = (Equal_Operator)0,
+  .f_comp = (Comp_Operator)0,
   .f_print = (Printer)0
 };
 
@@ -300,7 +300,7 @@ PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
 	    buffer = (char*)Memory_alloc(length+1);
       if (buffer)
       {
-        FileIo_read(buffer, length, 1, f);
+        FileIo_read(f, buffer, length);
         buffer[length] = 0;
         result = String_new(0);
         String_setBuffer(result, buffer);

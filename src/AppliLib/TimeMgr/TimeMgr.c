@@ -29,7 +29,7 @@ PRIVATE Class timeMgrClass =
   .f_new = (Constructor)0,
   .f_delete = (Destructor)&TimeMgr_delete,
   .f_copy = (Copy_Operator)&TimeMgr_copy,
-  .f_equal = (Equal_Operator)0,
+  .f_comp = (Comp_Operator)0,
   .f_print = (Printer)0
 };
 

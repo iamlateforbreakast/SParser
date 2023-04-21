@@ -33,7 +33,7 @@ PRIVATE Class sdbMgrClass =
   .f_new = (Constructor)0,
   .f_delete = (Destructor)&SdbMgr_delete,
   .f_copy = (Copy_Operator)&SdbMgr_copy,
-  .f_equal = (Equal_Operator)0,
+  .f_comp = (Comp_Operator)0,
   .f_print = (Printer)0
 };
 
