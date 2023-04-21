@@ -15,11 +15,12 @@
 #include "FileDesc.h"
 #include "Memory.h"
 #include "Error.h"
+#include "FileIo.h"
 
-#include <unistd.h>
-#include <dirent.h>
+//#include <unistd.h>
+//#include <dirent.h>
 //#include <stat.h>
-#include <stdio.h>
+//#include <stdio.h>
 
 #define FILEMGR_MAX_PATH (1024)
 
@@ -277,8 +278,8 @@ PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
 {
   String * result = 0;
   String * name = String_new(fileName);
-  FILE * f = NULL;
-  FileDesc * fd = NULL;
+  FileIo * f = 0;
+  FileDesc * fd = 0;
   
   char * buffer = 0;
   unsigned int length = 0;
@@ -288,21 +289,22 @@ PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
   if (fd)
   {
     /* Open file */
-    f=fopen(String_getBuffer(FileDesc_getFullName(fd)),"rb");
+    //f=fopen(String_getBuffer(FileDesc_getFullName(fd)),"rb");
+    f = FileIo_new(String_getBuffer(FileDesc_getFullName(fd)));
     if (f)
     {
-	    fseek(f, 0, SEEK_END);
+	    FileIo_fSeekEnd(f, 0);
 	    length=ftell(f);
-	    fseek(f, 0 , SEEK_SET);
+	    FileIo_fSeekSet(f, 0);
         
 	    buffer = (char*)Memory_alloc(length+1);
       if (buffer)
       {
-        fread(buffer, length, 1, f);
+        FileIo_read(buffer, length, 1, f);
         buffer[length] = 0;
         result = String_new(0);
         String_setBuffer(result, buffer);
-	      fclose(f);
+	    FileIo_delete(f);
       }
     }
   }
@@ -343,14 +345,15 @@ PUBLIC List * FileMgr_filterFiles(FileMgr * this, const char * pattern)
 
 PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory)
 {
-  struct dirent *directoryEntry = NULL;
-  DIR * dir = 0;
+  struct dirent *directoryEntry = 0;
+  FileIo * dir = 0;
   FileDesc * fileDesc= 0;
   String * fullName = 0;
   String * name = 0;
   
-  dir = opendir(String_getBuffer(directory));
+  dir = FileIo_new(String_getBuffer(directory));
   
+#if 0
   if (dir!=0)
   {
     while ((directoryEntry = readdir(dir)) != NULL) 
@@ -379,6 +382,7 @@ PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory)
       }
     }
   }
+#endif
 }
 
 /**************************************************
@@ -567,13 +571,14 @@ PRIVATE FileDesc * FileMgr_isManaged(FileMgr * this, String * fullName)
 PRIVATE unsigned int FileMgr_existFS(FileMgr * this, String * fullName)
 {
   unsigned int result = 0;
-  FILE * f;
+  FileIo * f;
 
-  f=fopen(String_getBuffer(fullName),"rb");
+  //f=fopen(String_getBuffer(fullName),"rb");
+  f = FileIo_fileOpen(String_getBuffer(fullName));
   if (f) 
   {
     result = 1;
-    fclose(f);
+    //fclose(f);
   }
   return result;
 }
