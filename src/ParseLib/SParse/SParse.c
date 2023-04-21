@@ -47,7 +47,7 @@ PRIVATE Class sparseClass =
   .f_new = (Constructor)0,
   .f_delete = (Destructor)&SParse_delete,
   .f_copy = (Copy_Operator)&SParse_copy,
-  .f_equal = (Equal_Operator)0,
+  .f_comp = (Comp_Operator)0,
   .f_print = (Printer)0
 };
 
@@ -115,13 +115,15 @@ PUBLIC unsigned int SParse_parse(SParse * this, const char * extension)
   unsigned int result = 0;
   
   FileMgr* fileMgr  = FileMgr_getRef();
+  String * fileName = 0;
   List * fileList = 0;
   
   /* List all files with extension in all the input directories */
   fileList = FileMgr_filterFiles(fileMgr, extension);
 
-  List_forEach(fileList, (void (*)(void* , void *))&SParse_parseFile, (void*)this);
-  
+  //List_forEach(fileList, (void (*)(void* , void *))&SParse_parseFile, (void*)this);
+  while ((fileName = list_getNext(fileList))!=0)
+    SParse_parseFile(this, fileName);
   FileMgr_delete(fileMgr);
   List_delete(fileList);
   

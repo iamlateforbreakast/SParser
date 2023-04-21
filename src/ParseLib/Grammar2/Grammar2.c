@@ -74,7 +74,7 @@ PRIVATE Class grammar2Class =
   .f_new = (Constructor)0,
   .f_delete = (Destructor)&Grammar2_delete,
   .f_copy = (Copy_Operator)&Grammar2_copy,
-  .f_equal = (Equal_Operator)0,
+  .f_comp = (Comp_Operator)0,
   .f_print = (Printer)0
 };
 

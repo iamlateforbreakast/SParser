@@ -43,7 +43,7 @@ PRIVATE Class fileReaderClass =
   .f_new = (Constructor)0,
   .f_delete = (Destructor)&FileReader_delete,
   .f_copy = (Copy_Operator)&FileReader_copy,
-  .f_equal = (Equal_Operator)0,
+  .f_comp = (Comp_Operator)0,
   .f_print = 0
 };
 
