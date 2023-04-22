@@ -132,7 +132,55 @@ PUBLIC List* FileIo_listDir(FileIo* this)
         FindClose(hFind);
     }
 #else
+  struct dirent *directoryEntry = 0;
+  FileIo * dir = 0;
+  FileDesc * fileDesc= 0;
+  String * fullName = 0;
+  String * name = 0;
+  
+  dir = FileIo_new(String_getBuffer(directory));
+  
+#if 0
+  if (dir!=0)
+  {
+    while ((directoryEntry = readdir(dir)) != NULL) 
+    {
+      if (directoryEntry->d_type != DT_DIR)
+      {
+        fileDesc = FileDesc_new();
+        fullName = String_copy(directory);
+        name = String_new(directoryEntry->d_name);
+        FileMgr_mergePath(this, fullName, name);
+        FileDesc_setFullName(fileDesc, fullName);
+        List_insertHead(this->files, (void*)fileDesc);
+        String_delete(name);
+      }
+      else
+      {
+        if ((Memory_ncmp(directoryEntry->d_name,"..",2)==0) 
+           && (Memory_ncmp(directoryEntry->d_name,".",1)==0))
+        {
+          fullName = String_copy(directory);
+          name = String_new(directoryEntry->d_name);
+          FileMgr_mergePath(this, fullName, name);
+          List_insertHead(this->directories,fullName);
+          String_delete(name);
+        }
+      }
+    }
+  }
+#endif
 
 #endif
     return result;
+}
+
+int FileIo_fSeekEnd(FileIo * this, int pos)
+{
+
+}
+
+int FileIo_fSeekSet(FileIo * this, int pos)
+{
+  
 }

@@ -69,11 +69,24 @@ int step3()
   return 0;
 }
 
+int step4()
+{
+// PUBLIC unsigned int FileMgr_setRootLocation(FileMgr* this, const char * location);
+// PUBLIC char * FileMgr_getRootLocation(FileMgr* this);
+}
+
+int step5()
+{
+  //PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryName);
+  //PUBLIC List * FileMgr_filterFiles(FileMgr * this, const char * pattern);
+  //PUBLIC String * FileMgr_searchFile(FileMgr * this, String * name, List * preferredDir);
+}
 int main()
 {
   //step1();
   step2();
   //step3();
-
+  //step4();
+  //step5();
   return 0;
 }

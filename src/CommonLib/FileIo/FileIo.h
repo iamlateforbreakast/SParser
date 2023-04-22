@@ -21,6 +21,8 @@ PUBLIC void FileIo_createDir(FileIo* this, String* fullDirName);
 PUBLIC void FileIo_write(FileIo* this, char* buffer, int length);
 PUBLIC void FileIo_read(FileIo* this, char* buffer, int length);
 PUBLIC void FileIo_remove(FileIo* this, String* fullFileName);
+PUBLIC int FileIo_fSeekEnd(FileIo * this, int pos);
+PUBLIC int FileIo_fSeekSet(FileIo * this, int pos);
 
 //Opendir
 //Readdir
