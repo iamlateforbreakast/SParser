@@ -9,6 +9,7 @@
 
 #include "SkipList.h"
 #include "Pool.h"
+#include "Object.h"
 #include <limits.h>
 #include <stdlib.h>
 
@@ -27,6 +28,7 @@ typedef struct SkipNode
 
 typedef struct SkipList
 {
+    Object * object;
     unsigned int (*isEqual)(unsigned int, unsigned int);
     unsigned int (*isGreaterOrEqual)(unsigned int, unsigned int);
     unsigned int (*isGreater)(unsigned int, unsigned int);
@@ -56,6 +58,7 @@ PUBLIC SkipList* SkipList_new(unsigned int maxObjectNb)
     newSkipList = (SkipList*)malloc(sizeof(SkipList));
     newSkipList->maxObjectNb = maxObjectNb;
     newSkipList->pool = Pool_new(newSkipList->maxObjectNb, sizeof(SkipNode));
+    // NewSkipList->poll = Pool_new(storage, sizeof(SkipNode));
     newSkipList->level = 1;
     newSkipList->nbObjects = 0;
     newSkipList->isGreaterOrEqual = &myGreateOrEqual;
@@ -63,6 +66,7 @@ PUBLIC SkipList* SkipList_new(unsigned int maxObjectNb)
     newSkipList->isEqual = &myEqual;
 
     SkipNode* skipNode = Pool_alloc(newSkipList->pool, &newSkipList->headerIdx);
+    // SkipNode * skipNode = Pool_alloc();
     for (int i = 0; i < SKIPLIST_MAX_LEVEL; i++)
     {
         skipNode->forward[i] = newSkipList->headerIdx;
