@@ -9,6 +9,7 @@
 
 #include "SkipList.h"
 #include "Pool.h"
+#include "Class h"
 #include "Object.h"
 #include <limits.h>
 #include <stdlib.h>
@@ -20,11 +21,24 @@ typedef struct SkipNode SkipNode;
 
 typedef struct SkipNode
 {
+    Object * object;
     unsigned int key;
     void* object;
     unsigned int level;
     unsigned int forward[SKIPLIST_MAX_LEVEL];
 } SkipNode;
+
+/**********************************************//**
+  @private Class Description
+**************************************************/
+PRIVATE Class skipNodeClass = 
+{
+  .f_new = 0,
+  .f_delete = (Destructor)&SkipNode_delete,
+  .f_copy = (Copy_Operator)&SkipNode_copy,
+  .f_comp = (Comp_Operator)&SkipNode_compare,
+  .f_print = (Printer)&SkipNode_print
+};
 
 typedef struct SkipList
 {
@@ -38,6 +52,18 @@ typedef struct SkipList
     Pool* pool;
     unsigned int headerIdx;
 } SkipList;
+
+/**********************************************//**
+  @private Class Description
+**************************************************/
+PRIVATE Class skipListClass = 
+{
+  .f_new = 0,
+  .f_delete = (Destructor)&SkipList_delete,
+  .f_copy = (Copy_Operator)&SkipList_copy,
+  .f_comp = (Comp_Operator)&SkipList_compare,
+  .f_print = (Printer)&SkipList_print
+};
 
 PRIVATE unsigned int SkipList_randLevel(SkipList* this);
 PRIVATE unsigned int SkipList_reportCache(SkipList* this);
