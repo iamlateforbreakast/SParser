@@ -9,7 +9,7 @@
 
 #include "SkipList.h"
 #include "Pool.h"
-#include "Class h"
+#include "Class.h"
 #include "Object.h"
 #include <limits.h>
 #include <stdlib.h>
@@ -21,7 +21,7 @@ typedef struct SkipNode SkipNode;
 
 typedef struct SkipNode
 {
-    Object * object;
+    Object * objectInfo;
     unsigned int key;
     void* object;
     unsigned int level;
@@ -31,14 +31,14 @@ typedef struct SkipNode
 /**********************************************//**
   @private Class Description
 **************************************************/
-PRIVATE Class skipNodeClass = 
-{
-  .f_new = 0,
-  .f_delete = (Destructor)&SkipNode_delete,
-  .f_copy = (Copy_Operator)&SkipNode_copy,
-  .f_comp = (Comp_Operator)&SkipNode_compare,
-  .f_print = (Printer)&SkipNode_print
-};
+//PRIVATE Class skipNodeClass = 
+//{
+//  .f_new = 0,
+//  .f_delete = (Destructor)&SkipNode_delete,
+//  .f_copy = (Copy_Operator)&SkipNode_copy,
+//  .f_comp = (Comp_Operator)&SkipNode_compare,
+//  .f_print = (Printer)&SkipNode_print
+//};
 
 typedef struct SkipList
 {
@@ -110,10 +110,20 @@ PUBLIC SkipList* SkipList_new(unsigned int maxObjectNb)
   @param[in] Instance to destroy
   @return None
 **************************************************/
-PUBLIC void SkipList_free(SkipList* this)
+PUBLIC void SkipList_delete(SkipList* this)
 {
     Pool_free(this->pool);
     free(this);
+}
+
+/**********************************************//**
+  @brief SkipList_copy
+  @param[in] Instance to copy
+  @return None
+**************************************************/
+PUBLIC SkipList * SkipList_copy(SkipList * this)
+{
+    return 0;
 }
 
 /**********************************************//**
@@ -246,7 +256,7 @@ PUBLIC void SkipList_add(SkipList* this, unsigned int key, void* object)
   @param[in] Key of object to remove
   @return Object removed from SkipList object.
 **************************************************/
-PUBLIC void* SkipList_delete(SkipList* this, unsigned int key)
+PUBLIC void* SkipList_remove(SkipList* this, unsigned int key)
 {
     void* removedObject = 0;
     unsigned int update[SKIPLIST_MAX_LEVEL];
@@ -380,6 +390,17 @@ PUBLIC void* SkipList_get(SkipList* this, unsigned int key)
     }
     
     return foundObject;
+}
+
+/**********************************************//**
+  @brief SkipList_compare
+  @param[in] None
+  @return None
+**************************************************/
+
+PUBLIC int SkipList_compare(SkipList * this, SkipList * compared)
+{
+    return 0;
 }
 
 /**********************************************//**

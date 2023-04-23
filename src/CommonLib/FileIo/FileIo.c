@@ -134,11 +134,11 @@ PUBLIC List* FileIo_listDir(FileIo* this)
 #else
   struct dirent *directoryEntry = 0;
   FileIo * dir = 0;
-  FileDesc * fileDesc= 0;
+  //FileDesc * fileDesc= 0;
   String * fullName = 0;
   String * name = 0;
   
-  dir = FileIo_new(String_getBuffer(directory));
+  //dir = FileIo_new(String_getBuffer(directory));
   
 #if 0
   if (dir!=0)
@@ -182,5 +182,5 @@ int FileIo_fSeekEnd(FileIo * this, int pos)
 
 int FileIo_fSeekSet(FileIo * this, int pos)
 {
-  
+
 }
