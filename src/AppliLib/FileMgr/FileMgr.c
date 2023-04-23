@@ -32,7 +32,7 @@ struct FileMgr
   Object object;
   List * files;
   List * directories;
-  char rootLocation[FILEMGR_MAX_PATH];
+  String * rootLocation;
 };
 
 /**********************************************//**
@@ -69,11 +69,11 @@ PRIVATE unsigned int FileMgr_existFS(FileMgr * this, String * fullName);
 PRIVATE FileMgr * FileMgr_new()
 {
   FileMgr * this = 0;
-  
+  FileIo * f = FileIo_new();
   this = (FileMgr*)Object_new(sizeof(FileMgr), &fileMgrClass);
   this->files = List_new();
   this->directories = List_new();
-  if (getcwd(this->rootLocation, FILEMGR_MAX_PATH)==0)
+  if (this->rootLocation = FileIo_getcwd(f) ==0)
   {
     /* Error case: Cannot obtain the FileMgr root location. */
     Error_new(ERROR_FATAL, "Cannot obtain the FileMgr root location");
