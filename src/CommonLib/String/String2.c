@@ -301,15 +301,15 @@ PUBLIC unsigned int String_prepend(String * this, const char * prefix)
  @param [in]     postfix: const char * - prefix
  @return: unsigned int: 0 successfull
 **************************************************/
-PUBLIC unsigned int String_append(String* this, const char* prefix)
+PUBLIC unsigned int String_append(String* this, const char* postfix)
 {
   char* buffer;
-  unsigned int newSize = String_getLength(this) + Memory_len((void*)prefix);
+  unsigned int newSize = String_getLength(this) + Memory_len((void*)postfix);
 
   buffer = Memory_alloc(newSize + 1);
   
   Memory_copy(buffer, String_getBuffer(this), String_getLength(this));
-  Memory_copy(buffer + String_getLength(this), (void*)prefix, Memory_len((void*)prefix));
+  Memory_copy(buffer + String_getLength(this), (void*)postfix, Memory_len((void*)postfix));
   Memory_free(this->buffer, this->length + 1);
   buffer[newSize] = 0;
   this->buffer = buffer;

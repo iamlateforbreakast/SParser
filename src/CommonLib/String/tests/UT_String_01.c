@@ -109,6 +109,16 @@ int step5()
     return 0;
 }
 
+int step6()
+{
+  String * testString = String_new("TestString");
+
+  String_append(testString, "123");
+
+  printf("String append %s\n", String_getBuffer(testString));
+
+  return 0;
+}
 int main()
 {
   step1();
@@ -116,6 +126,7 @@ int main()
   step3();
   step4();
   step5();
+  step6();
 
   return 0;
 }
