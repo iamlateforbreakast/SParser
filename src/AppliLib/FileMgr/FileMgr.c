@@ -32,6 +32,7 @@ struct FileMgr
   Object object;
   List * files;
   List * directories;
+  char * separator;
   String * rootLocation;
 };
 
@@ -73,7 +74,13 @@ PRIVATE FileMgr * FileMgr_new()
   this = (FileMgr*)Object_new(sizeof(FileMgr), &fileMgrClass);
   this->files = List_new();
   this->directories = List_new();
-  if (this->rootLocation = FileIo_getcwd(f) ==0)
+  this->rootLocation = FileIo_getCwd(f);
+#ifdef _WIN32
+  this->separator = "\\";
+#else
+  this->separator = "\/";
+#endif
+  if (this->rootLocation ==0)
   {
     /* Error case: Cannot obtain the FileMgr root location. */
     Error_new(ERROR_FATAL, "Cannot obtain the FileMgr root location");
@@ -97,7 +104,8 @@ PUBLIC void FileMgr_delete(FileMgr * this)
     {
       List_delete(this->files);
       List_delete(this->directories);
-      // TODO: String_delete(this->rootLocation);
+      //String_delete(this->separator);
+      String_delete(this->rootLocation);
       Object_delete(&this->object);
       fileMgr = 0;
     }
@@ -152,7 +160,7 @@ PUBLIC unsigned int FileMgr_setRootLocation(FileMgr* this, const char * location
   unsigned int result = 0;
   
   String * newLocation = String_new(location);
-  String * currentLocation = String_new(this->rootLocation);
+  String * currentLocation = String_copy(this->rootLocation);
 
   FileMgr_mergePath(this, currentLocation, newLocation);
   
@@ -172,7 +180,7 @@ PUBLIC unsigned int FileMgr_setRootLocation(FileMgr* this, const char * location
 **************************************************/
 PUBLIC char * FileMgr_getRootLocation(FileMgr* this)
 {
-  char * result = this->rootLocation;
+  char * result = String_getBuffer(this->rootLocation);
   
   return result;
 }
@@ -188,7 +196,7 @@ PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryN
   //static int nbCalls = 0;
   
   unsigned int result = 0;
-  String * fullPathDirectory = String_new(this->rootLocation);
+  String * fullPathDirectory = String_copy(this->rootLocation);
   String * addedDirectory = String_new(directoryName);
   
   /* TODO: Check directoryName has a valid length */
@@ -234,7 +242,7 @@ PUBLIC String * FileMgr_addFile(FileMgr * this, const char * fileName)
 {
   String * result = 0;
   FileDesc * fileDesc = 0;
-  String * fullName = String_new(this->rootLocation);
+  String * fullName = String_copy(this->rootLocation);
   String * addedFile = String_new(fileName);
   
   /* Merge current path with fileName */
@@ -294,7 +302,7 @@ PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
     if (f)
     {
 	    FileIo_fSeekEnd(f, 0);
-	    length=ftell(f);
+	    length=FileIo_ftell(f);
 	    FileIo_fSeekSet(f, 0);
         
 	    buffer = (char*)Memory_alloc(length+1);
@@ -358,70 +366,47 @@ PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory)
 **************************************************/
 PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
 {
-  char * p2_idx = 0;
-  char * p1_idx = 0;
-  char buffer[FILEMGR_MAX_PATH];
-  char * mergedPath = 0;
-  unsigned int bufferLength = String_getLength(path1);
-  
+  String * s = 0;
+  String * twoDots = String_new("..");
+  String * oneDot = String_new(".");
+  String* result = String_new(0);
   // TODO: CHeck initial condition of validity length > 0
   
+  printf("mergePath: path1 %s\n", String_getBuffer(path1));
+  printf("mergePath: path2 %s\n", String_getBuffer(path2));
   /* TODO: check if path2 is absolute path in which case copy and return */
   
-  // Initialise result buffer
-  Memory_copy(buffer, String_getBuffer(path1), bufferLength);
-  
-  p1_idx = buffer + String_getLength(path1);
-  
-  if (*(p1_idx-1)  != '/')
+  List* tokenPath1 = String_splitToken(path1, this->separator);
+  List* tokenPath2 = String_splitToken(path2, this->separator);
+
+  while ((s = List_removeTail(tokenPath2))!=0)
   {
-    *p1_idx = '/';
-    p1_idx++;
+    if (String_compare(s, twoDots)==0)
+    {
+      List_removeTail(tokenPath2);
+      List_removeHead(tokenPath1);
+    }
+    else if (String_compare(s, oneDot)==0)
+    {
+      List_removeTail(tokenPath2);
+    }
+    else
+    {
+      List_insertHead(tokenPath1, List_removeTail(tokenPath2));
+    }
   }
-   *p1_idx = 0;
-  
-  for (p2_idx=String_getBuffer(path2); p2_idx<(String_getBuffer(path2)+String_getLength(path2)); p2_idx++)
+
+  while ((s = List_getNext(tokenPath1)) != 0)
   {
-      //Take ../ into account
-      if (Memory_ncmp(p2_idx, "..", 2) == 1)
-         //((memcmp(p2_idx, "..",2)==0) && (p2_idx == (String_getBuffer(path2)+String_getLength(path2)))))
-      {
-        p1_idx = p1_idx - 2;
-        while ((*p1_idx != '/') && (p1_idx > buffer))
-        {
-          p1_idx--;
-        }
-        p1_idx++;
-        p2_idx = p2_idx + 2;
-      }
-      //Ignore ./ in path2
-      else if ((Memory_ncmp(p2_idx, "./", 2) == 1) ||
-                 ((Memory_ncmp(p2_idx, ".", 1) == 1) && (p2_idx == (String_getBuffer(path2)+String_getLength(path2)-1))))
-      {
-        //p1_idx = p1_idx - 1;
-        p2_idx = p2_idx + 1;
-      }
-      else
-      {
-        //p2_idx = p2_idx + 1;
-        *p1_idx = *p2_idx;
-        //*p1_idx = '/';
-        p1_idx++;
-      }
+    String_append(result, this->separator);
+    String_append(result, String_getBuffer(s));
+    printf("%s\n", String_getBuffer(s)); 
   }
-  
-  *p1_idx = 0;
-  
-  //Place merged path into path1
-  mergedPath = (char *)Memory_alloc(p1_idx - buffer+1);
-  Memory_copy(mergedPath, buffer, p1_idx-buffer+1);
-  
-  String_setBuffer(path1, mergedPath);
-  
-  if (String_getLength(path1)>1000) 
+
+  if (String_getLength(result)>1000) 
   {
-    printf("String length = %d\n", String_getLength(path1));
-    printf("Str length = %d\n", Memory_len(String_getBuffer(path1)));
+    printf("String length = %d\n", String_getLength(result));
+    printf("Str length = %d\n", Memory_len(String_getBuffer(result)));
   }
   Error_new(ERROR_INFO,"Merged path: %s\n", buffer);
 }
@@ -448,7 +433,7 @@ PUBLIC String * FileMgr_searchFile(FileMgr * this, String * name, List * preferr
   /* For each directory in preferred list */
   while (((d = List_getNext(preferredDir))!=0)&&(!isFound))
   {
-    fullPath = String_new(this->rootLocation);
+    fullPath = String_copy(this->rootLocation);
     FileMgr_mergePath(this, d, name);
     FileMgr_mergePath(this, fullPath, d);
     
@@ -542,7 +527,7 @@ PRIVATE unsigned int FileMgr_existFS(FileMgr * this, String * fullName)
   FileIo * f = FileIo_new();
 
   //f=fopen(String_getBuffer(fullName),"rb");
-  FileIo_openFile(f, String_getBuffer(fullName));
+  FileIo_openFile(f, fullName);
   if (f) 
   {
     result = 1;
