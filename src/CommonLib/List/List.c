@@ -314,6 +314,40 @@ PUBLIC void * List_removeHead(List * this)
   return item;
 }
 
+/**********************************************//**
+  @brief Remove the tail item in an instance of List
+  @public
+  @memberof List.
+**************************************************/
+PUBLIC void* List_removeTail(List* this)
+{
+  ListNode* tailNode = 0;
+  void* item = 0;
+
+  if ((this != 0) && (this->nbNodes != 0))
+  {
+    tailNode = this->tail;
+    item = this->tail->item;
+    if (this->tail->next != 0)
+    {
+      this->tail = this->tail->next;
+      this->tail->prev = 0;
+      this->iterator = this->tail;
+    }
+    else
+    {
+      this->head = 0;
+      this->tail = 0;
+      this->iterator = 0;
+    }
+    this->nbNodes--;
+    //TODO: this->iterator;
+    Memory_free(tailNode, sizeof(ListNode));
+  }
+
+  return item;
+}
+
 /**********************************************//** 
   @brief Get the head item in an insatnce of LIst
   @public
