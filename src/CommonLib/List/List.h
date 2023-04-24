@@ -18,6 +18,7 @@ PUBLIC void List_merge(List* this, List* l1);
 PUBLIC void List_forEach(List* this, void (*method)(void* o));
 PUBLIC void * List_getNext(List* this);
 PUBLIC void * List_removeHead(List * this);
+PUBLIC void* List_removeTail(List* this);
 PUBLIC void * List_getHead(List * this);
 PUBLIC unsigned int List_getSize(List * this);
 PUBLIC void List_resetIterator(List * this);
