@@ -400,7 +400,6 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   {
     String_append(result, this->separator);
     String_append(result, String_getBuffer(s));
-    printf("%s\n", String_getBuffer(s)); 
   }
 
   if (String_getLength(result)>1000) 
@@ -408,7 +407,7 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
     printf("String length = %d\n", String_getLength(result));
     printf("Str length = %d\n", Memory_len(String_getBuffer(result)));
   }
-  Error_new(ERROR_INFO,"Merged path: %s\n", buffer);
+  Error_new(ERROR_INFO,"Merged path: %s\n", String_getBuffer(result));
 }
 
 /**************************************************
