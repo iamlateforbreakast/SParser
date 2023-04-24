@@ -100,12 +100,16 @@ int step1()
 int step2()
 {
   List * testList1 = 0;
-  
+  List * testList2 = 0;
+
   TestItem * items[LIST_SIZE];
-  TestItem * output = 0;
+  TestItem * output1 = 0;
+  TestItem * output2 = 0;
+
   int i;
   
   testList1 = List_new();
+  testList2 = List_new();
 
   for (i=0; i<LIST_SIZE;i++)
   {
@@ -113,21 +117,28 @@ int step2()
     items[i]->x = i;
     items[i]->y = LIST_SIZE - i;
     List_insertHead(testList1, items[i]);
-    printf("Nb items %d\n", List_getSize(testList1));
+    List_insertHead(testList2, items[i]);
+    printf("Test List1: Nb items %d\n", List_getSize(testList1));
+    printf("Test List2: Nb items %d\n", List_getSize(testList2));
   }
   
-  output = List_getHead(testList1);
- 
+  output1 = List_getHead(testList1);
+  output2 = List_getHead(testList2);
+
   for (i=0; i<LIST_SIZE; i++)
   {
-    output = List_removeHead(testList1);
-    TestItem_delete(output);
-    printf("Nb items %d\n", List_getSize(testList1));
+    output1 = List_removeHead(testList1);
+    output2 = List_removeTail(testList2);
+    TestItem_delete(output1);
+    printf("Test List 1: Nb items %d\n", List_getSize(testList1));
+    printf("Test List 2: Nb items %d\n", List_getSize(testList2));
   }
 
-  output = List_removeHead(testList1);
+  output1 = List_removeHead(testList1);
+  output2 = List_removeTail(testList2);
 
   List_delete(testList1);
+  List_delete(testList2);
 
   return 0;
 }
