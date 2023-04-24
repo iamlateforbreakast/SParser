@@ -69,6 +69,13 @@ int step6()
 	return 1;
 }
 
+int step7()
+{
+  FileIo* f = FileIo_new();
+  String* currentPath = FileIo_getCwd(f);
+  printf("Current Working Directoy: %s\n", String_getBuffer(currentPath));
+}
+
 void main()
 {
 	for (int i = 0; i < BUFFER_SIZE_BYTES; i++)
@@ -82,4 +89,5 @@ void main()
 	step4();
 	step5();
 	step6();
+	step7();
 }
