@@ -1,7 +1,9 @@
 #include "FileIo.h"
 #include "String2.h"
 #include "List.h"
+#include "Error.h"
 #include <stdio.h>
+#include <limits.h>
 #include <stdlib.h>
 
 #ifdef _WIN32
@@ -182,7 +184,25 @@ PUBLIC int FileIo_fSeekEnd(FileIo * this, int pos)
 
 PUBLIC String * FileIo_getCwd(FileIo * this)
 {
-  
+#ifdef _WIN32
+  TCHAR workDir[1024];
+  DWORD retVal = GetCurrentDirectory(1024, workDir);
+  char workingDirectory[1024];
+  size_t nb = 0;
+  wcstombs_s(&nb, workingDirectory, 100, workDir, wcslen(workDir));
+  if ((retVal == 0) || (retVal > 1024))
+  {
+    Error_new(ERROR_FATAL, "FileIo: Cannot obtain the root location");
+  }
+#else
+  char* workingDirectory[1024];
+
+  if (getcwd(&workingDirectory[0], sizeof(workingDirectory) == 0))
+  {
+    Error_new(ERROR_FATAL, "FileIo: Cannot obtain the root location");
+  }
+#endif
+  return String_new(workingDirectory);
 }
 
 PUBLIC int FileIo_fSeekSet(FileIo* this, int pos)
