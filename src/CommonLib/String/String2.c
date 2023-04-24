@@ -11,6 +11,7 @@
 #include "Class.h"
 #include "Object.h"
 #include "Memory.h"
+#include "List.h"
 #include <stdlib.h>
 
 /**********************************************//** 
@@ -292,6 +293,30 @@ PUBLIC unsigned int String_prepend(String * this, const char * prefix)
   return 0;
 }
 
+/**************************************************
+ @brief String_append
+
+ This function add the prefix at the back of a String object
+
+ @param [in]     postfix: const char * - prefix
+ @return: unsigned int: 0 successfull
+**************************************************/
+PUBLIC unsigned int String_append(String* this, const char* prefix)
+{
+  char* buffer;
+  unsigned int newSize = String_getLength(this) + Memory_len((void*)prefix);
+
+  buffer = Memory_alloc(newSize + 1);
+  
+  Memory_copy(buffer, String_getBuffer(this), String_getLength(this));
+  Memory_copy(buffer + String_getLength(this), (void*)prefix, Memory_len((void*)prefix));
+  Memory_free(this->buffer, this->length + 1);
+  buffer[newSize] = 0;
+  this->buffer = buffer;
+  this->length = newSize;
+
+  return 0;
+}
 
 /**************************************************
  @brief String_matchWildcard
@@ -365,3 +390,24 @@ PUBLIC unsigned int String_matchWildcard(String * this, const char * wildcard)
   return isMatch;
 }
 
+/**************************************************
+ @brief String_splitToken
+
+ This function splits a string 
+
+ @param [in]     separator: const char *: separator
+ @return: unsigned int: 0 no match, 1 match
+**************************************************/
+PUBLIC List* String_splitToken(String* this, const char* separator)
+{
+  List* result = List_new();
+  char* str = String_getBuffer(this);
+  char* token = 0;
+  token = strtok(str, separator);
+  while (token != 0)
+  {
+    List_insertHead(result, String_new(token));
+    token = strtok(0, separator);
+  }
+  return result;
+}
