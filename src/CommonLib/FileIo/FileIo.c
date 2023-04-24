@@ -175,17 +175,22 @@ PUBLIC List* FileIo_listDir(FileIo* this)
     return result;
 }
 
-int FileIo_fSeekEnd(FileIo * this, int pos)
+PUBLIC int FileIo_fSeekEnd(FileIo * this, int pos)
 {
 
 }
 
-int FileIo_fSeekSet(FileIo * this, int pos)
-{
-
-}
-
-String * FileIo_getcwd(FileIo * this)
+PUBLIC String * FileIo_getCwd(FileIo * this)
 {
   
+}
+
+PUBLIC int FileIo_fSeekSet(FileIo* this, int pos)
+{
+
+}
+
+PUBLIC int FileIo_ftell(FileIo* this)
+{
+
 }
