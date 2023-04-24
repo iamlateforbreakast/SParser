@@ -184,3 +184,8 @@ int FileIo_fSeekSet(FileIo * this, int pos)
 {
 
 }
+
+String * FileIo_getcwd(FileIo * this)
+{
+  
+}
