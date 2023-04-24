@@ -195,12 +195,8 @@ PUBLIC String * FileIo_getCwd(FileIo * this)
     Error_new(ERROR_FATAL, "FileIo: Cannot obtain the root location");
   }
 #else
-  char* workingDirectory[1024];
+  char * workingDirectory = get_current_dir_name();
 
-  if (getcwd(&workingDirectory[0], sizeof(workingDirectory) == 0))
-  {
-    Error_new(ERROR_FATAL, "FileIo: Cannot obtain the root location");
-  }
 #endif
   return String_new(workingDirectory);
 }
