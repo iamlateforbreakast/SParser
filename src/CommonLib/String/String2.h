@@ -4,6 +4,7 @@
 #define _STRING2_H_
 
 #include "Types.h"
+#include "List.h"
 
 typedef struct String String;
 
@@ -20,4 +21,5 @@ PUBLIC int String_compare(String * this, String * compared);
 PUBLIC String * String_subString(String * this, unsigned int idx, unsigned int length);
 PUBLIC unsigned int String_matchWildcard(String * this, const char * wildcard);
 PUBLIC int String_toInt(String* this);
+PUBLIC List* String_splitToken(String* this, const char* separator);
 #endif /* _STRING2_H_ */
