@@ -212,10 +212,10 @@ PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryN
   /* For each directory */
   /* List_forEach(this->directories, FileMgr_listFiles, this); */
   fullPathDirectory = List_getNext(this->directories);
-  printf("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory));
+  //printf("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory));
   while (fullPathDirectory!=0)
   {
-    printf("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory));
+    //printf("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory));
     FileMgr_listFiles(this, fullPathDirectory);
     fullPathDirectory = List_getNext(this->directories);
     #if 0
@@ -357,13 +357,17 @@ PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory)
   FileIo* f = FileIo_new();
   List * fileList = FileIo_listFiles(f, directory);
   String* fileName = 0;
+  FileDesc * fileDesc= 0;
 
   while ((fileName = List_getNext(fileList)) != 0)
   {
+    fileDesc = FileDesc_new();
     String* fullFileName = String_copy(directory);
     FileMgr_mergePath(this, fullFileName, fileName);
-    List_insertTail(this->files, fullFileName);
-    printf("List files: %s\n", String_getBuffer(fullFileName));
+    List_insertTail(this->files, (void*)fileDesc);
+    Error_new(ERROR_INFO,"List files: %s\n", String_getBuffer(fullFileName));
+    FileDesc_setFullName(fileDesc, fullFileName);
+    //String_delete(name);
   }
 }
 
@@ -384,8 +388,8 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   String* result = String_new(0);
   // TODO: CHeck initial condition of validity length > 0
   
-  Error_new(ERROR_INFO, "mergePath: path1 %s\n", String_getBuffer(path1));
-  Error_new(ERROR_INFO, "mergePath: path2 %s\n", String_getBuffer(path2));
+  //Error_new(ERROR_INFO, "mergePath: path1 %s\n", String_getBuffer(path1));
+  //Error_new(ERROR_INFO, "mergePath: path2 %s\n", String_getBuffer(path2));
 
   /* TODO: check if path2 is absolute path in which case copy and return */
   
@@ -427,7 +431,7 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
     Error_new(ERROR_INFO, "String length = %d\n", String_getLength(result));
     Error_new(ERROR_INFO, "Str length = %d\n", Memory_len(String_getBuffer(result)));
   }
-  Error_new(ERROR_INFO,"Merged path: %s\n", String_getBuffer(result));
+  //Error_new(ERROR_INFO,"Merged path: %s\n", String_getBuffer(result));
   String_setBuffer(path1, String_getBuffer(result));
   String_delete(twoDots);
   String_delete(oneDot);
