@@ -144,8 +144,8 @@ PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
   String * fullName = 0;
   String * name = 0;
   DIR * dirHandle = opendir(String_getBuffer(directory));
-
-  if (directory!=0)
+  printf("%s\n",String_getBuffer(directory));
+  if (dirHandle!=0)
   {
     while ((directoryEntry = readdir(dirHandle)) != NULL) 
     {
