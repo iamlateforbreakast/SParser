@@ -106,7 +106,7 @@ PUBLIC void FileIo_createDir(FileIo* this, String * fullDirName)
 
 }
 
-PUBLIC List* FileIo_listDir(FileIo* this)
+PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
 {
     List* result = List_new();
 #ifdef _WIN32
@@ -124,12 +124,15 @@ PUBLIC List* FileIo_listDir(FileIo* this)
     {        
         do {
             //_tprintf(_T("The first file found is %s\n"), FindFileData.cFileName);
+          if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
+          {
             char text[MAX_PATH];
             size_t nb = 0;
             wcstombs_s(&nb, text, 100, FindFileData.cFileName, wcslen(FindFileData.cFileName));
             printf("=>%s\n", text);
-            String* s = String_new("text");
+            String* s = String_new(text);
             List_insertTail(result, s);
+          }
         } while (FindNextFile(hFind, &FindFileData));
         FindClose(hFind);
     }
