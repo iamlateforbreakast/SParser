@@ -410,7 +410,11 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
     s = List_removeTail(tokenPath2);
   }
   s = List_getNext(tokenPath1);
+  #ifndef _WIN32
+  String_append(result, this->separator);
+  #endif
   String_append(result, String_getBuffer(s));
+
   while ((s = List_getNext(tokenPath1)) != 0)
   {
     String_append(result, this->separator);

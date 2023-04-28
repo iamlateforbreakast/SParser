@@ -149,7 +149,7 @@ PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
   {
     while ((directoryEntry = readdir(dirHandle)) != NULL) 
     {
-      if (directoryEntry->d_type != DT_DIR)
+      if (directoryEntry->d_type == DT_REG)
       {
         //fileDesc = FileDesc_new();
         //fullName = String_copy(directory);
@@ -158,7 +158,7 @@ PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
         //FileMgr_mergePath(this, fullName, name);
         //FileDesc_setFullName(fileDesc, fullName);
         List_insertHead(result, (void*)name);
-        String_delete(name);
+        //String_delete(name);
       }
       else
       {
