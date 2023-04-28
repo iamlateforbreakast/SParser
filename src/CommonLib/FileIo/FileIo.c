@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <limits.h>
 #include <stdlib.h>
+#include <dirent.h>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -142,26 +143,26 @@ PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
   //FileDesc * fileDesc= 0;
   String * fullName = 0;
   String * name = 0;
-  
-  //dir = FileIo_new(String_getBuffer(directory));
-  
-#if 0
-  if (dir!=0)
+  DIR * dirHandle = opendir(String_getBuffer(directory));
+
+  if (directory!=0)
   {
-    while ((directoryEntry = readdir(dir)) != NULL) 
+    while ((directoryEntry = readdir(dirHandle)) != NULL) 
     {
       if (directoryEntry->d_type != DT_DIR)
       {
-        fileDesc = FileDesc_new();
-        fullName = String_copy(directory);
+        //fileDesc = FileDesc_new();
+        //fullName = String_copy(directory);
         name = String_new(directoryEntry->d_name);
-        FileMgr_mergePath(this, fullName, name);
-        FileDesc_setFullName(fileDesc, fullName);
-        List_insertHead(this->files, (void*)fileDesc);
+        printf("%s\n",String_getBuffer(name));
+        //FileMgr_mergePath(this, fullName, name);
+        //FileDesc_setFullName(fileDesc, fullName);
+        List_insertHead(result, (void*)name);
         String_delete(name);
       }
       else
       {
+        #if 0
         if ((Memory_ncmp(directoryEntry->d_name,"..",2)==0) 
            && (Memory_ncmp(directoryEntry->d_name,".",1)==0))
         {
@@ -171,12 +172,12 @@ PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
           List_insertHead(this->directories,fullName);
           String_delete(name);
         }
+        #endif
       }
     }
   }
 #endif
 
-#endif
     return result;
 }
 

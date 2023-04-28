@@ -50,7 +50,7 @@ int step4()
 {
 	f = FileIo_new(testFileName);
 	FileIo_remove(f, testFileName);
-
+    FileIo_delete(f);
 	return 1;
 }
 
@@ -63,9 +63,12 @@ int step5()
 
 int step6()
 {
-	FileIo* f = 0;
-	List* listOfFiles = FileIo_listDir(f);
+	FileIo* f = FileIo_new();
+	String* currentPath = FileIo_getCwd(f);
+	List* listOfFiles = FileIo_listFiles(f, currentPath);
 	
+	String_delete(currentPath);
+	FileIo_delete(f);
 	return 1;
 }
 
@@ -74,6 +77,9 @@ int step7()
   FileIo* f = FileIo_new();
   String* currentPath = FileIo_getCwd(f);
   printf("Current Working Directoy: %s\n", String_getBuffer(currentPath));
+  String_delete(currentPath);
+  FileIo_delete(f);
+  return 1;
 }
 
 void main()
