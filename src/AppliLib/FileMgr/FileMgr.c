@@ -203,7 +203,7 @@ PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryN
   
   /* Merge directory name with current path to have the full path of the directory*/
   FileMgr_mergePath(this, fullPathDirectory, addedDirectory);
-  
+  printf("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory));
   /* TODO: Check if merged path exist on filesystem */
   
   /* add directory to this->directories */
@@ -212,9 +212,10 @@ PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryN
   /* For each directory */
   /* List_forEach(this->directories, FileMgr_listFiles, this); */
   fullPathDirectory = List_getNext(this->directories);
-  
+  printf("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory));
   while (fullPathDirectory!=0)
   {
+    printf("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory));
     FileMgr_listFiles(this, fullPathDirectory);
     fullPathDirectory = List_getNext(this->directories);
     #if 0
@@ -353,6 +354,17 @@ PUBLIC List * FileMgr_filterFiles(FileMgr * this, const char * pattern)
 
 PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory)
 {
+  FileIo* f = FileIo_new();
+  List * fileList = FileIo_listFiles(f, directory);
+  String* fileName = 0;
+
+  while ((fileName = List_getNext(fileList)) != 0)
+  {
+    String* fullFileName = String_copy(directory);
+    FileMgr_mergePath(this, fullFileName, fileName);
+    List_insertTail(this->files, fullFileName);
+    printf("List files: %s\n", String_getBuffer(fullFileName));
+  }
 }
 
 /**************************************************
@@ -372,14 +384,15 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   String* result = String_new(0);
   // TODO: CHeck initial condition of validity length > 0
   
-  printf("mergePath: path1 %s\n", String_getBuffer(path1));
-  printf("mergePath: path2 %s\n", String_getBuffer(path2));
+  Error_new(ERROR_INFO, "mergePath: path1 %s\n", String_getBuffer(path1));
+  Error_new(ERROR_INFO, "mergePath: path2 %s\n", String_getBuffer(path2));
+
   /* TODO: check if path2 is absolute path in which case copy and return */
   
   List* tokenPath1 = String_splitToken(path1, this->separator);
   List* tokenPath2 = String_splitToken(path2, this->separator);
-
-  while ((s = List_removeTail(tokenPath2))!=0)
+  s = List_removeTail(tokenPath2);
+  while (s!=0)
   {
     if (String_compare(s, twoDots)==0)
     {
@@ -392,22 +405,29 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
     }
     else
     {
-      List_insertHead(tokenPath1, List_removeTail(tokenPath2));
+      List_insertHead(tokenPath1, s);
     }
+    s = List_removeTail(tokenPath2);
   }
-
+  s = List_getNext(tokenPath1);
+  String_append(result, String_getBuffer(s));
   while ((s = List_getNext(tokenPath1)) != 0)
   {
     String_append(result, this->separator);
     String_append(result, String_getBuffer(s));
+    //printf("%s\n", String_getBuffer(s)); 
   }
 
-  if (String_getLength(result)>1000) 
+  if (String_getLength(result)>1024) 
   {
-    printf("String length = %d\n", String_getLength(result));
-    printf("Str length = %d\n", Memory_len(String_getBuffer(result)));
+    Error_new(ERROR_INFO, "String length = %d\n", String_getLength(result));
+    Error_new(ERROR_INFO, "Str length = %d\n", Memory_len(String_getBuffer(result)));
   }
   Error_new(ERROR_INFO,"Merged path: %s\n", String_getBuffer(result));
+  String_setBuffer(path1, String_getBuffer(result));
+  String_delete(twoDots);
+  String_delete(oneDot);
+  String_delete(s);
 }
 
 /**************************************************
