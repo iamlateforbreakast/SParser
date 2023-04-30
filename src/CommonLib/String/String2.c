@@ -1,10 +1,10 @@
 /**********************************************//** 
-  @file String2.c
+  /file String2.c
   
-  @brief The String class provide a dynamic array of char terminated
+  /brief The String class provide a dynamic array of char terminated
   by 0.
   
-  The class String is TBD
+  The class String is a container for text data.
 **************************************************/
 
 #include "String2.h"
@@ -15,17 +15,18 @@
 #include <stdlib.h>
 
 /**********************************************//** 
-  @class String
+  /class String
 **************************************************/
 struct String
 {
   Object object;
+  int isOwned;
   char * buffer;
   unsigned int length;
 };
 
 /**********************************************//**
-  @private Class Description
+  /private Class Description
 **************************************************/
 PRIVATE Class stringClass = 
 {
@@ -37,10 +38,10 @@ PRIVATE Class stringClass =
 };
 
 /**********************************************//** 
-  @brief Create a new String object.
-  @public
-  @memberof String
-  @return Created String object.
+  /brief Create a new String object.
+  /public
+  /memberof String
+  /return Created String object.
 **************************************************/
 PUBLIC String * String_new(const char* initString)
 {
@@ -60,10 +61,26 @@ PUBLIC String * String_new(const char* initString)
     this->buffer = 0;
     this->length = 0;
   }
-  
+  this->isOwned = 1;
   return this;
 }
 
+/**********************************************//** 
+  /brief Create a new instance without copying the
+  initial text.
+  /public
+  /memberof String
+  /param[in] initString the const text to use for init
+  /return created object
+**************************************************/
+PUBLIC String * String_newNoCopy(const char * initString)
+{
+  String * this;
+  
+  this->isOwn = 0;
+  
+  return this;
+}
 /**********************************************//** 
   @brief Delete an instance of class String.
   @public
