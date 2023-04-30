@@ -37,13 +37,16 @@ int step2()
 {
   FileMgr * testFileMgr = 0;
   String * testFileContent = 0;
+  String * fileName = String_new("main.c");
 
   testFileMgr = FileMgr_getRef();
 
   FileMgr_addDirectory(testFileMgr, ".");
-
-  testFileContent = FileMgr_load(testFileMgr, "main.c");
-
+  
+  if (FileMgr_isManaged(testFileMgr, fileName))
+  {
+    testFileContent = FileMgr_load(testFileMgr, "main.c");
+  }
   FileMgr_delete(testFileMgr);
 
   String_delete(testFileContent);

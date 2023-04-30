@@ -519,6 +519,9 @@ PRIVATE FileDesc * FileMgr_isManaged(FileMgr * this, String * fullName)
   FileDesc * fd = 0;
   unsigned int isFound = 0;
   
+  #ifndef PRIVATE
+  printf("PRIVATE macro is not defined\n");
+  #endif
   /* Find file in list */
   while ((fd = List_getNext(this->files))!=0)
   {

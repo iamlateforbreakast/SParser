@@ -4,6 +4,10 @@
 #define _TYPES_H_
 
 #define PUBLIC
-#define PRIVATE static
 
+#ifndef UNIT_TEST
+  #define PRIVATE static
+#else
+  #define PRIVATE
+#endif
 #endif /* _TYPES_H_ */
