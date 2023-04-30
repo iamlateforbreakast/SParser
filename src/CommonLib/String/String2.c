@@ -77,7 +77,7 @@ PUBLIC String * String_newNoCopy(const char * initString)
 {
   String * this;
   
-  this->isOwn = 0;
+  this->isOwned = 0;
   
   return this;
 }
