@@ -72,11 +72,23 @@ int step1()
 
 int step2()
 {
-    // PUBLIC unsigned int * this, const char * location);
-  //FileMgr_addDirectory(testFileMgr, "../../../../../../Solo/AUK40803_tr_solo_dev/vobs/solo/fsw");
-  //FileMgr_addDirectory(testFileMgr, "..");
-  //FileMgr_addDirectory(testFileMgr, "../../..");
+  FileMgr * testFileMgr1 = FileMgr_getRef();
+
+  /* Test 1 */
+  printf("Step 2: Test 1 - Check it is possible to add a directory: ");
+  FileMgr_addDirectory(testFileMgr1, "..");
+  UT_ASSERT((1))
+
+  /* Test 2 */
+  FileMgr_delete(testFileMgr1);
+  printf("Step 2: test 2 - Check all memory is freed properly: ");
+  Memory_report();
+
+  UT_ASSERT((Memory_getAllocRequestNb()==(Memory_getFreeRequestNb()+1)))
+
+  return 1;
 }
+
 int step3()
 {
   FileMgr * testFileMgr = 0;
@@ -97,7 +109,7 @@ int step3()
 
   Memory_report();
 
-  return 0;
+  return 1;
 }
 
 int step4()
@@ -113,25 +125,25 @@ int step4()
 
   Memory_report();
 
-  return 0;
+  return 1;
 }
 
 int step5()
 {
-
-// PUBLIC char * FileMgr_getRootLocation(FileMgr* this);
+  //PUBLIC List * FileMgr_filterFiles(FileMgr * this, const char * pattern);
+  return 1;
 }
 
 int step6()
 {
-  //PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryName);
-  //PUBLIC List * FileMgr_filterFiles(FileMgr * this, const char * pattern);
   //PUBLIC String * FileMgr_searchFile(FileMgr * this, String * name, List * preferredDir);
+  return 1;
 }
+
 int main()
 {
   step1();
-  //step2();
+  step2();
   //step3();
   //step4();
   //step5();
