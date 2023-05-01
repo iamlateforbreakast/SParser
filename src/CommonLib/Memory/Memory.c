@@ -20,8 +20,10 @@ PRIVATE unsigned int Memory_freeRequestId = 0;
 PRIVATE unsigned int Memory_nbBytesAllocated = 0;
 
 /**********************************************//** 
-  @brief TBD
+  @brief Allocate a memory area of nbBytes
   @public
+  @param[in] nbBytes Number of bytes
+  @return pointer to allocated area
   @memberof Memory
 **************************************************/
 PUBLIC void* Memory_alloc(unsigned int nbBytes)
@@ -40,8 +42,10 @@ PUBLIC void* Memory_alloc(unsigned int nbBytes)
 }
 
 /**********************************************//** 
-  @brief TBD
+  @brief Free an allocate area of memory
   @public
+  @param[in] pointer Pointer to area to free
+  @param[in] nbBytes Number of bytes
   @memberof Memory
 **************************************************/
 PUBLIC void Memory_free(void* pointer, unsigned int nbBytes)
@@ -61,8 +65,11 @@ PUBLIC void Memory_free(void* pointer, unsigned int nbBytes)
 }
 
 /**********************************************//** 
-  @brief TBD
+  @brief Re-allocate an area of memory
   @public
+  @param[in] pointer Pointer to area
+  @param[in] prevSizeBytes Previous size of area in bytes
+  @param[in] newSizeBytes New size of area in bytes
   @memberof Memory
 **************************************************/
 PUBLIC void * Memory_realloc(void * pointer, unsigned int prevSizeBytes, unsigned int newSizeBytes)
@@ -148,4 +155,24 @@ PUBLIC void Memory_report()
   Error_new(ERROR_INFO, "Memory Usage Report:\n"
                                         "Number of memory allocation Requests: %d\n"
                                         "Number of memory de-allocation Requests: %d\n", Memory_allocRequestId, Memory_freeRequestId);
+}
+
+/**********************************************//** 
+  @brief TBD
+  @public
+  @memberof Memory
+**************************************************/
+PUBLIC int Memory_getAllocRequestNb()
+{
+  return Memory_allocRequestId;
+}
+
+/**********************************************//** 
+  @brief TBD
+  @public
+  @memberof Memory
+**************************************************/
+PUBLIC int Memory_getFreeRequestNb()
+{
+  return Memory_freeRequestId;
 }
