@@ -98,20 +98,20 @@ PRIVATE FileMgr * FileMgr_new()
 **************************************************/
 PUBLIC void FileMgr_delete(FileMgr * this)
 {
-  if (this!=0)
+  if (fileMgr!=0)
   {
-    if (this->object.refCount==1)
+    if (fileMgr->object.refCount==1)
     {
-      List_delete(this->files);
-      List_delete(this->directories);
+      List_delete(fileMgr->files);
+      List_delete(fileMgr->directories);
       //String_delete(this->separator);
-      String_delete(this->rootLocation);
-      Object_delete(&this->object);
+      String_delete(fileMgr->rootLocation);
+      Object_delete(&fileMgr->object);
       fileMgr = 0;
     }
-    else if (this->object.refCount>1)
+    else if (fileMgr->object.refCount>1)
     {
-      this->object.refCount--;
+      fileMgr->object.refCount--;
     }
   }
 }

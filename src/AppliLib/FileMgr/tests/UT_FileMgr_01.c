@@ -6,6 +6,9 @@
 
 #include <stdio.h>
 
+#define UT_ASSERT(cond) if ((cond)) \
+                          { printf("Failed\n"; return 0;)} \
+                          else printf("Passed\n");
 #define FILEMGR_MAX_PATH (1024)
 
 typedef struct TestFileMgr
@@ -57,13 +60,15 @@ int step1()
   //FileMgr_addDirectory(testFileMgr, "../../..");
 
   /* Test 3 */
+  printf("Step 1: Test 3 - Check the ability to change root location: ");
+  printf("Failed\n");
   // FileMgr_setRootLocation(FileMgr
 
   /* Test 4 */
+  printf("Step 1: Test 4 - Check ref is not null: ");
   FileIo_delete(f);
   String_delete(currentLocation);
   FileMgr_delete(testFileMgr1);
-  Printf("Step 1: test 3 - Check ref is not null: ");
   if (testFileMgr1)
   {
      printf("OK\n");
@@ -71,16 +76,23 @@ int step1()
   else
   {
      printf("Failed\n");
-     Return 0;
+     return 0;
   }
 
   /* Test 5 */
+  printf("Step 1: Test 5 - Check ref is null: ");
   FileMgr_delete(testFileMgr2);
+  printf("Failed\n");
+  //ASSERT((testFIleMgr->object->refCount))
 
   /* Test 6 */
+  printf("Step 1: Test 6 - Check it is possible to delete a null pointer: ");
+  printf("Failed\n");
   FileMgr_delete(testFileMgr2);
 
   /* Test 7 */
+  printf("Step 1: test 7 - Check all memory is ffreed properly");
+  printf("Failed\n");
   Memory_report();
 
   return 1;
