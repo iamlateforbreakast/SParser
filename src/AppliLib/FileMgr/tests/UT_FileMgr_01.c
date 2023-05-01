@@ -11,6 +11,8 @@
                           else { printf("Failed\n"); return 0;}
 #define FILEMGR_MAX_PATH (1024)
 
+extern FileMgr * fileMgr;
+
 typedef struct TestFileMgr
 {
   Object object;
@@ -31,33 +33,13 @@ int step1()
   
   /* Test 1 */
   printf("Step 1: Test 1 - Check there is only one FileMgr: ");
-  if (testFileMgr1!=testFileMgr2) 
-  {
-    printf("Failed\n");
-    return 0;
-  }
-  else
-  {
-    printf("OK\n");
-  }
+  UT_ASSERT((testFileMgr1==testFileMgr2))
 
   /* Test 2 */
   printf("Step 1: Test 2 - Check the root location is correct: ");
-  if (String_compare(((TestFileMgr*)testFileMgr1)->rootLocation, currentLocation)!=0)
-  {
-    printf("Failed\n");
-    return 0;
-  }
-  else
-  {
-    printf("OK\n");
-  }
+  UT_ASSERT(String_compare(((TestFileMgr*)testFileMgr1)->rootLocation, currentLocation)==0)
   
-  printf("Root location: %s\n", (((TestFileMgr*)testFileMgr1)->rootLocation));
-  // PUBLIC unsigned int * this, const char * location);
-  //FileMgr_addDirectory(testFileMgr, "../../../../../../Solo/AUK40803_tr_solo_dev/vobs/solo/fsw");
-  //FileMgr_addDirectory(testFileMgr, "..");
-  //FileMgr_addDirectory(testFileMgr, "../../..");
+  printf("Root location: %s\n", String_getBuffer(((TestFileMgr*)testFileMgr1)->rootLocation));
 
   /* Test 3 */
   printf("Step 1: Test 3 - Check the ability to change root location: ");
@@ -74,21 +56,27 @@ int step1()
   /* Test 5 */
   printf("Step 1: Test 5 - Check ref is null: ");
   FileMgr_delete(testFileMgr2);
-  UT_ASSERT((testFileMgr2==0))
+  UT_ASSERT((fileMgr==0))
 
   /* Test 6 */
   printf("Step 1: Test 6 - Check it is possible to delete a null pointer: ");
   FileMgr_delete(testFileMgr2);
-  UT_ASSERT((testFileMgr2==0))
+  UT_ASSERT((fileMgr==0))
 
   /* Test 7 */
-  printf("Step 1: test 7 - Check all memory is ffreed properly");
-  printf("Failed\n");
-  Memory_report();
+  printf("Step 1: test 7 - Check all memory is freed properly: ");
+  UT_ASSERT((Memory_getAllocRequestNb()==(Memory_getFreeRequestNb()+1)))
 
   return 1;
 }
 
+int step2()
+{
+    // PUBLIC unsigned int * this, const char * location);
+  //FileMgr_addDirectory(testFileMgr, "../../../../../../Solo/AUK40803_tr_solo_dev/vobs/solo/fsw");
+  //FileMgr_addDirectory(testFileMgr, "..");
+  //FileMgr_addDirectory(testFileMgr, "../../..");
+}
 int step3()
 {
   FileMgr * testFileMgr = 0;

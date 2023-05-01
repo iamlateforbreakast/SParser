@@ -78,7 +78,7 @@ PRIVATE FileMgr * FileMgr_new()
 #ifdef _WIN32
   this->separator = "\\";
 #else
-  this->separator = "\/";
+  this->separator = "//";
 #endif
   if (this->rootLocation ==0)
   {
@@ -108,6 +108,7 @@ PUBLIC void FileMgr_delete(FileMgr * this)
       String_delete(fileMgr->rootLocation);
       Object_delete(&fileMgr->object);
       fileMgr = 0;
+      this = 0;
     }
     else if (fileMgr->object.refCount>1)
     {
@@ -203,7 +204,7 @@ PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryN
   
   /* Merge directory name with current path to have the full path of the directory*/
   FileMgr_mergePath(this, fullPathDirectory, addedDirectory);
-  printf("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory));
+  Error_new(ERROR_INFO, "Full directoryPath: %s\n", String_getBuffer(fullPathDirectory));
   /* TODO: Check if merged path exist on filesystem */
   
   /* add directory to this->directories */
@@ -218,14 +219,6 @@ PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryN
     //printf("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory));
     FileMgr_listFiles(this, fullPathDirectory);
     fullPathDirectory = List_getNext(this->directories);
-    #if 0
-    if (String_getLength(fullPathDirectory)>1000) 
-    {
-      printf("String length = %d\n", String_getLength(fullPathDirectory));
-      printf("Nb calls = %d\n", nbCalls);
-    }
-    nbCalls++;
-    #endif
   }
   
   String_delete(addedDirectory);
@@ -519,9 +512,6 @@ PRIVATE FileDesc * FileMgr_isManaged(FileMgr * this, String * fullName)
   FileDesc * fd = 0;
   unsigned int isFound = 0;
   
-  #ifndef PRIVATE
-  printf("PRIVATE macro is not defined\n");
-  #endif
   /* Find file in list */
   while ((fd = List_getNext(this->files))!=0)
   {
