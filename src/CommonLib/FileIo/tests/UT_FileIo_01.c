@@ -82,6 +82,16 @@ int step7()
   return 1;
 }
 
+/*
+PUBLIC void FileIo_createFile(FileIo* this, String* fullFileName);
+PUBLIC void FileIo_openDir(FileIo* this, String* fullFileName);
+PUBLIC void FileIo_createDir(FileIo* this, String* fullDirName);
+PUBLIC void FileIo_write(FileIo* this, char* buffer, int length);
+PUBLIC int FileIo_fSeekEnd(FileIo * this, int pos);
+PUBLIC int FileIo_fSeekSet(FileIo * this, int pos);
+PUBLIC int FileIo_ftell(FileIo* this);
+*/
+
 void main()
 {
 	for (int i = 0; i < BUFFER_SIZE_BYTES; i++)
