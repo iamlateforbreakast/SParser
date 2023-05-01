@@ -26,6 +26,7 @@ int step1()
   FileIo * f = FileIo_new();
   String * currentLocation = FileIo_getCwd(f);
   
+  /* Test 1 */
   printf("Step 1: Test 1 - Check there is only one FileMgr: ");
   if (testFileMgr1!=testFileMgr2) 
   {
@@ -36,6 +37,8 @@ int step1()
   {
     printf("OK\n");
   }
+
+  /* Test 2 */
   printf("Step 1: Test 2 - Check the root location is correct: ");
   if (String_compare(((TestFileMgr*)testFileMgr1)->rootLocation, currentLocation)!=0)
   {
@@ -46,24 +49,44 @@ int step1()
   {
     printf("OK\n");
   }
-
+  
   printf("Root location: %s\n", (((TestFileMgr*)testFileMgr1)->rootLocation));
-  // PUBLIC unsigned int FileMgr_setRootLocation(FileMgr* this, const char * location);
+  // PUBLIC unsigned int * this, const char * location);
   //FileMgr_addDirectory(testFileMgr, "../../../../../../Solo/AUK40803_tr_solo_dev/vobs/solo/fsw");
   //FileMgr_addDirectory(testFileMgr, "..");
   //FileMgr_addDirectory(testFileMgr, "../../..");
 
+  /* Test 3 */
+  // FileMgr_setRootLocation(FileMgr
+
+  /* Test 4 */
   FileIo_delete(f);
   String_delete(currentLocation);
   FileMgr_delete(testFileMgr1);
-  FileMgr_delete(testFileMgr1);
+  Printf("Step 1: test 3 - Check ref is not null: ");
+  if (testFileMgr1)
+  {
+     printf("OK\n");
+  }
+  else
+  {
+     printf("Failed\n");
+     Return 0;
+  }
 
+  /* Test 5 */
+  FileMgr_delete(testFileMgr2);
+
+  /* Test 6 */
+  FileMgr_delete(testFileMgr2);
+
+  /* Test 7 */
   Memory_report();
 
   return 1;
 }
 
-int step2()
+int step3()
 {
   FileMgr * testFileMgr = 0;
   String * testFileContent = 0;
@@ -86,7 +109,7 @@ int step2()
   return 0;
 }
 
-int step3()
+int step4()
 {
   FileMgr * testFileMgr = FileMgr_getRef();
   String * testFileContent = 0;
@@ -102,13 +125,13 @@ int step3()
   return 0;
 }
 
-int step4()
+int step5()
 {
 
 // PUBLIC char * FileMgr_getRootLocation(FileMgr* this);
 }
 
-int step5()
+int step6()
 {
   //PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryName);
   //PUBLIC List * FileMgr_filterFiles(FileMgr * this, const char * pattern);
