@@ -7,8 +7,8 @@
 #include <stdio.h>
 
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("Failed\n"; return 0;)} \
-                          else printf("Passed\n");
+                          { printf("Passed\n");} \
+                          else { printf("Failed\n"); return 0;}
 #define FILEMGR_MAX_PATH (1024)
 
 typedef struct TestFileMgr
@@ -69,26 +69,17 @@ int step1()
   FileIo_delete(f);
   String_delete(currentLocation);
   FileMgr_delete(testFileMgr1);
-  if (testFileMgr1)
-  {
-     printf("OK\n");
-  }
-  else
-  {
-     printf("Failed\n");
-     return 0;
-  }
-
+  UT_ASSERT((testFileMgr1!=0))
+  
   /* Test 5 */
   printf("Step 1: Test 5 - Check ref is null: ");
   FileMgr_delete(testFileMgr2);
-  printf("Failed\n");
-  //ASSERT((testFIleMgr->object->refCount))
+  UT_ASSERT((testFileMgr2==0))
 
   /* Test 6 */
   printf("Step 1: Test 6 - Check it is possible to delete a null pointer: ");
-  printf("Failed\n");
   FileMgr_delete(testFileMgr2);
+  UT_ASSERT((testFileMgr2==0))
 
   /* Test 7 */
   printf("Step 1: test 7 - Check all memory is ffreed properly");
