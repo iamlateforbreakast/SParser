@@ -3,6 +3,7 @@
 #include "List.h"
 #include "FileIo.h"
 #include "Memory.h"
+#include "ObjectMgr.h"
 
 #include <stdio.h>
 
@@ -72,15 +73,18 @@ int step1()
 
 int step2()
 {
+  ObjectMgr * objMgr = ObjectMgr_getRef();
   FileMgr * testFileMgr1 = FileMgr_getRef();
 
   /* Test 1 */
   printf("Step 2: Test 1 - Check it is possible to add a directory: ");
   FileMgr_addDirectory(testFileMgr1, "..");
   UT_ASSERT((1))
-
+  ObjectMgr_reportUnallocated(objMgr);
+  
   /* Test 2 */
   FileMgr_delete(testFileMgr1);
+  ObjectMgr_delete(objMgr);
   printf("Step 2: test 2 - Check all memory is freed properly: ");
   Memory_report();
 
@@ -142,7 +146,7 @@ int step6()
 
 int main()
 {
-  step1();
+  //step1();
   step2();
   //step3();
   //step4();

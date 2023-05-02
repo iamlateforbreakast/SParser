@@ -78,7 +78,7 @@ PRIVATE FileMgr * FileMgr_new()
 #ifdef _WIN32
   this->separator = "\\";
 #else
-  this->separator = "//";
+  this->separator = "/";
 #endif
   if (this->rootLocation ==0)
   {
@@ -357,9 +357,9 @@ PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory)
     fileDesc = FileDesc_new();
     String* fullFileName = String_copy(directory);
     FileMgr_mergePath(this, fullFileName, fileName);
+    FileDesc_setFullName(fileDesc, fullFileName);
     List_insertTail(this->files, (void*)fileDesc);
     Error_new(ERROR_INFO,"List files: %s\n", String_getBuffer(fullFileName));
-    FileDesc_setFullName(fileDesc, fullFileName);
     //String_delete(name);
   }
 }
