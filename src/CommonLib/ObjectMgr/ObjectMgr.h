@@ -13,6 +13,7 @@ PUBLIC ObjectMgr * ObjectMgr_copy(ObjectMgr * this);
 PUBLIC ObjectMgr * ObjectMgr_getRef();
 PUBLIC Object * ObjectMgr_allocate(ObjectMgr * this, unsigned int size);
 PUBLIC void ObjectMgr_deallocate(ObjectMgr * this, Object * object);
+PUBLIC void ObjectMgr_reportUnallocated(ObjectMgr* this);
 PUBLIC void ObjectMgr_report(ObjectMgr * this);
 
 #endif /* _OBJECTMGR_H_ */
