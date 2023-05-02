@@ -258,5 +258,15 @@ PUBLIC void ObjectMgr_deallocate(ObjectMgr * this, Object * object)
 PUBLIC void ObjectMgr_reportUnallocated(ObjectMgr* this)
 {
   Object* obj = this->allocatedObjects[this->usedSpace].ptr;
-  printf("Id of first unalloacted object: %d\n", obj->id);
+  int idx = this->usedSpace;
+  printf("Id of first unallocated object: ");
+
+  for (int i=0; i<10; i++)
+  {
+    printf(" %d", idx);
+    idx =  this->allocatedObjects[idx].prevId;
+    if (idx==END_OF_QUEUE) break;
+  }
+  printf("\n");
+  
 }

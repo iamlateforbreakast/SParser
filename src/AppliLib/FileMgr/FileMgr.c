@@ -362,6 +362,8 @@ PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory)
     Error_new(ERROR_INFO,"List files: %s\n", String_getBuffer(fullFileName));
     //String_delete(name);
   }
+  FileIo_delete(f);
+  List_delete(fileList);
 }
 
 /**************************************************
@@ -393,12 +395,12 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   {
     if (String_compare(s, twoDots)==0)
     {
-      List_removeTail(tokenPath2);
-      List_removeHead(tokenPath1);
+      String_delete(s);
+      String_delete(List_removeHead(tokenPath1));
     }
     else if (String_compare(s, oneDot)==0)
     {
-      List_removeTail(tokenPath2);
+      String_delete(s);
     }
     else
     {
@@ -425,7 +427,10 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
     Error_new(ERROR_INFO, "Str length = %d\n", Memory_len(String_getBuffer(result)));
   }
   //Error_new(ERROR_INFO,"Merged path: %s\n", String_getBuffer(result));
-  String_setBuffer(path1, String_getBuffer(result));
+  String_stealBuffer(path1, result);
+  List_delete(tokenPath1);
+  List_delete(tokenPath2);
+  String_delete(result);
   String_delete(twoDots);
   String_delete(oneDot);
   String_delete(s);

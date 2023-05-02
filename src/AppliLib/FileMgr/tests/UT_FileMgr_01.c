@@ -80,14 +80,14 @@ int step2()
   printf("Step 2: Test 1 - Check it is possible to add a directory: ");
   FileMgr_addDirectory(testFileMgr1, "..");
   UT_ASSERT((1))
-  ObjectMgr_reportUnallocated(objMgr);
   
+
   /* Test 2 */
   FileMgr_delete(testFileMgr1);
   ObjectMgr_delete(objMgr);
   printf("Step 2: test 2 - Check all memory is freed properly: ");
   Memory_report();
-
+  ObjectMgr_reportUnallocated(objMgr);
   UT_ASSERT((Memory_getAllocRequestNb()==(Memory_getFreeRequestNb()+1)))
 
   return 1;
