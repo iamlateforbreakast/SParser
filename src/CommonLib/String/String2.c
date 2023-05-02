@@ -73,14 +73,27 @@ PUBLIC String * String_new(const char* initString)
   /param[in] initString the const text to use for init
   /return created object
 **************************************************/
-PUBLIC String * String_newNoCopy(const char * initString)
+PUBLIC String * String_newByRef(const char * initString)
 {
-  String * this;
+  String * this = 0;
   
+  this = (String*)Object_new(sizeof(String), &stringClass);
+
+  if (initString != 0)
+  {
+    this->length = Memory_len((void*)initString);
+    this->buffer = initString;
+  }
+  else
+  {
+    this->length = 0;
+    this->buffer = 0;
+  }
   this->isOwned = 0;
   
   return this;
 }
+
 /**********************************************//** 
   @brief Delete an instance of class String.
   @public
@@ -92,8 +105,7 @@ PUBLIC void String_delete(String * this)
   {
     if (this->object.refCount == 1)
     {
-      // TODO: Check refCOunt
-      if (this->buffer!=0) 
+      if ((this->buffer!=0) && (this->isOwned))
       {
         Memory_free(this->buffer, this->length + 1);
       }
@@ -257,8 +269,10 @@ PUBLIC void String_setBuffer(String * this, char * buffer)
       Memory_free(this->buffer, this->length+1);
     }
     this->buffer = buffer;
-    // TO DO: check for NULL char
-    this->length = Memory_len((void*)this->buffer);
+    if (buffer != 0)
+      this->length = Memory_len((void*)this->buffer);
+    else
+      this->length = 0;
   }
 }
 
@@ -427,4 +441,19 @@ PUBLIC List* String_splitToken(String* this, const char* separator)
     token = strtok(0, separator);
   }
   return result;
+}
+
+/**************************************************
+ @brief String_stealBuffer
+
+ This function move the buffer from string s
+
+ @param [in]     s String to steal from
+**************************************************/
+PUBLIC void String_stealBuffer(String* this, String* s)
+{
+  String_setBuffer(this, String_getBuffer(s));
+  s->buffer = 0;
+  s->length = 0;
+  s->isOwned = 0;
 }
