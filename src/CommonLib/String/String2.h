@@ -23,4 +23,5 @@ PUBLIC String * String_subString(String * this, unsigned int idx, unsigned int l
 PUBLIC unsigned int String_matchWildcard(String * this, const char * wildcard);
 PUBLIC int String_toInt(String* this);
 PUBLIC List* String_splitToken(String* this, const char* separator);
+PUBLIC void String_stealBuffer(String* this, String* s);
 #endif /* _STRING2_H_ */
