@@ -80,11 +80,6 @@ PRIVATE FileMgr * FileMgr_new()
 #else
   this->separator = "/";
 #endif
-  if (this->rootLocation ==0)
-  {
-    /* Error case: Cannot obtain the FileMgr root location. */
-    Error_new(ERROR_FATAL, "Cannot obtain the FileMgr root location");
-  }
   
   /* TODO: Check this->rootLocation has a valid length */
   
@@ -104,7 +99,6 @@ PUBLIC void FileMgr_delete(FileMgr * this)
     {
       List_delete(fileMgr->files);
       List_delete(fileMgr->directories);
-      //String_delete(this->separator);
       String_delete(fileMgr->rootLocation);
       Object_delete(&fileMgr->object);
       fileMgr = 0;
@@ -428,6 +422,7 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   }
   //Error_new(ERROR_INFO,"Merged path: %s\n", String_getBuffer(result));
   String_stealBuffer(path1, result);
+  String_delete(result);
   List_delete(tokenPath1);
   List_delete(tokenPath2);
   String_delete(result);
@@ -520,7 +515,7 @@ PRIVATE FileDesc * FileMgr_isManaged(FileMgr * this, String * fullName)
   /* Find file in list */
   while ((fd = List_getNext(this->files))!=0)
   {
-    if (String_compare(FileDesc_getFullName(fd), fullName)==0)
+    if (String_compare(FileDesc_getName(fd), fullName)==0)
     {
       isFound ++;
       result = fd;
@@ -556,7 +551,7 @@ PRIVATE unsigned int FileMgr_existFS(FileMgr * this, String * fullName)
   if (f) 
   {
     result = 1;
-    //fclose(f);
+    FileIo_delete(f);
   }
   return result;
 }
