@@ -82,6 +82,16 @@ int step7()
   return 1;
 }
 
+int step8()
+{
+  FileIo* f = FileIo_new();
+  FileIo_openFile(f, "test.file");
+  FileIo_fSeekEnd(f, 0);
+  printf("Ftell %d\n", FileIo_ftell(f));
+  FileIo_delete(f);
+  return 1;
+}
+
 /*
 PUBLIC void FileIo_createFile(FileIo* this, String* fullFileName);
 PUBLIC void FileIo_openDir(FileIo* this, String* fullFileName);
@@ -106,4 +116,5 @@ void main()
 	step5();
 	step6();
 	step7();
+	step8();
 }
