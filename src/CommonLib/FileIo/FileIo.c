@@ -183,7 +183,7 @@ PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
 
 PUBLIC int FileIo_fSeekEnd(FileIo * this, int pos)
 {
-
+  fseek(this->f, pos, SEEK_END);
 }
 
 PUBLIC String * FileIo_getCwd(FileIo * this)
@@ -207,10 +207,10 @@ PUBLIC String * FileIo_getCwd(FileIo * this)
 
 PUBLIC int FileIo_fSeekSet(FileIo* this, int pos)
 {
-
+  fseek(this->f, pos, SEEK_SET);
 }
 
 PUBLIC int FileIo_ftell(FileIo* this)
 {
-
+  return ftell(this->f);
 }

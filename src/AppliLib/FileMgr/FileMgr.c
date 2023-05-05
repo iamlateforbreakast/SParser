@@ -280,7 +280,7 @@ PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
 {
   String * result = 0;
   String * name = String_new(fileName);
-  FileIo * f = 0;
+  FileIo * f = FileIo_new();
   FileDesc * fd = 0;
   
   char * buffer = 0;
@@ -292,7 +292,7 @@ PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
   {
     /* Open file */
     //f=fopen(String_getBuffer(FileDesc_getFullName(fd)),"rb");
-    f = FileIo_new(String_getBuffer(FileDesc_getFullName(fd)));
+    FileIo_openFile(f, FileDesc_getFullName(fd));
     if (f)
     {
 	    FileIo_fSeekEnd(f, 0);
