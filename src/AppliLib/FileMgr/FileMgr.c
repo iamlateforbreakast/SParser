@@ -425,7 +425,7 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   String_delete(result);
   List_delete(tokenPath1);
   List_delete(tokenPath2);
-  String_delete(result);
+  //String_delete(result);
   String_delete(twoDots);
   String_delete(oneDot);
   String_delete(s);
