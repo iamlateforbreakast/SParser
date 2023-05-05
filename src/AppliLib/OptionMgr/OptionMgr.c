@@ -101,6 +101,7 @@ PUBLIC void OptionMgr_delete(OptionMgr * this)
     {
       Map_delete(this->options);
       Object_delete(&this->object);
+      optionMgr = 0;
       this = 0;
     }
   }    
@@ -188,7 +189,7 @@ PUBLIC unsigned int OptionMgr_readFromFile(OptionMgr * this)
   if ((fullPath = FileMgr_addFile(fileMgr, String_getBuffer(path1))) != 0)
   {
     /* File exists and is managed */
-    fileContent = FileMgr_load(fileMgr, String_getBuffer(fullPath));
+    fileContent = FileMgr_load(fileMgr, String_getBuffer(fileName));
     OptionMgr_parseFile(this, fileContent);
   }
   /* TODO: Try home directory */
