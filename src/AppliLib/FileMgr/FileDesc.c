@@ -8,6 +8,7 @@
 
 #include "FileDesc.h"
 #include "String2.h"
+#include "FileIo.h"
 #include "Class.h"
 #include "Object.h"
 
@@ -130,4 +131,33 @@ PRIVATE String * FileDesc_getBasename(FileDesc * this)
   }
   
   return result;
+}
+
+/**********************************************//** 
+  @brief Load the content of a file
+  @public
+  @memberof FileDesc
+**************************************************/
+PUBLIC String * FileDesc_load(FileDesc * this)
+{
+  String * fileContent = 0;
+  FileIo * f = FileIo_new();
+
+  FileIo_openFile(f, FileDesc_getFullName(this));
+  if (f)
+  {
+	  FileIo_fSeekEnd(f, 0);
+	  int length=FileIo_ftell(f);
+	  FileIo_fSeekSet(f, 0);
+        
+	  char * buffer = (char*)Memory_alloc(length+1);
+    if (buffer)
+    {
+      FileIo_read(f, buffer, length);
+      buffer[length] = 0;
+      fileContent = String_new(buffer); 
+    }
+  }
+  FileIo_delete(f);
+  return fileContent;
 }

@@ -45,7 +45,8 @@ int step1()
   /* Test 3 */
   printf("Step 1: Test 3 - Check the ability to change root location: ");
   printf("Failed\n");
-  // FileMgr_setRootLocation(FileMgr
+  FileMgr_setRootLocation(testFileMgr1, "../../OptionMgr/tests");
+  printf("Root location: %s\n", String_getBuffer(((TestFileMgr*)testFileMgr1)->rootLocation));
 
   /* Test 4 */
   printf("Step 1: Test 4 - Check ref is not null: ");
@@ -146,10 +147,10 @@ int step6()
 
 int main()
 {
-  //step1();
+  step1();
   step2();
-  //step3();
-  //step4();
-  //step5();
+  step3();
+  step4();
+  step5();
   return 0;
 }

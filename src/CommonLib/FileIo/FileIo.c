@@ -49,7 +49,7 @@ PUBLIC void FileIo_openFile(FileIo * this, String * fullFileName)
   errno_t err = fopen_s(&this->f, "test.file" /*String_getBuffer(fullFileName)*/, "rb+");
   printf("Errno: %d\n", err);
 #else
-  this->f = fopen(String_getBuffer(fullFileName), "wb");
+  this->f = fopen(String_getBuffer(fullFileName), "rb+");
 #endif
   if (this->f)
   {

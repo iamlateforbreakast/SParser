@@ -145,7 +145,7 @@ PUBLIC FileMgr* FileMgr_getRef()
 }
 
 /**********************************************//** 
-  @brief TBD
+  @brief Set the root location
   @public
   @memberof FileMgr
   @return Status.
@@ -158,8 +158,9 @@ PUBLIC unsigned int FileMgr_setRootLocation(FileMgr* this, const char * location
   String * currentLocation = String_copy(this->rootLocation);
 
   FileMgr_mergePath(this, currentLocation, newLocation);
+  String_stealBuffer(this->rootLocation, currentLocation);
   
-  Memory_copy(this->rootLocation, String_getBuffer(currentLocation), FILEMGR_MAX_PATH);
+  //Memory_copy(this->rootLocation, String_getBuffer(currentLocation), FILEMGR_MAX_PATH);
   
   String_delete(newLocation);
   String_delete(currentLocation);
@@ -281,7 +282,8 @@ PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
   unsigned int length = 0;
   
   fd = FileMgr_isManaged(this, name);
-  
+  Error_new(ERROR_INFO,"Loading file: %s\n", fileName);
+
   if (fd)
   {
     /* Open file */
@@ -300,8 +302,8 @@ PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
         buffer[length] = 0;
         result = String_new(0);
         String_setBuffer(result, buffer);
-	    FileIo_delete(f);
       }
+      FileIo_delete(f);
     }
   }
   else
@@ -331,8 +333,7 @@ PUBLIC List * FileMgr_filterFiles(FileMgr * this, const char * pattern)
   {
     if (String_matchWildcard(FileDesc_getName(fd), pattern))
     {
-      s = String_getRef(FileDesc_getFullName(fd));
-      List_insertHead(result, s);
+      List_insertHead(result, fd);
     }
   }
   

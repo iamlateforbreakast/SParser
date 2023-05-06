@@ -11,6 +11,7 @@
 #include "Object.h"
 #include "String2.h"
 #include "FileMgr.h"
+#include "FileDesc.h"
 #include "OptionMgr.h"
 #include "List.h"
 #include "Error.h"
@@ -30,7 +31,7 @@ struct FileReader
 {
   Object object;
   List * buffers;
-  String * fileName;
+  FileDesc * fileDesc;
   String * currentBuffer;
   List * preferredDirs;
 };
@@ -57,26 +58,26 @@ PRIVATE void FileReader_printListPreferredDir(FileReader * this);
   @memberof FileReader
   @return Created FileReader object.
 **************************************************/
-PUBLIC FileReader * FileReader_new(String * fileName)
+PUBLIC FileReader * FileReader_new(FileDesc * fileDesc)
 {
   FileReader * this = 0;
   FileMgr * fileMgr = FileMgr_getRef();
   String * newFileContent = 0;
-  
+  char * fileName = String_getBuffer(FileDesc_getName(fileDesc));
+
   this = (FileReader*)Object_new(sizeof(FileReader), &fileReaderClass);
-  
   
   this->buffers = List_new();
   this->preferredDirs = List_new();
   
-  this->fileName = fileName;
-  Error_new(ERROR_INFO, "FileReader_new: Processing file %s\n", String_getBuffer(this->fileName));
+  this->fileDesc = fileDesc;
+  Error_new(ERROR_INFO, "FileReader_new: Processing file %s\n", fileName);
   
   /* Build list of all directories to be used to lookup additional files (include) */
   FileReader_getListPreferredDir(this);
   
   /* associate buffer containing the file to the fileRead */
-  newFileContent = FileMgr_load(fileMgr, String_getBuffer(fileName));
+  newFileContent = FileDesc_load(this->fileDesc);
   List_insertHead(this->buffers, newFileContent);
   this->currentBuffer = newFileContent;
   
@@ -139,7 +140,8 @@ PUBLIC char * FileReader_getBuffer(FileReader * this)
 **************************************************/
 PUBLIC String * FileReader_getName(FileReader * this)
 {
-  return this->fileName;
+  String * fileName = FileDesc_getName(this->fileDesc);
+  return fileName;
 }
 
 /**********************************************//** 
@@ -165,7 +167,8 @@ PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
   
   if (List_getSize(this->preferredDirs)==0)
   {
-    Error_new(ERROR_NORMAL, "FileReader_addFile: preferred search dirs is empty %s\n", String_getBuffer(this->fileName));
+    Error_new(ERROR_NORMAL, "FileReader_addFile: preferred search dirs is empty %s\n",
+                             String_getBuffer(FileReader_getName(this)));
   }
   /* Check in the fileName matches a pattern with a default search path */
   while ((dirInfo = (struct IncludeInfo *)List_getNext(this->preferredDirs))!=0)
@@ -312,7 +315,8 @@ PRIVATE void FileReader_printListPreferredDir(FileReader * this)
   
   if (List_getSize(this->preferredDirs)==0)
   {
-    Error_new(ERROR_NORMAL, "FileReader_addFile: preferred search dirs is empty %s\n", String_getBuffer(this->fileName));
+    Error_new(ERROR_NORMAL, "FileReader_addFile: preferred search dirs is empty %s\n", 
+                             String_getBuffer(FileReader_getName(this)));
   }
   while ((dirInfo = (struct IncludeInfo *)List_getNext(this->preferredDirs))!=0)
   {
