@@ -22,6 +22,7 @@ PUBLIC void FileIo_write(FileIo* this, char* buffer, int length);
 PUBLIC void FileIo_read(FileIo* this, char* buffer, int length);
 PUBLIC void FileIo_remove(FileIo* this, String* fullFileName);
 PUBLIC String * FileIo_getCwd(FileIo* this);
+PUBLIC List * FileIo_listDirs(FileIo * this, String * directory);
 PUBLIC List* FileIo_listFiles(FileIo* this, String * directory);
 PUBLIC int FileIo_fSeekEnd(FileIo * this, int pos);
 PUBLIC int FileIo_fSeekSet(FileIo * this, int pos);

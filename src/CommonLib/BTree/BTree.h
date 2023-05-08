@@ -32,5 +32,5 @@ PUBLIC unsigned int BTree_sizeof(BTree* tree);
 PUBLIC unsigned int BTree_reportSizeInBytes(BTree * tree);
 
 
-#endif _BTREE_
+#endif /* _BTREE_ */
 

@@ -446,7 +446,12 @@ PRIVATE unsigned int Grammar2_isFileToBeIgnored(Grammar2 * this, String * fileNa
     if (Memory_ncmp(buffer, "errno.h", 7)) return 1;
     if (Memory_ncmp(buffer, "inttypes.h", 10)) return 1;
     if (Memory_ncmp(buffer, "stdint.h", 8)) return 1;
-    
+    if (Memory_ncmp(buffer, "windows.h", 9)) return 1;
+    if (Memory_ncmp(buffer, "Windows.h", 9)) return 1;
+    if (Memory_ncmp(buffer, "tchar.h", 7)) return 1;
+    if (Memory_ncmp(buffer, "strsafe.h", 9)) return 1;
+    if (Memory_ncmp(buffer, "malloc.h", 8)) return 1;
+
     if (Memory_ncmp(buffer, "rtems/rtems/", 12)) return 1;
     if (Memory_ncmp(buffer, "rtems/rtems/status.inl", 23)) return 1;
     if (Memory_ncmp(buffer, "rtems/score/address.inl", 24)) return 1;

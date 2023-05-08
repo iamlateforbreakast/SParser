@@ -14,6 +14,7 @@
 #else
 #include <unistd.h>
 #endif
+
 struct FileIo
 {
   FILE* f;
@@ -107,6 +108,63 @@ PUBLIC void FileIo_createDir(FileIo* this, String * fullDirName)
 
 }
 
+PUBLIC List * FileIo_listDirs(FileIo * this, String * directory)
+{
+  List* result = List_new();
+#ifdef _WIN32
+  WIN32_FIND_DATA FindFileData;
+  HANDLE hFind;
+  TCHAR dir[MAX_PATH];
+
+  char * dirText = "C:\\Users\\remion_t\\source\\repos\\SParse-SP6\\UT_FileIo_01\\*";
+  hFind = FindFirstFile(_T("*"), &FindFileData);
+  if (hFind == INVALID_HANDLE_VALUE)
+  {
+    printf("FindFirstFile failed (%d)\n", GetLastError());
+  }
+  else
+  {        
+    do {
+      //_tprintf(_T("The first file found is %s\n"), FindFileData.cFileName);
+      if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
+      {
+        char text[MAX_PATH];
+        size_t nb = 0;
+        wcstombs_s(&nb, text, 100, FindFileData.cFileName, wcslen(FindFileData.cFileName));
+        printf("=>%s\n", text);
+        String* s = String_new(text);
+        List_insertTail(result, s);
+      }
+    } while (FindNextFile(hFind, &FindFileData));
+    FindClose(hFind);
+  }
+#else
+  struct dirent *directoryEntry = 0;
+  String * name = 0;
+  DIR * dirHandle = opendir(String_getBuffer(directory));
+  printf("%s\n",String_getBuffer(directory));
+  if (dirHandle!=0)
+  {
+    while ((directoryEntry = readdir(dirHandle)) != NULL) 
+    {
+      if (directoryEntry->d_type == DT_DIR)
+      {
+        if ((Memory_ncmp(directoryEntry->d_name,"..",2)==0) 
+           && (Memory_ncmp(directoryEntry->d_name,".",1)==0))
+        {
+          //String * fullName = String_copy(directory);
+          name = String_new(directoryEntry->d_name);
+          //FileMgr_mergePath(this, fullName, name);
+          List_insertHead(result,name);
+          printf("%s\n",String_getBuffer(name));
+        }
+      }
+    }
+  }
+#endif
+return result;
+}
+
 PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
 {
     List* result = List_new();
@@ -139,9 +197,6 @@ PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
     }
 #else
   struct dirent *directoryEntry = 0;
-  FileIo * dir = 0;
-  //FileDesc * fileDesc= 0;
-  String * fullName = 0;
   String * name = 0;
   DIR * dirHandle = opendir(String_getBuffer(directory));
   printf("%s\n",String_getBuffer(directory));
@@ -178,12 +233,14 @@ PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
   }
 #endif
 
-    return result;
+  return result;
 }
 
 PUBLIC int FileIo_fSeekEnd(FileIo * this, int pos)
 {
   fseek(this->f, pos, SEEK_END);
+
+  return 0;
 }
 
 PUBLIC String * FileIo_getCwd(FileIo * this)
@@ -208,6 +265,8 @@ PUBLIC String * FileIo_getCwd(FileIo * this)
 PUBLIC int FileIo_fSeekSet(FileIo* this, int pos)
 {
   fseek(this->f, pos, SEEK_SET);
+
+  return 0;
 }
 
 PUBLIC int FileIo_ftell(FileIo* this)

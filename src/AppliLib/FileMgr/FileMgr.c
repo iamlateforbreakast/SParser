@@ -211,7 +211,7 @@ PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryN
   //printf("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory));
   while (fullPathDirectory!=0)
   {
-    //printf("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory));
+    printf("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory));
     FileMgr_listFiles(this, fullPathDirectory);
     fullPathDirectory = List_getNext(this->directories);
   }
@@ -344,7 +344,9 @@ PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory)
 {
   FileIo* f = FileIo_new();
   List * fileList = FileIo_listFiles(f, directory);
-  String* fileName = 0;
+  List * dirs = FileIo_listDirs(f, directory);
+  String * fileName = 0;
+  String * dirName = 0;
   FileDesc * fileDesc= 0;
 
   while ((fileName = List_getNext(fileList)) != 0)
@@ -357,8 +359,16 @@ PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory)
     Error_new(ERROR_INFO,"List files: %s\n", String_getBuffer(fullFileName));
     //String_delete(name);
   }
+  while ((dirName = List_getNext(dirs))!=0)
+  {
+    String * fullDirPath = String_copy(directory);
+    FileMgr_mergePath(this, fullDirPath, dirName);
+    List_insertHead(this->directories, (void*)fullDirPath);
+    Error_new(ERROR_INFO,"Add directory: %s\n", String_getBuffer(fullDirPath));
+  }
   FileIo_delete(f);
   List_delete(fileList);
+  List_delete(dirs);
 }
 
 /**************************************************
@@ -442,7 +452,7 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
  @param [in]     name: String* - name of the file.
  @return: none
 **************************************************/
-PUBLIC String * FileMgr_searchFile(FileMgr * this, String * name, List * preferredDir)
+PUBLIC FileDesc * FileMgr_searchFile(FileMgr * this, String * name, List * preferredDir)
 {
   String * result = 0;
   //String * temp = 0;
@@ -458,11 +468,13 @@ PUBLIC String * FileMgr_searchFile(FileMgr * this, String * name, List * preferr
     FileMgr_mergePath(this, d, name);
     FileMgr_mergePath(this, fullPath, d);
     
-    c=FileMgr_isManaged(this, fullPath);
+    //c=FileMgr_isManaged(this, fullPath);
+    c=FileMgr_isManaged(this, name);
+    printf("Searching file %s in %s\n", String_getBuffer(fullPath), String_getBuffer(d));
     if (c!=0)
     {
       isFound = 1;
-      result = FileDesc_getFullName((FileDesc*)c);
+      result = c;
     }
     else
     {

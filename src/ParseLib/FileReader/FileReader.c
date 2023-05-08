@@ -155,6 +155,7 @@ PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
   FileMgr * fileMgr = FileMgr_getRef();
   // Not freed
   List * dirList = 0;
+  FileDesc * fileDesc = 0;
   String * fullPath = 0;
   String * newFileContent = 0;
   struct IncludeInfo * dirInfo = 0;
@@ -184,11 +185,11 @@ PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
   /* In all cases make sure the current dir. is in the search path */
   List_insertTail(dirList, String_new("."));
   
-  fullPath = FileMgr_searchFile(fileMgr, fileName, dirList);
+  fileDesc = FileMgr_searchFile(fileMgr, fileName, dirList);
   
-  if (fullPath != 0)
+  if (fileDesc != 0)
   {
-    newFileContent = FileMgr_load(fileMgr, String_getBuffer(fullPath));
+    newFileContent = FileDesc_load(fileDesc);
     List_insertHead(this->buffers, newFileContent);
     this->currentBuffer = newFileContent;
     result = String_getBuffer(newFileContent);

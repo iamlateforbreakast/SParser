@@ -74,6 +74,24 @@ int step6()
 
 int step7()
 {
+	FileIo * f =FileIo_new();
+
+    String * currentPath = FileIo_getCwd(f);
+#ifdef _WIN32
+   	String_append(currentPath, "\\..\\.."); 
+#else
+	String_append(currentPath, "/../..");
+#endif
+    List * listOfDir = FileIo_listDirs(f, currentPath);
+
+    List_delete(listOfDir);
+	String_delete(currentPath);
+	FileIo_delete(f);
+	return 1;
+}
+
+int step8()
+{
   FileIo* f = FileIo_new();
   String* currentPath = FileIo_getCwd(f);
   printf("Current Working Directoy: %s\n", String_getBuffer(currentPath));
@@ -82,7 +100,7 @@ int step7()
   return 1;
 }
 
-int step8()
+int step9()
 {
   FileIo* f = FileIo_new();
   FileIo_openFile(f, "test.file");
@@ -97,9 +115,6 @@ PUBLIC void FileIo_createFile(FileIo* this, String* fullFileName);
 PUBLIC void FileIo_openDir(FileIo* this, String* fullFileName);
 PUBLIC void FileIo_createDir(FileIo* this, String* fullDirName);
 PUBLIC void FileIo_write(FileIo* this, char* buffer, int length);
-PUBLIC int FileIo_fSeekEnd(FileIo * this, int pos);
-PUBLIC int FileIo_fSeekSet(FileIo * this, int pos);
-PUBLIC int FileIo_ftell(FileIo* this);
 */
 
 void main()
@@ -117,4 +132,5 @@ void main()
 	step6();
 	step7();
 	step8();
+	step9();
 }
