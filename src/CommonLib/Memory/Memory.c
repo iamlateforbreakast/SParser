@@ -118,7 +118,8 @@ PUBLIC int Memory_ncmp(void * pointer, void * compared, unsigned int nbBytes)
 {
   unsigned int result = 0;
   
-  if (memcmp(pointer, compared, nbBytes)==0) result = 1;
+  if ((pointer!=0) && (compared!=0) && (memcmp(pointer, compared, nbBytes)==0))
+    result = 1;
   
   return result;
 }
