@@ -20,16 +20,16 @@ post_rules = []
 class HTTPHandler(BaseHTTPRequestHandler):    
     def do_GET(self):
         o = urlparse(self.path)
-        print "GET: path: ",o.path
+        print("GET: path: ",o.path)
         for rule in get_rules:
             #print "Rule: ", rule[0]
             m = re.match(rule[0], o.path)
             if m:
-                print " Matched -->Rule: ",rule[0]
-                print rule[1](self, o.path)
+                print(" Matched -->Rule: ",rule[0])
+                print(rule[1](self, o.path))
     def do_POST(self):
         o = urlparse(self.path)
-        print "POST: path: ",o.path
+        print("POST: path: ",o.path)
         
 class Router():
 
@@ -44,7 +44,7 @@ class Router():
         if len(endpoint):
     	    #print "Endpoint: ",str(endpoint[0])
             l=re.split('<|>', endpoint[0])
-            print "l: ",l
+            print("l: ",l)
             for s in l:
                if s[0:3] == "int":
                   pattern = pattern + "(\d+)"
