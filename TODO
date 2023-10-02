@@ -1,14 +1,25 @@
-Grammar2: Buffer size is fixed to 16Kb. This should be dynamic
+[-] Grammar2: Buffer size is fixed to 16Kb. This should be dynamic
 
-Grammar2: Check if include file as already been processed
+[-] Grammar2: Check if include file as already been processed
 
-Object: Add a print method
+[-] Object: Add a print method
 
-Object: Add an equal method
+[-] Object: Add an equal method
 
-TimeMgr: Implement
+[-] FileMgr: Add accessor and create API
 
-Object: IMplement refcount better
+[-] Object: IMplement refcount better
 
-Object: Check for memory leaks
+[-] Object: Check for memory leaks
 
+[-] Metrics: Report LSC
+
+[-] Map: Use Pool class
+
+[-] List: Correct For each function
+
+[X] TimeMgr: Implement
+
+[X] Time: implement wall clock portable funct.
+
+[X] TimeMgr: Re implement Class

@@ -1,7 +1,9 @@
 /**********************************************//** 
-  \file main.c
+  @file main.c
      
-  \brief Contains the main() function
+  @brief This file initialises:
+  1) The OptionMgr object
+  2) The FileMgr object
         
   This file contains only one function main() 
   which initialises the OptionMgr and FileMgr objects.
