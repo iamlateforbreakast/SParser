@@ -51,9 +51,9 @@ PUBLIC int main(const int argc, const char** argv)
  
   sigaction(SIGTERM, &action, 0);
   sigaction(SIGSEGV, &action, 0);
-  sigaction(SIGSEGV, &action, 0);
+  //sigaction(SIGSEGV, &action, 0);
   sigaction(SIGINT, &action, 0);
-  sigaction(SIGTERM, &action, 0);
+  //sigaction(SIGTERM, &action, 0);
   sigaction(SIGHUP, &action, 0);
   
   /* Initialise OptionMgr from command line */
@@ -130,7 +130,7 @@ PRIVATE void start_application(String * inputDir, String * dbName)
   /* Cleanup */
   TimeMgr_delete(timeMgr);
   String_delete(totalExecutionTime);
-  FileMgr_delete(fileMgr);
+  //FileMgr_delete(fileMgr);
 }
 
 /**********************************************//** 
