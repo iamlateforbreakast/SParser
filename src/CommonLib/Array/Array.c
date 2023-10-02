@@ -42,6 +42,8 @@ PRIVATE Class arrayClass =
 **************************************************/
 PUBLIC Array * Array_new(ArrayParam * param)
 {
+  Array * this = 0;
+  this = (Array*)Object_new(sizeof(Array), &arrayClass);
 }
 
 /**********************************************//** 
@@ -51,6 +53,18 @@ PUBLIC Array * Array_new(ArrayParam * param)
 **************************************************/
 PUBLIC void Array_delete(Array * this)
 {
+  if (this!=0)
+  {
+    if (this->object.refCount==1)
+    {
+      Object_delete(&this->object);
+      this = 0;
+    }
+    else if (this->object.refCount>1)
+    {
+      this->object.refCount--;
+    }
+  }
 }
 
 /**********************************************//** 
