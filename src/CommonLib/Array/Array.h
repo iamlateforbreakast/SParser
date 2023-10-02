@@ -13,12 +13,12 @@ typedef struct ArrayParam
 {
   unsigned int defaultSize;
   unsigned int storageMode;
-  unsinged int autoresize;
+  unsigned int autoresize;
 } ArrayParam;
 
 PUBLIC Array * Array_new(ArrayParam * param);
 PUBLIC void Array_delete(Array* this);
-PUBLIC List * Array_copy(Array* this);
+PUBLIC Array * Array_copy(Array* this);
 PUBLIC int Array_compare(Array * this, Array * compared);
 PUBLIC void Array_print(Array * this);
 PUBLIC void Array_put(Array * this, unsigned int index);

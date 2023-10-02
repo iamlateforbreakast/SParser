@@ -9,12 +9,15 @@
   - get
 **************************************************/
 #include "Array.h"
+#include "Class.h"
+#include "Object.h"
 
 /**********************************************//**
   @class Array
 **************************************************/
 struct Array
 {
+  Object object;
   unsigned int nbElements;
   Object ** tab;
 };
