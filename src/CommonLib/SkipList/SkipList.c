@@ -11,6 +11,7 @@
 #include "Pool.h"
 #include "Class.h"
 #include "Object.h"
+#include "Debug.h"
 #include <limits.h>
 #include <stdlib.h>
 
@@ -410,22 +411,22 @@ PUBLIC int SkipList_compare(SkipList * this, SkipList * compared)
 **************************************************/
 PUBLIC void SkipList_print(SkipList* this)
 {
-    printf("NbObject: %d\n", this->nbObjects);
-    printf("Level: %d\n", this->level);
-    printf("Header node: %d\n", this->headerIdx);
+    PRINT(("NbObject: %d\n", this->nbObjects));
+    PRINT(("Level: %d\n", this->level));
+    PRINT(("Header node: %d\n", this->headerIdx));
 
     unsigned int currentNodeIdx = this->headerIdx;
     SkipNode* skipNode = Pool_read(this->pool, currentNodeIdx);
     for (int i = 0; i < this->nbObjects; i++)
     {
-        printf("SkipNode: %d ", currentNodeIdx);
-        printf(" Level: %d ", skipNode->level);
-        printf(" Key: %d ", skipNode->key);
+        PRINT(("SkipNode: %d ", currentNodeIdx));
+        PRINT((" Level: %d ", skipNode->level));
+        PRINT((" Key: %d ", skipNode->key));
         for (int j = 0; j < skipNode->level; j++)
         {
-            printf(" Forward[%d]: %d", j, skipNode->forward[j]);
+            PRINT((" Forward[%d]: %d", j, skipNode->forward[j]));
         }
-        printf("\n");
+        PRINT(("\n"));
         Pool_discardCache(this->pool, currentNodeIdx);
         currentNodeIdx = skipNode->forward[0];
         skipNode = Pool_read(this->pool, skipNode->forward[0]);

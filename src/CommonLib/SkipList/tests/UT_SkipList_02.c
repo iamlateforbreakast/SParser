@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
-
+#include "Times.h"
 #include "SkipList.h"
 
 #define NB_OBJECTS (5000)
