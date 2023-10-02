@@ -6,6 +6,10 @@
 #include <unistd.h>
 #include <stdio.h>
 
+#define UT_ASSERT(cond) if ((cond)) \
+                          { printf("Passed\n");} \
+                          else { printf("Failed\n"); return 0;}
+                          
 typedef struct TestTimeMgr
 {
   Object object;
@@ -14,11 +18,19 @@ typedef struct TestTimeMgr
 
 int step1()
 {
-  TimeMgr * testTimeMgr = 0;
+  TimeMgr * testTimeMgr1 = 0;
+  TimeMgr * testTimeMgr2 = 0;
 
-  testTimeMgr = TimeMgr_getRef();
+  testTimeMgr1 = TimeMgr_getRef();
+  testTimeMgr2 = TimeMgr_getRef();
 
-  TimeMgr_delete(testTimeMgr);
+  /* Test 1 */
+  printf("Step 1: Test 1 - Check there is only one TimeMgr: ");
+
+  UT_ASSERT((testTimeMgr1==testTimeMgr2))
+
+  TimeMgr_delete(testTimeMgr1);
+  TimeMgr_delete(testTimeMgr2);
 
   Memory_report();
 
@@ -46,7 +58,7 @@ int step2()
 
   TimeMgr_delete(testTimeMgr);
 
-  //String_delete(testTimerName);
+  String_delete(testTimerName);
 
   Memory_report();
 
