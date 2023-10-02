@@ -48,7 +48,7 @@ int step3()
 
 int step4()
 {
-    SkipList_free(testList);
+    SkipList_delete(testList);
     return 1;
 }
 
@@ -77,7 +77,7 @@ int step5()
         //printf("Adding %d\n", randomKeys[i]);
     }
     SkipList_print(testList);
-    SkipList_free(testList);
+    SkipList_delete(testList);
     return 1;
 }
 

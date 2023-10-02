@@ -44,7 +44,7 @@ int step1()
 
    
     SkipList_print(testList);
-    SkipList_free(testList);
+    SkipList_delete(testList);
 
     printf("Insert CPU time %Lf\n", (cpu_time1- cpu_time0)/NB_OBJECTS);
     printf("Insert Wall Time %Lf\n", (wall_time1 - wall_time0)/NB_OBJECTS);
