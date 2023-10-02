@@ -48,7 +48,7 @@ class App:
             while self.keep_running:
                self.keep_running = self.router.process_request()
         except KeyboardInterrupt:
-            print '^C received, shutting down server'
+            print("^C received, shutting down server")
             self.keep_running = 0
         
     def addRoute(self, className, method, rule):
@@ -58,17 +58,17 @@ def main(argv):
     try:
        opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
     except getopt.GetoptError:
-       print 'test.py -i <inputfile> -o <outputfile>'
+       print("test.py -i <inputfile> -o <outputfile>r")
        sys.exit(2)
     for opt, value in opts:
         if opt == '-h':
-            print 'webserver.py -i <inputdb> -o <outputdb>'
+            print("webserver.py -i <inputdb> -o <outputdb>")
         elif opt in ("-i", "--ifile"):
             inputDb = value
         elif opt in ("-o", "--ofile"):
             outputDb = value
-    print "Options: ", opts
-    print "Args:", args
+    print("Options: ", opts)
+    print("Args:", args)
     app=App()
     app.addRoute(Home, "GET","/index.html")
     app.addRoute(SparseCss, "GET","/sparse.css")
