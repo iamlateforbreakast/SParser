@@ -19,7 +19,8 @@ SOURCES = \
 	./Pool/Pool.c \
 	./Error/Error.c \
 	./Times/Times.c \
-	./FileIo/FileIo.c
+	./FileIo/FileIo.c \
+	./Array/Array.c
 
 HEADERS = ./Types/Types.h ./Object/Class.h $(SOURCES:.c=.h)
 
