@@ -44,6 +44,8 @@ PUBLIC Array * Array_new(ArrayParam * param)
 {
   Array * this = 0;
   this = (Array*)Object_new(sizeof(Array), &arrayClass);
+
+  return this;
 }
 
 /**********************************************//** 
@@ -75,6 +77,9 @@ PUBLIC void Array_delete(Array * this)
 **************************************************/
 PUBLIC Array * Array_copy(Array * this)
 {
+  Array * copy = 0;
+
+  return copy;
 }
 
 /**********************************************//** 
