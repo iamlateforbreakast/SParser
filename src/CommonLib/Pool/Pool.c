@@ -200,11 +200,11 @@ PUBLIC Pool* Pool_newFromFile(char* fileName, unsigned int nbMemChunks, unsigned
 }
 
 /**********************************************//**
-  @brief Pool_free
+  @brief Pool_delete
   @param[in] none
   @return none
 **************************************************/
-PUBLIC void Pool_free(Pool* pool)
+PUBLIC void Pool_delete(Pool* pool)
 {
     if (pool)
     {
