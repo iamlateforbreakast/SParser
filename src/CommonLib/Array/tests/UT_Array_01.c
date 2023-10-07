@@ -2,12 +2,15 @@
 #include "String2.h"
 #include "Memory.h"
 #include "Object.h"
+#include "FileIo.h"
 #include <stdio.h>
 #include <stdlib.h>
 
 #define UT_ASSERT(cond) if ((cond)) \
                           { printf("Passed\n");} \
                           else { printf("Failed\n"); return 0;}
+#define STEP_PASS (1)
+#define STEP_FAIL (0)
 
 typedef struct TestObject TestObject;
 
@@ -19,12 +22,17 @@ struct TestObject
 
 TestObject * TestObject_new()
 {
+  TestObject * newTestObject = 0;
 
+  newTestObject = (TestObject*)malloc(sizeof(TestObject));
+  newTestObject->id = 0;
+
+  return newTestObject;
 }
 
 void TestObject_delete(TestObject * this)
 {
-
+  free(this);
 }
 
 int step1()
@@ -103,9 +111,12 @@ int step3()
   ArrayParam testParam = { .defaultSize = 10, .storageMode = 0, .autoresize = 0};
 
   /* Test 1 */
-  //testArray = Array_newFromFile(&testParam);
+  String * fileName = String_new("./test.array");
+  FileIo * inStream = FileIo_new();
+  FileIo_createFile(inStream, fileName);
+  testArray = Array_newFromFile(inStream, &testParam);
 
-  /* Test*/
+  /* Test 2 */
   return 0;
 }
 

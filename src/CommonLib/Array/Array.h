@@ -6,6 +6,7 @@
 *********************************************************************************/
 #include "Types.h"
 #include "Object.h"
+#include "FileIo.h"
 
 typedef struct Array Array;
 
@@ -17,6 +18,7 @@ typedef struct ArrayParam
 } ArrayParam;
 
 PUBLIC Array * Array_new(ArrayParam * param);
+PUBLIC Array * Array_newFromFile(FileIo * fileIo, ArrayParam * param);
 PUBLIC void Array_delete(Array* this);
 PUBLIC Array * Array_copy(Array* this);
 PUBLIC int Array_compare(Array * this, Array * compared);
