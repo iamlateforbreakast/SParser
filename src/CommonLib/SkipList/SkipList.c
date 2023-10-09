@@ -22,7 +22,6 @@ typedef struct SkipNode SkipNode;
 
 typedef struct SkipNode
 {
-    Object object;
     unsigned int key;
     void* object;
     unsigned int level;
@@ -31,7 +30,7 @@ typedef struct SkipNode
 
 typedef struct SkipList
 {
-    Object * object;
+    Object object;
     unsigned int (*isEqual)(unsigned int, unsigned int);
     unsigned int (*isGreaterOrEqual)(unsigned int, unsigned int);
     unsigned int (*isGreater)(unsigned int, unsigned int);
