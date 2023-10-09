@@ -22,24 +22,12 @@ typedef struct SkipNode SkipNode;
 
 typedef struct SkipNode
 {
-    Object * objectInfo;
+    Object object;
     unsigned int key;
     void* object;
     unsigned int level;
     unsigned int forward[SKIPLIST_MAX_LEVEL];
 } SkipNode;
-
-/**********************************************//**
-  @private Class Description
-**************************************************/
-//PRIVATE Class skipNodeClass = 
-//{
-//  .f_new = 0,
-//  .f_delete = (Destructor)&SkipNode_delete,
-//  .f_copy = (Copy_Operator)&SkipNode_copy,
-//  .f_comp = (Comp_Operator)&SkipNode_compare,
-//  .f_print = (Printer)&SkipNode_print
-//};
 
 typedef struct SkipList
 {
@@ -82,7 +70,8 @@ PUBLIC SkipList* SkipList_new(unsigned int maxObjectNb)
 {
     SkipList* newSkipList = 0;
 
-    newSkipList = (SkipList*)malloc(sizeof(SkipList));
+    //newSkipList = (SkipList*)malloc(sizeof(SkipList));
+    newSkipList = (SkipList*)Object_new(sizeof(SkipList),&skipListClass);
     newSkipList->maxObjectNb = maxObjectNb;
     newSkipList->pool = Pool_new(newSkipList->maxObjectNb, sizeof(SkipNode));
     // NewSkipList->poll = Pool_new(storage, sizeof(SkipNode));
@@ -112,9 +101,12 @@ PUBLIC SkipList* SkipList_new(unsigned int maxObjectNb)
   @return None
 **************************************************/
 PUBLIC void SkipList_delete(SkipList* this)
-{
+{ 
+  if (this!=0)
+  {
     Pool_free(this->pool);
-    free(this);
+    Object_delete(&this->object);
+  }
 }
 
 /**********************************************//**
