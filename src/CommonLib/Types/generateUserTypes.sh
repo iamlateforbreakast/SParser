@@ -1,13 +1,16 @@
 #!/bin/sh
 
-cat "/* User Types */" > UserTypes.h
-cat "#ifndef _USERTYPES_" > UserTypes.h
-cat "#define _USERTYPES_" > UserTypes.h
+echo "/* User Types */" > UserTypes.h
+echo "#ifndef _USERTYPES_" >> UserTypes.h
+echo "#define _USERTYPES_" >> UserTypes.h
+echo "#include \"Class.h\"" >> UserTypes.h
+echo "Class * userTypes[] =" >> UserTypes.h
+echo "{" >> UserTypes.h
+#enum = "enum {\n"
+class = "grep -R --include="*.c" "DECLARE_CLASS(" ../../ | awk -F'[()]' '{print "  " $2 }'"
+echo $class
+echo "  &listClass,"  >> UserTypes.h
+echo "  &stringClass"  >> UserTypes.h
+echo "};" >> UserTypes.h
 
-cat "Class * userTypes[] =" > UserTypes.h
-cat "{" > UserTypes.h
-cat "  &listClass,"  > UserTypes.h
-cat "  &stringClass"  > UserTypes.h
-cat "};" > UserTypes.h
-
-cat "#endif /* UserTypes.h */" > UserTypes.h
+echo "#endif /* UserTypes.h */" >> UserTypes.h
