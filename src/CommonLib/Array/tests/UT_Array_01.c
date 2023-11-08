@@ -43,7 +43,7 @@ int step1()
 
   /* Test 1 */
   printf("Step 1: Test 1 - Check the Array object is well constructed: ");
-  testArray = Array_new(&testParam);
+  testArray = Array_new(sizeof(TestObject),&testParam));
   UT_ASSERT((Memory_ncmp(testArray, refArray, sizeof(testArray))==1));
 
 
