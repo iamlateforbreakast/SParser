@@ -22,7 +22,7 @@ SOURCES = \
 	./FileIo/FileIo.c \
 	./Array/Array.c
 
-HEADERS = ./Types/Types.h ./Object/Class.h $(SOURCES:.c=.h)
+HEADERS = ./Types/Types.h ./Types/UserTypes.h ./Object/Class.h $(SOURCES:.c=.h)
 
 OBJECTS = $(SOURCES:.c=.o)
 
