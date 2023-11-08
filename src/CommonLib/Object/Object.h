@@ -4,6 +4,7 @@
 #define _OBJECT_H_
 
 #include "Types.h"
+#include "Class.h"
 
 typedef struct Object Object;
 
