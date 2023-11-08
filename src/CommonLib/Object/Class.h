@@ -3,7 +3,14 @@
 #ifndef _CLASS_H_
 #define _CLASS_H_
 
-#include "Object.h"
+typedef struct Class Class;
+
+struct Object;
+typedef struct Object* (*Constructor)();
+typedef void (*Destructor)(struct Object*);
+typedef struct Object* (*Copy_Operator)(struct Object*);
+typedef int (*Comp_Operator)(struct Object*, struct Object*);
+typedef char* (*Printer)(struct Object*);
 
 struct Class
 {
