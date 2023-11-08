@@ -5,7 +5,6 @@
 
 #include "Types.h"
 
-typedef struct Class Class;
 typedef struct Object Object;
 
 struct Object
@@ -17,14 +16,6 @@ struct Object
   unsigned int refCount;
   unsigned int size;
 };
-
-typedef struct Object * (*Constructor)();
-typedef void (*Destructor)(struct Object *);
-typedef struct Object * (*Copy_Operator)(struct Object *);
-typedef int (*Comp_Operator)(struct Object *, struct Object *);
-typedef char * (*Printer)(struct Object *);
-
-
 
 PUBLIC Object * Object_new(unsigned int size, Class * class);
 PUBLIC void Object_delete(Object * this);
