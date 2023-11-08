@@ -9,6 +9,7 @@ SOURCES = \
 	./Memory/Memory.c \
 	./Object/Object.c \
 	./ObjectMgr/ObjectMgr.c \
+	./ObjectStore/ObjectStore.c \
 	./List/List.c \
 	./String/String2.c \
 	./Map/Map.c \
