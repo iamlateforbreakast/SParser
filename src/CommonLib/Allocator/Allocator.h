@@ -3,6 +3,18 @@
 #define _ALLOCATOR_H_
 typedef struct Allocator Allocator;
 
+enum AllocatorType
+{
+  MALLOC,
+  POOLED
+};
+
+struct AllocatorParam
+{
+  int type;
+  char * fileName;
+};
+
 struct Allocator
 {
 };
