@@ -5,15 +5,15 @@
 
 #include "Types.h"
 #include "Object.h"
-#include "Pool.h"
+#include "Allocator.h"
 
 typedef struct ObjectStore ObjectStore;
 
 PUBLIC void ObjectStore_delete(ObjectStore * this);
 PUBLIC ObjectStore * ObjectStore_getRef();
-PUBLIC Pool * ObjectStore_createPool(ObjectStore * this);
-PUBLIC void ObjectStore_deletePool(ObjectStore * this, Pool * pool);
-PUBLIC Object ObjectStore_createObject(ObjectStore * this, Class * class);
+PUBLIC Allocator * ObjectStore_createAllocator(ObjectStore * this);
+PUBLIC void ObjectStore_deleteAllocator(ObjectStore * this, Allocator * allocator);
+PUBLIC Object * ObjectStore_createObject(ObjectStore * this, Class * class, Allocator * allocator);
 PUBLIC void ObjectStore_deleteObject(ObjectStore * this, Object object);
 PUBLIC void ObjectStore_reportUnallocated(ObjectStore * this);
 PUBLIC void ObjectStore_report(ObjectStore * this);
