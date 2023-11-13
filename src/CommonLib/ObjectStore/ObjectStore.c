@@ -9,6 +9,7 @@
 
 #include "ObjectStore.h"
 #include "Malloc.h"
+#include "Debug.h"
 
 typedef struct AllocInfo
 {
@@ -24,6 +25,7 @@ struct ObjectStore
 {
   Object object;
   AllocInfo * allocList;
+  unsigned int nbAllocatedObjects;
 };
 
 PRIVATE ObjectStore * objectStore = 0;
@@ -40,10 +42,19 @@ PUBLIC Allocator * mem_alloc = 0;
 **************************************************/
 PUBLIC void ObjectStore_delete(ObjectStore * this)
 {
+  this->object.refCount = this->object.refCount - 1;
+  
+  if (this->object.refCount == 0)
+  {
+    ObjectStore_report(this);
+    /* TODO: memset(this, 0, sizeof(ObjectMgr)); */
+    //Memory_free(this, sizeof(ObjectStore));
+    this = 0;
+  } 
 }
 
 /**********************************************//** 
-  @brief TBD
+  @brief Obtain the reference to the object store.
   @details TBD
   @public
   @memberof ObjectStore
@@ -92,7 +103,12 @@ PUBLIC Object * ObjectStore_createObject(ObjectStore * this, Class * class, Allo
 {
   Object * object;
   
-  object = (Object *)allocator->allocate(allocator, class->f_size());
+  object = (Object *)allocator->allocate(allocator, class->f_size());//0B5EC7
+
+  //object->id = 0;
+  //object->allocator = allocator;
+
+  this->nbAllocatedObjects++;
 
   return object;
 }
@@ -103,9 +119,27 @@ PUBLIC Object * ObjectStore_createObject(ObjectStore * this, Class * class, Allo
   @public
   @memberof ObjectStore
 **************************************************/
-PUBLIC void ObjectStore_deleteObject(ObjectStore * this, Object object)
+PUBLIC void ObjectStore_deleteObject(ObjectStore * this, Object * object)
 {
-  // Allocator_deallocate(object->allocator, object);
+  if (object==0) return;
+  
+  //object->allocator->deallocate(object->allocator, object);
+  this->nbAllocatedObjects--;
+
+}
+
+/**********************************************//** 
+  @brief Reports the usage statistics for an instance of ObjectStore.
+  @public
+  @memberof ObjectStore
+**************************************************/
+PUBLIC void ObjectStore_report(ObjectStore * this)
+{
+  PRINT(("Object Manager Usage report:\n"));
+  PRINT(("Nb allocated objects: %d\n", this->nbAllocatedObjects));
+  //printf("Max nb allocated objects: %d\n", this->maxNbObjectAllocated);
+  //printf("Nb alloc request: %d\n", this->allocRequestId);
+  //printf("Nb free requests: %d\n", this->freeRequestId);
 }
 
 /**********************************************//** 
@@ -122,6 +156,8 @@ PRIVATE ObjectStore * ObjectStore_new()
   objectStore->allocList->ptr = (Allocator*)Malloc_getRef();
   objectStore->allocList->next = 0;
   objectStore->allocList->prev = 0;
+
+  objectStore->nbAllocatedObjects = 0;
 
   //ObjectStore_addAllocator(); 
   return objectStore;

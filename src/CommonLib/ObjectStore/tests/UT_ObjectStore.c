@@ -94,11 +94,8 @@ int step3()
   objectStore = ObjectStore_getRef();
   testAlloc = (MyAllocator*)ObjectStore_createAllocator(objectStore);
 
-  //Allocator_new();
-  //Allocator_setAllocFunction();
-  //Allocator_setDeleteFunction();
-
   object = ObjectStore_createObject(objectStore, &testClass, (Allocator*)testAlloc);
+  //object = (Object *)testAlloc->allocate(testAlloc, class->f_size());
 
   ObjectStore_deleteAllocator(objectStore, (Allocator*)testAlloc);
   ObjectStore_delete(objectStore);

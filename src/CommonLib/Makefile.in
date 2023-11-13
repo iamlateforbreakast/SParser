@@ -44,4 +44,4 @@ include:
 clean:
 	@CLEAN@ include $(OBJECTS) libCommon.a
 
-.PHONY: clean all
+.PHONY: include clean all
