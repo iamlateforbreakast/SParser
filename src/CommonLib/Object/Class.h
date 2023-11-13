@@ -11,6 +11,7 @@ typedef void (*Destructor)(struct Object*);
 typedef struct Object* (*Copy_Operator)(struct Object*);
 typedef int (*Comp_Operator)(struct Object*, struct Object*);
 typedef char* (*Printer)(struct Object*);
+typedef unsigned int (*Sizer)();
 
 struct Class
 {
@@ -19,6 +20,7 @@ struct Class
   Copy_Operator f_copy;
   Comp_Operator f_comp;
   Printer f_print;
+  Sizer f_size;
 };
 
 #endif /* _CLASS_H_ */

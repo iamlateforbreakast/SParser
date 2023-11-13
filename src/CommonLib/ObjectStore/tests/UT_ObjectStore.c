@@ -1,27 +1,13 @@
 #include "ObjectStore.h"
 #include "Class.h"
 
+#include "MyAllocator.h"
+
 #include <stdio.h>
-#include <stdlib.h>
 
 #define UT_ASSERT(cond) if ((cond)) \
                           { printf("Passed\n");} \
                           else { printf("Failed\n"); return 0;}
-
-typedef struct MyAllocator
-{
-  Allocator * allocator;
-} MyAllocator;
-
-void * MyAllocator_allocate(unsigned int size)
-{
-    return malloc(size);
-}
-
-void MyAllocator_delete(void * ptr)
-{
-  free(ptr);
-}
 
 typedef struct TestClass
 {
@@ -102,15 +88,19 @@ int step2()
 int step3()
 {
   ObjectStore * objectStore = 0;
-  Allocator * testAlloc = 0;
+  MyAllocator * testAlloc = 0;
   Object * object = 0;
 
   objectStore = ObjectStore_getRef();
-  testAlloc = ObjectStore_createAllocator(objectStore);
+  testAlloc = (MyAllocator*)ObjectStore_createAllocator(objectStore);
 
-  object = ObjectStore_createObject(objectStore, &testClass, testAlloc);
+  //Allocator_new();
+  //Allocator_setAllocFunction();
+  //Allocator_setDeleteFunction();
 
-  ObjectStore_deleteAllocator(objectStore, testAlloc);
+  object = ObjectStore_createObject(objectStore, &testClass, (Allocator*)testAlloc);
+
+  ObjectStore_deleteAllocator(objectStore, (Allocator*)testAlloc);
   ObjectStore_delete(objectStore);
 
   return 1;

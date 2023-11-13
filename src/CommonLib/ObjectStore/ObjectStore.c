@@ -1,5 +1,4 @@
 /********************************************************//**
-0123456789012345678901234567890123456789012345678901234567890
   @file ObjectStorage.c
  
   @brief An object storage class.
@@ -9,7 +8,7 @@
 ************************************************************/
 
 #include "ObjectStore.h"
-#include "Memory.h"
+#include "Malloc.h"
 
 typedef struct AllocInfo
 {
@@ -24,14 +23,14 @@ typedef struct AllocInfo
 struct ObjectStore
 {
   Object object;
-  AllocInfo * AllocList;
+  AllocInfo * allocList;
 };
 
 PRIVATE ObjectStore * objectStore = 0;
 
 PRIVATE ObjectStore * ObjectStore_new();
 
-PUBLIC Allocator * mallocPool = 0;
+PUBLIC Allocator * mem_alloc = 0;
 
 /**********************************************//** 
   @brief Delete an instance of the class ObjectMgr.
@@ -93,7 +92,7 @@ PUBLIC Object * ObjectStore_createObject(ObjectStore * this, Class * class, Allo
 {
   Object * object;
   
-  // object = Allocator_allocate(malloc, Class_getSize(class));
+  object = (Object *)allocator->allocate(allocator, class->f_size());
 
   return object;
 }
@@ -119,11 +118,11 @@ PRIVATE ObjectStore * ObjectStore_new()
 {
   ObjectStore * objectStore;
   // Create Malloc Pool
-  //mallocPool = Pool_new(MALLOC_TYPE);
-  //objecStore = Pool_allocate(mallocPool,sizeof(ObjectStore));
-  //objectStore->poolList = Pool_allocate(mallocPool,sizeof(PoolInfo));
-  //objectStore->poolList->ptr = mallocPool;
-  //objectStore->poolList->nextPool = 0;
-  //objectStore->poolList->prevPoool = 0; 
+  objectStore->allocList = (AllocInfo*)Malloc_allocate((Allocator*)Malloc_getRef(),sizeof(AllocInfo));
+  objectStore->allocList->ptr = (Allocator*)Malloc_getRef();
+  objectStore->allocList->next = 0;
+  objectStore->allocList->prev = 0;
+
+  //ObjectStore_addAllocator(); 
   return objectStore;
 }
