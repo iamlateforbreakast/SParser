@@ -2,6 +2,8 @@
 #include "Class.h"
 
 #include "MyAllocator.h"
+#include "Malloc.h"
+#include "Debug.h"
 
 #include <stdio.h>
 
@@ -55,7 +57,7 @@ int step1()
   ObjectStore * objectStore2 = 0;
 
   /* Test 1 */
-  printf("Step 1: Test 1 - Check there is only one ObjectStore: ");
+  PRINT(("Step 1: Test 1 - Check there is only one ObjectStore: "));
   
   objectStore1 = ObjectStore_getRef();
   objectStore2 = ObjectStore_getRef();
@@ -65,7 +67,9 @@ int step1()
   ObjectStore_delete(objectStore1);
   ObjectStore_delete(objectStore2);
 
-  ObjectStore_report(objectStore1);
+  PRINT(("Step 1: Test 2 - Check all memory is freed: "));
+  
+  UT_ASSERT((Malloc_report((Allocator*)Malloc_getRef())==0));
 
   return 1;
 }
@@ -79,7 +83,7 @@ int step2()
   printf("Step 2: Test 1 - TBC: ");
 
   objectStore = ObjectStore_getRef();
-  //testAlloc = ObjectStore_createAllocator(objectStore);
+  //testAlloc = ObjectStore_addAllocator(objectStore);
 
   //ObjectStore_deleteAllocator(objectStore, testAlloc);
   ObjectStore_delete(objectStore);

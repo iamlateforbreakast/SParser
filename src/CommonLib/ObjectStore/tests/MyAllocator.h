@@ -3,12 +3,14 @@
 #define _MYALLOCATOR_H_
 
 #include "Allocator.h"
+#include "Types.h"
 
 typedef struct MyAllocator MyAllocator;
 
-MyAllocator * MyAllocator_new();
-void MyAllocator_delete(MyAllocator * this);
-char * MyAllocator_allocate(Allocator * allocator, unsigned int size);
-void MyAllocator_deallocate(Allocator * allocator, char * ptr);
+PUBLIC MyAllocator * MyAllocator_new();
+PUBLIC void MyAllocator_delete(MyAllocator * this);
+PUBLIC char * MyAllocator_allocate(Allocator * allocator, unsigned int size);
+PUBLIC void MyAllocator_deallocate(Allocator * allocator, char * ptr);
+PUBLIC unsigned int MyAllocator_report(Allocator * this);
 
 #endif /* _MYALLOCATOR_H_ */
