@@ -46,9 +46,21 @@ PUBLIC void ObjectStore_delete(ObjectStore * this)
   
   if (this->object.refCount == 0)
   {
-    ObjectStore_report(this);
+    AllocInfo * iterator = this->allocList;
+    AllocInfo * current = this->allocList;
+    
+    iterator=iterator->prev;
+    current->ptr->delete(current->ptr);
+    Malloc_deallocate((Allocator*)Malloc_getRef(), (char*)current);
+    current = iterator;
+
+    while (iterator!=0)
+    {
+       // TODO
+    }
+
     /* TODO: memset(this, 0, sizeof(ObjectMgr)); */
-    //Memory_free(this, sizeof(ObjectStore));
+    Malloc_deallocate((Allocator*)Malloc_getRef(), (char*)this);
     this = 0;
   } 
 }
@@ -61,7 +73,7 @@ PUBLIC void ObjectStore_delete(ObjectStore * this)
 **************************************************/
 PUBLIC ObjectStore * ObjectStore_getRef()
 {
-    if (objectStore==0)
+  if (objectStore==0)
   {
     objectStore = ObjectStore_new();
   }
@@ -81,6 +93,7 @@ PUBLIC ObjectStore * ObjectStore_getRef()
 **************************************************/
 PUBLIC Allocator * ObjectStore_addAllocator(ObjectStore * this)
 {
+  return 0;
 }
 
 /**********************************************//** 
@@ -121,10 +134,10 @@ PUBLIC Object * ObjectStore_createObject(ObjectStore * this, Class * class, Allo
 **************************************************/
 PUBLIC void ObjectStore_deleteObject(ObjectStore * this, Object * object)
 {
+
+
   if (object==0) return;
   
-  //object->allocator->deallocate(object->allocator, object);
-  this->nbAllocatedObjects--;
 
 }
 
@@ -137,14 +150,15 @@ PUBLIC void ObjectStore_report(ObjectStore * this)
 {
   AllocInfo * iterator = this->allocList;
   
-  iterator->ptr->report(iterator->ptr);
+  PRINT(("Object Store Usage report:\n"));
+  PRINT((" Nb allocated objects: %d\n", iterator->ptr->report(iterator->ptr)));
   iterator = iterator->next;
   while (iterator!=0)
   {
-    iterator->ptr->report(iterator->ptr);
+    PRINT((" Nb allocated objects: %d\n", iterator->ptr->report(iterator->ptr)));
     iterator = iterator->next;
   }
-  //PRINT(("Object Manager Usage report:\n"));
+  
 
 }
 

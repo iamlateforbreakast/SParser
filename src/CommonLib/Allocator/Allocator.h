@@ -4,15 +4,20 @@
 
 typedef struct Allocator Allocator;
 
+typedef void * (*NewFunction)();
+typedef void (*DeleteFunction)(Allocator * allocator);
 typedef char* (*AllocateFunction)(Allocator * allocator, unsigned int size);
 typedef void (*DeAllocateFunction)(Allocator * allocator, char * ptr);
 typedef unsigned int (*ReportFunction)(Allocator * allocator);
 
 struct Allocator
 {
+  NewFunction new;
+  DeleteFunction delete;
   AllocateFunction allocate;
   DeAllocateFunction deallocate;
   ReportFunction report;
+  unsigned int nbAllocatedObjects;
 };
 
 Allocator * Allocator_new();
