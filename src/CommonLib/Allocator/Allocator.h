@@ -5,12 +5,14 @@
 typedef struct Allocator Allocator;
 
 typedef char* (*AllocateFunction)(Allocator * allocator, unsigned int size);
-typedef void (*DeAllocateFunction)(Allocator * allocator, void * ptr);
+typedef void (*DeAllocateFunction)(Allocator * allocator, char * ptr);
+typedef unsigned int (*ReportFunction)(Allocator * allocator);
 
 struct Allocator
 {
   AllocateFunction allocate;
   DeAllocateFunction deallocate;
+  ReportFunction report;
 };
 
 Allocator * Allocator_new();

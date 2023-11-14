@@ -11,12 +11,14 @@
 #include "Malloc.h"
 #include "Debug.h"
 
-typedef struct AllocInfo
+typedef struct AllocInfo AllocInfo;
+
+struct AllocInfo
 {
   Allocator * ptr;
-  Allocator * prev;
-  Allocator * next; 
-} AllocInfo;
+  AllocInfo * prev;
+  AllocInfo * next; 
+};
 
 /********************************************************//**
   @class ObjectStore
@@ -31,8 +33,6 @@ struct ObjectStore
 PRIVATE ObjectStore * objectStore = 0;
 
 PRIVATE ObjectStore * ObjectStore_new();
-
-PUBLIC Allocator * mem_alloc = 0;
 
 /**********************************************//** 
   @brief Delete an instance of the class ObjectMgr.
@@ -79,7 +79,7 @@ PUBLIC ObjectStore * ObjectStore_getRef()
   @public
   @memberof ObjectStore
 **************************************************/
-PUBLIC Allocator * ObjectStore_createAllocator(ObjectStore * this)
+PUBLIC Allocator * ObjectStore_addAllocator(ObjectStore * this)
 {
 }
 
@@ -135,11 +135,17 @@ PUBLIC void ObjectStore_deleteObject(ObjectStore * this, Object * object)
 **************************************************/
 PUBLIC void ObjectStore_report(ObjectStore * this)
 {
-  PRINT(("Object Manager Usage report:\n"));
-  PRINT(("Nb allocated objects: %d\n", this->nbAllocatedObjects));
-  //printf("Max nb allocated objects: %d\n", this->maxNbObjectAllocated);
-  //printf("Nb alloc request: %d\n", this->allocRequestId);
-  //printf("Nb free requests: %d\n", this->freeRequestId);
+  AllocInfo * iterator = this->allocList;
+  
+  iterator->ptr->report(iterator->ptr);
+  iterator = iterator->next;
+  while (iterator!=0)
+  {
+    iterator->ptr->report(iterator->ptr);
+    iterator = iterator->next;
+  }
+  //PRINT(("Object Manager Usage report:\n"));
+
 }
 
 /**********************************************//** 
@@ -150,14 +156,12 @@ PUBLIC void ObjectStore_report(ObjectStore * this)
 **************************************************/
 PRIVATE ObjectStore * ObjectStore_new()
 {
-  ObjectStore * objectStore;
+  ObjectStore * objectStore = (ObjectStore*)Malloc_allocate((Allocator*)Malloc_getRef(),sizeof(ObjectStore));;
   // Create Malloc Pool
   objectStore->allocList = (AllocInfo*)Malloc_allocate((Allocator*)Malloc_getRef(),sizeof(AllocInfo));
   objectStore->allocList->ptr = (Allocator*)Malloc_getRef();
   objectStore->allocList->next = 0;
   objectStore->allocList->prev = 0;
-
-  objectStore->nbAllocatedObjects = 0;
 
   //ObjectStore_addAllocator(); 
   return objectStore;

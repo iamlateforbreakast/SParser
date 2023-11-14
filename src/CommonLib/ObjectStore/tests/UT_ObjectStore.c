@@ -65,6 +65,8 @@ int step1()
   ObjectStore_delete(objectStore1);
   ObjectStore_delete(objectStore2);
 
+  ObjectStore_report(objectStore1);
+
   return 1;
 }
 
@@ -77,9 +79,9 @@ int step2()
   printf("Step 2: Test 1 - TBC: ");
 
   objectStore = ObjectStore_getRef();
-  testAlloc = ObjectStore_createAllocator(objectStore);
+  //testAlloc = ObjectStore_createAllocator(objectStore);
 
-  ObjectStore_deleteAllocator(objectStore, testAlloc);
+  //ObjectStore_deleteAllocator(objectStore, testAlloc);
   ObjectStore_delete(objectStore);
 
   return 1;
@@ -92,12 +94,12 @@ int step3()
   Object * object = 0;
 
   objectStore = ObjectStore_getRef();
-  testAlloc = (MyAllocator*)ObjectStore_createAllocator(objectStore);
+  //testAlloc = (MyAllocator*)ObjectStore_createAllocator(objectStore);
 
   object = ObjectStore_createObject(objectStore, &testClass, (Allocator*)testAlloc);
   //object = (Object *)testAlloc->allocate(testAlloc, class->f_size());
 
-  ObjectStore_deleteAllocator(objectStore, (Allocator*)testAlloc);
+  //ObjectStore_deleteAllocator(objectStore, (Allocator*)testAlloc);
   ObjectStore_delete(objectStore);
 
   return 1;
@@ -105,5 +107,5 @@ int step3()
 
 int main()
 {
-    int step1();
+    step1();
 }
