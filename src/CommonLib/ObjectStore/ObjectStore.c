@@ -91,7 +91,7 @@ PUBLIC ObjectStore * ObjectStore_getRef()
   @public
   @memberof ObjectStore
 **************************************************/
-PUBLIC Allocator * ObjectStore_addAllocator(ObjectStore * this)
+PUBLIC AllocInfo * ObjectStore_createAllocator(ObjectStore * this, Allocator * allocator)
 {
   return 0;
 }
@@ -102,7 +102,7 @@ PUBLIC Allocator * ObjectStore_addAllocator(ObjectStore * this)
   @public
   @memberof ObjectStore
 **************************************************/
-PUBLIC void ObjectStore_deleteAllocator(ObjectStore * this, Allocator * allocator)
+PUBLIC void ObjectStore_deleteAllocator(ObjectStore * this, AllocInfo * allocInfo)
 {
 }
 
