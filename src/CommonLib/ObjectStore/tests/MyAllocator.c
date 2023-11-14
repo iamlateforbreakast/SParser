@@ -5,22 +5,34 @@
 
 #include <stdlib.h>
 
+#define MYMEMORY_SIZE (1000)
+
 struct MyAllocator
 {
   Allocator allocator;
-  unsigned int nbAllocatedObjects;
   char * memory;
+  char * pointer;
 };
 
 MyAllocator * MyAllocator_new()
 {
-  MyAllocator * myAllocator = (MyAllocator*)Malloc_allocate((Allocator*)Malloc_getRef(),sizeof(MyAllocator));;
+  MyAllocator * myAllocator = (MyAllocator*)Malloc_allocate((Allocator*)Malloc_getRef(),sizeof(MyAllocator));
+
+  myAllocator->allocator.new = (NewFunction)MyAllocator_new;
+  myAllocator->allocator.delete = (DeleteFunction)MyAllocator_delete;
+  myAllocator->allocator.allocate = (AllocateFunction)MyAllocator_allocate;
+  myAllocator->allocator.deallocate = (DeAllocateFunction)MyAllocator_deallocate;
+  myAllocator->allocator.report = (ReportFunction)MyAllocator_report;
+  myAllocator->allocator.nbAllocatedObjects = 0;
+  myAllocator->memory = Malloc_allocate((Allocator*)Malloc_getRef(), MYMEMORY_SIZE);
+  myAllocator->pointer = myAllocator->memory;
 
   return myAllocator;
 }
 
 void MyAllocator_delete(MyAllocator * this)
 {
+  Malloc_deallocate((Allocator*)Malloc_getRef(), (char*)this->memory);
   Malloc_deallocate((Allocator*)Malloc_getRef(), (char*)this);
 }
 

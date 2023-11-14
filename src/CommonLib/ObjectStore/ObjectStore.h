@@ -7,6 +7,7 @@
 #include "Object.h"
 #include "Allocator.h"
 
+typedef struct AllocInfo AllocInfo;
 typedef struct ObjectStore ObjectStore;
 
 PUBLIC void ObjectStore_delete(ObjectStore * this);

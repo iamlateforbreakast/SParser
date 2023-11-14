@@ -11,8 +11,6 @@
 #include "Malloc.h"
 #include "Debug.h"
 
-typedef struct AllocInfo AllocInfo;
-
 struct AllocInfo
 {
   Allocator * ptr;
@@ -93,7 +91,15 @@ PUBLIC ObjectStore * ObjectStore_getRef()
 **************************************************/
 PUBLIC AllocInfo * ObjectStore_createAllocator(ObjectStore * this, Allocator * allocator)
 {
-  return 0;
+  AllocInfo * allocInfo;
+
+  allocInfo = (AllocInfo*)Malloc_allocate((Allocator*)Malloc_getRef(),sizeof(AllocInfo));
+  
+  allocInfo->ptr = allocator;
+  allocInfo->prev = this->allocList;
+  this->allocList->next = allocInfo;
+  
+  return allocInfo;
 }
 
 /**********************************************//** 
@@ -104,6 +110,11 @@ PUBLIC AllocInfo * ObjectStore_createAllocator(ObjectStore * this, Allocator * a
 **************************************************/
 PUBLIC void ObjectStore_deleteAllocator(ObjectStore * this, AllocInfo * allocInfo)
 {
+  allocInfo->prev->next = allocInfo->next;
+  allocInfo->next->prev = allocInfo->prev;
+
+  allocInfo->ptr->delete(allocInfo->ptr);
+  Malloc_deallocate((Allocator*)Malloc_getRef(), (char*)allocInfo);
 }
 
 /**********************************************//** 
