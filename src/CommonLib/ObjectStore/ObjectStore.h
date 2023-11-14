@@ -11,8 +11,8 @@ typedef struct ObjectStore ObjectStore;
 
 PUBLIC void ObjectStore_delete(ObjectStore * this);
 PUBLIC ObjectStore * ObjectStore_getRef();
-PUBLIC Allocator * ObjectStore_createAllocator(ObjectStore * this);
-PUBLIC void ObjectStore_deleteAllocator(ObjectStore * this, Allocator * allocator);
+PUBLIC AllocInfo * ObjectStore_createAllocator(ObjectStore * this, Allocator * allocator);
+PUBLIC void ObjectStore_deleteAllocator(ObjectStore * this, AllocInfo * allocInfo);
 PUBLIC Object * ObjectStore_createObject(ObjectStore * this, Class * class, Allocator * allocator);
 PUBLIC void ObjectStore_deleteObject(ObjectStore * this, Object * object);
 PUBLIC void ObjectStore_reportUnallocated(ObjectStore * this);
