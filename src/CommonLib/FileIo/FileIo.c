@@ -1,6 +1,7 @@
 #include "FileIo.h"
 #include "String2.h"
 #include "List.h"
+#include "Memory.h"
 #include "Error.h"
 #include <stdio.h>
 #include <limits.h>

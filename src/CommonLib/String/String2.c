@@ -13,6 +13,7 @@
 #include "Memory.h"
 #include "List.h"
 #include <stdlib.h>
+#include <string.h>
 
 /**********************************************//** 
   /class String
@@ -28,7 +29,8 @@ struct String
 /**********************************************//**
   /private Class Description
 **************************************************/
-PRIVATE Class stringClass = 
+DECLARE_CLASS(String)
+Class stringClass = 
 {
   .f_new = NULL,
   .f_delete = (Destructor)&String_delete,
@@ -81,8 +83,8 @@ PUBLIC String * String_newByRef(const char * initString)
 
   if (initString != 0)
   {
-    this->length = Memory_len((void*)initString);
-    this->buffer = initString;
+    this->length = Memory_len((const void*)initString);
+    this->buffer = (char*)initString;
   }
   else
   {

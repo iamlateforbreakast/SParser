@@ -103,7 +103,7 @@ PUBLIC void SkipList_delete(SkipList* this)
 { 
   if (this!=0)
   {
-    Pool_free(this->pool);
+    Pool_delete(this->pool);
     Object_delete(&this->object);
   }
 }
@@ -127,7 +127,7 @@ PUBLIC SkipList * SkipList_copy(SkipList * this)
 PUBLIC void SkipList_add(SkipList* this, unsigned int key, void* object)
  {
     unsigned int update[SKIPLIST_MAX_LEVEL];
-    unsigned int currentNodeIdx = this->headerIdx;
+    //unsigned int currentNodeIdx = this->headerIdx;
     
     //printf("[Cache usage] Add start %d\n", SkipList_reportCache(this));
     for (int i = 0; i < SKIPLIST_MAX_LEVEL; i++) update[i] = 0;
@@ -252,7 +252,7 @@ PUBLIC void* SkipList_remove(SkipList* this, unsigned int key)
 {
     void* removedObject = 0;
     unsigned int update[SKIPLIST_MAX_LEVEL];
-    unsigned int currentNodeIdx = this->headerIdx;
+    //unsigned int currentNodeIdx = this->headerIdx;
 
     //printf("[Cache usage] delete start %d\n", SkipList_reportCache(this));
 
@@ -348,7 +348,7 @@ PUBLIC void* SkipList_get(SkipList* this, unsigned int key)
 {
     void* foundObject = 0;
     unsigned int update[SKIPLIST_MAX_LEVEL];
-    unsigned int currentNodeIdx = this->headerIdx;
+    //unsigned int currentNodeIdx = this->headerIdx;
 
     //printf("[Cache usage] delete start %d\n", SkipList_reportCache(this));
 

@@ -9,6 +9,7 @@
 **************************************************/
 #include "Pool.h"
 #include "Memory.h"
+#include "Error.h"
 #include <stdio.h>
 
 #define CACHE_NB (6)
@@ -69,7 +70,7 @@ PUBLIC Pool* Pool_new(unsigned int nbMemChunks, unsigned int memChunkSize)
 {
     Pool* newPool = 0;
 
-    newPool = (Pool*)malloc(sizeof(Pool));
+    newPool = (Pool*)Memory_alloc(sizeof(Pool));
     newPool->nbMemChunks = nbMemChunks;
     newPool->maxNbMemChunks = nbMemChunks; // TBC
     newPool->nbAllocatedChunks = 0;
@@ -77,14 +78,14 @@ PUBLIC Pool* Pool_new(unsigned int nbMemChunks, unsigned int memChunkSize)
     newPool->firstAvailable = 0;
     newPool->lastAllocated = 0;
     newPool->isFile = 0;
-    newPool->pool = (MemChunk*)malloc(newPool->nbMemChunks * (sizeof(MemChunk) + newPool->memChunkSize));
+    newPool->pool = (MemChunk*)Memory_alloc(newPool->nbMemChunks * (sizeof(MemChunk) + newPool->memChunkSize));
     newPool->file = 0;
     for (int i = 0; i < CACHE_NB; i++)
     {
-        //newPool->writeChunkCache[i] = (char*)malloc(sizeof(MemChunk) + newPool->memChunkSize);
+        //newPool->writeChunkCache[i] = (char*)Memory_alloc(sizeof(MemChunk) + newPool->memChunkSize);
         newPool->chunkCache[i].idx = 0;
         newPool->chunkCache[i].isUsed = 0;
-        newPool->chunkCache[i].cache = (char*)malloc(sizeof(MemChunk) + newPool->memChunkSize);
+        newPool->chunkCache[i].cache = (char*)Memory_alloc(sizeof(MemChunk) + newPool->memChunkSize);
     }
     newPool->cacheUsed = 0;
 
@@ -126,7 +127,7 @@ PUBLIC Pool* Pool_newFromFile(char* fileName, unsigned int nbMemChunks, unsigned
 {
     Pool* newPool = 0;
 
-    newPool = (Pool*)malloc(sizeof(Pool));
+    newPool = (Pool*)Memory_alloc(sizeof(Pool));
     newPool->nbMemChunks = nbMemChunks;
     newPool->maxNbMemChunks = nbMemChunks;
     newPool->memChunkSize = memChunkSize;
@@ -137,10 +138,10 @@ PUBLIC Pool* Pool_newFromFile(char* fileName, unsigned int nbMemChunks, unsigned
     newPool->pool = 0;
     for (int i = 0; i < CACHE_NB; i++)
     {
-        //newPool->writeChunkCache[i] = (char*)malloc(sizeof(MemChunk) + newPool->memChunkSize);
+        //newPool->writeChunkCache[i] = (char*)Memory_alloc(sizeof(MemChunk) + newPool->memChunkSize);
         newPool->chunkCache[i].idx = 0;
         newPool->chunkCache[i].isUsed = 0;
-        newPool->chunkCache[i].cache = (char*)malloc(sizeof(MemChunk) + newPool->memChunkSize);
+        newPool->chunkCache[i].cache = (char*)Memory_alloc(sizeof(MemChunk) + newPool->memChunkSize);
     }
     newPool->cacheUsed = 0;
     //fclose(newPool->file);
@@ -190,8 +191,7 @@ PUBLIC Pool* Pool_newFromFile(char* fileName, unsigned int nbMemChunks, unsigned
         }
         else
         {
-            printf("Cannot create file %s\n", fileName);
-            exit(1);
+            Error_new(ERROR_FATAL, "Cannot create file %s\n", fileName);
         }
     }
     printf("Pool memChunkSize: %d\n", newPool->memChunkSize);
@@ -209,10 +209,10 @@ PUBLIC void Pool_delete(Pool* pool)
     if (pool)
     {
         if (!pool->isFile)
-            free(pool->pool);
+            Memory_free(pool->pool,sizeof(pool->pool));
         else
             fclose(pool->file);
-        free(pool);
+        Memory_free(pool,sizeof(pool));
     }
 }
 
@@ -244,8 +244,7 @@ PUBLIC void* Pool_alloc(Pool* pool, unsigned int* ptrIdx)
         }
     }
     // No cache position left
-    printf("Error: Pool out of cache\n");
-    exit(2);
+    Error_new(ERROR_FATAL, "Error: Pool out of cache\n");
     return NULL;
 }
 
@@ -319,18 +318,19 @@ PUBLIC void* Pool_read(Pool* pool, unsigned int idx /*, void * ptrContent*/)
             freePos = i;
         }
     }
-    if (foundPos < 0) 
+    if (foundPos < 0)
+    {
         if (freePos < 0)
         {
             // No space left in cache
-            printf("Error: No space in cache\n");
-            exit(2);
+            Error_new(ERROR_FATAL,"Error: No space in cache\n");
             return NULL;
         }
         else
         {
             foundPos = freePos;
         }
+    }
     // Read the pool vavlue in the cache found
     if (pool->isFile)
         Pool_readInFile(pool, idx, pool->chunkCache[foundPos].cache);
