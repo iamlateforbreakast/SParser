@@ -6,8 +6,8 @@ typedef struct Allocator Allocator;
 
 typedef void * (*NewFunction)();
 typedef void (*DeleteFunction)(Allocator * allocator);
-typedef char* (*AllocateFunction)(Allocator * allocator, unsigned int size);
-typedef void (*DeAllocateFunction)(Allocator * allocator, char * ptr);
+typedef void* (*AllocateFunction)(Allocator * allocator, unsigned int size);
+typedef void (*DeAllocateFunction)(Allocator * allocator, void * ptr);
 typedef unsigned int (*ReportFunction)(Allocator * allocator);
 
 struct Allocator
@@ -21,8 +21,8 @@ struct Allocator
 };
 
 Allocator * Allocator_new();
-char * Allocator_allocate(Allocator * this, unsigned int size);
+void * Allocator_allocate(Allocator * this, unsigned int size);
 //void * Allocator_allocFromClass(Allocator * this, /* Class class*/);
-void Allocator_deallocate(Allocator * this, char * ptr);
+void Allocator_deallocate(Allocator * this, void * ptr);
 void Allocator_delete(Allocator * this);
 #endif /* _ALLOCATOR_H_ */

@@ -28,13 +28,13 @@ PUBLIC void Malloc_delete(Allocator * this)
   //Malloc_deallocate((Allocator*)Malloc_getRef(), (char*)this);
 }
 
-PUBLIC char * Malloc_allocate(Allocator * this, unsigned int size)
+PUBLIC void * Malloc_allocate(Allocator * this, unsigned int size)
 {
   this->nbAllocatedObjects++;
-  return (char*)malloc(size);
+  return (void*)malloc(size);
 }
 
-PUBLIC void Malloc_deallocate(Allocator * this, char * ptr)
+PUBLIC void Malloc_deallocate(Allocator * this, void * ptr)
 {
   free(ptr);
   this->nbAllocatedObjects--;

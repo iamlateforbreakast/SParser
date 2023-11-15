@@ -2,14 +2,17 @@
   @file ObjectStorage.c
  
   @brief An object storage class.
-  @details This class provides an object allocation and
-   de-allocation service. Only one instance of this class can 
-   be created.
+  @details This class purpose is to keep track of all objects
+   created provides an object allocation and
+   de-allocation service. This is performed by registering 
+   every Allocator object with the ObjectStore.
+   Only one instance of this class can be created.
 ************************************************************/
 
 #include "ObjectStore.h"
 #include "Malloc.h"
 #include "Debug.h"
+#include "Error.h"
 
 struct AllocInfo
 {
@@ -24,8 +27,21 @@ struct AllocInfo
 struct ObjectStore
 {
   Object object;
-  AllocInfo * allocList;
   unsigned int nbAllocatedObjects;
+  AllocInfo * allocList;
+};
+
+/**********************************************//**
+  @private Class Description
+**************************************************/
+DECLARE_CLASS(ObjectStore)
+Class objectStoreClass = 
+{
+  .f_new = 0,
+  .f_delete = (Destructor)&ObjectStore_delete,
+  .f_copy = (Copy_Operator)&ObjectStore_copy,
+  .f_comp = (Comp_Operator)&ObjectStore_compare,
+  .f_print = (Printer)&ObjectStore_print
 };
 
 PRIVATE ObjectStore * objectStore = 0;
@@ -59,9 +75,20 @@ PUBLIC void ObjectStore_delete(ObjectStore * this)
 
     /* TODO: memset(this, 0, sizeof(ObjectMgr)); */
     Malloc_deallocate((Allocator*)Malloc_getRef(), (char*)this);
-    this = 0;
+    objectStore = 0;
   } 
 }
+
+/**********************************************//** 
+  @brief Copy an instance of the class ObjectStore.
+  @public
+  @memberof ObjectStore
+  @return Copy of the given instance.
+**************************************************/
+PUBLIC ObjectStore * ObjectStore_copy(ObjectStore* this)
+{
+  return ObjectStore_getRef();
+}  
 
 /**********************************************//** 
   @brief Obtain the reference to the object store.
@@ -84,7 +111,7 @@ PUBLIC ObjectStore * ObjectStore_getRef()
 }
 
 /**********************************************//** 
-  @brief TBD
+  @brief Register an Allocator with the objectStore
   @details TBD
   @public
   @memberof ObjectStore
@@ -111,7 +138,8 @@ PUBLIC AllocInfo * ObjectStore_createAllocator(ObjectStore * this, Allocator * a
 PUBLIC void ObjectStore_deleteAllocator(ObjectStore * this, AllocInfo * allocInfo)
 {
   allocInfo->prev->next = allocInfo->next;
-  allocInfo->next->prev = allocInfo->prev;
+  if (allocInfo->next)
+    allocInfo->next->prev = allocInfo->prev;
 
   allocInfo->ptr->delete(allocInfo->ptr);
   Malloc_deallocate((Allocator*)Malloc_getRef(), (char*)allocInfo);
@@ -128,9 +156,14 @@ PUBLIC Object * ObjectStore_createObject(ObjectStore * this, Class * class, Allo
   Object * object;
   
   object = (Object *)allocator->allocate(allocator, class->f_size());//0B5EC7
-
-  //object->id = 0;
-  //object->allocator = allocator;
+  if (object==0)
+  {
+    Error_new(ERROR_FATAL,"Object allocation failed\n");
+  }
+  object->id = this->nbAllocatedObjects;
+  object->class = class;
+  object->size = class->f_size();
+  object->allocator = allocator;
 
   this->nbAllocatedObjects++;
 
@@ -145,10 +178,9 @@ PUBLIC Object * ObjectStore_createObject(ObjectStore * this, Class * class, Allo
 **************************************************/
 PUBLIC void ObjectStore_deleteObject(ObjectStore * this, Object * object)
 {
-
-
   if (object==0) return;
-  
+
+  object->allocator->deallocate(object->allocator, (char*)object); 
 
 }
 
@@ -174,6 +206,40 @@ PUBLIC void ObjectStore_report(ObjectStore * this)
 }
 
 /**********************************************//** 
+  @brief Reports the number of allocated objects in the ObjectStore.
+  @details TBD
+  @public
+  @memberof ObjectStore
+**************************************************/
+PUBLIC unsigned int ObjectStore_getNbAllocatedObjects(ObjectStore * this)
+{
+  return this->nbAllocatedObjects;
+}
+
+/**********************************************//** 
+  @brief Compare 2 instances of the class ObjjectStore.
+  Since there is only one ObjectStore instance, always return 1.
+  @public
+  @memberof ObjectStore
+  @return 0 if different, 1 if equal.
+**************************************************/
+PUBLIC int ObjectStore_compare(ObjectStore * this, ObjectStore * compared)
+{
+  int result = 1;
+
+  return result;
+}
+
+/**********************************************//** 
+  @brief Print an instance of the class ObjectStore.
+  @public
+  @memberof ObjectStore
+**************************************************/
+PUBLIC void ObjectStore_print(ObjectStore * this)
+{
+}
+
+/**********************************************//** 
   @brief Create the instance of the ObjectStore
   @details TBD
   @private
@@ -182,11 +248,16 @@ PUBLIC void ObjectStore_report(ObjectStore * this)
 PRIVATE ObjectStore * ObjectStore_new()
 {
   ObjectStore * objectStore = (ObjectStore*)Malloc_allocate((Allocator*)Malloc_getRef(),sizeof(ObjectStore));;
+  objectStore->object.id = 0;
+  objectStore->object.class = &objectStoreClass;
+
   // Create Malloc Pool
   objectStore->allocList = (AllocInfo*)Malloc_allocate((Allocator*)Malloc_getRef(),sizeof(AllocInfo));
   objectStore->allocList->ptr = (Allocator*)Malloc_getRef();
   objectStore->allocList->next = 0;
   objectStore->allocList->prev = 0;
+
+  objectStore->nbAllocatedObjects =0;
 
   //ObjectStore_addAllocator(); 
   return objectStore;
