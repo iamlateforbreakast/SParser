@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <limits.h>
 #include <stdlib.h>
-#include <dirent.h>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -14,6 +13,7 @@
 #include <strsafe.h>
 #else
 #include <unistd.h>
+#include <dirent.h>
 #endif
 
 struct FileIo
@@ -48,7 +48,7 @@ PUBLIC void FileIo_delete(FileIo* this)
 PUBLIC void FileIo_openFile(FileIo * this, String * fullFileName)
 {
 #ifdef _WIN32
-  errno_t err = fopen_s(&this->f, "test.file" /*String_getBuffer(fullFileName)*/, "rb+");
+  errno_t err = fopen_s(&this->f, String_getBuffer(fullFileName), "rb+");
   printf("Errno: %d\n", err);
 #else
   this->f = fopen(String_getBuffer(fullFileName), "rb+");
