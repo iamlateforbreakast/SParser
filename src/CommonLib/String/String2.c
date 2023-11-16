@@ -29,14 +29,14 @@ struct String
 /**********************************************//**
   /private Class Description
 **************************************************/
-DECLARE_CLASS(String)
-Class stringClass = 
+PRIVATE Class stringClass =
 {
   .f_new = NULL,
   .f_delete = (Destructor)&String_delete,
   .f_copy = (Copy_Operator)&String_copy,
   .f_comp = (Comp_Operator)&String_compare,
-  .f_print = (Printer)NULL
+  .f_print = (Printer)NULL,
+  .f_size = 0
 };
 
 /**********************************************//** 
@@ -436,11 +436,21 @@ PUBLIC List* String_splitToken(String* this, const char* separator)
   List* result = List_new();
   char* str = String_getBuffer(this);
   char* token = 0;
+#ifndef _WIN32
   token = strtok(str, separator);
+#else
+  char* nextToken = 0;
+  token = strtok_s(str, separator, &nextToken);
+#endif
   while (token != 0)
   {
     List_insertHead(result, String_new(token));
+#ifndef _WIN32
     token = strtok(0, separator);
+#else
+    char* nextToken = 0;
+    token = strtok_s(0, separator, &nextToken);
+#endif
   }
   return result;
 }
