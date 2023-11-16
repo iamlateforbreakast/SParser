@@ -36,7 +36,6 @@ struct ObjectStore
 /**********************************************//**
   @private Class Description
 **************************************************/
-DECLARE_CLASS(ObjectStore)
 Class objectStoreClass = 
 {
   .f_new = 0,
@@ -126,6 +125,7 @@ PUBLIC AllocInfo * ObjectStore_createAllocator(ObjectStore * this, Allocator * a
   
   allocInfo->ptr = allocator;
   allocInfo->prev = this->allocList;
+  allocInfo->next = 0;
   this->allocList->next = allocInfo;
   
   return allocInfo;
@@ -252,6 +252,11 @@ PRIVATE ObjectStore * ObjectStore_new()
   ObjectStore * objectStore = (ObjectStore*)Malloc_allocate((Allocator*)Malloc_getRef(),sizeof(ObjectStore));;
   objectStore->object.id = 0;
   objectStore->object.class = &objectStoreClass;
+  objectStore->object.delete = 0;
+  objectStore->object.copy = 0;
+  objectStore->object.refCount = 1;
+  objectStore->object.size = 0;
+  objectStore->object.allocator = (Allocator*)Malloc_getRef();
 
   // Create Malloc Pool
   objectStore->allocList = (AllocInfo*)Malloc_allocate((Allocator*)Malloc_getRef(),sizeof(AllocInfo));
