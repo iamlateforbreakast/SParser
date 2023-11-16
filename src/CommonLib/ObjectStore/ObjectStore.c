@@ -10,6 +10,8 @@
 ************************************************************/
 
 #include "ObjectStore.h"
+#include "Class.h"
+#include "Object.h"
 #include "Malloc.h"
 #include "Debug.h"
 #include "Error.h"
