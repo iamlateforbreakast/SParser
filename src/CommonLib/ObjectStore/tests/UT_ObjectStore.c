@@ -8,6 +8,9 @@
 
 #include <stdio.h>
 
+#define DEBUG (0)
+
+
 #define UT_ASSERT(cond) if ((cond)) \
                           { printf("Passed\n");} \
                           else { printf("Failed\n"); return 0;}
@@ -140,7 +143,7 @@ int step3()
   {
     object[i] = ObjectStore_createObject(objectStore, &testClass, (Allocator*)testAlloc);
 
-    PRINT(("=> %d: Object created at 0x%x with Id:%d AllocatedObjects:%d\n",
+    TRACE(("=> %d: Object created at 0x%x with Id:%d AllocatedObjects:%d\n",
       i,
       object[i],
       object[i]->id,
@@ -149,7 +152,7 @@ int step3()
   for (int i = 0; i < 10; i++)
   {
     ObjectStore_deleteObject(objectStore, object[0]);
-    PRINT(("=> %d: Object at 0x%x deleted with Id:%d AllocatedObjects:%d\n",
+    TRACE(("=> %d: Object at 0x%x deleted with Id:%d AllocatedObjects:%d\n",
       i,
       object[i],
       object[i]->id,
