@@ -5,6 +5,7 @@
 
 #include "Types.h"
 #include "Class.h"
+#include "Allocator.h"
 
 typedef struct Object Object;
 
@@ -16,6 +17,7 @@ struct Object
   Object * (*copy)(Object * this);
   unsigned int refCount;
   unsigned int size;
+  Allocator * allocator;
 };
 
 PUBLIC Object * Object_new(unsigned int size, Class * class);
