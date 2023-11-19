@@ -82,7 +82,12 @@ int step1()
   ObjectStore_delete(objectStore2);
 
   /* Test 3 */
-  PRINT(("Step 1: Test 3 - Check all memory is freed: "));
+  PRINT(("Step 1: Test 3 - Delete a deleted ObjectStore: "));
+  ObjectStore_delete(objectStore1);
+  UT_ASSERT((1));
+
+  /* Test 4 */
+  PRINT(("Step 1: Test 4 - Check all memory is freed: "));
 
   UT_ASSERT((Malloc_report((Allocator*)Malloc_getRef()) == 0));
 
@@ -106,7 +111,7 @@ int step2()
   PRINT(("Step 2: test 2 - Delete a custom allocator: "));
   ObjectStore_deleteAllocator(objectStore1, testAllocInfo);
   UT_ASSERT((1));
-  ObjectStore_delete(objectStore1); 
+  ObjectStore_delete(objectStore1);
 
   /* Test 3 */
   PRINT(("Step 2: Test 3 - Check all memory is freed: "));
@@ -170,9 +175,42 @@ int step3()
   return 1;
 }
 
+int step4()
+{
+  static const int N = 3;
+  MyAllocator* testAlloc[N];
+  AllocInfo* testAllocInfo[N];
+  ObjectStore* objectStore = 0;
+  Object* object[1000] = { 0 };
+
+  objectStore = ObjectStore_getRef();
+
+  for (int i=0; i< N;i++)
+  {
+    testAlloc[i] = MyAllocator_new();
+    testAllocInfo[i] = ObjectStore_createAllocator(objectStore, (Allocator*)testAlloc[i]);
+  }
+
+  for (int i=0; i<N; i++)
+  {
+    ObjectStore_deleteAllocator(objectStore, testAllocInfo[i]);
+  }
+
+  ObjectStore_delete(objectStore);
+
+  ObjectStore_report(objectStore);
+  
+  /* Test 4 */
+  PRINT(("Step 4: Test 4 - Check all memory is freed: "));
+  UT_ASSERT((Malloc_report((Allocator*)Malloc_getRef()) == 0));
+
+  return 1;
+}
+
 int main()
 {
   step1();
   step2();
   step3();
+  step4();
 }
