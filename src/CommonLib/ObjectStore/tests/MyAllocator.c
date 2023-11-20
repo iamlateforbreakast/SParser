@@ -2,6 +2,7 @@
 #include "Malloc.h"
 
 #include "Debug.h"
+#include "Error.h"
 
 #include <stdlib.h>
 
@@ -46,7 +47,10 @@ void * MyAllocator_allocate(Allocator * this, unsigned int size)
     return allocatedPtr;
   }
   else
+  {
+    Error_new(ERROR_NORMAL,"Failed to allocate");
     return 0;
+  }
 }
 
 void MyAllocator_deallocate(Allocator * this, void * ptr)
