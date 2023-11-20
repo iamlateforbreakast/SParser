@@ -124,12 +124,20 @@ PUBLIC AllocInfo * ObjectStore_createAllocator(ObjectStore * this, Allocator * a
   allocInfo = (AllocInfo*)Malloc_allocate((Allocator*)Malloc_getRef(),sizeof(AllocInfo));
   
   allocInfo->ptr = allocator;
-  allocInfo->prev = this->allocList;
-  allocInfo->next = 0;
-  this->allocList->next = allocInfo;
   
-  this->allocList = allocInfo;
-
+  if (this->allocList != 0)
+  {
+    allocInfo->prev = 0;
+    allocInfo->next = this->allocList;
+    this->allocList->prev = allocInfo;
+    this->allocList = allocInfo;
+  }
+  else
+  {
+    allocInfo->prev = 0;
+    allocInfo->next = 0;
+    this->allocList = allocInfo;
+  }
   return allocInfo;
 }
 
@@ -141,12 +149,13 @@ PUBLIC AllocInfo * ObjectStore_createAllocator(ObjectStore * this, Allocator * a
 **************************************************/
 PUBLIC void ObjectStore_deleteAllocator(ObjectStore * this, AllocInfo * allocInfo)
 {
-  allocInfo->prev->next = allocInfo->next;
+  if (allocInfo->prev!=0)
+    allocInfo->prev->next = allocInfo->next;
   if (allocInfo->next)
     allocInfo->next->prev = allocInfo->prev;
 
   allocInfo->ptr->delete(allocInfo->ptr);
-  Malloc_deallocate((Allocator*)Malloc_getRef(), (char*)allocInfo);
+  Malloc_deallocate((Allocator*)Malloc_getRef(), (void*)allocInfo);
 }
 
 /**********************************************//** 
