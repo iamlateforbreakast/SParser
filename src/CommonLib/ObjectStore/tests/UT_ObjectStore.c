@@ -10,6 +10,7 @@
 
 #define DEBUG (0)
 #define N (3)
+#define MAX_OBJECT_NB (1000)
 
 #define UT_ASSERT(cond) if ((cond)) \
                           { printf("Passed\n");} \
@@ -180,7 +181,7 @@ int step4()
   MyAllocator* testAlloc[N];
   AllocInfo* testAllocInfo[N];
   ObjectStore* objectStore = 0;
-  Object* object[1000] = { 0 };
+  Object* object[MAX_OBJECT_NB] = { 0 };
 
   objectStore = ObjectStore_getRef();
 
@@ -190,13 +191,13 @@ int step4()
     testAllocInfo[i] = ObjectStore_createAllocator(objectStore, (Allocator*)testAlloc[i]);
   }
 
-  PRINT(("Step 4 - Test 1 : Create 1000 objects across 3 allocators: "));
+  PRINT(("Step 4 - Test 1 : Create %d objects across 3 allocators: ", MAX_OBJECT_NB));
   
   int object_idx = 0;
   for (int i=0; i<N;i++)
   {
     object[object_idx] = ObjectStore_createObject(objectStore, &testClass, (Allocator*)testAlloc[i]);
-    while ((object[object_idx] != 0) && (object_idx<10000))
+    while ((object[object_idx] != 0) && (object_idx<MAX_OBJECT_NB))
     {
       object_idx++;
       object[object_idx] = ObjectStore_createObject(objectStore, &testClass, (Allocator*)testAlloc[i]);

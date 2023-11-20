@@ -153,6 +153,8 @@ PUBLIC void ObjectStore_deleteAllocator(ObjectStore * this, AllocInfo * allocInf
     allocInfo->prev->next = allocInfo->next;
   if (allocInfo->next)
     allocInfo->next->prev = allocInfo->prev;
+  if (this->allocList == allocInfo)
+    this->allocList = allocInfo->next;
 
   allocInfo->ptr->delete(allocInfo->ptr);
   Malloc_deallocate((Allocator*)Malloc_getRef(), (void*)allocInfo);
@@ -211,7 +213,7 @@ PUBLIC void ObjectStore_report(ObjectStore * this)
   
   PRINT(("Object Store Usage report:\n"));
   PRINT((" Nb allocated objects: %d\n", iterator->ptr->report(iterator->ptr)));
-  iterator = iterator->prev;
+  iterator = iterator->next;
   while (iterator!=0)
   {
     PRINT((" Nb allocated objects: %d\n", iterator->ptr->report(iterator->ptr)));
