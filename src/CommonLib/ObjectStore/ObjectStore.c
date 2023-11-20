@@ -128,6 +128,8 @@ PUBLIC AllocInfo * ObjectStore_createAllocator(ObjectStore * this, Allocator * a
   allocInfo->next = 0;
   this->allocList->next = allocInfo;
   
+  this->allocList = allocInfo;
+
   return allocInfo;
 }
 
@@ -155,19 +157,22 @@ PUBLIC void ObjectStore_deleteAllocator(ObjectStore * this, AllocInfo * allocInf
 **************************************************/
 PUBLIC Object * ObjectStore_createObject(ObjectStore * this, Class * class, Allocator * allocator)
 {
-  Object * object;
+  Object * object = 0;
   
   object = (Object *)allocator->allocate(allocator, class->f_size());//0B5EC7
-  if (object==0)
+  if (object!=0) //return object;
   {
-    Error_new(ERROR_FATAL,"Object allocation failed\n");
-  }
-  object->id = this->nbAllocatedObjects;
-  object->class = class;
-  object->size = class->f_size();
-  object->allocator = allocator;
+    object->id = this->nbAllocatedObjects;
+    object->class = class;
+    object->size = class->f_size();
+    object->allocator = allocator;
 
-  this->nbAllocatedObjects++;
+    this->nbAllocatedObjects++;
+  }
+  else
+  {
+    Error_new(ERROR_NORMAL,"Object allocation failed\n");
+  }
 
   return object;
 }
@@ -197,7 +202,7 @@ PUBLIC void ObjectStore_report(ObjectStore * this)
   
   PRINT(("Object Store Usage report:\n"));
   PRINT((" Nb allocated objects: %d\n", iterator->ptr->report(iterator->ptr)));
-  iterator = iterator->next;
+  iterator = iterator->prev;
   while (iterator!=0)
   {
     PRINT((" Nb allocated objects: %d\n", iterator->ptr->report(iterator->ptr)));

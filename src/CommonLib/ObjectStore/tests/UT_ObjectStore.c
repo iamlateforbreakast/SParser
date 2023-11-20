@@ -191,6 +191,20 @@ int step4()
     testAllocInfo[i] = ObjectStore_createAllocator(objectStore, (Allocator*)testAlloc[i]);
   }
 
+  PRINT(("Step 4 - Test 1 :"));
+  
+  int object_idx = 0;
+  for (int i=0; i<N;i++)
+  {
+    object[object_idx] = ObjectStore_createObject(objectStore, &testClass, (Allocator*)testAlloc[i]);
+    while ((object[object_idx] != 0) && (object_idx<10000))
+    {
+      object_idx++;
+      object[object_idx] = ObjectStore_createObject(objectStore, &testClass, (Allocator*)testAlloc[i]);
+    }
+  }
+  
+
   for (int i=0; i<N; i++)
   {
     ObjectStore_deleteAllocator(objectStore, testAllocInfo[i]);
@@ -199,7 +213,7 @@ int step4()
   ObjectStore_delete(objectStore);
 
   ObjectStore_report(objectStore);
-  
+
   /* Test 4 */
   PRINT(("Step 4: Test 4 - Check all memory is freed: "));
   UT_ASSERT((Malloc_report((Allocator*)Malloc_getRef()) == 0));
