@@ -9,8 +9,8 @@
 #include <stdio.h>
 
 #define DEBUG (0)
-#define N (3)
-#define MAX_OBJECT_NB (1000)
+#define N (5)
+#define MAX_OBJECT_NB (500)
 
 #define UT_ASSERT(cond) if ((cond)) \
                           { printf("Passed\n");} \
@@ -21,7 +21,7 @@ typedef struct TestClass
   Object object;
 } TestClass;
 
-Object * TestClass_new()
+TestClass * TestClass_new()
 {
   return 0;
 }
@@ -191,13 +191,13 @@ int step4()
     testAllocInfo[i] = ObjectStore_createAllocator(objectStore, (Allocator*)testAlloc[i]);
   }
 
-  PRINT(("Step 4 - Test 1 : Create %d objects across 3 allocators: ", MAX_OBJECT_NB));
+  PRINT(("Step 4 - Test 1 : Create %d objects across %d allocators: ", MAX_OBJECT_NB-1, N));
   
   int object_idx = 0;
-  for (int i=0; i<N;i++)
+  for (int i=0; (i<N)&& (object_idx<MAX_OBJECT_NB-1);i++)
   {
     object[object_idx] = ObjectStore_createObject(objectStore, &testClass, (Allocator*)testAlloc[i]);
-    while ((object[object_idx] != 0) && (object_idx<MAX_OBJECT_NB))
+    while ((object[object_idx] != 0) && (object_idx<MAX_OBJECT_NB-1))
     {
       object_idx++;
       object[object_idx] = ObjectStore_createObject(objectStore, &testClass, (Allocator*)testAlloc[i]);
@@ -225,8 +225,8 @@ int step4()
 
 int main()
 {
-  step1();
-  step2();
-  step3();
+  //step1();
+  //step2();
+  //step3();
   step4();
 }

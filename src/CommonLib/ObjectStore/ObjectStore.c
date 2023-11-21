@@ -64,14 +64,17 @@ PUBLIC void ObjectStore_delete(ObjectStore * this)
     AllocInfo * iterator = this->allocList;
     AllocInfo * current = this->allocList;
     
-    iterator=iterator->prev;
+    iterator=iterator->next;
     current->ptr->delete(current->ptr);
     Malloc_deallocate((Allocator*)Malloc_getRef(), (char*)current);
     current = iterator;
 
     while (iterator!=0)
     {
-       // TODO
+      iterator=iterator->next;
+      current->ptr->delete(current->ptr);
+      Malloc_deallocate((Allocator*)Malloc_getRef(), (char*)current);
+      current = iterator;
     }
 
     /* TODO: memset(this, 0, sizeof(ObjectMgr)); */
