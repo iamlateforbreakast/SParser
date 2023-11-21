@@ -21,6 +21,7 @@ struct Object
 };
 
 PUBLIC Object * Object_new(unsigned int size, Class * class);
+PUBLIC Object* Object_newFromAllocator(Class* class, Allocator* allocator);
 PUBLIC void Object_delete(Object * this);
 PUBLIC Object * Object_copy(Object * this);
 PUBLIC unsigned int Object_isEqual(Object * this, Object * compared);
