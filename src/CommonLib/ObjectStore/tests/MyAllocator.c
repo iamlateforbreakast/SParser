@@ -6,11 +6,11 @@
 
 #include <stdlib.h>
 
-#define MYMEMORY_SIZE (10000)
+#define MYMEMORY_SIZE (1000)
 
 struct MyAllocator
 {
-  Allocator allocator;
+  Allocator allocator; 
   void * memory;
   void * pointer;
 };
@@ -39,12 +39,16 @@ void MyAllocator_delete(MyAllocator * this)
 
 void * MyAllocator_allocate(Allocator * this, unsigned int size)
 {
-  if ((((MyAllocator*)this)->pointer+size)<(((MyAllocator*)this)->memory + MYMEMORY_SIZE))
+  char * ptr = ((MyAllocator*)this)->pointer;
+  char * startAddress = ((MyAllocator*)this)->memory;
+
+  if ((ptr+size)<(startAddress + MYMEMORY_SIZE))
   {
     void * allocatedPtr = ((MyAllocator*)this)->pointer;
-    ((MyAllocator*)this)->pointer += ((size / 64)+1)*64;
+    ptr += ((size / 8)+1)*8;
+    ((MyAllocator*)this)->pointer = (void*)ptr;
     this->nbAllocatedObjects++;
-    return allocatedPtr;
+    return (void*)allocatedPtr;
   }
   else
   {
