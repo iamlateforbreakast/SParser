@@ -6,10 +6,12 @@
 #include "Types.h"
 #include "String2.h"
 #include "List.h"
+#include "Allocator.h"
 
 typedef struct Map Map;
 
 PUBLIC Map * Map_new();
+PUBLIC Map* Map_newFromAllocator(Allocator * allocator);
 PUBLIC void Map_delete(Map * this);
 PUBLIC Map * Map_copy(Map * this);
 PUBLIC unsigned int Map_insert(Map * this,String* s, void * p);
