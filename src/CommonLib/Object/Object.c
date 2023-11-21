@@ -9,11 +9,14 @@
 #include "Class.h"
 #include "Object.h"
 #include "ObjectMgr.h"
+#include "ObjectStore.h"
+#include "Allocator.h"
 
 /**********************************************//**
   @private
 **************************************************/
 PRIVATE ObjectMgr * Object_objMgrPtr = 0;
+PRIVATE ObjectStore * Object_objectStore = 0;
 
 /**********************************************//** 
   @brief Create an instance of the class Object.
@@ -48,6 +51,38 @@ PUBLIC Object * Object_new(unsigned int size, Class * class)
   return this;
 }
 
+/**********************************************//**
+  @brief TBD
+  @public
+  @param[in] Class to instanciate
+  @memberof Object
+**************************************************/
+PUBLIC Object* Object_newFromAllocator(Class* class, Allocator * allocator)
+{
+  Object* this = 0;
+
+  if (Object_objectStore != 0)
+  {
+    // TODO: Not re-entrant
+    Object_objectStore = ObjectStore_getRef();
+  }
+
+  this = ObjectStore_createObject(Object_objectStore, class, allocator);
+  if (this != 0)
+  {
+    this->class = class;
+    if (this->class != 0)
+    {
+      this->delete = class->f_delete;
+      this->copy = class->f_copy;
+      this->size = class->f_size(0);
+    }
+    this->refCount = 1;
+  }
+
+  return this;
+}
+
 /**********************************************//** 
   @brief Delete an instance of the class Object.
   @public
@@ -55,7 +90,10 @@ PUBLIC Object * Object_new(unsigned int size, Class * class)
 **************************************************/
 PUBLIC void Object_delete(Object * this)
 {
-  ObjectMgr_deallocate(Object_objMgrPtr, this);
+  if (this->allocator == 0)
+    ObjectMgr_deallocate(Object_objMgrPtr, this);
+  else
+    ObjectStore_deleteObject(Object_objectStore, this);
 }
 
 /**********************************************//** 
