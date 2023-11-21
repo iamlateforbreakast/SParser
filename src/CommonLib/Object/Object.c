@@ -61,13 +61,7 @@ PUBLIC Object* Object_newFromAllocator(Class* class, Allocator * allocator)
 {
   Object* this = 0;
 
-  if (Object_objectStore != 0)
-  {
-    // TODO: Not re-entrant
-    Object_objectStore = ObjectStore_getRef();
-  }
-
-  this = ObjectStore_createObject(Object_objectStore, class, allocator);
+  this = ObjectStore_createObject(ObjectStore_getRef(), class, allocator);
   if (this != 0)
   {
     this->class = class;
