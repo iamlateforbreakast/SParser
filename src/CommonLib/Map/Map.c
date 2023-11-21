@@ -35,32 +35,55 @@ struct Map
 /**********************************************//**
   @private Class Description
 **************************************************/
-PRIVATE Class mapClass = 
+PRIVATE Class mapClass =
 {
   .f_new = 0,
   .f_delete = (Destructor)&Map_delete,
   .f_copy = (Copy_Operator)&Map_copy,
   .f_comp = 0,
-  .f_print = 0
+  .f_print = 0,
+  .f_size = (Sizer)&Map_getSize
 };
 
-/**********************************************//** 
+/********************************************************//**
   @brief Create a new instance of the class Map.
   @public
   @memberof Map
-**************************************************/
+************************************************************/
 PUBLIC Map* Map_new()
 {
   Map * this = 0;
   unsigned int i = 0;
   
   this = (Map*)Object_new(sizeof(Map),&mapClass);
-  
+  this->object.allocator = 0;
+
   for (i=0;i<HTABLE_SIZE;i++)
   {
     this->htable[i] = 0;
   }
   
+  return this;
+}
+
+/**********************************************//**
+  @brief Create a new instance of the class Map 
+  using a specifc allocator
+  @public
+  @memberof Map
+**************************************************/
+PUBLIC Map* Map_newFromAllocator(Allocator * allocator)
+{
+  Map* this = 0;
+  unsigned int i = 0;
+
+  this = (Map*)Object_newFromAllocator(&mapClass, (Allocator*)allocator);
+
+  for (i = 0; i < HTABLE_SIZE; i++)
+  {
+    this->htable[i] = 0;
+  }
+
   return this;
 }
 
@@ -260,6 +283,17 @@ PUBLIC void Map_print(Map * this)
   }
 }
 
+PUBLIC unsigned int Map_getSize(Map* this)
+{
+  if (this != 0)
+  {
+
+  }
+  else
+  {
+    return sizeof(Map);
+  }
+}
 /**********************************************//** 
   @brief Get all the entries in an instance of a Map.
   @public
