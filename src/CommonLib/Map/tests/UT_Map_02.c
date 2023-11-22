@@ -18,7 +18,7 @@ Map * testMap = 0;
 
 int step1()
 {
-  PRINT(("Step1: test 1 - Create an instance of Map using a custom alllcator:"));
+  PRINT(("Step 1: Test 1 - Create an instance of Map using a custom allocator: "));
   testMap = Map_newFromAllocator((Allocator*)testAlloc);
   UT_ASSERT((1));
 
@@ -27,7 +27,21 @@ int step1()
 
 int step2()
 {
+  String * s = String_new("Hello world");
+  String * item = String_new("The value");
+  
+  PRINT(("Step 2: Test 1 - Insert a string item: "));
+  Map_insert(testMap, s, (void**)item);
+  UT_ASSERT((1));
+
+  return 1;
+}
+
+int step3()
+{
+  PRINT(("Step 3: Test 1 - Delete the map: "));
   Map_delete(testMap);
+  UT_ASSERT((1));
 
   return 1;
 }
@@ -41,6 +55,8 @@ int main()
   allocInfo = ObjectStore_createAllocator(objectStore, (Allocator*)testAlloc);
 
   step1();
+  step2();
+  step3();
 
   ObjectStore_deleteAllocator(objectStore, allocInfo);
   ObjectStore_delete(objectStore);
