@@ -11,6 +11,7 @@
 #include "Class.h"
 #include "Object.h"
 #include "Memory.h"
+#include "ObjectStore.h"
 
 /**********************************************//**
   @private
@@ -23,8 +24,24 @@ typedef struct ListNode ListNode;
 struct ListNode
 {
   void* item;
+  int isOwned;
   ListNode* next;
   ListNode* prev;
+};
+
+PRIVATE unsigned int ListNode_getSize(ListNode* this)
+{
+  return sizeof(ListNode);
+}
+
+PRIVATE Class listNodeClass =
+{
+  .f_new = (Constructor)0,
+  .f_delete = (Destructor)0,
+  .f_copy = (Copy_Operator)0,
+  .f_comp = (Comp_Operator)0,
+  .f_print = (Printer)0,
+  .f_size = (Sizer)&ListNode_getSize
 };
 
 /**********************************************//**
@@ -42,15 +59,14 @@ struct List
 /**********************************************//**
   @private Class Description
 **************************************************/
-DECLARE_CLASS(List)
-Class listClass = 
+PRIVATE Class listClass = 
 {
   .f_new = (Constructor)0,
   .f_delete = (Destructor)&List_delete,
   .f_copy = (Copy_Operator)&List_copy,
   .f_comp = (Comp_Operator)&List_compare,
   .f_print = (Printer)&List_print,
-  .f_size = (Sizer)0
+  .f_size = (Sizer)&List_getSize
 };
 
 /**********************************************//** 
@@ -83,7 +99,7 @@ PUBLIC List * List_newFromAllocator(Allocator * allocator)
 {
   List * this = 0;
 
-  this = Object_newFromAllocator(&listClass, allocator);
+  this = (List*)Object_newFromAllocator(&listClass, allocator);
   // TODO: Check if allocation failed
   this->head = 0;
   this->tail = 0;
@@ -108,7 +124,7 @@ PUBLIC void List_delete(List* this)
     while ((node = this->tail)!=0)
     {
       this->tail = node->next;
-      if (((Object*)node->item)->delete!=0)
+      if (((Object*)node->isOwned) && (((Object*)node->item)->delete!=0))
       {
         ((Object*)node->item)->delete(node->item);
       }
@@ -183,10 +199,14 @@ PUBLIC void List_insertHead(List* this, void* item)
 {
   ListNode* newNode = 0;
   
-  newNode = Memory_alloc(sizeof(ListNode));
+  if (this->object.allocator)
+    newNode = (ListNode*)ObjectStore_createObject(ObjectStore_getRef(), &listNodeClass, this->object.allocator);
+  else
+    newNode = Memory_alloc(sizeof(ListNode));
   newNode->item = item;
   newNode->next = 0;
   newNode->prev = this->head;
+  newNode->isOwned = 1;
   /* The following test case for empty list. */
   if (this->nbNodes == 0)
   {
@@ -213,7 +233,10 @@ PUBLIC void List_insertTail(List* this, void* item)
 {
   ListNode* newNode = 0;
   
-  newNode = Memory_alloc(sizeof(ListNode));
+  if (this->object.allocator)
+    newNode = (ListNode*)ObjectStore_createObject(ObjectStore_getRef(), &listNodeClass, this->object.allocator);
+  else
+    newNode = Memory_alloc(sizeof(ListNode));
   newNode->item = item;
   newNode->next = this->tail;
   newNode->prev = 0;
@@ -279,9 +302,14 @@ PUBLIC void List_forEach(List* this, void (*method)(void* o))
   @memberof List
   @return Number of items.
 **************************************************/
-PUBLIC unsigned int List_getSize(List * this)
+PUBLIC unsigned int List_getNbNodes(List * this)
 {
   return this->nbNodes;
+}
+
+PUBLIC unsigned int List_getSize(List* this)
+{
+  return sizeof(List);
 }
 
 PUBLIC void * List_getNext(List * this)
