@@ -42,13 +42,15 @@ struct List
 /**********************************************//**
   @private Class Description
 **************************************************/
-PRIVATE Class listClass = 
+DECLARE_CLASS(List)
+Class listClass = 
 {
-  .f_new = 0,
+  .f_new = (Constructor)0,
   .f_delete = (Destructor)&List_delete,
   .f_copy = (Copy_Operator)&List_copy,
   .f_comp = (Comp_Operator)&List_compare,
-  .f_print = (Printer)&List_print
+  .f_print = (Printer)&List_print,
+  .f_size = (Sizer)0
 };
 
 /**********************************************//** 
@@ -68,6 +70,26 @@ PUBLIC List* List_new()
   this->iterator = this->head;
   this->nbNodes = 0;
   
+  return this;
+}
+
+/**********************************************//** 
+  @brief Create a new instance of the class List using a custom allocator
+  @public
+  @memberof List
+  @return New instance.
+**************************************************/
+PUBLIC List * List_newFromAllocator(Allocator * allocator)
+{
+  List * this = 0;
+
+  this = Object_newFromAllocator(&listClass, allocator);
+  // TODO: Check if allocation failed
+  this->head = 0;
+  this->tail = 0;
+  this->iterator = this->head;
+  this->nbNodes = 0;
+
   return this;
 }
 

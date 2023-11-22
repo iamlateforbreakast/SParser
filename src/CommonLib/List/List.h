@@ -4,10 +4,12 @@
 #define _LIST_H_
 
 #include "Types.h"
+#include "Allocator.h"
 
 typedef struct List List;
 
 PUBLIC List * List_new();
+PUBLIC List * List_newFromAllocator(Allocator * allocator);
 PUBLIC void List_delete(List* this);
 PUBLIC List * List_copy(List* this);
 PUBLIC int List_compare(List * this, List * compared);
