@@ -3,6 +3,7 @@
 #include "TestObject.h"
 #include "Types.h"
 #include "Object.h"
+#include "ObjectStore.h"
 
 struct TestObject
 {
@@ -41,7 +42,11 @@ PUBLIC TestObject * TestObject_newFromAllocator(Allocator* allocator)
 
 PUBLIC void TestObject_delete(TestObject * this)
 {
+  ObjectStore * objectStore = ObjectStore_getRef();
+  
+  ObjectStore_deleteObject(objectStore, (Object*)this);
 
+  ObjectStore_delete(objectStore);
 }
 
 PUBLIC int TestObject_compare(TestObject* this, TestObject* compare)

@@ -1,12 +1,13 @@
 #include "MyAllocator.h"
 #include "Malloc.h"
+#include "Types.h"
 
 #include "Debug.h"
 #include "Error.h"
 
 #include <stdlib.h>
 
-#define MYMEMORY_SIZE (1000)
+#define MYMEMORY_SIZE (5000)
 
 struct MyAllocator
 {
@@ -42,7 +43,7 @@ void * MyAllocator_allocate(Allocator * this, unsigned int size)
   if ((((MyAllocator*)this)->pointer+size)<(((MyAllocator*)this)->memory + MYMEMORY_SIZE))
   {
     void * allocatedPtr = ((MyAllocator*)this)->pointer;
-    ((MyAllocator*)this)->pointer += ((size / 8) + 1);
+    ((MyAllocator*)this)->pointer += ((size / MEM_ALIGN) + 1) * MEM_ALIGN;
     this->nbAllocatedObjects++;
     return allocatedPtr;
   }

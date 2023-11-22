@@ -43,7 +43,11 @@ int step1()
   UT_ASSERT((List_getNbNodes(testList) == MAX_OBJECT_NB));
 
   PRINT(("Step1: Test 3 - Insert %d objects in list: ", MAX_OBJECT_NB));
-
+  for (i = 0; i< MAX_OBJECT_NB; i++)
+  {
+    List_removeHead(testList);
+  }
+  
   PRINT(("Step1: Test 4 - Check all memory is freed: "));
   
   UT_ASSERT((MyAllocator_report((Allocator*)testAlloc) != 0));
