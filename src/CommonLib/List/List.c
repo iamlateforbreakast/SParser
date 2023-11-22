@@ -23,6 +23,7 @@ typedef struct ListNode ListNode;
 **************************************************/
 struct ListNode
 {
+  Object object;
   void* item;
   int isOwned;
   ListNode* next;
@@ -59,7 +60,7 @@ struct List
 /**********************************************//**
   @private Class Description
 **************************************************/
-PRIVATE Class listClass = 
+Class listClass = 
 {
   .f_new = (Constructor)0,
   .f_delete = (Destructor)&List_delete,
@@ -116,10 +117,12 @@ PUBLIC List * List_newFromAllocator(Allocator * allocator)
 **************************************************/
 PUBLIC void List_delete(List* this)
 {
-  ListNode * node = 0;
-  
+    
   if (this!=0)
   {
+    ListNode * node = 0;
+    ObjectStore * objectStore = ObjectStore_getRef();
+
     //node = this->tail;
     while ((node = this->tail)!=0)
     {
@@ -128,10 +131,16 @@ PUBLIC void List_delete(List* this)
       {
         ((Object*)node->item)->delete(node->item);
       }
-      Memory_free(node, sizeof(ListNode));
+      if (this->object.allocator)
+        ObjectStore_deleteObject(objectStore, (Object*)node);
+      else
+        Memory_free(node, sizeof(ListNode));
+      
       //node = this->tail;
     }
     Object_delete(&this->object);
+    ObjectStore_deleteObject(objectStore, (Object*)this);
+    ObjectStore_delete(objectStore);
   }
 }
 
@@ -234,7 +243,10 @@ PUBLIC void List_insertTail(List* this, void* item)
   ListNode* newNode = 0;
   
   if (this->object.allocator)
+  {
     newNode = (ListNode*)ObjectStore_createObject(ObjectStore_getRef(), &listNodeClass, this->object.allocator);
+    newNode->object.allocator = this->object.allocator;
+  }
   else
     newNode = Memory_alloc(sizeof(ListNode));
   newNode->item = item;
@@ -358,7 +370,14 @@ PUBLIC void * List_removeHead(List * this)
     }
     this->nbNodes--;
     //TODO: this->iterator;
-    Memory_free(headNode, sizeof(ListNode));
+    if (this->object.allocator)
+    {
+      ObjectStore * objectStore = ObjectStore_getRef();
+      ObjectStore_deleteObject(objectStore, (Object*)headNode);
+      ObjectStore_delete(objectStore);
+    }
+    else
+      Memory_free(headNode, sizeof(ListNode));
   }
 
   return item;
