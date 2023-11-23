@@ -108,7 +108,7 @@ PUBLIC void List_delete(List* this)
       
       //node = this->tail;
     }
-    Object_delete(&this->object);
+    //Object_delete(&this->object);
     ObjectStore_deleteObject(objectStore, (Object*)this);
     ObjectStore_delete(objectStore);
   }
@@ -179,9 +179,9 @@ PUBLIC void List_insertHead(List* this, void* item)
   ListNode* newNode = 0;
   
   if (this->object.allocator)
-    newNode = (ListNode*)ObjectStore_createObject(ObjectStore_getRef(), &listNodeClass, this->object.allocator);
+    newNode = (ListNode*)ListNode_newFromAllocator(this->object.allocator, item);
   else
-    newNode = Memory_alloc(sizeof(ListNode));
+    newNode = (ListNode*)ListNode_new(item);
   newNode->item = item;
   newNode->next = 0;
   newNode->prev = this->head;

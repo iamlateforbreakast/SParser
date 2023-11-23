@@ -28,12 +28,12 @@ int step1()
 
   int i = 0;
 
-  PRINT(("Step1: Test 1 - Create a list from a custom allocator: "));
+  PRINT(("Step 1: Test 1 - Create a list from a custom allocator: "));
   testList = List_newFromAllocator((Allocator*)testAlloc);
 
   UT_ASSERT((1));
 
-  PRINT(("Step1: Test 2 - Insert %d objects in list: ", MAX_OBJECT_NB));
+  PRINT(("Step 1: Test 2 - Insert %d objects in list: ", MAX_OBJECT_NB));
   for (i = 0; i < MAX_OBJECT_NB; i++)
   {
     items[i] = TestObject_newFromAllocator((Allocator*)testAlloc);
@@ -45,7 +45,7 @@ int step1()
   }
   UT_ASSERT((List_getNbNodes(testList) == MAX_OBJECT_NB));
 
-  PRINT(("Step1: Test 3 - Insert %d objects in list: ", MAX_OBJECT_NB));
+  PRINT(("Step 1: Test 3 - Remove %d objects from list: ", MAX_OBJECT_NB));
   for (i = 0; i< MAX_OBJECT_NB; i++)
   {
     removed[i] = List_removeHead(testList);
@@ -53,8 +53,11 @@ int step1()
   }
   UT_ASSERT((1));
   
-  PRINT(("Step1: Test 4 - Check all memory is freed: "));
-  UT_ASSERT((MyAllocator_report((Allocator*)testAlloc) != 0));
+  PRINT(("Step 1: test 4 - Delete List from allocator: "));
+  List_delete(testList);
+
+  PRINT(("Step 1: Test 5 - Check all memory is freed: "));
+  UT_ASSERT((MyAllocator_report((Allocator*)testAlloc) != 1));
   printf("Nb object allocated: %d\n", MyAllocator_report((Allocator*)testAlloc));
 
   return 0;
