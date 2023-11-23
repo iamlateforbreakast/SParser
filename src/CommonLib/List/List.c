@@ -340,14 +340,7 @@ PUBLIC void * List_removeHead(List * this)
     }
     this->nbNodes--;
     //TODO: this->iterator;
-    if (this->object.allocator)
-    {
-      ObjectStore * objectStore = ObjectStore_getRef();
-      ObjectStore_deleteObject(objectStore, (Object*)headNode);
-      ObjectStore_delete(objectStore);
-    }
-    else
-      Memory_free(headNode, sizeof(ListNode));
+      ListNode_delete(headNode);
   }
 
   return item;
