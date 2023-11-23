@@ -39,6 +39,7 @@ PUBLIC Object * Object_new(unsigned int size, Class * class)
   {
     this->delete = class->f_delete;
     this->copy = class->f_copy;
+    this->size = class->f_size(0);
   }
   else
   {
@@ -46,7 +47,7 @@ PUBLIC Object * Object_new(unsigned int size, Class * class)
     this->copy = (Copy_Operator)0;
   }
   this->refCount = 1;
-  this->size = size;
+  this->allocator = 0;
   
   return this;
 }
@@ -72,6 +73,7 @@ PUBLIC Object* Object_newFromAllocator(Class* class, Allocator * allocator)
       this->size = class->f_size(0);
     }
     this->refCount = 1;
+    this->allocator = allocator;
   }
 
   return this;
