@@ -24,6 +24,8 @@ int step1()
   List* testList = 0;
 
   TestObject * items[MAX_OBJECT_NB];
+  TestObject * removed[MAX_OBJECT_NB];
+
   int i = 0;
 
   PRINT(("Step1: Test 1 - Create a list from a custom allocator: "));
@@ -39,17 +41,19 @@ int step1()
     //items[i]->y = MAX_OBJECT_NB - i;
     List_insertHead(testList, items[i]);
     TRACE(("Nb items %d\n", List_getNbNodes(testList)));
+    TRACE(("  Allocated %d bytes at %x\n", ((Object*)items[i])->class->f_size(0), items[i]));
   }
   UT_ASSERT((List_getNbNodes(testList) == MAX_OBJECT_NB));
 
   PRINT(("Step1: Test 3 - Insert %d objects in list: ", MAX_OBJECT_NB));
   for (i = 0; i< MAX_OBJECT_NB; i++)
   {
-    List_removeHead(testList);
+    removed[i] = List_removeHead(testList);
+    TRACE(("  Removed %d bytes at %x\n", ((Object*)removed[i])->class->f_size(0), removed[i]));
   }
+  UT_ASSERT((1));
   
   PRINT(("Step1: Test 4 - Check all memory is freed: "));
-  
   UT_ASSERT((MyAllocator_report((Allocator*)testAlloc) != 0));
   printf("Nb object allocated: %d\n", MyAllocator_report((Allocator*)testAlloc));
 
