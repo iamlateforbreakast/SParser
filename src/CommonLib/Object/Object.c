@@ -45,6 +45,7 @@ PUBLIC Object * Object_new(unsigned int size, Class * class)
   {
     this->delete = (Destructor)0;
     this->copy = (Copy_Operator)0;
+	this->size = class->f_size(0);
   }
   this->refCount = 1;
   this->allocator = 0;
