@@ -13,37 +13,7 @@
 #include "Memory.h"
 #include "ObjectStore.h"
 
-/**********************************************//**
-  @private
-**************************************************/
-typedef struct ListNode ListNode;
-
-/**********************************************//**
-  @private
-**************************************************/
-struct ListNode
-{
-  Object object;
-  void* item;
-  int isOwned;
-  ListNode* next;
-  ListNode* prev;
-};
-
-PRIVATE unsigned int ListNode_getSize(ListNode* this)
-{
-  return sizeof(ListNode);
-}
-
-PRIVATE Class listNodeClass =
-{
-  .f_new = (Constructor)0,
-  .f_delete = (Destructor)0,
-  .f_copy = (Copy_Operator)0,
-  .f_comp = (Comp_Operator)0,
-  .f_print = (Printer)0,
-  .f_size = (Sizer)&ListNode_getSize
-};
+#include "ListNode.h"
 
 /**********************************************//**
   @class List
