@@ -68,9 +68,18 @@ PUBLIC int TestObject_compare(TestObject* this, TestObject* compare)
   return 0;
 }
 
-PUBLIC TestObject* TestObject_copy()
+PUBLIC TestObject* TestObject_copy(TestObject * this)
 {
-  return 0;
+  TestObject * copy = 0;
+  if (this!=0)
+  {
+    if (this->object.allocator)
+      copy = (TestObject*)TestObject_newFromAllocator(this->object.allocator);
+    else
+      copy = (TestObject*)TestObject_new();
+    copy->testValue = this->testValue;
+  }
+  return copy;
 }
 
 PUBLIC void TestObject_print(TestObject* this)
