@@ -1,59 +1,17 @@
 #include "List.h"
 #include "Object.h"
+#include "TestObject.h"
 #include <stdlib.h>
 #include <stdio.h>
 
 #define LIST_SIZE (10)
-
-typedef struct TestItem
-{
-  Object object;
-  int x;
-  int y;
-} TestItem;
-
-void TestItem_delete(TestItem * this);
-TestItem * TestItem_copy(TestItem * item);
-
-TestItem * TestItem_new()
-{
-  TestItem * this = 0;
-
-  this = (TestItem*)malloc(sizeof(TestItem));
-  this->object.delete = (Destructor)&TestItem_delete;
-  this->object.copy = (Copy_Operator)&TestItem_copy;
-  this->object.size = sizeof(TestItem);
-
-  return this;
-}
-
-void TestItem_delete(TestItem * this)
-{
-  free(this);
-}
-
-TestItem * TestItem_copy(TestItem * item)
-{
-  TestItem * copy = 0;
-
-  copy = (TestItem*)malloc(sizeof(TestItem));
-  copy->x = item->x;
-  copy->y = item->y;
-
-  return copy;
-}
-
-void TestItem_print(TestItem * item, void * p)
-{
-  printf("x=%d y=%d\n", item->x, item->y);
-}
 
 int step1()
 {
   List * testList1 = 0;
   List * testList2 = 0;
   List * testList3 = 0;
-  TestItem * items[LIST_SIZE*2];
+  TestObject * items[LIST_SIZE*2];
   int i = 0;
 
   testList1 = List_new();
@@ -61,38 +19,38 @@ int step1()
 
   for (i=0; i<LIST_SIZE; i++)
   {
-    items[i] = TestItem_new();
-    items[i]->x = i;
-    items[i]->y = LIST_SIZE - i;
+    items[i] = TestObject_new();
+    //items[i]->x = i;
+    //items[i]->y = LIST_SIZE - i;
     List_insertHead(testList1, items[i]);
-    printf("Nb items %d\n", List_getSize(testList1));
+    printf("Nb items %d\n", List_getNbNodes(testList1));
   }
   for (i=LIST_SIZE; i<LIST_SIZE*2; i++)
   {
-    items[i] = TestItem_new();
-    items[i]->x = i;
-    items[i]->y = LIST_SIZE * 2 - i;
+    items[i] = TestObject_new();
+    //items[i]->x = i;
+    //items[i]->y = LIST_SIZE * 2 - i;
     List_insertTail(testList2, items[i]);
-    printf("Nb items %d\n", List_getSize(testList2));
+    printf("Nb items %d\n", List_getNbNodes(testList2));
   }
 
   printf("List1 ------------->\n");
-  List_forEach(testList1, &TestItem_print, 0);
+  List_forEach(testList1, (void (*)(void* o))&TestObject_print);
   printf("List2 ------------->\n");
-  List_forEach(testList2, &TestItem_print, 0);
+  List_forEach(testList2, (void (*)(void* o))&TestObject_print);
 
   List_merge(testList1, testList2);
   printf("List1 + List2 ----->\n");
-  List_forEach(testList1, &TestItem_print, 0);
+  List_forEach(testList1, (void (*)(void* o))&TestObject_print);
 
   testList3 = List_copy(testList1);
   printf("Copy of List1 ------>\n");
-  List_forEach(testList3, &TestItem_print, 0);
+  List_forEach(testList3, (void (*)(void* o))&TestObject_print);
 
   List_delete(testList1);
   List_delete(testList3);
 
-  Memory_report();
+  //Memory_report();
 
   return 0;
 }
@@ -102,9 +60,9 @@ int step2()
   List * testList1 = 0;
   List * testList2 = 0;
 
-  TestItem * items[LIST_SIZE];
-  TestItem * output1 = 0;
-  TestItem * output2 = 0;
+  TestObject * items[LIST_SIZE];
+  TestObject * output1 = 0;
+  TestObject * output2 = 0;
 
   int i;
   
@@ -113,13 +71,13 @@ int step2()
 
   for (i=0; i<LIST_SIZE;i++)
   {
-    items[i] = TestItem_new();
-    items[i]->x = i;
-    items[i]->y = LIST_SIZE - i;
+    items[i] = TestObject_new();
+    //items[i]->x = i;
+    //items[i]->y = LIST_SIZE - i;
     List_insertHead(testList1, items[i]);
     List_insertHead(testList2, items[i]);
-    printf("Test List1: Nb items %d\n", List_getSize(testList1));
-    printf("Test List2: Nb items %d\n", List_getSize(testList2));
+    printf("Test List1: Nb items %d\n", List_getNbNodes(testList1));
+    printf("Test List2: Nb items %d\n", List_getNbNodes(testList2));
   }
   
   output1 = List_getHead(testList1);
@@ -129,9 +87,9 @@ int step2()
   {
     output1 = List_removeHead(testList1);
     output2 = List_removeTail(testList2);
-    TestItem_delete(output1);
-    printf("Test List 1: Nb items %d\n", List_getSize(testList1));
-    printf("Test List 2: Nb items %d\n", List_getSize(testList2));
+    //TestItem_delete(output1);
+    printf("Test List 1: Nb items %d\n", List_getNbNodes(testList1));
+    printf("Test List 2: Nb items %d\n", List_getNbNodes(testList2));
   }
 
   output1 = List_removeHead(testList1);
@@ -145,7 +103,7 @@ int step2()
 
 int main()
 {
-  //step1();
+  step1();
   step2();
   return 0;
 }

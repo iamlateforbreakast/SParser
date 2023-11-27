@@ -12,11 +12,12 @@
 struct MyAllocator
 {
   Allocator allocator;
+  unsigned int size;
   void * memory;
   void * pointer;
 };
 
-MyAllocator * MyAllocator_new()
+MyAllocator * MyAllocator_new(unsigned int size)
 {
   MyAllocator * myAllocator = (MyAllocator*)Malloc_allocate((Allocator*)Malloc_getRef(),sizeof(MyAllocator));
 
@@ -26,7 +27,8 @@ MyAllocator * MyAllocator_new()
   myAllocator->allocator.deallocate = (DeAllocateFunction)MyAllocator_deallocate;
   myAllocator->allocator.report = (ReportFunction)MyAllocator_report;
   myAllocator->allocator.nbAllocatedObjects = 0;
-  myAllocator->memory = Malloc_allocate((Allocator*)Malloc_getRef(), MYMEMORY_SIZE);
+  myAllocator->size = size;
+  myAllocator->memory = Malloc_allocate((Allocator*)Malloc_getRef(), myAllocator->size);
   myAllocator->pointer = myAllocator->memory;
 
   return myAllocator;

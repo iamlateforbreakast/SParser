@@ -57,7 +57,7 @@ PRIVATE ListNode* ListNode_new(Object* object)
 
   this = (ListNode*)Object_new(sizeof(ListNode), &listNodeClass);
   // TODO: Check if allocation failed
-  this->item = object;
+  this->item = Object_getRef(object);
   this->isOwned = 0;
   this->next = 0;
   this->prev = 0;
@@ -95,9 +95,6 @@ PRIVATE void ListNode_delete(ListNode* this)
 
   if (this != 0)
   {
-    ListNode* node = 0;
-
-
     if ((this->item) && ((Object*)this->item)->delete != 0)
     {
       ((Object*)this->item)->delete(this->item);

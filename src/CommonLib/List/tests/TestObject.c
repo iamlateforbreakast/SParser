@@ -26,7 +26,12 @@ PRIVATE Class testObjectClass =
 
 PUBLIC TestObject * TestObject_new()
 {
-  return 0;
+  TestObject * this = 0;
+  
+  this = (TestObject*)Object_new(sizeof(TestObject), &testObjectClass);
+  this->testValue = 12345678;
+
+  return this;
 }
 
 PUBLIC TestObject * TestObject_newFromAllocator(Allocator* allocator)
@@ -42,11 +47,20 @@ PUBLIC TestObject * TestObject_newFromAllocator(Allocator* allocator)
 
 PUBLIC void TestObject_delete(TestObject * this)
 {
-  ObjectStore * objectStore = ObjectStore_getRef();
-  
-  ObjectStore_deleteObject(objectStore, (Object*)this);
-
-  ObjectStore_delete(objectStore);
+  if (this!=0)
+  {
+    if (this->object.refCount==1)
+    {
+      Object_delete((Object*)this);
+      //ObjectStore * objectStore = ObjectStore_getRef();
+      //ObjectStore_deleteObject(objectStore, (Object*)this);
+      //ObjectStore_delete(objectStore);
+    }
+    else if (this->object.refCount>1)
+    {
+      this->object.refCount--;
+    }
+  }
 }
 
 PUBLIC int TestObject_compare(TestObject* this, TestObject* compare)

@@ -87,30 +87,39 @@ PUBLIC List * List_newFromAllocator(Allocator * allocator)
 **************************************************/
 PUBLIC void List_delete(List* this)
 {
-    
   if (this!=0)
   {
-    ListNode * node = 0;
-    ObjectStore * objectStore = ObjectStore_getRef();
-
-    //node = this->tail;
-    while ((node = this->tail)!=0)
+    if (this->object.refCount == 1)
     {
-      this->tail = node->next;
-      if (((Object*)node->isOwned) && (((Object*)node->item)->delete!=0))
-      {
-        ((Object*)node->item)->delete(node->item);
-      }
-      if (this->object.allocator)
-        ObjectStore_deleteObject(objectStore, (Object*)node);
-      else
-        Memory_free(node, sizeof(ListNode));
+      ListNode * node = 0;
       
+
       //node = this->tail;
+      while ((node = this->tail)!=0)
+      {
+        this->tail = node->next;
+        if ((node->isOwned) && (((Object*)node->item)->delete!=0))
+        {
+          ((Object*)node->item)->delete(node->item);
+        }
+        ListNode_delete(node);
+        /*if (this->object.allocator)
+        {
+          ObjectStore * objectStore = ObjectStore_getRef();
+          ObjectStore_deleteObject(objectStore, (Object*)node);
+          ObjectStore_deleteObject(objectStore, (Object*)this);
+        }
+        else
+          Memory_free(node, sizeof(ListNode));*/
+      
+        //node = this->tail;
+      }
+      Object_delete(&this->object);
     }
-    //Object_delete(&this->object);
-    ObjectStore_deleteObject(objectStore, (Object*)this);
-    ObjectStore_delete(objectStore);
+    else if (this->object.refCount>1)
+    {
+      this->object.refCount--;
+    }
   }
 }
 

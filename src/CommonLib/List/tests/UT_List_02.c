@@ -117,7 +117,7 @@ int step3()
 int main()
 {
   objectStore = ObjectStore_getRef();
-  testAlloc = (MyAllocator*)MyAllocator_new();
+  testAlloc = (MyAllocator*)MyAllocator_new(5000);
   allocInfo = ObjectStore_createAllocator(objectStore, (Allocator*)testAlloc);
 
   step1();
