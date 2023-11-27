@@ -63,7 +63,11 @@ PUBLIC Object* Object_newFromAllocator(Class* class, Allocator * allocator)
 {
   Object* this = 0;
 
-  this = ObjectStore_createObject(ObjectStore_getRef(), class, allocator);
+  if (Object_objectStore==0)
+  {
+    Object_objectStore = ObjectStore_getRef();
+  }
+  this = ObjectStore_createObject(Object_objectStore, class, allocator);
   if (this != 0)
   {
     this->class = class;
@@ -103,7 +107,6 @@ PUBLIC Object * Object_copy(Object * this)
 {
   Object * copy = 0;
 
-  
   if ((this!=0) && (this->copy!=0))
   {
     copy = this->copy((Object*)this);
