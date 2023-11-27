@@ -38,6 +38,11 @@ void MyAllocator_delete(MyAllocator * this)
   Malloc_deallocate((Allocator*)Malloc_getRef(), (char*)this);
 }
 
+void MyAllocatro_reset(Allocator * this)
+{
+
+}
+
 void * MyAllocator_allocate(Allocator * this, unsigned int size)
 {
   if ((((MyAllocator*)this)->pointer+size)<(((MyAllocator*)this)->memory + MYMEMORY_SIZE))
