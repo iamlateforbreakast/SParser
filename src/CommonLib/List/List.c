@@ -213,12 +213,9 @@ PUBLIC void List_insertTail(List* this, void* item)
   ListNode* newNode = 0;
   
   if (this->object.allocator)
-  {
-    newNode = (ListNode*)ObjectStore_createObject(ObjectStore_getRef(), &listNodeClass, this->object.allocator);
-    newNode->object.allocator = this->object.allocator;
-  }
+    newNode = (ListNode*)ListNode_newFromAllocator(this->object.allocator, item);
   else
-    newNode = Memory_alloc(sizeof(ListNode));
+    newNode = (ListNode*)ListNode_new(item);
   newNode->item = item;
   newNode->next = this->tail;
   newNode->prev = 0;
@@ -279,7 +276,7 @@ PUBLIC void List_forEach(List* this, void (*method)(void* o))
 }
 
 /**********************************************//** 
-  @brief Get the number of item in List instance.
+  @brief Get the number of items in List instance.
   @public
   @memberof List
   @return Number of items.
@@ -289,6 +286,13 @@ PUBLIC unsigned int List_getNbNodes(List * this)
   return this->nbNodes;
 }
 
+/**********************************************//** 
+  @brief Get the size of a List obejct. If parameter is 0
+  return the size of the class.
+  @public
+  @memberof List
+  @return Number of items.
+**************************************************/
 PUBLIC unsigned int List_getSize(List* this)
 {
   return sizeof(List);
@@ -340,7 +344,7 @@ PUBLIC void * List_removeHead(List * this)
     }
     this->nbNodes--;
     //TODO: this->iterator;
-      ListNode_delete(headNode);
+    ListNode_delete(headNode);
   }
 
   return item;
@@ -374,7 +378,7 @@ PUBLIC void* List_removeTail(List* this)
     }
     this->nbNodes--;
     //TODO: this->iterator;
-    Memory_free(tailNode, sizeof(ListNode));
+    ListNode_delete(tailNode);
   }
 
   return item;
