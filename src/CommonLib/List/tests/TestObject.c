@@ -4,6 +4,7 @@
 #include "Types.h"
 #include "Object.h"
 #include "ObjectStore.h"
+#include "Debug.h"
 
 struct TestObject
 {
@@ -84,7 +85,7 @@ PUBLIC TestObject* TestObject_copy(TestObject * this)
 
 PUBLIC void TestObject_print(TestObject* this)
 {
-
+  PRINT(("  ~ Object: %d\n", this->object.id));
 }
 
 PUBLIC unsigned int TestObject_getSize(TestObject* this)
