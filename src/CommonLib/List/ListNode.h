@@ -120,7 +120,7 @@ PRIVATE void ListNode_delete(ListNode* this)
 PRIVATE ListNode* ListNode_copy(ListNode* this)
 {
   ListNode* copy = 0;
-  Object* item = 0;
+  //Object* item = 0;
 
   if (this != 0)
   {

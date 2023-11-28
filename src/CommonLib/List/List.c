@@ -11,7 +11,7 @@
 #include "Class.h"
 #include "Object.h"
 #include "Memory.h"
-#include "ObjectStore.h"
+#include "Debug.h"
 
 #include "ListNode.h"
 
@@ -93,8 +93,7 @@ PUBLIC void List_delete(List* this)
     {
       ListNode * node = 0;
       
-
-      //node = this->tail;
+      /* De-allocate the specific members */
       while ((node = this->tail)!=0)
       {
         this->tail = node->next;
@@ -103,17 +102,12 @@ PUBLIC void List_delete(List* this)
           ((Object*)node->item)->delete(node->item);
         }
         ListNode_delete(node);
-        /*if (this->object.allocator)
-        {
-          ObjectStore * objectStore = ObjectStore_getRef();
-          ObjectStore_deleteObject(objectStore, (Object*)node);
-          ObjectStore_deleteObject(objectStore, (Object*)this);
-        }
-        else
-          Memory_free(node, sizeof(ListNode));*/
-      
-        //node = this->tail;
       }
+      this->nbNodes = 0;
+      this->iterator = 0;
+      this->head = 0;
+      this->tail = 0;
+      /* De-allocate the base object */
       Object_delete(&this->object);
     }
     else if (this->object.refCount>1)
@@ -175,6 +169,7 @@ PUBLIC int List_compare(List * this, List * compared)
 **************************************************/
 PUBLIC void List_print(List * this)
 {
+  PRINT((" ~ List Object: %d", this->object.id));
 }
 
 /**********************************************//** 

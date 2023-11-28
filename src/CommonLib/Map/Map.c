@@ -287,7 +287,7 @@ PUBLIC unsigned int Map_getSize(Map* this)
 {
   if (this != 0)
   {
-
+    return sizeof(Map);
   }
   else
   {
