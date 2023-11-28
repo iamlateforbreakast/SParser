@@ -40,8 +40,8 @@ PRIVATE Class mapClass =
   .f_new = 0,
   .f_delete = (Destructor)&Map_delete,
   .f_copy = (Copy_Operator)&Map_copy,
-  .f_comp = 0,
-  .f_print = 0,
+  .f_comp = (Comp_Operator)&Map_comp,
+  .f_print = (Printer)&Map_print,
   .f_size = (Sizer)&Map_getSize
 };
 
@@ -53,16 +53,16 @@ PRIVATE Class mapClass =
 PUBLIC Map* Map_new()
 {
   Map * this = 0;
-  unsigned int i = 0;
   
   this = (Map*)Object_new(sizeof(Map),&mapClass);
-  this->object.allocator = 0;
-
-  for (i=0;i<HTABLE_SIZE;i++)
+  if (this=!0)
   {
-    this->htable[i] = 0;
+    for (int i = 0; i < HTABLE_SIZE; i++)
+    {
+      //this->htable[i] = List_new();
+    }
   }
-  
+
   return this;
 }
 
@@ -75,13 +75,14 @@ PUBLIC Map* Map_new()
 PUBLIC Map* Map_newFromAllocator(Allocator * allocator)
 {
   Map* this = 0;
-  unsigned int i = 0;
 
   this = (Map*)Object_newFromAllocator(&mapClass, (Allocator*)allocator);
-
-  for (i = 0; i < HTABLE_SIZE; i++)
+  if (this!=0)
   {
-    this->htable[i] = 0;
+    for (int i = 0; i < HTABLE_SIZE; i++)
+    {
+      this->htable[i] = 0;
+    }
   }
 
   return this;
@@ -94,16 +95,22 @@ PUBLIC Map* Map_newFromAllocator(Allocator * allocator)
 **************************************************/
 PUBLIC void Map_delete(Map * this)
 {
-  unsigned int i = 0;
-  
   if (this != 0)
   {
-    for (i=0;i<HTABLE_SIZE;i++)
+    if (this->object.refCount == 1)
     {
-      List_delete(this->htable[i]);
+      /* De-allocate the specific members */
+      for (int i = 0; i < HTABLE_SIZE; i++)
+      {
+        List_delete(this->htable[i]);
+      }
+      /* De-allocate the base object */
+      Object_delete(&this->object);
     }
-  
-    Object_delete(&this->object);
+    else if (this->object.refCount > 1)
+    {
+      this->object.refCount--;
+    }
   }
 }
 
@@ -118,6 +125,11 @@ PUBLIC Map * Map_copy(Map * this)
   Map * result = 0;
   
   return result;
+}
+
+PUBLIC int Map_comp(Map* this, Map* compared)
+{
+  return 0;
 }
 
 /**********************************************//** 
