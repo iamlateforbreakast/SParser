@@ -25,7 +25,7 @@ PRIVATE Class mapEntryClass =
   .f_copy = (Copy_Operator)&MapEntry_copy,
   .f_comp = (Comp_Operator)0,
   .f_print = (Printer)0,
-  .f_size = (Sizer)0
+  .f_size = (Sizer)&MapEntry_getSize
 };
 
 PUBLIC MapEntry * MapEntry_new(String * s, void * item)
@@ -54,6 +54,11 @@ PUBLIC MapEntry * MapEntry_copy(MapEntry * this)
   MapEntry * copy = 0;
 
   return copy;
+}
+
+PUBLIC MapEntry * MapEntry_getSize(MapEntry * this)
+{
+  return sizeof(MapEntry);
 }
 
 PUBLIC String * MapEntry_getString(MapEntry * this)

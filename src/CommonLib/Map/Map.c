@@ -55,11 +55,11 @@ PUBLIC Map* Map_new()
   Map * this = 0;
   
   this = (Map*)Object_new(sizeof(Map),&mapClass);
-  if (this=!0)
+  if (this!=0)
   {
     for (int i = 0; i < HTABLE_SIZE; i++)
     {
-      //this->htable[i] = List_new();
+      this->htable[i] = List_new();
     }
   }
 
@@ -81,7 +81,7 @@ PUBLIC Map* Map_newFromAllocator(Allocator * allocator)
   {
     for (int i = 0; i < HTABLE_SIZE; i++)
     {
-      this->htable[i] = 0;
+      this->htable[i] = List_new();
     }
   }
 
