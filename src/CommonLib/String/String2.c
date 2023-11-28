@@ -36,7 +36,7 @@ PRIVATE Class stringClass =
   .f_copy = (Copy_Operator)&String_copy,
   .f_comp = (Comp_Operator)&String_compare,
   .f_print = (Printer)NULL,
-  .f_size = 0
+  .f_size = (Sizer)&String_getSize
 };
 
 /**********************************************//** 
@@ -468,4 +468,16 @@ PUBLIC void String_stealBuffer(String* this, String* s)
   s->buffer = 0;
   s->length = 0;
   s->isOwned = 0;
+}
+
+/**************************************************
+ @brief String_getSize
+
+**************************************************/
+PUBLIC unsigned int String_getSize(String* this)
+{
+  if (this == 0)
+    return sizeof(String);
+  else
+    return sizeof(String);
 }
