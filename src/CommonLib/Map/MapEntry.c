@@ -24,7 +24,8 @@ PRIVATE Class mapEntryClass =
   .f_delete = (Destructor)&MapEntry_delete,
   .f_copy = (Copy_Operator)&MapEntry_copy,
   .f_comp = (Comp_Operator)0,
-  .f_print = (Printer)0
+  .f_print = (Printer)0,
+  .f_size = (Sizer)0
 };
 
 PUBLIC MapEntry * MapEntry_new(String * s, void * item)
