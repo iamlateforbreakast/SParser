@@ -1,23 +1,22 @@
 #include "MyAllocator.h"
 #include "Malloc.h"
+#include "Types.h"
 
 #include "Debug.h"
 #include "Error.h"
 
-#include <stdlib.h>
-
-#define MYMEMORY_SIZE (1000)
-
 struct MyAllocator
 {
   Allocator allocator;
+  unsigned int size;
   void * memory;
   void * pointer;
 };
 
-MyAllocator * MyAllocator_new()
+MyAllocator * MyAllocator_new(unsigned int size)
 {
-  MyAllocator * myAllocator = (MyAllocator*)Malloc_allocate((Allocator*)Malloc_getRef(),sizeof(MyAllocator));
+  Malloc* malloc = Malloc_getRef();
+  MyAllocator * myAllocator = (MyAllocator*)Malloc_allocate((Allocator*)malloc,sizeof(MyAllocator));
 
   myAllocator->allocator.new = (NewFunction)MyAllocator_new;
   myAllocator->allocator.delete = (DeleteFunction)MyAllocator_delete;
@@ -25,7 +24,8 @@ MyAllocator * MyAllocator_new()
   myAllocator->allocator.deallocate = (DeAllocateFunction)MyAllocator_deallocate;
   myAllocator->allocator.report = (ReportFunction)MyAllocator_report;
   myAllocator->allocator.nbAllocatedObjects = 0;
-  myAllocator->memory = Malloc_allocate((Allocator*)Malloc_getRef(), MYMEMORY_SIZE);
+  myAllocator->size = size;
+  myAllocator->memory = Malloc_allocate((Allocator*)Malloc_getRef(), myAllocator->size);
   myAllocator->pointer = myAllocator->memory;
 
   return myAllocator;
@@ -35,6 +35,11 @@ void MyAllocator_delete(MyAllocator * this)
 {
   Malloc_deallocate((Allocator*)Malloc_getRef(), (char*)this->memory);
   Malloc_deallocate((Allocator*)Malloc_getRef(), (char*)this);
+}
+
+void MyAllocator_reset(Allocator * this)
+{
+
 }
 
 void * MyAllocator_allocate(Allocator * this, unsigned int size)
