@@ -12,7 +12,6 @@
 #include "Class.h"
 #include "Object.h"
 #include "Debug.h"
-#include "Pool.h"
 
 #define NB_ELEMENT_MAX (100)
 #define ELEMENT_SIZE_BYTES (100)
@@ -24,7 +23,6 @@ struct Array
 {
   Object object;
   unsigned int nbElements;
-  Pool * pool;
 };
 
 /**********************************************//**
@@ -36,7 +34,8 @@ PRIVATE Class arrayClass =
   .f_delete = (Destructor)&Array_delete,
   .f_copy = (Copy_Operator)&Array_copy,
   .f_comp = (Comp_Operator)&Array_compare,
-  .f_print = (Printer)&Array_print
+  .f_print = (Printer)&Array_print,
+  .f_size = (Sizer)&Array_getSize
 };
 
 /**********************************************//** 
@@ -143,4 +142,9 @@ PUBLIC void Array_print(Array * this)
     }
     //Pool_discardCache(this->pool, this->headerIdx);
     //Pool_discardCache(this->pool, currentNodeIdx);
+}
+
+PUBLIC unsigned int Array_getSize(Array * this)
+{
+  return 0;
 }
