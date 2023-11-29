@@ -142,9 +142,8 @@ PUBLIC List* List_copy(List* this)
       }
       iterator = iterator->next;
     }
+    copy->iterator = copy->tail;
   }
-  
-  copy->iterator = copy->tail;
   
   return copy;
 }
