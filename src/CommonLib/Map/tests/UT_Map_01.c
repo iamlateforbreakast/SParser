@@ -10,7 +10,7 @@
                           { printf("Passed\n");} \
                           else { printf("Failed\n"); return 0;}
 
-#define NB_KEYS (200)
+#define NB_KEYS (250)
 
 const char* text = "For a long time I used to go to bed early. Sometimes, when I had put out my candle,"
 "my eyes would close so quickly that I had not even time to say I'm going to sleep. And half an hour"
@@ -18,16 +18,18 @@ const char* text = "For a long time I used to go to bed early. Sometimes, when I
 "which, I imagined, was still in my hands, and to blow out the light; I had been thinking all the time,"
 "while I was asleep, of what I had just been reading, but my thoughts had run into a channel of their"
 "own, until I myself seemed actually to have become the subject of my book : a church, a quartet, the"
-"rivalry between François Iand Charles V.This impression would persist for some moments after I was"
+"rivalry between François Iand Charles V. This impression would persist for some moments after I was"
 "awake; it did not disturb my mind, but it lay like scales upon my eyesand prevented them from"
-"registering the fact that the candle was no longer burning.Then it would begin to seem unintelligible,"
+"registering the fact that the candle was no longer burning. Then it would begin to seem unintelligible,"
 "as the thoughts of a former existence must be to a reincarnate spirit; the subject of my book would"
 "separate itself from me, leaving me free to choose whether I would form part of it or no;and at the"
 "same time my sight would return and I would be astonished to find myself in a state of darkness,"
 "pleasantand restful enough for the eyes, and even more, perhaps, for my mind, to which it appeared"
 "incomprehensible, without a cause, a matter dark indeed.";
 
-String* keys[NB_KEYS];
+String * keys[NB_KEYS];
+TestObject * testObjects[NB_KEYS];
+int nbTokens = 0;
 
 int init_keys()
 {
@@ -36,26 +38,50 @@ int init_keys()
 
   tokens = String_splitToken(fullText, " ");
 
-  for (int i = 0; i < List_getNbNodes(tokens); i++)
+  for (int i = 0; ((i < List_getNbNodes(tokens)) && (i< NB_KEYS)); i++)
   {
     keys[i] = (String*)List_getNext(tokens);
+    testObjects[i] = TestObject_new();
+    nbTokens++;
   }
 
   List_delete(tokens);
   String_delete(fullText);
 }
 
+int delete_keys()
+{
+  for (int i = 0; i < nbTokens; i++)
+  {
+    TestObject_delete(testObjects[i]);
+    String_delete(keys[i]);
+  }
+}
+
 int step1()
 {
   Map* testMap = 0;
 
+  Memory_report();
+
   PRINT(("Step 1: Test 1 - Build a Map: "));
 
   testMap = Map_new();
-  
+
   UT_ASSERT((1));
 
-  PRINT(("Step 1: Test 1 - Insert an object: "));
+  PRINT(("Step 1: Test 2 - Insert an object: "));
+
+  Map_insert(testMap, keys[0], testObjects[0]);
+
+  UT_ASSERT((1));
+
+  PRINT(("Step 1: Test 3 - Delete the Map: "));
+  Map_delete(testMap);
+
+  UT_ASSERT((1));
+
+  Memory_report();
 
   return 0;
 }
@@ -63,13 +89,16 @@ int step1()
 int step2()
 {
   Map * testMap = Map_new();
-
-  String * s = String_new("Hello world");
-  String * item = String_new("The value");
   
-  Map_insert(testMap, s, (void*)item);
+  for (int i = 0; i < 10; i++)
+  {
+    printf("-->%s\n", String_getBuffer(keys[i]));
+    Map_insert(testMap, keys[i], testObjects[i]);
+  }
   
   Map_delete(testMap);
+
+  Memory_report();
 
   return 0;
 }
@@ -154,12 +183,15 @@ int step6()
 int main()
 {
   init_keys();
+
   step1();
   step2();
   step3();
   step4();
   step5();
   step6();
+
+  delete_keys();
 
   Memory_report();
 
