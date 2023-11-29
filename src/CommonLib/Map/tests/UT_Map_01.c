@@ -1,29 +1,83 @@
 #include "Map.h"
 #include "String2.h"
+#include "TestObject.h"
 #include "ObjectMgr.h"
 #include "Memory.h"
+#include "Debug.h"
 
-Map * testMap = 0;
+#define DEBUG (0)
+#define UT_ASSERT(cond) if ((cond)) \
+                          { printf("Passed\n");} \
+                          else { printf("Failed\n"); return 0;}
+
+#define NB_KEYS (200)
+
+const char* text = "For a long time I used to go to bed early. Sometimes, when I had put out my candle,"
+"my eyes would close so quickly that I had not even time to say I'm going to sleep. And half an hour"
+"later the thought that it was time to go to sleep would awaken me; I would try to put away the book"
+"which, I imagined, was still in my hands, and to blow out the light; I had been thinking all the time,"
+"while I was asleep, of what I had just been reading, but my thoughts had run into a channel of their"
+"own, until I myself seemed actually to have become the subject of my book : a church, a quartet, the"
+"rivalry between François Iand Charles V.This impression would persist for some moments after I was"
+"awake; it did not disturb my mind, but it lay like scales upon my eyesand prevented them from"
+"registering the fact that the candle was no longer burning.Then it would begin to seem unintelligible,"
+"as the thoughts of a former existence must be to a reincarnate spirit; the subject of my book would"
+"separate itself from me, leaving me free to choose whether I would form part of it or no;and at the"
+"same time my sight would return and I would be astonished to find myself in a state of darkness,"
+"pleasantand restful enough for the eyes, and even more, perhaps, for my mind, to which it appeared"
+"incomprehensible, without a cause, a matter dark indeed.";
+
+String* keys[NB_KEYS];
+
+int init_keys()
+{
+  String * fullText = String_new(text);
+  List * tokens = 0;
+
+  tokens = String_splitToken(fullText, " ");
+
+  for (int i = 0; i < List_getNbNodes(tokens); i++)
+  {
+    keys[i] = (String*)List_getNext(tokens);
+  }
+
+  List_delete(tokens);
+  String_delete(fullText);
+}
 
 int step1()
 {
+  Map* testMap = 0;
+
+  PRINT(("Step 1: Test 1 - Build a Map: "));
+
   testMap = Map_new();
   
+  UT_ASSERT((1));
+
+  PRINT(("Step 1: Test 1 - Insert an object: "));
+
   return 0;
 }
 
 int step2()
 {
+  Map * testMap = Map_new();
+
   String * s = String_new("Hello world");
   String * item = String_new("The value");
   
-  Map_insert(testMap, s, (void**)item);
+  Map_insert(testMap, s, (void*)item);
   
+  Map_delete(testMap);
+
   return 0;
 }
 
 int step3()
 {
+  Map* testMap = Map_new();
+
   String * s = String_new("Hello world");
   String * item = 0;
   
@@ -33,11 +87,15 @@ int step3()
 
   String_delete(s);
   
+  Map_delete(testMap);
+
   return 0;
 }
 
 int step4()
 {
+  Map* testMap = Map_new();
+
   String * s = String_new("Hello world");
   String * item = String_new("The new value");
   String * newItem = 0;
@@ -48,6 +106,8 @@ int step4()
   printf("New value : %s\n",
           String_getBuffer(newItem));
   
+  Map_delete(testMap);
+
   return 0;
 }
 
@@ -57,6 +117,8 @@ int step5()
   String * s = 0;
   String * c = 0;
   List * l = 0;
+  Map* testMap = Map_new();
+
   const char * testNames[] =
   {
     "banana", "strawberry", "cherry", "apple", "orange", "pear", "blackberry"
@@ -78,18 +140,20 @@ int step5()
 
   List_delete(l);
 
+  Map_delete(testMap);
+
   return 0;
 }
 
 int step6()
 {
-  Map_delete(testMap);
   
   return 0;
 }
 
 int main()
 {
+  init_keys();
   step1();
   step2();
   step3();
