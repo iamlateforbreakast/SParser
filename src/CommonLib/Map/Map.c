@@ -150,8 +150,8 @@ PUBLIC unsigned int Map_insert(Map * this,String * s, void * p)
   if ((me = Map_findEntry(this, s))!=0)
   {
     /* Replace entry with new entry an free existing entry */
-    MapEntry_setString(me, s);
-    MapEntry_setItem(me, p);
+    MapEntry_setString(me, Object_getRef((Object*)s));
+    MapEntry_setItem(me, Object_getRef((Object*)p));
   }
   else
   {
@@ -162,13 +162,13 @@ PUBLIC unsigned int Map_insert(Map * this,String * s, void * p)
       if (this->htable[key] == 0)
       {
         this->htable[key] = List_new();
-        entry = MapEntry_new(s,p);
+        entry = MapEntry_new(Object_getRef((Object*)s), Object_getRef((Object*)p));
         List_insertHead(this->htable[key], entry);
         result = 1;
       }
       else if (i==String_getLength(s)) 
       {
-        entry = MapEntry_new(s,p);
+        entry = MapEntry_new(Object_getRef((Object*)s), Object_getRef((Object*)p));
         List_insertHead(this->htable[key], entry);
       }
     }
