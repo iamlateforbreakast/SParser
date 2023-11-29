@@ -5,6 +5,8 @@
 #include "Memory.h"
 #include "Debug.h"
 
+#include <stdio.h>
+
 #define DEBUG (0)
 #define UT_ASSERT(cond) if ((cond)) \
                           { printf("Passed\n");} \
