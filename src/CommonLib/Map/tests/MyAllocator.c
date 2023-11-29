@@ -44,7 +44,7 @@ void MyAllocator_reset(Allocator * this)
 
 void * MyAllocator_allocate(Allocator * this, unsigned int size)
 {
-  if ((((MyAllocator*)this)->pointer+size)<(((MyAllocator*)this)->memory + MYMEMORY_SIZE))
+  if ((((MyAllocator*)this)->pointer+size)<(((MyAllocator*)this)->memory + ((MyAllocator*)this)->size))
   {
     void * allocatedPtr = ((MyAllocator*)this)->pointer;
     ((MyAllocator*)this)->pointer += ((size / 8) + 1);
