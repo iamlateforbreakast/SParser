@@ -97,10 +97,10 @@ PUBLIC void List_delete(List* this)
       while ((node = this->tail)!=0)
       {
         this->tail = node->next;
-        if ((node->isOwned) && (((Object*)node->item)->delete!=0))
-        {
-          ((Object*)node->item)->delete(node->item);
-        }
+        //if ((node->isOwned) && (((Object*)node->item)->delete!=0))
+        //{
+        //  ((Object*)node->item)->delete(node->item);
+        //}
         ListNode_delete(node);
       }
       this->nbNodes = 0;
