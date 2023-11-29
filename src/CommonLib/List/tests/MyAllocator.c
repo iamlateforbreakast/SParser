@@ -5,8 +5,6 @@
 #include "Debug.h"
 #include "Error.h"
 
-#include <stdlib.h>
-
 struct MyAllocator
 {
   Allocator allocator;
@@ -17,7 +15,8 @@ struct MyAllocator
 
 MyAllocator * MyAllocator_new(unsigned int size)
 {
-  MyAllocator * myAllocator = (MyAllocator*)Malloc_allocate((Allocator*)Malloc_getRef(),sizeof(MyAllocator));
+  Malloc* malloc = Malloc_getRef();
+  MyAllocator * myAllocator = (MyAllocator*)Malloc_allocate((Allocator*)malloc,sizeof(MyAllocator));
 
   myAllocator->allocator.new = (NewFunction)MyAllocator_new;
   myAllocator->allocator.delete = (DeleteFunction)MyAllocator_delete;
