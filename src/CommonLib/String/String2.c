@@ -448,7 +448,6 @@ PUBLIC List* String_splitToken(String* this, const char* separator)
 #ifndef _WIN32
     token = strtok(0, separator);
 #else
-    char* nextToken = 0;
     token = strtok_s(0, separator, &nextToken);
 #endif
   }
