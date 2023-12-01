@@ -1,3 +1,5 @@
+/* UT_Map_01.c */
+
 #include "Map.h"
 #include "String2.h"
 #include "TestObject.h"
@@ -29,8 +31,8 @@ const char* text = "For a long time I used to go to bed early. Sometimes, when I
 "pleasantand restful enough for the eyes, and even more, perhaps, for my mind, to which it appeared"
 "incomprehensible, without a cause, a matter dark indeed.";
 
-String * keys[NB_KEYS];
-TestObject * testObjects[NB_KEYS];
+String ** keys;
+TestObject ** testObjects;
 int nbTokens = 0;
 
 int init_keys()
@@ -39,16 +41,21 @@ int init_keys()
   List * tokens = 0;
 
   tokens = String_splitToken(fullText, " ");
+  nbTokens = List_getNbNodes(tokens);
 
-  for (int i = 0; ((i < List_getNbNodes(tokens)) && (i< NB_KEYS)); i++)
+  keys = (String**)Memory_alloc(nbTokens * sizeof(String*));
+  testObjects = (TestObject**)Memory_alloc(nbTokens * sizeof(TestObject*));
+
+  for (int i = 0; i < nbTokens; i++)
   {
     keys[i] = (String*)List_getNext(tokens);
     testObjects[i] = TestObject_new();
-    nbTokens++;
   }
 
   List_delete(tokens);
   String_delete(fullText);
+
+  return 1;
 }
 
 int delete_keys()
@@ -58,6 +65,10 @@ int delete_keys()
     TestObject_delete(testObjects[i]);
     String_delete(keys[i]);
   }
+  Memory_free(keys, sizeof(keys));
+  Memory_free(testObjects,sizeof(testObjects));
+
+  return 1;
 }
 
 int step1()
@@ -67,11 +78,13 @@ int step1()
   Memory_report();
 
   PRINT(("Step 1: Test 1 - Build a Map: "));
+
   testMap = Map_new();
 
   UT_ASSERT((1));
 
   PRINT(("Step 1: Test 2 - Insert an object: "));
+
   Map_insert(testMap, keys[0], testObjects[0]);
 
   UT_ASSERT((1));
@@ -160,7 +173,7 @@ int step5()
 
   const char * testColor[] =
   {
-    "yellow", "red", "red", "yellow", "orange", "green",    "black"
+    "yellow", "red", "red", "yellow", "orange", "green", "black"
   };
 
   for (i=0; i<sizeof(testNames)/sizeof(const char *); i++)
@@ -171,8 +184,6 @@ int step5()
     String_delete(s);
     String_delete(c);
   }
-
-  
 
   l = Map_getAll(testMap);
 
@@ -193,12 +204,12 @@ int main()
 {
   init_keys();
 
-  //step1();
-  //step2();
-  //step3();
-  //step4();
+  step1();
+  step2();
+  step3();
+  step4();
   step5();
-  //step6();
+  step6();
 
   delete_keys();
 
