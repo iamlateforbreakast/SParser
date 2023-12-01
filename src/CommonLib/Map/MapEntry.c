@@ -1,7 +1,7 @@
 /**********************************************//** 
-   @file Map.c
+   @file MapEntry.c
 		     
-   @brief A support class for theMap class.
+   @brief A support class for the Map class.
 **************************************************/
 #include "MapEntry.h"
 #include "Class.h"
@@ -56,7 +56,7 @@ PUBLIC MapEntry * MapEntry_copy(MapEntry * this)
   return copy;
 }
 
-PUBLIC MapEntry * MapEntry_getSize(MapEntry * this)
+PUBLIC unsigned int MapEntry_getSize(MapEntry * this)
 {
   return sizeof(MapEntry);
 }
