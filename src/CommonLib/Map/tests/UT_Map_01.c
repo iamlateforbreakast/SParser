@@ -1,359 +1,208 @@
-/**********************************************//** 
-  @file Map.c
- 
-  @brief A Map class.
-  This class provides a container indexed
-  by a string.
-**************************************************/
-
 #include "Map.h"
-#include "MapEntry.h"
-#include "List.h"
-#include "Class.h"
-#include "Object.h"
 #include "String2.h"
+#include "TestObject.h"
+#include "ObjectMgr.h"
 #include "Memory.h"
-#include "Error.h"
+#include "Debug.h"
 
-#define HTABLE_SIZE (50)
+#include <stdio.h>
 
-/**********************************************//**
-  @private
-**************************************************/
-PRIVATE unsigned int Map_hash(Map * this, char * s, unsigned int i);
-PRIVATE MapEntry * Map_findEntry(Map* this, String * s);
+#define DEBUG (0)
+#define UT_ASSERT(cond) if ((cond)) \
+                          { printf("Passed\n");} \
+                          else { printf("Failed\n"); return 0;}
 
-/**********************************************//**
-  @class Map
-**************************************************/
-struct Map
+#define NB_KEYS (250)
+
+const char* text = "For a long time I used to go to bed early. Sometimes, when I had put out my candle,"
+"my eyes would close so quickly that I had not even time to say I'm going to sleep. And half an hour"
+"later the thought that it was time to go to sleep would awaken me; I would try to put away the book"
+"which, I imagined, was still in my hands, and to blow out the light; I had been thinking all the time,"
+"while I was asleep, of what I had just been reading, but my thoughts had run into a channel of their"
+"own, until I myself seemed actually to have become the subject of my book : a church, a quartet, the"
+"rivalry between François Iand Charles V. This impression would persist for some moments after I was"
+"awake; it did not disturb my mind, but it lay like scales upon my eyesand prevented them from"
+"registering the fact that the candle was no longer burning. Then it would begin to seem unintelligible,"
+"as the thoughts of a former existence must be to a reincarnate spirit; the subject of my book would"
+"separate itself from me, leaving me free to choose whether I would form part of it or no;and at the"
+"same time my sight would return and I would be astonished to find myself in a state of darkness,"
+"pleasantand restful enough for the eyes, and even more, perhaps, for my mind, to which it appeared"
+"incomprehensible, without a cause, a matter dark indeed.";
+
+String * keys[NB_KEYS];
+TestObject * testObjects[NB_KEYS];
+int nbTokens = 0;
+
+int init_keys()
 {
-  Object object;
-  List * htable[HTABLE_SIZE];
-};
+  String * fullText = String_new(text);
+  List * tokens = 0;
 
-/**********************************************//**
-  @private Class Description
-**************************************************/
-PRIVATE Class mapClass =
-{
-  .f_new = 0,
-  .f_delete = (Destructor)&Map_delete,
-  .f_copy = (Copy_Operator)&Map_copy,
-  .f_comp = (Comp_Operator)&Map_comp,
-  .f_print = (Printer)&Map_print,
-  .f_size = (Sizer)&Map_getSize
-};
+  tokens = String_splitToken(fullText, " ");
 
-/********************************************************//**
-  @brief Create a new instance of the class Map.
-  @public
-  @memberof Map
-  @return New Map instance or NULL if failed to allocate.
-************************************************************/
-PUBLIC Map* Map_new()
-{
-  Map * this = 0;
-  
-  this = (Map*)Object_new(sizeof(Map),&mapClass);
-  if (this!=0)
+  for (int i = 0; ((i < List_getNbNodes(tokens)) && (i< NB_KEYS)); i++)
   {
-    for (int i = 0; i < HTABLE_SIZE; i++)
-    {
-      this->htable[i] = List_new();
-    }
+    keys[i] = (String*)List_getNext(tokens);
+    testObjects[i] = TestObject_new();
+    nbTokens++;
   }
 
-  return this;
+  List_delete(tokens);
+  String_delete(fullText);
 }
 
-/**********************************************//**
-  @brief Create a new instance of the class Map 
-  using a specifc allocator.
-  @public
-  @memberof Map
-  @return New Map instance or NULL if failed to allocate.
-**************************************************/
-PUBLIC Map* Map_newFromAllocator(Allocator * allocator)
+int delete_keys()
 {
-  Map* this = 0;
-
-  this = (Map*)Object_newFromAllocator(&mapClass, (Allocator*)allocator);
-  if (this!=0)
+  for (int i = 0; i < nbTokens; i++)
   {
-    for (int i = 0; i < HTABLE_SIZE; i++)
-    {
-      this->htable[i] = List_new();
-    }
-  }
-
-  return this;
-}
-
-/**********************************************//** 
-  @brief Delete an instance of the class Map.
-  @public
-  @memberof Map
-**************************************************/
-PUBLIC void Map_delete(Map * this)
-{
-  if (this != 0)
-  {
-    if (this->object.refCount == 1)
-    {
-      /* De-allocate the specific members */
-      for (int i = 0; i < HTABLE_SIZE; i++)
-      {
-        List_delete(this->htable[i]);
-      }
-      /* De-allocate the base object */
-      Object_delete(&this->object);
-    }
-    else if (this->object.refCount > 1)
-    {
-      this->object.refCount--;
-    }
+    TestObject_delete(testObjects[i]);
+    String_delete(keys[i]);
   }
 }
 
-/**********************************************//** 
-  @brief Copy an instance of the class Map.
-  @public
-  @memberof Map
-  @return Copy of instance of NULL if failed to allocate.
-**************************************************/
-PUBLIC Map * Map_copy(Map * this)
+int step1()
 {
-  Map * result = 0;
-  
-  return result;
-}
+  Map* testMap = 0;
 
-PUBLIC int Map_comp(Map* this, Map* compared)
-{
+  Memory_report();
+
+  PRINT(("Step 1: Test 1 - Build a Map: "));
+  testMap = Map_new();
+
+  UT_ASSERT((1));
+
+  PRINT(("Step 1: Test 2 - Insert an object: "));
+  Map_insert(testMap, keys[0], testObjects[0]);
+
+  UT_ASSERT((1));
+
+  PRINT(("Step 1: Test 3 - Delete the Map: "));
+  Map_delete(testMap);
+
+  UT_ASSERT((1));
+
+  Memory_report();
+
   return 0;
 }
 
-/**********************************************//** 
-  @brief Insert an object into a Map instance
-  @public
-  @memberof Map
-  @return 1 is inserted
-**************************************************/
-PUBLIC unsigned int Map_insert(Map * this, String * s, void * p)
+int step2()
 {
-  unsigned int result = 0;
-  unsigned int key = 0;
-  unsigned int i = 0;
-  void * entry =0;
-  MapEntry * me = 0;
+  Map * testMap = Map_new();
   
-  /* Check if there is an entry under s */
-  if ((me = Map_findEntry(this, s))!=0)
+  for (int i = 0; i < nbTokens; i++)
   {
-    /* Replace entry with new entry an free existing entry */
-    MapEntry_setString(me, Object_getRef((Object*)s));
-    MapEntry_setItem(me, Object_getRef((Object*)p));
-  }
-  else
-  {
-    /* Create a new entry */
-    for (i=1; (i<=String_getLength(s)) && (result==0); i++)
-    {
-      key = Map_hash(this,String_getBuffer(s), i);
-      if (this->htable[key] == 0)
-      {
-        this->htable[key] = List_new();
-        entry = MapEntry_new(Object_getRef((Object*)s), Object_getRef((Object*)p));
-        List_insertHead(this->htable[key], entry);
-        result = 1;
-      }
-      else if (i==String_getLength(s)) 
-      {
-        entry = MapEntry_new(Object_getRef((Object*)s), Object_getRef((Object*)p));
-        List_insertHead(this->htable[key], entry);
-      }
-    }
+    //printf("-->%s\n", String_getBuffer(keys[i]));
+    Map_insert(testMap, keys[i], testObjects[i]);
   }
   
-  return result;
+  Map_delete(testMap);
+
+  Memory_report();
+
+  return 0;
 }
 
-/**********************************************//** 
-  @brief TBD
-  @public
-  @memberof Map
-**************************************************/
-PUBLIC unsigned int Map_find(Map* this, String* s, void** p)
+int step3()
 {
-  unsigned int result = 0;
-  MapEntry * n = 0;
+  Map* testMap = Map_new();
+
+  String * s = String_new("Hello world");
+  String * item = 0;
   
-  n = Map_findEntry(this, s);
+  Map_find(testMap, s, (void**)&item);
+ 
+  printf("Value : %s\n", String_getBuffer(item));
+
+  String_delete(s);
   
-  if (n!=0)
-  {
-    *p = (MapEntry_getItem(n));
-    result = 1;
-  }
-  else
-  {
-    *p = 0;
-    result = 0;
-  }
-  
-  return result;
+  Map_delete(testMap);
+
+  return 0;
 }
 
-/**********************************************//** 
-  @brief TBD
-  @private
-  @memberof Map
-**************************************************/
-PRIVATE unsigned int Map_hash(Map * this, char * s, unsigned int length)
+int step4()
 {
-  unsigned int result = 0;
-  unsigned int i = 0;
-  
-  for (i=0; i<length; i++)
-  {
-    result = result + s[i];
-    result += (result << 10);
-    result ^= (result>>6);
-  }
-  result = result % HTABLE_SIZE;
-  /*
-          hash += key[i], hash += ( hash << 10 ), hash ^= ( hash >> 6 );
-    }
-    hash += ( hash << 3 ), hash ^= ( hash >> 11 ), hash += ( hash << 15 );
-    */
+  Map* testMap = Map_new();
 
-  return result;
+  String * s = String_new("Hello world");
+  String * item = String_new("The new value");
+  String * newItem = 0;
+  
+  Map_insert(testMap, s, item);
+  Map_find(testMap, s, (void**)&newItem);
+  
+  printf("New value : %s\n",
+          String_getBuffer(newItem));
+  
+  String_delete(s);
+  String_delete(item);
+
+  Map_delete(testMap);
+
+  return 0;
 }
 
-/**********************************************//**
-  @brief Find a map item based on a key
-  @private
-  @memberof Map
-**************************************************/
-PRIVATE MapEntry * Map_findEntry(Map* this, String * s)
-{
-  MapEntry * result = 0;
-  unsigned int key = 0;
-  unsigned int i = 0;
-  unsigned int isFound = 0;
-  MapEntry * n = 0;
-  
-  for (i=1; (i<=String_getLength(s)) && (!isFound); i++)
-  {
-    key = Map_hash(this, String_getBuffer(s), i);
-    if (this->htable[key] != 0)
-    {
-      List_resetIterator(this->htable[key]);
-      n = (MapEntry*)List_getNext(this->htable[key]);
-      while (n!= 0)
-      {
-        if (String_compare(MapEntry_getString(n), s)==0)
-        {
-          isFound = 1;
-          result = n;
-          break;
-        }
-        n = (MapEntry*)List_getNext(this->htable[key]);
-      }
-      
-    }
-  }
-  
-  return result;
-}
-
-/**********************************************//**
-  @brief Print a Map instance
-  @public
-  @memberof Map
-**************************************************/
-PUBLIC void Map_print(Map * this)
+int step5()
 {
   int i = 0;
-  MapEntry * n = 0;
-  int j = 0;
-  char * p = 0;
-  
-  if (this != 0)
+  String * s = 0;
+  String * c = 0;
+  List * l = 0;
+  Map* testMap = Map_new();
+
+  Map_print(testMap);
+
+  const char * testNames[] =
   {
-    for (i=0;i<HTABLE_SIZE;i++)
-    {
-      if (this->htable[i]!=0)
-      {
-        Error_new(ERROR_INFO,"Map.c: Map[%d] is used with %d elements.\n",i, List_getSize(this->htable[i]));
-         for (j=0; j<List_getSize(this->htable[i]);j++)
-        {
-          List_resetIterator(this->htable[i]);
-          n = (MapEntry*)List_getNext(this->htable[i]);
-          if  (n!=0)
-          {
-            p = (char*)(String_getBuffer((String*)MapEntry_getItem(n)));
-            Error_new(ERROR_INFO,"Item %d: %x %x %x %x\n", j+1, *p, *(p+1), *(p+2), *(p+3));
-          }
-          else
-          {
-            Error_new(ERROR_INFO,"Item %d: void\n", j+1);
-          }
-          n = (MapEntry*)List_getNext(this->htable[i]);
-        }
-      }
-    }
+    "banana", "strawberry", "cherry", "apple", "orange", "pear", "blackberry"
+  };
+
+  const char * testColor[] =
+  {
+    "yellow", "red", "red", "yellow", "orange", "green",    "black"
+  };
+
+  for (i=0; i<sizeof(testNames)/sizeof(const char *); i++)
+  {
+    s = String_new(testNames[i]);
+    c = String_new(testColor[i]);
+    Map_insert(testMap, s, c);
+    String_delete(s);
+    String_delete(c);
   }
+
+  
+
+  l = Map_getAll(testMap);
+
+  List_delete(l);
+
+  Map_delete(testMap);
+
+  return 0;
 }
 
-/**********************************************//**
-  @brief Provide the size of a Map instance
-  @public
-  @memberof Map
-  @return Size in bytes
-**************************************************/
-PUBLIC unsigned int Map_getSize(Map* this)
+int step6()
 {
-  if (this != 0)
-  {
-    return sizeof(Map);
-  }
-  else
-  {
-    return sizeof(Map);
-  }
+  
+  return 0;
 }
-/**********************************************//** 
-  @brief Get all the entries in an instance of a Map.
-  @public
-  @memberof Map
-  @return List of map objects
-**************************************************/
-PUBLIC List * Map_getAll(Map * this)
+
+int main()
 {
-  List * result = 0;
-  int i = 0;
-  void * pItem = 0;
-  void * pCopy = 0;
-  MapEntry * n = 0;
-  
-  result = List_new();
-  for (i=0; i<HTABLE_SIZE; i++)
-  {
-    if (this->htable[i]!=0)
-    {
-      List_resetIterator(this->htable[i]);
-      n = (MapEntry*)List_getNext(this->htable[i]);
-      while (n!= 0)
-      {
-        pItem =  MapEntry_getItem(n);
-        pCopy = Object_copy((Object*)pItem);
-        List_insertHead(result, pCopy);
-        n = (MapEntry*)List_getNext(this->htable[i]);
-      }
-    }
-  }
-  
-  return result;
+  init_keys();
+
+  //step1();
+  //step2();
+  //step3();
+  //step4();
+  step5();
+  //step6();
+
+  delete_keys();
+
+  Memory_report();
+
+  return 0;
 }
