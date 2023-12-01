@@ -49,6 +49,7 @@ PRIVATE Class mapClass =
   @brief Create a new instance of the class Map.
   @public
   @memberof Map
+  @return New Map instance or NULL if failed to allocate.
 ************************************************************/
 PUBLIC Map* Map_new()
 {
@@ -68,9 +69,10 @@ PUBLIC Map* Map_new()
 
 /**********************************************//**
   @brief Create a new instance of the class Map 
-  using a specifc allocator
+  using a specific allocator.
   @public
   @memberof Map
+  @return New Map instance or NULL if failed to allocate.
 **************************************************/
 PUBLIC Map* Map_newFromAllocator(Allocator * allocator)
 {
@@ -89,7 +91,7 @@ PUBLIC Map* Map_newFromAllocator(Allocator * allocator)
 }
 
 /**********************************************//** 
-  @brief TBD
+  @brief Delete an instance of the class Map.
   @public
   @memberof Map
 **************************************************/
@@ -118,7 +120,7 @@ PUBLIC void Map_delete(Map * this)
   @brief Copy an instance of the class Map.
   @public
   @memberof Map
-  @return Copy of instance.
+  @return Copy of instance of NULL if failed to allocate.
 **************************************************/
 PUBLIC Map * Map_copy(Map * this)
 {
@@ -133,10 +135,10 @@ PUBLIC int Map_comp(Map* this, Map* compared)
 }
 
 /**********************************************//** 
-  @brief TBD
+  @brief Insert an object into a Map instance
   @public
   @memberof Map
-  @return TBD
+  @return 1 is inserted
 **************************************************/
 PUBLIC unsigned int Map_insert(Map * this,String * s, void * p)
 {
@@ -150,7 +152,7 @@ PUBLIC unsigned int Map_insert(Map * this,String * s, void * p)
   if ((me = Map_findEntry(this, s))!=0)
   {
     /* Replace entry with new entry an free existing entry */
-    MapEntry_setString(me, Object_getRef((Object*)s));
+    MapEntry_setString(me, String_getRef(s));
     MapEntry_setItem(me, Object_getRef((Object*)p));
   }
   else
@@ -229,6 +231,11 @@ PRIVATE unsigned int Map_hash(Map * this, char * s, unsigned int length)
   return result;
 }
 
+/**********************************************//**
+  @brief Find a map item based on a key
+  @private
+  @memberof Map
+**************************************************/
 PRIVATE MapEntry * Map_findEntry(Map* this, String * s)
 {
   MapEntry * result = 0;
@@ -261,6 +268,11 @@ PRIVATE MapEntry * Map_findEntry(Map* this, String * s)
   return result;
 }
 
+/**********************************************//**
+  @brief Print a Map instance
+  @public
+  @memberof Map
+**************************************************/
 PUBLIC void Map_print(Map * this)
 {
   int i = 0;
@@ -295,6 +307,12 @@ PUBLIC void Map_print(Map * this)
   }
 }
 
+/**********************************************//**
+  @brief Provide the size of a Map instance
+  @public
+  @memberof Map
+  @return Size in bytes
+**************************************************/
 PUBLIC unsigned int Map_getSize(Map* this)
 {
   if (this != 0)
@@ -310,7 +328,7 @@ PUBLIC unsigned int Map_getSize(Map* this)
   @brief Get all the entries in an instance of a Map.
   @public
   @memberof Map
-  @return List of map 
+  @return List of map objects
 **************************************************/
 PUBLIC List * Map_getAll(Map * this)
 {
