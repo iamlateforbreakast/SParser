@@ -1,8 +1,8 @@
+[-] Memory: Use Malloc allocator
+
 [-] Grammar2: Buffer size is fixed to 16Kb. This should be dynamic
 
 [-] Grammar2: Check if include file as already been processed
-
-[-] Object: Add a print method
 
 [-] Object: Add an equal method
 
@@ -14,9 +14,11 @@
 
 [-] Metrics: Report LSC
 
-[-] Map: Use Pool class
+[-] Map: Re-work storage mechanism
 
-[-] List: Correct For each function
+[X] Object: Add a print method
+
+[X] List: Correct For each function
 
 [X] TimeMgr: Implement
 
