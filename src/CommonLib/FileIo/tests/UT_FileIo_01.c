@@ -26,7 +26,7 @@ int step2()
 	FileIo_write(f, &testBuffer, BUFFER_SIZE_BYTES);
 	FileIo_delete(f);
 
-	String_delete(testFilename);
+	String_delete(testFileName);
 	
 	return 1;
 }
@@ -111,7 +111,7 @@ int step9()
   FileIo_openFile(f, "test.file");
   FileIo_fSeekEnd(f, 0);
   printf("Ftell %d\n", FileIo_ftell(f));
-	String_delete(testFilename);
+	String_delete(testFileName);
   FileIo_delete(f);
 	
   return 1;
