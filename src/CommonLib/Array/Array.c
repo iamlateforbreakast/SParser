@@ -49,7 +49,7 @@ PUBLIC Array * Array_new(ArrayParam * param)
   Array * newArray = 0;
   newArray = (Array*)Object_new(sizeof(Array), &arrayClass);
 
-  newArray->pool = Pool_new(NB_ELEMENT_MAX, ELEMENT_SIZE_BYTES);
+  ////newArray->pool = Pool_new(NB_ELEMENT_MAX, ELEMENT_SIZE_BYTES);
   newArray->nbElements = 0;
 
   return newArray;
@@ -83,7 +83,7 @@ PUBLIC void Array_delete(Array * this)
   {
     if (this->object.refCount==1)
     {
-      Pool_delete(this->pool);
+      //Pool_delete(this->pool);
       Object_delete(&this->object);
       this = 0;
     }

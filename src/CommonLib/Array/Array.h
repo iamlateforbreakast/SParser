@@ -25,4 +25,6 @@ PUBLIC int Array_compare(Array * this, Array * compared);
 PUBLIC void Array_print(Array * this);
 PUBLIC void Array_put(Array * this, unsigned int index);
 PUBLIC Object * Array_get(Array * this, unsigned int index);
+PUBLIC unsigned int Array_getSize(Array * this);
+
 #endif /* _ARRAY_H_ */

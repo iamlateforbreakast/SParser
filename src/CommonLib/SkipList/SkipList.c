@@ -8,38 +8,14 @@
 **************************************************/
 
 #include "SkipList.h"
+
 #include "Pool.h"
 #include "Class.h"
 #include "Object.h"
 #include "Debug.h"
-#include <limits.h>
 #include <stdlib.h>
 
-
-#define SKIPLIST_MAX_LEVEL (6)
-
-typedef struct SkipNode SkipNode;
-
-typedef struct SkipNode
-{
-    Object * objectInfo;
-    unsigned int key;
-    void* object;
-    unsigned int level;
-    unsigned int forward[SKIPLIST_MAX_LEVEL];
-} SkipNode;
-
-/**********************************************//**
-  @private Class Description
-**************************************************/
-//PRIVATE Class skipNodeClass = 
-//{
-//  .f_new = 0,
-//  .f_delete = (Destructor)&SkipNode_delete,
-//  .f_copy = (Copy_Operator)&SkipNode_copy,
-//  .f_comp = (Comp_Operator)&SkipNode_compare,
-//  .f_print = (Printer)&SkipNode_print
-//};
+#include "SkipNode.h"
 
 typedef struct SkipList
 {
@@ -82,8 +58,9 @@ PUBLIC SkipList* SkipList_new(unsigned int maxObjectNb)
 // PUBLIC SkipList * SkipList_new(Storage * storage)
 {
     SkipList* newSkipList = 0;
-    //Added: this = (Map*)Object_new(sizeof(SkipList),&skipListClass);
-    newSkipList = (SkipList*)malloc(sizeof(SkipList));
+    
+    newSkipList = (SkipList*)Object_new(sizeof(SkipList),&skipListClass);
+    //Removed: newSkipList = (SkipList*)malloc(sizeof(SkipList));
     newSkipList->maxObjectNb = maxObjectNb;
     // Removed: newSkipList->pool = Pool_new(newSkipList->maxObjectNb, sizeof(SkipNode));
     // NewSkipList->poll = Pool_new(storage, sizeof(SkipNode));
@@ -93,9 +70,8 @@ PUBLIC SkipList* SkipList_new(unsigned int maxObjectNb)
     newSkipList->isGreater = &myGreater;
     newSkipList->isEqual = &myEqual;
 
-    //Added: SkipNode * skipNode = (SkipNode*)Object_new(sizeof(SkipNode),&skipNodeClass);
-    SkipNode* skipNode = Pool_alloc(newSkipList->pool, &newSkipList->headerIdx);
-    // SkipNode * skipNode = Pool_alloc();
+    SkipNode * skipNode = SkipNode_new();
+    //Removed: SkipNode* skipNode = Pool_alloc(newSkipList->pool, &newSkipList->headerIdx);
     for (int i = 0; i < SKIPLIST_MAX_LEVEL; i++)
     {
         skipNode->forward[i] = newSkipList->headerIdx;
@@ -121,14 +97,22 @@ PUBLIC SkipList* SkipList_newFromAllocator()
 }
 
 /**********************************************//**
-  @brief SkipList_free
+  @brief SkipList_delete
   @param[in] Instance to destroy
   @return None
 **************************************************/
 PUBLIC void SkipList_delete(SkipList* this)
 {
-    Pool_free(this->pool);
+  if (this!=0)
+  {
+    while (this->headerIdx)
+    {
+        
+    }
+
+    //Removed: Pool_free(this->pool);
     free(this);
+  }
 }
 
 /**********************************************//**
@@ -267,7 +251,7 @@ PUBLIC void SkipList_add(SkipList* this, unsigned int key, void* object)
 //    return 0;
 //}
 /**********************************************//**
-  @brief SkipList_delete
+  @brief SkipList_remove
   @param[in] Key of object to remove
   @return Object removed from SkipList object.
 **************************************************/
