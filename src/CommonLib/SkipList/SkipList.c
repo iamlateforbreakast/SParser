@@ -22,15 +22,28 @@ typedef struct SkipNode SkipNode;
 
 typedef struct SkipNode
 {
+    Object * objectInfo;
     unsigned int key;
     void* object;
     unsigned int level;
     unsigned int forward[SKIPLIST_MAX_LEVEL];
 } SkipNode;
 
+/**********************************************//**
+  @private Class Description
+**************************************************/
+//PRIVATE Class skipNodeClass = 
+//{
+//  .f_new = 0,
+//  .f_delete = (Destructor)&SkipNode_delete,
+//  .f_copy = (Copy_Operator)&SkipNode_copy,
+//  .f_comp = (Comp_Operator)&SkipNode_compare,
+//  .f_print = (Printer)&SkipNode_print
+//};
+
 typedef struct SkipList
 {
-    Object object;
+    Object * object;
     unsigned int (*isEqual)(unsigned int, unsigned int);
     unsigned int (*isGreaterOrEqual)(unsigned int, unsigned int);
     unsigned int (*isGreater)(unsigned int, unsigned int);
@@ -50,7 +63,8 @@ PRIVATE Class skipListClass =
   .f_delete = (Destructor)&SkipList_delete,
   .f_copy = (Copy_Operator)&SkipList_copy,
   .f_comp = (Comp_Operator)&SkipList_compare,
-  .f_print = (Printer)&SkipList_print
+  .f_print = (Printer)&SkipList_print,
+  .f_size = (Sizer)&SkipList_getSize
 };
 
 PRIVATE unsigned int SkipList_randLevel(SkipList* this);
@@ -68,11 +82,10 @@ PUBLIC SkipList* SkipList_new(unsigned int maxObjectNb)
 // PUBLIC SkipList * SkipList_new(Storage * storage)
 {
     SkipList* newSkipList = 0;
-
-    //newSkipList = (SkipList*)malloc(sizeof(SkipList));
-    newSkipList = (SkipList*)Object_new(sizeof(SkipList),&skipListClass);
+    //Added: this = (Map*)Object_new(sizeof(SkipList),&skipListClass);
+    newSkipList = (SkipList*)malloc(sizeof(SkipList));
     newSkipList->maxObjectNb = maxObjectNb;
-    newSkipList->pool = Pool_new(newSkipList->maxObjectNb, sizeof(SkipNode));
+    // Removed: newSkipList->pool = Pool_new(newSkipList->maxObjectNb, sizeof(SkipNode));
     // NewSkipList->poll = Pool_new(storage, sizeof(SkipNode));
     newSkipList->level = 1;
     newSkipList->nbObjects = 0;
@@ -80,6 +93,7 @@ PUBLIC SkipList* SkipList_new(unsigned int maxObjectNb)
     newSkipList->isGreater = &myGreater;
     newSkipList->isEqual = &myEqual;
 
+    //Added: SkipNode * skipNode = (SkipNode*)Object_new(sizeof(SkipNode),&skipNodeClass);
     SkipNode* skipNode = Pool_alloc(newSkipList->pool, &newSkipList->headerIdx);
     // SkipNode * skipNode = Pool_alloc();
     for (int i = 0; i < SKIPLIST_MAX_LEVEL; i++)
@@ -89,9 +103,21 @@ PUBLIC SkipList* SkipList_new(unsigned int maxObjectNb)
     skipNode->key = INT_MAX;
     skipNode->object = 0;
     skipNode->level = 1;
-    Pool_write(newSkipList->pool, newSkipList->headerIdx, skipNode);
+    //Removed: Pool_write(newSkipList->pool, newSkipList->headerIdx, skipNode);
 
     return newSkipList;
+}
+
+/**********************************************//**
+  @brief SkipList_newFromAllocator
+  @param[in] none
+  @return New instance of class SkipList.
+**************************************************/
+PUBLIC SkipList* SkipList_newFromAllocator()
+{
+  SkipList* newSkipList = 0;
+
+  return newSkipList;
 }
 
 /**********************************************//**
@@ -100,12 +126,9 @@ PUBLIC SkipList* SkipList_new(unsigned int maxObjectNb)
   @return None
 **************************************************/
 PUBLIC void SkipList_delete(SkipList* this)
-{ 
-  if (this!=0)
-  {
-    Pool_delete(this->pool);
-    Object_delete(&this->object);
-  }
+{
+    Pool_free(this->pool);
+    free(this);
 }
 
 /**********************************************//**
@@ -174,7 +197,7 @@ PUBLIC void SkipList_add(SkipList* this, unsigned int key, void* object)
         insert->object = object;
         insert->level = level;
         SkipNode* header = Pool_read(this->pool, this->headerIdx);
-        for (int i = 0; i < level; i++)
+        for (int i = 0; i < (int)level; i++)
         {
             if (update[0] != 0)
             {
@@ -426,6 +449,14 @@ PUBLIC void SkipList_print(SkipList* this)
     Pool_discardCache(this->pool, currentNodeIdx);
 }
  
+PUBLIC unsigned int SkipList_getSize(SkipList* this)
+{
+  if (this == 0)
+    return sizeof(SkipList);
+  else
+    return sizeof(SkipList);
+}
+
 PRIVATE unsigned int SkipList_randLevel(SkipList* this)
 {
     int level = 1;
