@@ -21,10 +21,13 @@ int step1()
 int step2()
 {
 	String* testFileName = String_new("test.file");
+	
 	FileIo_createFile(f, testFileName);
 	FileIo_write(f, &testBuffer, BUFFER_SIZE_BYTES);
 	FileIo_delete(f);
 
+	String_delete(testFilename);
+	
 	return 1;
 }
 
