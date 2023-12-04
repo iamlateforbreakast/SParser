@@ -335,7 +335,6 @@ PUBLIC List * Map_getAll(Map * this)
   List * result = 0;
   int i = 0;
   void * pItem = 0;
-  void * pCopy = 0;
   MapEntry * n = 0;
   
   result = List_new();
@@ -348,8 +347,7 @@ PUBLIC List * Map_getAll(Map * this)
       while (n!= 0)
       {
         pItem =  MapEntry_getItem(n);
-        pCopy = Object_copy((Object*)pItem);
-        List_insertHead(result, pCopy);
+        List_insertHead(result, pItem);
         n = (MapEntry*)List_getNext(this->htable[i]);
       }
     }
