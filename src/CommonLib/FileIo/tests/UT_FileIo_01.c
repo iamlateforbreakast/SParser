@@ -106,10 +106,14 @@ int step8()
 int step9()
 {
   FileIo* f = FileIo_new();
+  String* fileName = String_new("test.file");
+	
   FileIo_openFile(f, "test.file");
   FileIo_fSeekEnd(f, 0);
   printf("Ftell %d\n", FileIo_ftell(f));
+	String_delete(testFilename);
   FileIo_delete(f);
+	
   return 1;
 }
 
