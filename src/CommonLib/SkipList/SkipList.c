@@ -19,15 +19,15 @@
 
 typedef struct SkipList
 {
-    Object * object;
+    Object object;
     unsigned int (*isEqual)(unsigned int, unsigned int);
     unsigned int (*isGreaterOrEqual)(unsigned int, unsigned int);
     unsigned int (*isGreater)(unsigned int, unsigned int);
     unsigned int level;
     unsigned int nbObjects;
     unsigned int maxObjectNb;
-    Pool* pool;
-    unsigned int headerIdx;
+    //Pool* pool;
+    void * headerPtr;
 } SkipList;
 
 /**********************************************//**
@@ -60,10 +60,13 @@ PUBLIC SkipList* SkipList_new(unsigned int maxObjectNb)
     SkipList* newSkipList = 0;
     
     newSkipList = (SkipList*)Object_new(sizeof(SkipList),&skipListClass);
-    //Removed: newSkipList = (SkipList*)malloc(sizeof(SkipList));
-    newSkipList->maxObjectNb = maxObjectNb;
+    
+    if (newSkipList==0) return 0;
+
+    // Removed: newSkipList = (SkipList*)malloc(sizeof(SkipList));
     // Removed: newSkipList->pool = Pool_new(newSkipList->maxObjectNb, sizeof(SkipNode));
-    // NewSkipList->poll = Pool_new(storage, sizeof(SkipNode));
+    // NewSkipList->pool = Pool_new(storage, sizeof(SkipNode));
+    newSkipList->maxObjectNb = maxObjectNb;
     newSkipList->level = 1;
     newSkipList->nbObjects = 0;
     newSkipList->isGreaterOrEqual = &myGreateOrEqual;
@@ -72,9 +75,11 @@ PUBLIC SkipList* SkipList_new(unsigned int maxObjectNb)
 
     SkipNode * skipNode = SkipNode_new();
     //Removed: SkipNode* skipNode = Pool_alloc(newSkipList->pool, &newSkipList->headerIdx);
+    newSkipList->headerPtr = skipNode;
+
     for (int i = 0; i < SKIPLIST_MAX_LEVEL; i++)
     {
-        skipNode->forward[i] = newSkipList->headerIdx;
+        skipNode->forward[i] = newSkipList->headerPtr;
     }
     skipNode->key = INT_MAX;
     skipNode->object = 0;
@@ -103,15 +108,19 @@ PUBLIC SkipList* SkipList_newFromAllocator()
 **************************************************/
 PUBLIC void SkipList_delete(SkipList* this)
 {
+  SkipNode * nextPtr = 0;
+
   if (this!=0)
   {
-    while (this->headerIdx)
+    while (nextPtr->key!=INT_MAX)
     {
-        
+      nextPtr = ((SkipNode*)this->headerPtr)->forward[1];
+      SkipNode_delete(this->headerPtr);
+      this->headerPtr = nextPtr;
     }
-
+    SkipNode_delete(this->headerPtr);
     //Removed: Pool_free(this->pool);
-    free(this);
+    Object_delete(&this->object);
   }
 }
 
@@ -131,87 +140,91 @@ PUBLIC SkipList * SkipList_copy(SkipList * this)
   @param[in] Object to add to SkipList object.
   @return None
 **************************************************/
-PUBLIC void SkipList_add(SkipList* this, unsigned int key, void* object)
+PUBLIC void SkipList_add(SkipList* this, unsigned int key, void* item)
  {
-    unsigned int update[SKIPLIST_MAX_LEVEL];
-    //unsigned int currentNodeIdx = this->headerIdx;
-    
+    //Removed: unsigned int update[SKIPLIST_MAX_LEVEL];
+    void * updatePtr[SKIPLIST_MAX_LEVEL];
+    //Removed: unsigned int currentNodeIdx = this->headerIdx;
+    void * currentNodePtr = this->headerPtr;
+
     //printf("[Cache usage] Add start %d\n", SkipList_reportCache(this));
-    for (int i = 0; i < SKIPLIST_MAX_LEVEL; i++) update[i] = 0;
+    for (int i = 0; i < SKIPLIST_MAX_LEVEL; i++) updatePtr[i] = 0;
 
-    unsigned int nextNodeIdx = this->headerIdx;
-    SkipNode* nextNode = Pool_read(this->pool, this->headerIdx);
-
+    void * nextNodePtr = this->headerPtr;
+    //SkipNode* nextNode = Pool_read(this->pool, this->headerIdx);
+    //SkipNode * nextNode = Allocator_read(this->allocator, this->header->Ptr);
     for (int i = this->level - 1; i >= 0; i--)
     {
-        while ((*this->isGreater)(nextNode->key,key))
-        {
-            update[i] = nextNodeIdx;
-            nextNodeIdx = nextNode->forward[i];
-            Pool_discardCache(this->pool, update[i]);
-            nextNode = Pool_read(this->pool, nextNode->forward[i]);
-        }
-        Pool_discardCache(this->pool, nextNode->forward[i]);
-        Pool_discardCache(this->pool, nextNodeIdx);
-        nextNode = Pool_read(this->pool, update[i]);
-        nextNodeIdx = update[i];
+      while ((*this->isGreater)(((SkipNode*)nextNodePtr)->key,key))
+      {
+        updatePtr[i] = nextNodePtr;
+        nextNodePtr = ((SkipNode*)nextNodePtr)->forward[i];
+        //Removed: Pool_discardCache(this->pool, update[i]);
+        //Removed: nextNode = Pool_read(this->pool, nextNode->forward[i]);
+      }
+      //Removed: Pool_discardCache(this->pool, nextNode->forward[i]);
+      //Removed: Pool_discardCache(this->pool, nextNodeIdx);
+      //Removed: nextNode = Pool_read(this->pool, update[i]);
+      //Removed: nextNodeIdx = update[i];
+      nextNodePtr = updatePtr[i];
     }
 
-    SkipNode * currentNode = Pool_read(this->pool, update[0]);
-    unsigned int currentKey = currentNode->key;
-    Pool_discardCache(this->pool, update[0]);
+    //Removed: SkipNode * currentNode = Pool_read(this->pool, update[0]);
+    unsigned int currentKey = ((SkipNode*)currentNodePtr)->key;
+    //Removed: Pool_discardCache(this->pool, update[0]);
 
     //printf("[Pool Usage]: %d\n", Pool_reportCacheUsed(this->pool));
     if (key == currentKey)
     {
-        currentNode->object = object;
-        return;
+      ((SkipNode*)currentNodePtr)->item = item;
+      return;
     }
     else
     {
-        unsigned int level = this->level;
-        if (update[0] != 0) level = SkipList_randLevel(this);
-        if (level > this->level)
+      unsigned int level = this->level;
+      if (updatePtr[0] != 0) level = SkipList_randLevel(this);
+      if (level > this->level)
+      {
+        this->level = level;
+      }
+      //Removed: unsigned int insertIdx;
+      //Removed: SkipNode* insert = Pool_alloc(this->pool, &insertIdx);
+      SkipNode * insertPtr = SkipNode_new();
+      insertPtr->key = key;
+      insertPtr->object = item;
+      insertPtr->level = level;
+      //Removed: SkipNode* header = Pool_read(this->pool, this->headerIdx);
+      for (int i = 0; i < (int)level; i++)
+      {
+        if (updatePtr[0] != 0)
         {
-            this->level = level;
+          if (updatePtr[i] != 0)
+          {
+            //Removed: SkipNode* nodeBeforeInsert = Pool_read(this->pool, updatePtr[i]);
+            //insert->forward[i] = nodeBeforeInsert->forward[i];
+            //nodeBeforeInsert->forward[i] = insertIdx;
+            //Removed: Pool_write(this->pool, update[i], nodeBeforeInsert);
+            //if (header->forward[i] == 0) header->forward[i] = insertIdx;
+          }
+          else
+          {
+            //header->forward[i] = insertIdx;
+            //header->level = level;
+          }
         }
-        unsigned int insertIdx;
-        SkipNode* insert = Pool_alloc(this->pool, &insertIdx);
-        insert->key = key;
-        insert->object = object;
-        insert->level = level;
-        SkipNode* header = Pool_read(this->pool, this->headerIdx);
-        for (int i = 0; i < (int)level; i++)
+        else
         {
-            if (update[0] != 0)
-            {
-                if (update[i] != 0)
-                {
-                    SkipNode* nodeBeforeInsert = Pool_read(this->pool, update[i]);
-                    insert->forward[i] = nodeBeforeInsert->forward[i];
-                    nodeBeforeInsert->forward[i] = insertIdx;
-                    Pool_write(this->pool, update[i], nodeBeforeInsert);
-                    if (header->forward[i] == 0) header->forward[i] = insertIdx;
-                }
-                else
-                {
-                    header->forward[i] = insertIdx;
-                    header->level = level;
-                }
-            }
-            else
-            {
-                //header->forward[i] = insertIdx;
-                insert->forward[i] = this->headerIdx;
-            }
+          //header->forward[i] = insertIdx;
+          //insert->forward[i] = this->headerIdx;
         }
-        Pool_write(this->pool, this->headerIdx, header);
-        if (update[0] == 0) this->headerIdx = insertIdx;
-        Pool_write(this->pool, insertIdx, insert);
-        this->nbObjects++;
-        //printf("[Cache usage] Add end %d\n", SkipList_reportCache(this));
+      }
+      //Pool_write(this->pool, this->headerIdx, header);
+      //if (update[0] == 0) this->headerIdx = insertIdx;
+      //Pool_write(this->pool, insertIdx, insert);
+      this->nbObjects++;
+      //printf("[Cache usage] Add end %d\n", SkipList_reportCache(this));
 
-        return;
+      return;
     }
 }
 
@@ -258,7 +271,7 @@ PUBLIC void SkipList_add(SkipList* this, unsigned int key, void* object)
 PUBLIC void* SkipList_remove(SkipList* this, unsigned int key)
 {
     void* removedObject = 0;
-    unsigned int update[SKIPLIST_MAX_LEVEL];
+    /*unsigned int update[SKIPLIST_MAX_LEVEL];
     //unsigned int currentNodeIdx = this->headerIdx;
 
     //printf("[Cache usage] delete start %d\n", SkipList_reportCache(this));
@@ -319,7 +332,7 @@ PUBLIC void* SkipList_remove(SkipList* this, unsigned int key)
         Pool_dealloc(this->pool, nodeToRemoveIdx);
         this->nbObjects--;
         return removedObject;
-    }
+    }*/
     return 0;
     //printf("[Cache usage] delete end %d\n", SkipList_reportCache(this));
 }
@@ -354,7 +367,7 @@ PUBLIC void* SkipList_remove(SkipList* this, unsigned int key)
 PUBLIC void* SkipList_get(SkipList* this, unsigned int key)
 {
     void* foundObject = 0;
-    unsigned int update[SKIPLIST_MAX_LEVEL];
+    /*unsigned int update[SKIPLIST_MAX_LEVEL];
     //unsigned int currentNodeIdx = this->headerIdx;
 
     //printf("[Cache usage] delete start %d\n", SkipList_reportCache(this));
@@ -386,7 +399,7 @@ PUBLIC void* SkipList_get(SkipList* this, unsigned int key)
     if (currentKey == key)
     {
         foundObject = currentNode->object;
-    }
+    }*/
     
     return foundObject;
 }
@@ -411,7 +424,7 @@ PUBLIC void SkipList_print(SkipList* this)
 {
     PRINT(("NbObject: %d\n", this->nbObjects));
     PRINT(("Level: %d\n", this->level));
-    PRINT(("Header node: %d\n", this->headerIdx));
+    /*PRINT(("Header node: %d\n", this->headerIdx));
 
     unsigned int currentNodeIdx = this->headerIdx;
     SkipNode* skipNode = Pool_read(this->pool, currentNodeIdx);
@@ -430,7 +443,7 @@ PUBLIC void SkipList_print(SkipList* this)
         skipNode = Pool_read(this->pool, skipNode->forward[0]);
     }
     Pool_discardCache(this->pool, this->headerIdx);
-    Pool_discardCache(this->pool, currentNodeIdx);
+    Pool_discardCache(this->pool, currentNodeIdx);*/
 }
  
 PUBLIC unsigned int SkipList_getSize(SkipList* this)
@@ -449,10 +462,10 @@ PRIVATE unsigned int SkipList_randLevel(SkipList* this)
     return level;
 }
 
-PRIVATE unsigned int SkipList_reportCache(SkipList* this)
+/*PRIVATE unsigned int SkipList_reportCache(SkipList* this)
 {
     return Pool_reportCacheUsed(this->pool);
-}
+}*/
 
 PRIVATE unsigned int myGreateOrEqual(unsigned int k1, unsigned int k2)
 {
