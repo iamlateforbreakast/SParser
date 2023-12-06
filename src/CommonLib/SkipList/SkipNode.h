@@ -35,9 +35,9 @@ PRIVATE Class skipNodeClass =
 
 typedef struct SkipNode
 {
-  Object * object;
-  unsigned int key;
-  void * item;
+  Object object;
+  Object * key;
+  Object * item;
   unsigned int level;
   void * forward[SKIPLIST_MAX_LEVEL];
 } SkipNode;
@@ -52,7 +52,7 @@ PUBLIC SkipNode * SkipNode_new()
 
   this->item = 0;
   this->level = 1;
-  this->key = INT_MAX;
+  this->key = 0;
 
   return this;
 }
@@ -67,6 +67,8 @@ PUBLIC SkipNode * SkipNode_newFromAllocator()
 PUBLIC void SkipNode_delete(SkipNode * this)
 {
   if (this==0) return;
+
+  Object_delete(&this->object);
 }
 
 PUBLIC SkipNode * SkipNode_copy(SkipNode * this)
