@@ -8,7 +8,8 @@
 
 typedef struct SkipList SkipList;
 
-PUBLIC SkipList* SkipList_new();
+PUBLIC SkipList * SkipList_new();
+PUBLIC SkipList * SkipList_newFromAllocator(Allocator * allocator);
 PUBLIC void SkipList_delete(SkipList* skipList);
 PUBLIC SkipList * SkipList_copy(SkipList * this);
 PUBLIC void SkipList_add(SkipList* this, Object * key, Object * item);

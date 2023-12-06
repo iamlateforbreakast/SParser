@@ -9,6 +9,7 @@
 #include <limits.h>
 
 #define SKIPLIST_MAX_LEVEL (6)
+#define END_NODE (0)
 
 typedef struct SkipNode SkipNode;
 
@@ -52,12 +53,12 @@ PUBLIC SkipNode * SkipNode_new()
 
   this->item = 0;
   this->level = 1;
-  this->key = 0;
+  this->key = END_NODE;
 
   return this;
 }
 
-PUBLIC SkipNode * SkipNode_newFromAllocator()
+PUBLIC SkipNode * SkipNode_newFromAllocator(Allocator * allocator)
 {
   SkipNode * this = 0;
 
@@ -68,6 +69,7 @@ PUBLIC void SkipNode_delete(SkipNode * this)
 {
   if (this==0) return;
 
+  //Object_delete(this->item);
   Object_delete(&this->object);
 }
 

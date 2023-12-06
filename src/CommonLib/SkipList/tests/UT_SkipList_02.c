@@ -1,8 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
-#include "Times.h"
+
 #include "SkipList.h"
+#include "Object.h"
+#include "Debug.h"
+#include "TestObject.h"
+#include "Memory.h"
+#include "Times.h"
+#include "List.h"
+#include "String2.h"
+#include "Words1000.h"
 
 #define NB_OBJECTS (5000)
 

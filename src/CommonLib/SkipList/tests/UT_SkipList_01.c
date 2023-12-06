@@ -10,6 +10,7 @@
 #include "Debug.h"
 #include "TestObject.h"
 #include "Memory.h"
+#include "Times.h"
 #include "List.h"
 #include "String2.h"
 #include "Words1000.h"
@@ -22,14 +23,6 @@
 #define NB_OBJECTS (10000)
 
 SkipList* testList;
-
-//unsigned int keys[] = { 55, 30, 80, 10, 40, 120, 5, 20, 500 };
-//unsigned int value[] = { 1972, 2005, 1945, 1875, 2001, 1515, 1066, 0, 1789 };
-
-//unsigned int randomKeys[NB_OBJECTS];
-//unsigned int randomValues[NB_OBJECTS];
-
-//int nbItems = sizeof(keys) / sizeof(unsigned int);
 
 int nbWords;
 String** wordKeys;
@@ -105,12 +98,13 @@ int step1()
 int step2()
 {
   int isPassed = 1;
+  int aFewItems = 10;
 
-  PRINT(("Step 2: Test 1 - Add %d items: ", 10));
+  PRINT(("Step 2: Test 1 - Add %d items: ", aFewItems));
 
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i < aFewItems; i++)
   {
-    //PRINT(("  Inserting: ")); String_print(wordKeys[i]); PRINT(("\n"));
+    //TRACE(("  Inserting: ")); String_print(wordKeys[i]); PRINT(("\n"));
     SkipList_add(testList, (Object*)wordKeys[i], (Object*)testObjects[i]);
     SkipList_print(testList);
   }
