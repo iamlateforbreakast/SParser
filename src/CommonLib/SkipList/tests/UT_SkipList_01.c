@@ -172,30 +172,25 @@ int step6()
 
 int step7()
 {
-  /*testList = SkipList_new(NB_OBJECTS + 1);
+  SkipList * testList = SkipList_new();
 
-  for (int i = 0; i < NB_OBJECTS; i++)
-  {
-    randomKeys[i] = (i + 1) * 5;
-    randomValues[i] = (i + 1) * 15;
-  }
+  long double cpu_time0 = get_cpu_time();
+  long double wall_time0 = get_wall_time();
 
-  for (int i = 0; i < NB_OBJECTS; i++)
+  for (int i = 0; i < nbWords; i++)
   {
-    int j = (rand() % NB_OBJECTS);
-    unsigned int swap = randomKeys[i];
-    randomKeys[i] = randomKeys[j];
-    randomKeys[j] = swap;
-    //printf("Swapping %d and %d\n",i,j);
-  }
-
-  for (int i = 0; i < NB_OBJECTS; i++)
-  {
-    SkipList_add(testList, randomKeys[i], &randomValues[i]);
+    SkipList_add(testList, wordKeys[i], testObjects[i]);
     //printf("Adding %d\n", randomKeys[i]);
   }
-  SkipList_print(testList);
-  SkipList_delete(testList);*/
+
+  long double cpu_time1 = get_cpu_time();
+  long double wall_time1 = get_wall_time();
+
+  SkipList_delete(testList);
+  
+  printf("Insert CPU time %Lf\n", (cpu_time1- cpu_time0)/nbWords);
+  printf("Insert Wall Time %Lf\n", (wall_time1 - wall_time0)/nbWords);
+  
   return 1;
 }
 
@@ -209,6 +204,7 @@ int main()
   step4();
   step5();
   step6();
+  step7();
 
   delete_keys();
 
