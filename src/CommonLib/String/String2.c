@@ -11,6 +11,7 @@
 #include "Class.h"
 #include "Object.h"
 #include "Memory.h"
+#include "Debug.h"
 #include "List.h"
 #include <stdlib.h>
 #include <string.h>
@@ -35,7 +36,7 @@ PRIVATE Class stringClass =
   .f_delete = (Destructor)&String_delete,
   .f_copy = (Copy_Operator)&String_copy,
   .f_comp = (Comp_Operator)&String_compare,
-  .f_print = (Printer)NULL,
+  .f_print = (Printer)&String_print,
   .f_size = (Sizer)&String_getSize
 };
 
@@ -479,4 +480,14 @@ PUBLIC unsigned int String_getSize(String* this)
     return sizeof(String);
   else
     return sizeof(String);
+}
+
+/**************************************************
+ @brief Print the buffer of a String object.
+ @public
+ @memberof String
+**************************************************/
+PUBLIC void String_print(String* this)
+{
+  PRINT(("%s", String_getBuffer(this)));
 }
