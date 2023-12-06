@@ -30,7 +30,7 @@ struct String
 /**********************************************//**
   /private Class Description
 **************************************************/
-PRIVATE Class stringClass =
+Class stringClass =
 {
   .f_new = NULL,
   .f_delete = (Destructor)&String_delete,
