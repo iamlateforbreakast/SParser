@@ -25,4 +25,5 @@ PUBLIC int String_toInt(String* this);
 PUBLIC List* String_splitToken(String* this, const char* separator);
 PUBLIC void String_stealBuffer(String* this, String* s);
 PUBLIC unsigned int String_getSize(String* this);
+PUBLIC void String_print(String* this);
 #endif /* _STRING2_H_ */
