@@ -118,7 +118,7 @@ PUBLIC Object * Object_copy(Object * this)
   @brief Compare 2 instances of the class Object.
   @public
   @memberof Object
-  @return 1 if equal, 0 else.
+  @return 0 if O1=O2, negative if O1<O2, positive if O1>O2
 **************************************************/
 PUBLIC int Object_comp(Object * this, Object * compared)
 {
@@ -143,6 +143,10 @@ PUBLIC char * Object_print(Object * this)
 {
   char * result = 0;
   
+  if ((this != 0) && (this->class->f_print != 0))
+  {
+    return this->class->f_print(this);
+  }
   return result;
 }
 
