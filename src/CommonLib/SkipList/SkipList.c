@@ -106,6 +106,9 @@ PUBLIC SkipList* SkipList_newFromAllocator(Allocator * allocator)
   /* Create the end node */
   SkipNode * skipNode = SkipNode_newFromAllocator(allocator);
 
+  newSkipList->headerPtr = skipNode;
+  newSkipList->endPtr = skipNode;
+
   for (int i = 0; i < SKIPLIST_MAX_LEVEL; i++)
   {
     skipNode->forward[i] = newSkipList->headerPtr;
@@ -139,7 +142,7 @@ PUBLIC void SkipList_delete(SkipList* this)
     }
     SkipNode_delete(this->headerPtr);
     //Removed: Pool_free(this->pool);
-    Object_delete(&this->object);
+    Object_deallocate(&this->object);
   }
 }
 
