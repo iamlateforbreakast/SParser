@@ -112,7 +112,7 @@ PUBLIC void String_delete(String * this)
       {
         Memory_free(this->buffer, this->length + 1);
       }
-      Object_delete(&this->object);
+      Object_deallocate(&this->object);
     }
     else if (this->object.refCount>1)
     {
