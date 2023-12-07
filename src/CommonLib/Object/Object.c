@@ -91,6 +91,18 @@ PUBLIC Object* Object_newFromAllocator(Class* class, Allocator * allocator)
 **************************************************/
 PUBLIC void Object_delete(Object * this)
 {
+  if ((this->class != 0) && (this->class->f_delete != 0))
+  {
+    this->class->f_delete(this);
+  }
+}
+/**********************************************//**
+  @brief De-allocate an instance of the class Object.
+  @public
+  @memberof Object
+**************************************************/
+PUBLIC void Object_deallocate(Object* this)
+{
   if (this->allocator == 0)
     ObjectMgr_deallocate(Object_objMgrPtr, this);
   else
