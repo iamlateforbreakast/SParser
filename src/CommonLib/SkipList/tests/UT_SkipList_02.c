@@ -13,6 +13,7 @@
 #include "List.h"
 #include "String2.h"
 #include "Words1000.h"
+#include "Error.h"
 
 #define DEBUG (0)
 
@@ -78,8 +79,9 @@ int step1()
 
   PRINT(("Step 1: Test 2 - Build a SkipList: "));
 
-  testList = SkipList_newFromAllocator(testAlloc);
+  testList = SkipList_newFromAllocator((Allocator*)testAlloc);
 
+  if (testList == 0) Error_new(ERROR_FATAL, "Failed to create SkipList.\n");
   char* checkObjectPtr = (char*)testList;
   char* checkSkipListPtr = (char*)testList + (sizeof(Object) / MEM_ALIGN) * MEM_ALIGN;
 
@@ -100,7 +102,7 @@ int step2()
 {
   int isPassed = 1;
 
-  PRINT(("Step 5: Test 1 - Delete the SkipList instance: "));
+  PRINT(("Step 2: Test 1 - Delete the SkipList instance: "));
   SkipList_delete(testList);
 
   UT_ASSERT((isPassed));
