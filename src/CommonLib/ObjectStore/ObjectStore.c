@@ -179,7 +179,7 @@ PUBLIC Object * ObjectStore_createObject(ObjectStore * this, Class * class, Allo
   {
     object->id = this->nbAllocatedObjects;
     object->class = class;
-    object->size = class->f_size();
+    object->size = class->f_size(0);
     object->allocator = allocator;
 
     this->nbAllocatedObjects++;

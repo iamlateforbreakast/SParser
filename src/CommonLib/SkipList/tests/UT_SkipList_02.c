@@ -15,7 +15,7 @@
 #include "Words1000.h"
 #include "Error.h"
 
-#define DEBUG (0)
+#define DEBUG (1)
 
 #define UT_ASSERT(cond) if ((cond)) \
                           { printf("Passed\n");} \
