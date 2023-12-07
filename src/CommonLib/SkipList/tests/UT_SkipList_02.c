@@ -82,6 +82,7 @@ int step1()
   testList = SkipList_newFromAllocator((Allocator*)testAlloc);
 
   if (testList == 0) Error_new(ERROR_FATAL, "Failed to create SkipList.\n");
+
   char* checkObjectPtr = (char*)testList;
   char* checkSkipListPtr = (char*)testList + (sizeof(Object) / MEM_ALIGN) * MEM_ALIGN;
 
@@ -101,6 +102,69 @@ int step1()
 int step2()
 {
   int isPassed = 1;
+  int aFewItems = 10;
+
+  PRINT(("Step 2: Test 1 - Add %d items: ", aFewItems));
+
+  for (int i = 0; i < aFewItems; i++)
+  {
+    //TRACE(("  Inserting: ")); String_print(wordKeys[i]); PRINT(("\n"));
+    SkipList_add(testList, (Object*)wordKeys[i], (Object*)testObjects[i]);
+    SkipList_print(testList);
+  }
+
+  UT_ASSERT((isPassed));
+
+  return isPassed;
+}
+
+int step3()
+{
+  int isPassed = 1;
+
+  PRINT(("Step 3: Test 1 - Print %d items: ", 10));
+  SkipList_print(testList);
+
+  return isPassed;
+}
+
+int step4()
+{
+  void* itemPtr = 0;
+  int isPassed = 1;
+
+  PRINT(("Step 4: Test 1 - Retrieve %d items: ", 10));
+  TRACE(("\n"));
+  for (int i = 0; i < 10; i++)
+  {
+    itemPtr = SkipList_get(testList, (Object*)wordKeys[i]);
+    isPassed = isPassed && (itemPtr == testObjects[i]);
+
+    if (isPassed) TRACE(("Item %d retrieved.\n", i)); else TRACE(("Item %d failed to retrieved.\n", i));
+  }
+
+  UT_ASSERT((isPassed));
+
+  return isPassed;
+}
+
+int step5()
+{
+  int isPassed = 1;
+  void * itemPtr = 0;
+
+  PRINT(("Step 5: Test 1 - Remove some items: "));
+  itemPtr = SkipList_remove(testList, (Object*)wordKeys[0]);
+  SkipList_print(testList);
+
+  UT_ASSERT((isPassed));
+
+  return isPassed;
+}
+
+int step6()
+{
+  int isPassed = 1;
 
   PRINT(("Step 2: Test 1 - Delete the SkipList instance: "));
   SkipList_delete(testList);
@@ -110,7 +174,7 @@ int step2()
   return isPassed;
 }
 
-int step3()
+int step7()
 {
     /*testList = SkipList_newFromAllocator();
 
@@ -163,7 +227,10 @@ int main()
 
   step1();
   step2();
-  
+  step3();
+  step4();
+  step5();
+  step6();
   delete_keys();
 
   ObjectStore_deleteAllocator(objectStore, allocInfo);
