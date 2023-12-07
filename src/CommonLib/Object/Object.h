@@ -23,6 +23,7 @@ struct Object
 PUBLIC Object * Object_new(unsigned int size, Class * class);
 PUBLIC Object* Object_newFromAllocator(Class* class, Allocator* allocator);
 PUBLIC void Object_delete(Object * this);
+PUBLIC void Object_deallocate(Object* this);
 PUBLIC Object * Object_copy(Object * this);
 PUBLIC int Object_comp(Object * this, Object * compared);
 PUBLIC char * Object_print(Object * this);
