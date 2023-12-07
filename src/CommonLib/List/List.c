@@ -108,7 +108,7 @@ PUBLIC void List_delete(List* this)
       this->head = 0;
       this->tail = 0;
       /* De-allocate the base object */
-      Object_delete(&this->object);
+      Object_deallocate(&this->object);
     }
     else if (this->object.refCount>1)
     {
