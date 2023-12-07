@@ -51,7 +51,7 @@ PUBLIC void TestObject_delete(TestObject * this)
   {
     if (this->object.refCount==1)
     {
-      Object_deallocate((Object*)this);
+      Object_deallocate(&this->object);
       //ObjectStore * objectStore = ObjectStore_getRef();
       //ObjectStore_deleteObject(objectStore, (Object*)this);
       //ObjectStore_delete(objectStore);
@@ -84,7 +84,7 @@ PUBLIC TestObject* TestObject_copy(TestObject * this)
 
 PUBLIC void TestObject_print(TestObject* this)
 {
-
+  PRINT(("  ~ Object: %d\n", this->object.id));
 }
 
 PUBLIC unsigned int TestObject_getSize(TestObject* this)
