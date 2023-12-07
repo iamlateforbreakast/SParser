@@ -42,7 +42,8 @@ Class objectStoreClass =
   .f_delete = (Destructor)&ObjectStore_delete,
   .f_copy = (Copy_Operator)&ObjectStore_copy,
   .f_comp = (Comp_Operator)&ObjectStore_compare,
-  .f_print = (Printer)&ObjectStore_print
+  .f_print = (Printer)&ObjectStore_print,
+  .f_size = 0
 };
 
 PRIVATE ObjectStore * objectStore = 0;
@@ -173,7 +174,7 @@ PUBLIC Object * ObjectStore_createObject(ObjectStore * this, Class * class, Allo
 {
   Object * object = 0;
   
-  object = (Object *)allocator->allocate(allocator, class->f_size());//0B5EC7
+  object = (Object *)allocator->allocate(allocator, class->f_size(0));//0B5EC7
   if (object!=0) //return object;
   {
     object->id = this->nbAllocatedObjects;
