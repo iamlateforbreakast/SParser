@@ -62,6 +62,11 @@ PUBLIC SkipNode * SkipNode_newFromAllocator(Allocator * allocator)
 {
   SkipNode * this = 0;
 
+  this = (SkipNode*)Object_newFromAllocator(&skipNodeClass, allocator);
+  if (this == 0) return 0;
+  this->item = 0;
+  this->level = 1;
+  this->key = END_NODE;
   return this;
 }
 
@@ -69,8 +74,7 @@ PUBLIC void SkipNode_delete(SkipNode * this)
 {
   if (this==0) return;
 
-  //Object_delete(this->item);
-  Object_delete(&this->object);
+  Object_deallocate(&this->object);
 }
 
 PUBLIC SkipNode * SkipNode_copy(SkipNode * this)
