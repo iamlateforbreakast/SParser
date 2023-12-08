@@ -30,7 +30,8 @@ PRIVATE Class timeMgrClass =
   .f_delete = (Destructor)&TimeMgr_delete,
   .f_copy = (Copy_Operator)&TimeMgr_copy,
   .f_comp = (Comp_Operator)0,
-  .f_print = (Printer)0
+  .f_print = (Printer)0,
+  .f_size = (Sizer)&TimeMgr_getSize
 };
 
 PRIVATE TimeMgr * timeMgr = 0;
@@ -65,7 +66,7 @@ PUBLIC void TimeMgr_delete(TimeMgr * this)
     Map_delete(this->timers);
     if (this->object.refCount==1)
     {
-      Object_delete(&this->object);
+      Object_deallocate(&this->object);
       timeMgr = 0;
     }
     else if (this->object.refCount>1)
@@ -106,6 +107,19 @@ PUBLIC TimeMgr * TimeMgr_getRef()
   }
 
   return timeMgr;
+}
+
+/**********************************************//** 
+  @brief Provide the size of the class or an instance
+  @public
+  @memberof TimeMgr
+  @return Size in byte
+**************************************************/
+PUBLIC unsigned int TimeMgr_getSize(TimeMgr * this)
+{
+  if (this==0) return sizeof(TimeMgr);
+
+  return sizeof(TimeMgr);
 }
 
 /**********************************************//** 
