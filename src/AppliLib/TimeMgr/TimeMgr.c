@@ -63,9 +63,9 @@ PUBLIC void TimeMgr_delete(TimeMgr * this)
 {
   if (this != 0)
   {
-    Map_delete(this->timers);
     if (this->object.refCount==1)
     {
+      Map_delete(this->timers);
       Object_deallocate(&this->object);
       timeMgr = 0;
     }

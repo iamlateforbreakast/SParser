@@ -96,14 +96,16 @@ PUBLIC void OptionMgr_delete(OptionMgr * this)
 {
   if (this!=0)
   {
-    this->object.refCount = this->object.refCount - 1;
-  
-    if (this->object.refCount == 0)
+    if (this->object.refCount == 1)
     {
       Map_delete(this->options);
       Object_deallocate(&this->object);
       optionMgr = 0;
       this = 0;
+    }
+    else if (this->object.refCount > 1)
+    {
+      this->object.refCount = this->object.refCount - 1;
     }
   }    
 }
