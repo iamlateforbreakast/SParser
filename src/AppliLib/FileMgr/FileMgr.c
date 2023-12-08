@@ -15,6 +15,7 @@
 #include "FileDesc.h"
 #include "Memory.h"
 #include "Error.h"
+#include "Debug.h"
 #include "FileIo.h"
 
 //#include <unistd.h>
@@ -101,7 +102,7 @@ PUBLIC void FileMgr_delete(FileMgr * this)
       List_delete(fileMgr->files);
       List_delete(fileMgr->directories);
       String_delete(fileMgr->rootLocation);
-      Object_delete(&fileMgr->object);
+      Object_deallocate(&fileMgr->object);
       fileMgr = 0;
       this = 0;
     }
@@ -224,7 +225,7 @@ PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryN
   //printf("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory));
   while (fullPathDirectory!=0)
   {
-    printf("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory));
+    PRINT(("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory)));
     FileMgr_listFiles(this, fullPathDirectory);
     fullPathDirectory = List_getNext(this->directories);
   }
@@ -339,8 +340,7 @@ PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
 PUBLIC List * FileMgr_filterFiles(FileMgr * this, const char * pattern)
 {
   List * result = List_new();
-  FileDesc * fd = 0;
-  String * s = 0;
+  FileDesc * fd = 0;  
   
   while ((fd = List_getNext(this->files))!=0)
   {
@@ -467,7 +467,7 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
 **************************************************/
 PUBLIC FileDesc * FileMgr_searchFile(FileMgr * this, String * name, List * preferredDir)
 {
-  String * result = 0;
+  FileDesc * result = 0;
   //String * temp = 0;
   String * d = 0;
   FileDesc * c = 0;
@@ -483,7 +483,7 @@ PUBLIC FileDesc * FileMgr_searchFile(FileMgr * this, String * name, List * prefe
     
     //c=FileMgr_isManaged(this, fullPath);
     c=FileMgr_isManaged(this, name);
-    printf("Searching file %s in %s\n", String_getBuffer(fullPath), String_getBuffer(d));
+    PRINT(("Searching file %s in %s\n", String_getBuffer(fullPath), String_getBuffer(d)));
     if (c!=0)
     {
       isFound = 1;
@@ -499,7 +499,7 @@ PUBLIC FileDesc * FileMgr_searchFile(FileMgr * this, String * name, List * prefe
         c = FileDesc_new();
         FileDesc_setFullName(c, fullPath);
         List_insertHead(this->files, (void*)c);
-        result = fullPath;
+        result = c;
       }
       else
       {

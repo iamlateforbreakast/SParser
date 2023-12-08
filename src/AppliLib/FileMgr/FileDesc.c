@@ -11,6 +11,7 @@
 #include "FileIo.h"
 #include "Class.h"
 #include "Object.h"
+#include "Memory.h"
 
 /**********************************************//**
   @class FileDesc
@@ -61,7 +62,7 @@ PUBLIC void FileDesc_delete(FileDesc * this)
 {
   String_delete(this->fullName);
   String_delete(this->name);
-  Object_delete(&this->object);
+  Object_deallocate(&this->object);
 }
 
 /**********************************************//** 
