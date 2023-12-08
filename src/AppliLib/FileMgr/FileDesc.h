@@ -11,6 +11,7 @@ typedef struct FileDesc FileDesc;
 PUBLIC FileDesc * FileDesc_new();
 PUBLIC void FileDesc_delete(FileDesc * this);
 PUBLIC FileDesc * FileDesc_copy(FileDesc * this);
+PUBLIC unsigned int FileDesc_getSize(FileDesc* this);
 PUBLIC void FileDesc_setFullName(FileDesc * this, String * fullName);
 PUBLIC String * FileDesc_getFullName(FileDesc * this);
 PUBLIC void FileDesc_setName(FileDesc * this, String * name);
