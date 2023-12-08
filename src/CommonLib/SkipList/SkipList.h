@@ -5,6 +5,7 @@
 
 #include "Types.h"
 #include "Object.h"
+#include "Allocator.h"
 
 typedef struct SkipList SkipList;
 
