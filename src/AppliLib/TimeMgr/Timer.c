@@ -33,7 +33,8 @@ PRIVATE Class timerClass =
   .f_delete = (Destructor)&Timer_delete,
   .f_copy = (Copy_Operator)&Timer_copy,
   .f_comp = (Comp_Operator)&Timer_isEqual,
-  .f_print = (Printer)&Timer_print
+  .f_print = (Printer)&Timer_print,
+  .f_size = (Sizer)&Timer_getSize
 };
 
 /**********************************************//** 
@@ -72,7 +73,7 @@ PUBLIC void Timer_delete(Timer * this)
     if (this->object.refCount==1)
     {
       String_delete(this->name);
-      Object_delete(&this->object);
+      Object_deallocate(&this->object);
     }
     else
     {
@@ -105,6 +106,17 @@ PUBLIC Timer * Timer_copy(Timer * this)
   return result;
 }
 
+/**********************************************//** 
+  @brief TBD
+  @public
+  @memberof Timer
+**************************************************/
+PUBLIC unsigned int Timer_getSize(Timer * this)
+{
+  if (this==0) return sizeof(Timer);
+
+  return sizeof(Timer);
+}
 /**********************************************//** 
   @brief TBD
   @public
