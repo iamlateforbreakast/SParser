@@ -11,7 +11,7 @@ typedef struct TimeMgr TimeMgr;
 PUBLIC void TimeMgr_delete(TimeMgr * this);
 PUBLIC TimeMgr * TimeMgr_copy(TimeMgr * this);
 PUBLIC TimeMgr * TimeMgr_getRef();
-PUBLIC unsigned int TimeMgr_getSize(Time * this);
+PUBLIC unsigned int TimeMgr_getSize(TimeMgr * this);
 PUBLIC void TimeMgr_latchTime(TimeMgr * this, String * s);
 PUBLIC void TimeMgr_report(TimeMgr * this);
 
