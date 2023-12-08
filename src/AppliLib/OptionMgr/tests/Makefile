@@ -1,10 +1,10 @@
-all: main.c ../OptionMgr.c ../OptionMgr.h
-	gcc -DUNIT_TEST -g main.c ../OptionMgr.c \
-	../../../CommonLib/libCommon.a ../../FileMgr/*.o \
-	-lCommon \
+all: UT_OptionMgr_01.c ../OptionMgr.c ../OptionMgr.h
+	gcc -DUNIT_TEST -g UT_OptionMgr_01.c ../OptionMgr.c \
+	../../../CommonLib/libCommon.a ../../libAppli.a \
+	-lCommon -lAppli \
 	-I../../include -I../../../CommonLib/include \
-	-L../../../CommonLib -L../../AppliLib \
-	-o test1
+	-L../../../CommonLib -L../../../AppliLib \
+	-o UT_OptionMgr_01
 
 clean:
-	rm -rf test1 *.o ../*.o
+	rm -rf UT_OptionMgr_01 *.o ../*.o
