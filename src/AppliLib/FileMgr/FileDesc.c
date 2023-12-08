@@ -31,7 +31,8 @@ PRIVATE Class fileDescClass =
   .f_delete = (Destructor)&FileDesc_delete,
   .f_copy = (Copy_Operator)&FileDesc_copy,
   .f_comp = (Comp_Operator)0,
-  .f_print = (Printer)0
+  .f_print = (Printer)0,
+  .f_size = (Sizer)&FileDesc_getSize
 };
 
 PRIVATE String * FileDesc_getBasename(FileDesc * this);
@@ -75,6 +76,10 @@ PUBLIC FileDesc * FileDesc_copy(FileDesc * this)
   /* TODO: Not implemented */
   
   return copy;
+}
+PUBLIC unsigned int FileDesc_getSize(FileDesc* this)
+{
+  return sizeof(FileDesc);
 }
 
 /**********************************************//** 
