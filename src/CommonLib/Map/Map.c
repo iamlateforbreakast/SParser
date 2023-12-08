@@ -107,7 +107,7 @@ PUBLIC void Map_delete(Map * this)
         List_delete(this->htable[i]);
       }
       /* De-allocate the base object */
-      Object_delete(&this->object);
+      Object_deallocate(&this->object);
     }
     else if (this->object.refCount > 1)
     {
