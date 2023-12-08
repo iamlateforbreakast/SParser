@@ -39,7 +39,8 @@ PRIVATE Class optionMgrClass =
   .f_delete = (Destructor)&OptionMgr_delete,
   .f_copy = (Copy_Operator)&OptionMgr_copy,
   .f_comp = (Comp_Operator)0,
-  .f_print = (Printer)0
+  .f_print = (Printer)0,
+  .f_size = (Sizer)&OptionMgr_getSize
 };
 
 /**********************************************//**
@@ -100,7 +101,7 @@ PUBLIC void OptionMgr_delete(OptionMgr * this)
     if (this->object.refCount == 0)
     {
       Map_delete(this->options);
-      Object_delete(&this->object);
+      Object_deallocate(&this->object);
       optionMgr = 0;
       this = 0;
     }
@@ -136,6 +137,18 @@ PUBLIC OptionMgr* OptionMgr_getRef()
   }
   
   return optionMgr;
+}
+
+/**********************************************//** 
+  @brief TBD
+  @public
+  @memberof OptionMgr
+**************************************************/
+PUBLIC unsigned int OptionMgr_getSize(OptionMgr * this)
+{
+  if (this==0) return sizeof(OptionMgr);
+
+  return sizeof(OptionMgr);
 }
 
 /**********************************************//** 
