@@ -1,10 +1,5 @@
-all: main.c ../TimeMgr.c ../TimeMgr.h ../Timer.c ../Timer.h
-	gcc -DUNIT_TEST -g main.c ../TimeMgr.c ../Timer.c ../../../CommonLib/libCommon.a -I../../include -I../../../CommonLib/include -o test1
-
-run:
-	./test1 > test.log
-	cat test.log | grep Malloc > malloc.txt
-	cat test.log | grep Free > free.txt
+all: UT_TimeMgr_01.c ../TimeMgr.c ../TimeMgr.h ../Timer.c ../Timer.h
+	gcc -DUNIT_TEST -g UT_TimeMgr_01.c ../TimeMgr.c ../Timer.c ../../../CommonLib/libCommon.a -I../../include -I../../../CommonLib/include -o UT_TimeMgr_01
 
 clean:
-	rm -rf test1 *.o ../*.o
+	rm -rf UT_TimeMgr_01 *.o ../*.o
