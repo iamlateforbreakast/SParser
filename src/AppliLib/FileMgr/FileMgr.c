@@ -45,7 +45,8 @@ PRIVATE Class fileMgrClass =
   .f_delete = (Destructor)&FileMgr_delete,
   .f_copy = (Copy_Operator)&FileMgr_copy,
   .f_comp = (Comp_Operator)0,
-  .f_print = (Printer)0
+  .f_print = (Printer)0,
+  .f_size = (Sizer)&FileMgr_getSize
 };
 
 /**********************************************//**
@@ -144,6 +145,18 @@ PUBLIC FileMgr* FileMgr_getRef()
   return fileMgr;
 }
 
+/**********************************************//** 
+  @brief Return the size in byte of the class or object.
+  @public
+  @memberof FileMgr
+  @return Size in byte of Class or instance.
+**************************************************/
+PUBLIC unsigned int FileMgr_getSize(FileMgr* this)
+{
+  if (this == 0) return sizeof(FileMgr);
+  /* TODO: Return the actual size of the object */
+  return sizeof(FileMgr);
+}
 /**********************************************//** 
   @brief Set the root location
   @public
