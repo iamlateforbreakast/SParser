@@ -31,7 +31,8 @@ PRIVATE Class sdbRequestClass =
   .f_delete = (Destructor)&SdbRequest_delete,
   .f_copy = (Copy_Operator)&SdbRequest_copy,
   .f_comp = (Comp_Operator)0,
-  .f_print = (Printer)0
+  .f_print = (Printer)0,
+  .f_size = (Sizer)&SdbRequest_getSize
 };
 
 /**********************************************//** 
@@ -46,7 +47,6 @@ PUBLIC SdbRequest * SdbRequest_new(const char * fmt)
   SdbRequest * this = 0;
 
   this = (SdbRequest*)Object_new(sizeof(SdbRequest), &sdbRequestClass);
-  this->object.size = sizeof(SdbRequest);
   
   this->fmt = fmt;
   this->size = 0;
@@ -74,7 +74,7 @@ PUBLIC void SdbRequest_delete(SdbRequest * this)
     this->size = 0;
     List_delete(this->result);
   }
-  Object_delete(&this->object);
+  Object_deallocate(&this->object);
 }
 
 PUBLIC SdbRequest * SdbRequest_copy(SdbRequest * this)
@@ -82,6 +82,13 @@ PUBLIC SdbRequest * SdbRequest_copy(SdbRequest * this)
   SdbRequest * result = 0;
   
   return result;
+}
+
+PUBLIC unsigned int SdbRequest_getSize(SdbRequest * this)
+{
+  if (this==0) return sizeof(SdbRequest);
+
+  return sizeof(SdbRequest);
 }
 
 /**********************************************//** 

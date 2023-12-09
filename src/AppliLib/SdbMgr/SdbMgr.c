@@ -34,7 +34,8 @@ PRIVATE Class sdbMgrClass =
   .f_delete = (Destructor)&SdbMgr_delete,
   .f_copy = (Copy_Operator)&SdbMgr_copy,
   .f_comp = (Comp_Operator)0,
-  .f_print = (Printer)0
+  .f_print = (Printer)0,
+  .f_size = (Sizer)&SdbMgr_getSize
 };
 
 PRIVATE SdbMgr * sdbMgr = 0;
@@ -71,7 +72,7 @@ PUBLIC void SdbMgr_delete(SdbMgr* this)
       String_delete(this->name);
       SdbMgr_close(this);
       this->db = 0;
-      Object_delete(&this->object);
+      Object_deallocate(&this->object);
       sdbMgr = 0;
     }
     else
@@ -108,6 +109,13 @@ PUBLIC SdbMgr * SdbMgr_getRef()
   }
   
   return sdbMgr;
+}
+
+PUBLIC unsigned int SdbMgr_getSize(SdbMgr * this)
+{
+  if (this==0) return sizeof(SdbMgr);
+
+  return sizeof(SdbMgr);
 }
 
 /**********************************************//** 
