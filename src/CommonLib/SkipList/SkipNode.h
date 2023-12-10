@@ -74,6 +74,7 @@ PUBLIC void SkipNode_delete(SkipNode * this)
 {
   if (this==0) return;
 
+  //Object_delete(this->item);
   Object_deallocate(&this->object);
 }
 
