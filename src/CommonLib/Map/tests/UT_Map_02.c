@@ -51,7 +51,7 @@ int main()
   ObjectStore * objectStore = 0;
   
   objectStore = ObjectStore_getRef();
-  testAlloc = MyAllocator_new();
+  testAlloc = MyAllocator_new(5000);
   allocInfo = ObjectStore_createAllocator(objectStore, (Allocator*)testAlloc);
 
   step1();
