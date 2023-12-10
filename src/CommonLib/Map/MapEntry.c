@@ -46,7 +46,7 @@ PUBLIC void MapEntry_delete(MapEntry * this)
   {
     ((Object*)this->item)->delete(this->item);
   }
-  Object_delete(&this->object);
+  Object_deallocate(&this->object);
 }
 
 PUBLIC MapEntry * MapEntry_copy(MapEntry * this)
