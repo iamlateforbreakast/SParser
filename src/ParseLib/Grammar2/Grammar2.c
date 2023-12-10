@@ -50,6 +50,21 @@ struct GrammarContext
 
 typedef struct GrammarContext GrammarContext;
 
+PRIVATE unsigned int GrammarContext_getSize(GrammarContext * this)
+{
+  return sizeof(GrammarContext);
+}
+
+PRIVATE Class grammarContextClass =
+{
+  f_new = (Constructor)0,
+  f_delete = (Destructor)0,
+  f_copy = (Copy_Operator)0,
+  f_comp = (Copy_Operator)0,
+  f_print = (Printer)0,
+  f_size = (Sizer)&GrammarContext_getSize
+};
+
 /**********************************************//**
   @class Grammar2
 **************************************************/
