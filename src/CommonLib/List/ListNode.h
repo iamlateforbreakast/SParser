@@ -99,15 +99,7 @@ PRIVATE void ListNode_delete(ListNode* this)
     {
       ((Object*)this->item)->delete(this->item);
     }
-    if (this->object.allocator)
-    {
-      ObjectStore* objectStore = ObjectStore_getRef();
-      ObjectStore_deleteObject(objectStore, (Object*)this);
-      ObjectStore_delete(objectStore);
-    }
-    else
-      Memory_free(this, sizeof(ListNode));
-    //Object_delete(&this->object);
+    Object_deallocate(&this->object);
   }
 }
 
