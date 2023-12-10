@@ -51,7 +51,7 @@ PUBLIC void TestObject_delete(TestObject * this)
   {
     if (this->object.refCount==1)
     {
-      Object_delete((Object*)this);
+      Object_deallocate(&this->object);
       //ObjectStore * objectStore = ObjectStore_getRef();
       //ObjectStore_deleteObject(objectStore, (Object*)this);
       //ObjectStore_delete(objectStore);
