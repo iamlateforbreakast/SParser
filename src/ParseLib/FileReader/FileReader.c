@@ -17,11 +17,28 @@
 #include "Error.h"
 #include "Memory.h"
 
+typedef struct IncludeInfo IncludeInfo;
+
 struct IncludeInfo
 {
   Object object;
   String * pattern;
   List * dirs;
+};
+
+PRIVATE unsigned int IncludeDir_getSize(IncludeInfo * this)
+{
+  return sizeof(IncludeInfo);
+}
+
+PRIVATE Class includeInfoClass =
+{
+  .f_new = (Constructor)0,
+  .f_delete = (Destructor)0,
+  .f_copy = (Copy_Operator)0,
+  .f_comp = (Comp_Operator)0,
+  .f_print = (Printer)0,
+  .f_size = (Sizer)&IncludeDir_getSize
 };
 
  /**********************************************//**
@@ -45,7 +62,8 @@ PRIVATE Class fileReaderClass =
   .f_delete = (Destructor)&FileReader_delete,
   .f_copy = (Copy_Operator)&FileReader_copy,
   .f_comp = (Comp_Operator)0,
-  .f_print = 0
+  .f_print = (Printer)&FileReader_print,
+  .f_size = (Sizer)&FileReader_getSize
 };
 
 PRIVATE void FileReader_getListPreferredDir(FileReader * this);
@@ -258,7 +276,7 @@ PRIVATE void FileReader_getListPreferredDir(FileReader * this)
         case 2:
           if ((buf[i]==' ') || (buf[i]=='\n'))
           { 
-             prefDir = (struct IncludeInfo *)Object_new(sizeof(struct IncludeInfo), 0);
+             prefDir = (struct IncludeInfo *)Object_new(sizeof(struct IncludeInfo), &includeInfoClass);
              prefDir->pattern = String_subString(optionValue, j, i-j);
              prefDir->dirs = List_new();
              state = 3;
