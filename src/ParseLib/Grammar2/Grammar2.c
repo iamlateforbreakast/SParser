@@ -57,12 +57,12 @@ PRIVATE unsigned int GrammarContext_getSize(GrammarContext * this)
 
 PRIVATE Class grammarContextClass =
 {
-  f_new = (Constructor)0,
-  f_delete = (Destructor)0,
-  f_copy = (Copy_Operator)0,
-  f_comp = (Copy_Operator)0,
-  f_print = (Printer)0,
-  f_size = (Sizer)&GrammarContext_getSize
+  .f_new = (Constructor)0,
+  .f_delete = (Destructor)0,
+  .f_copy = (Copy_Operator)0,
+  .f_comp = (Copy_Operator)0,
+  .f_print = (Printer)0,
+  .f_size = (Sizer)&GrammarContext_getSize
 };
 
 /**********************************************//**
@@ -110,7 +110,7 @@ PUBLIC Grammar2 * Grammar2_new(FileReader * fr, SdbMgr * sdbMgr)
   Grammar2lex_init(&this->scanner);
   
   this->contexts = List_new(this->contexts);
-  this->current = (GrammarContext*)Object_new(sizeof(GrammarContext),0);
+  this->current = (GrammarContext*)Object_new(sizeof(GrammarContext),&grammarContextClass);
   this->current->lastNode = 0;
   this->current->includeNodeBranch = 0;
   List_insertHead(this->contexts, this->current);
