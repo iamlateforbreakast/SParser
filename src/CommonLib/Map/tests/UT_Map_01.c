@@ -164,8 +164,6 @@ int step5()
   List * l = 0;
   Map* testMap = Map_new();
 
-  Map_print(testMap);
-
   const char * testNames[] =
   {
     "banana", "strawberry", "cherry", "apple", "orange", "pear", "blackberry"
