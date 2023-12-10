@@ -9,6 +9,8 @@ typedef struct Grammar2 Grammar2;
 PUBLIC Grammar2 * Grammar2_new(FileReader * fr, SdbMgr * sdbMgr);
 PUBLIC void Grammar2_delete(Grammar2 * this);
 PUBLIC Grammar2 * Grammar2_copy(Grammar2 * this);
+PUBLIC void Grammar2_print(Grammar2 * this);
+PUBLIC unsigned int Grammar2_getSize(Grammar2 * this);
 PUBLIC void Grammar2_process(Grammar2 * this);
 PUBLIC FileReader * Grammar2_getFileReader(Grammar2 * grammar);
 PUBLIC SdbMgr * Grammar2_getSdbMgr(Grammar2 * grammar);

@@ -75,7 +75,8 @@ PRIVATE Class grammar2Class =
   .f_delete = (Destructor)&Grammar2_delete,
   .f_copy = (Copy_Operator)&Grammar2_copy,
   .f_comp = (Comp_Operator)0,
-  .f_print = (Printer)0
+  .f_print = (Printer)&Grammar2_print,
+  .f_size = (Sizer)&Grammar2_getSize
 };
 
 /**********************************************//** 
@@ -146,6 +147,18 @@ PUBLIC Grammar2 * Grammar2_copy(Grammar2 * this)
   Grammar2 * copy = 0;
 
   return copy;
+}
+
+PUBLIC void Grammar2_print(Grammar2 * this)
+{
+
+}
+
+PUBLIC unsigned int Grammar2_getSize(Grammar2 * this)
+{
+  if (this==0) return sizeof(Grammar2);
+
+  return sizeof(Grammar2);
 }
 
 PUBLIC void Grammar2_process(Grammar2 * this)

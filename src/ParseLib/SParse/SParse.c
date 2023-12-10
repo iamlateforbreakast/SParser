@@ -49,7 +49,8 @@ PRIVATE Class sparseClass =
   .f_delete = (Destructor)&SParse_delete,
   .f_copy = (Copy_Operator)&SParse_copy,
   .f_comp = (Comp_Operator)0,
-  .f_print = (Printer)0
+  .f_print = (Printer)&SParse_print,
+  .f_size = (Sizer)&SParse_getSize
 };
 
 static const SParseDefault SParse_default[] = 
@@ -94,10 +95,16 @@ PUBLIC void SParse_delete(SParse * this)
   if (this!=0)
   {
     SdbMgr_delete(this->sdbMgr);
-    Object_delete(&this->object);
+    Object_deallocate(&this->object);
   }
 }
 
+/**********************************************//** 
+  @brief Copy a SParse object instance.
+  @public
+  @memberof SParse
+  @return Copy of instance.
+**************************************************/
 PUBLIC SParse * SParse_copy(SParse * this)
 {
   SParse * copy = 0;
@@ -105,6 +112,22 @@ PUBLIC SParse * SParse_copy(SParse * this)
   return copy;
 }
 
+/**********************************************//** 
+  @brief Print a SParse object.
+  @public
+  @memberof SParse
+**************************************************/
+PUBLIC void SParse_print(SParse * this)
+{
+
+}
+
+PUBLIC unsigned int SParse_getSize(SParse * this)
+{
+  if (this == 0) return sizeof(SParse);
+
+  return sizeof(SParse);
+}
 /**********************************************//** 
   @brief Parse all files with a given extension.
   @memberof SParse

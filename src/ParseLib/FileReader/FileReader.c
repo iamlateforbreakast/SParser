@@ -98,7 +98,7 @@ PUBLIC void FileReader_delete(FileReader * this)
     List_delete(this->buffers);
     FileReader_deleteListPreferredDir(this);
     List_delete(this->preferredDirs); //PROBLEM
-    Object_delete(&this->object);
+    Object_deallocate(&this->object);
   }
 }
 
@@ -115,6 +115,18 @@ PUBLIC FileReader * FileReader_copy(FileReader * this)
   /* copy = Object_copy(this); */
   
   return copy;
+}
+
+PUBLIC void FileReader_print(FileReader * this)
+{
+
+}
+
+PUBLIC unsigned int FileReader_getSize(FileReader * this)
+{
+  if (this == 0) return sizeof(FileReader);
+
+  return sizeof(FileReader);
 }
 
 /**********************************************//** 
