@@ -40,7 +40,7 @@ int step1()
 
   /* Test 4 */
   OptionMgr_delete(testOptionMgr2);
-  printf("Step 1: Test 4 - Check all memory is freed properly: ");
+  printf("Step 1: Test 4 - Check delete can be called again: ");
   UT_ASSERT((optionMgr == 0))
 
   /* Test 5 */
