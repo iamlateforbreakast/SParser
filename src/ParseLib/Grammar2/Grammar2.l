@@ -158,7 +158,7 @@ unsigned int read_include(void * yyscanner, Grammar2 * grammar)
   Memory_copy(buffer, name+1, j-1);
   
   fileName = String_new(0);
-  String_setBuffer(fileName, buffer);
+  String_setBuffer(fileName, buffer, 1);
   Error_new(ERROR_DBG,"INCLUDE %s!!!\n", buffer);
 
   c = Grammar2_processNewFile(grammar, fileName);
