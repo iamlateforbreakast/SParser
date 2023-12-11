@@ -1,3 +1,7 @@
+[-] Move all objects to new new/delete scheme
+
+[-] Cleanup warnings in UT
+
 [-] Memory: Use Malloc allocator
 
 [-] Grammar2: Buffer size is fixed to 16Kb. This should be dynamic
