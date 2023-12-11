@@ -58,13 +58,15 @@ PUBLIC String * String_new(const char* initString)
     this->buffer = (char*)Memory_alloc(this->length+1);
     Memory_copy(this->buffer, (void*)initString, this->length+1);
     this->buffer[this->length] = 0;
+    this->isOwned = 1;
   }
   else
   {
     this->buffer = 0;
     this->length = 0;
+    this->isOwned = 0;
   }
-  this->isOwned = 1;
+  
   return this;
 }
 
@@ -86,13 +88,14 @@ PUBLIC String * String_newByRef(const char * initString)
   {
     this->length = Memory_len((const void*)initString);
     this->buffer = (char*)initString;
+    this->isOwned = 0;
   }
   else
   {
     this->length = 0;
     this->buffer = 0;
+    this->isOwned = 0;
   }
-  this->isOwned = 0;
   
   return this;
 }
@@ -140,6 +143,7 @@ PUBLIC String * String_copy(String * this)
       copy->buffer = Memory_alloc(copy->length+1);
       Memory_copy(copy->buffer, this->buffer, copy->length);
       copy->buffer[this->length] = 0;
+      copy->isOwned = this->isOwned;
     }
   }
   
@@ -211,6 +215,7 @@ PUBLIC String * String_subString(String * this, unsigned int idx, unsigned int l
     result->buffer = Memory_alloc(result->length+1);
     Memory_copy(result->buffer, this->buffer + idx, result->length);
     result->buffer[length] = 0;
+    result->isOwned = 1;
   }
   
   return result;
@@ -263,15 +268,16 @@ PUBLIC char * String_getBuffer(String * this)
   @public
   @memberof String
 **************************************************/
-PUBLIC void String_setBuffer(String * this, char * buffer)
+PUBLIC void String_setBuffer(String * this, char * buffer, int isOwned)
 {
   if (this!=0)
   {
-    if (this->buffer!=0)
+    if ((this->buffer!=0) && (this->isOwned))
     {
       Memory_free(this->buffer, this->length+1);
     }
     this->buffer = buffer;
+    this->isOwned = isOwned;
     if (buffer != 0)
       this->length = Memory_len((void*)this->buffer);
     else
@@ -323,6 +329,7 @@ PUBLIC unsigned int String_prepend(String * this, const char * prefix)
   buffer[newSize] = 0;
   this->buffer = buffer;
   this->length = newSize;
+  this->isOwned = 1; // Ensure the buffer is freed eventually
   
   return 0;
 }
@@ -348,6 +355,7 @@ PUBLIC unsigned int String_append(String* this, const char* postfix)
   buffer[newSize] = 0;
   this->buffer = buffer;
   this->length = newSize;
+  this->isOwned = 1; // Ensure buffer is freed eventually
 
   return 0;
 }
@@ -464,7 +472,7 @@ PUBLIC List* String_splitToken(String* this, const char* separator)
 **************************************************/
 PUBLIC void String_stealBuffer(String* this, String* s)
 {
-  String_setBuffer(this, String_getBuffer(s));
+  String_setBuffer(this, String_getBuffer(s), s->isOwned);
   s->buffer = 0;
   s->length = 0;
   s->isOwned = 0;
