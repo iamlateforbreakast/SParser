@@ -47,7 +47,7 @@ void * MyAllocator_allocate(Allocator * this, unsigned int size)
   if ((((MyAllocator*)this)->pointer+size)<(((MyAllocator*)this)->memory + ((MyAllocator*)this)->size))
   {
     void * allocatedPtr = ((MyAllocator*)this)->pointer;
-    ((MyAllocator*)this)->pointer += ((size / 8) + 1);
+    ((MyAllocator*)this)->pointer += ((size / MEM_ALIGN) + 1)*MEM_ALIGN;
     this->nbAllocatedObjects++;
     return allocatedPtr;
   }
