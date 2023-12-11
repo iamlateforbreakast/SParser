@@ -274,3 +274,10 @@ PUBLIC int FileIo_ftell(FileIo* this)
 {
   return ftell(this->f);
 }
+
+PUBLIC FileIoStatus FileIo_isOpen(FileIo * this)
+{
+  if (this->status == FILE_OPEN) return 1;
+
+  return 0;
+}

@@ -27,6 +27,7 @@ PUBLIC List* FileIo_listFiles(FileIo* this, String * directory);
 PUBLIC int FileIo_fSeekEnd(FileIo * this, int pos);
 PUBLIC int FileIo_fSeekSet(FileIo * this, int pos);
 PUBLIC int FileIo_ftell(FileIo* this);
+PUBLIC FileIoStatus FileIo_isOpen(FileIo * this);
 //Opendir
 //Readdir
 

@@ -150,7 +150,7 @@ PUBLIC String * FileDesc_load(FileDesc * this)
   FileIo * f = FileIo_new();
 
   FileIo_openFile(f, FileDesc_getFullName(this));
-  if (f)
+  if (FileIo_isOpen(f))
   {
 	  FileIo_fSeekEnd(f, 0);
 	  int length=FileIo_ftell(f);

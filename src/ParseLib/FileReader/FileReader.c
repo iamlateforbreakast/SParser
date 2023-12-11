@@ -220,6 +220,10 @@ PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
   if (fileDesc != 0)
   {
     newFileContent = FileDesc_load(fileDesc);
+    if (newFileContent==0)
+    {
+      Error_new(ERROR_FATAL, "NewFileContent is null");
+    }
     List_insertHead(this->buffers, newFileContent);
     this->currentBuffer = newFileContent;
     result = String_getBuffer(newFileContent);

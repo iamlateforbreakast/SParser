@@ -473,16 +473,22 @@ PUBLIC FileDesc * FileMgr_searchFile(FileMgr * this, String * name, List * prefe
   FileDesc * c = 0;
   unsigned int isFound = 0;
   String * fullPath = 0;
-  
+  String * allocName = String_new("MyAllocator.h");
+
+  if (String_compare(name,allocName) == 0)
+  {
+    PRINT(("Processing %s\n", String_getBuffer(allocName)));
+  }
   /* For each directory in preferred list */
   while (((d = List_getNext(preferredDir))!=0)&&(!isFound))
   {
+
     fullPath = String_copy(this->rootLocation);
     FileMgr_mergePath(this, d, name);
     FileMgr_mergePath(this, fullPath, d);
     
-    //c=FileMgr_isManaged(this, fullPath);
-    c=FileMgr_isManaged(this, name);
+    c=FileMgr_isManaged(this, fullPath);
+    //c=FileMgr_isManaged(this, name);
     PRINT(("Searching file %s in %s\n", String_getBuffer(fullPath), String_getBuffer(d)));
     if (c!=0)
     {
@@ -574,7 +580,7 @@ PRIVATE unsigned int FileMgr_existFS(FileMgr * this, String * fullName)
 
   //f=fopen(String_getBuffer(fullName),"rb");
   FileIo_openFile(f, fullName);
-  if (f) 
+  if (FileIo_isOpen(f)) 
   {
     result = 1;
     FileIo_delete(f);
