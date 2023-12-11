@@ -14,7 +14,7 @@ PUBLIC String * String_copy(String * this);
 PUBLIC String * String_getRef(String * this);
 PUBLIC unsigned int String_getLength(String * this);
 PUBLIC char * String_getBuffer(String * this);
-PUBLIC void String_setBuffer(String * this, char * buffer);
+PUBLIC void String_setBuffer(String* this, char* buffer, int isOwned);
 PUBLIC unsigned int String_isContained(String * this, String * s2);
 PUBLIC unsigned int String_prepend(String * this, const char * prefix);
 PUBLIC unsigned int String_append(String* this, const char* postfix);
