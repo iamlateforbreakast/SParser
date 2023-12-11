@@ -315,7 +315,7 @@ PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
         FileIo_read(f, buffer, length);
         buffer[length] = 0;
         result = String_new(0);
-        String_setBuffer(result, buffer);
+        String_setBuffer(result, buffer,1);
       }
       FileIo_delete(f);
     }
@@ -487,8 +487,8 @@ PUBLIC FileDesc * FileMgr_searchFile(FileMgr * this, String * name, List * prefe
     FileMgr_mergePath(this, d, name);
     FileMgr_mergePath(this, fullPath, d);
     
-    c=FileMgr_isManaged(this, fullPath);
-    //c=FileMgr_isManaged(this, name);
+    //c=FileMgr_isManaged(this, fullPath);
+    c=FileMgr_isManaged(this, name);
     PRINT(("Searching file %s in %s\n", String_getBuffer(fullPath), String_getBuffer(d)));
     if (c!=0)
     {
