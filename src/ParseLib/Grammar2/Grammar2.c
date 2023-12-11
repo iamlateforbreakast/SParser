@@ -434,7 +434,7 @@ PUBLIC char * Grammar2_processNewFile(Grammar2 * this, String * fileName)
    {
     Grammar2_addIncludeNode(this, String_getBuffer(fileName));
    
-    o = (GrammarContext*)Object_new(sizeof(GrammarContext),0);
+    o = (GrammarContext*)Object_new(sizeof(GrammarContext),&grammarContextClass);
     o->lastNode = this->current->lastNode;
     o->includeNodeBranch = 1;
     this->current = o;
