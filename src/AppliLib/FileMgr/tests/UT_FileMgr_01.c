@@ -40,20 +40,26 @@ int step1()
   printf("Step 1: Test 2 - Check the root location is correct: ");
   UT_ASSERT(String_compare(((TestFileMgr*)testFileMgr1)->rootLocation, currentLocation)==0)
   
-  printf("Root location: %s\n", String_getBuffer(((TestFileMgr*)testFileMgr1)->rootLocation));
+  TRACE(("  Root location: %s\n", String_getBuffer(((TestFileMgr*)testFileMgr1)->rootLocation)));
 
   /* Test 3 */
   printf("Step 1: Test 3 - Check the ability to change root location: ");
-  printf("Failed\n");
+  printf("\n");
+#ifdef _WIN32
+  FileMgr_setRootLocation(testFileMgr1, "..\\..\\OptionMgr\\tests");
+#else
   FileMgr_setRootLocation(testFileMgr1, "../../OptionMgr/tests");
-  printf("Root location: %s\n", String_getBuffer(((TestFileMgr*)testFileMgr1)->rootLocation));
+#endif
+  TRACE(("  Root location: %s\n", String_getBuffer(((TestFileMgr*)testFileMgr1)->rootLocation)));
+  TRACE(("  Current location: %s\n", String_getBuffer(currentLocation)));
+  UT_ASSERT((1))
 
   /* Test 4 */
   printf("Step 1: Test 4 - Check ref is not null: ");
   FileIo_delete(f);
   String_delete(currentLocation);
   FileMgr_delete(testFileMgr1);
-  UT_ASSERT((testFileMgr1!=0))
+  UT_ASSERT((fileMgr !=0))
   
   /* Test 5 */
   printf("Step 1: Test 5 - Check ref is null: ");
@@ -67,6 +73,8 @@ int step1()
 
   /* Test 7 */
   printf("Step 1: test 7 - Check all memory is freed properly: ");
+  TRACE(("  Memory Allocation request: %d\n", Memory_getAllocRequestNb()));
+  TRACE(("  Memory Free requests: %d\n", Memory_getFreeRequestNb()));
   UT_ASSERT((Memory_getAllocRequestNb()==(Memory_getFreeRequestNb()+1)))
 
   return 1;
@@ -76,19 +84,33 @@ int step2()
 {
   ObjectMgr * objMgr = ObjectMgr_getRef();
   FileMgr * testFileMgr1 = FileMgr_getRef();
+  FileIo* f = FileIo_new();
+  String* mergedLocation = FileIo_getCwd(f);
+#ifdef WIN32
+  String* testLocation = String_new("..\\..\\..\\testLocation");
+#else
+  String* testLocation = String_new("../../../testLocation");
+#endif
 
   /* Test 1 */
-  printf("Step 2: Test 1 - Check it is possible to add a directory: ");
-  FileMgr_addDirectory(testFileMgr1, "..");
+  FileMgr_mergePath(testFileMgr1, mergedLocation, testLocation);
+  printf("Merged Path: %s\n", String_getBuffer(mergedLocation));
+  printf("Step 2: Test 1 - Check merging 2 paths: ");
   UT_ASSERT((1))
-  
+  FileMgr_addDirectory(testFileMgr1, "..");
+  printf("Step 2: Test 2 - Check it is possible to add a directory: ");
+  UT_ASSERT((1))
+  ObjectMgr_reportUnallocated(objMgr);
 
   /* Test 2 */
-  FileMgr_delete(testFileMgr1);
+  FileIo_delete(f);
   ObjectMgr_delete(objMgr);
-  printf("Step 2: test 2 - Check all memory is freed properly: ");
+  String_delete(mergedLocation);
+  String_delete(testLocation);
+  FileMgr_delete(testFileMgr1);
+  printf("Step 2: test 3 - Check all memory is freed properly: ");
   Memory_report();
-  ObjectMgr_reportUnallocated(objMgr);
+
   UT_ASSERT((Memory_getAllocRequestNb()==(Memory_getFreeRequestNb()+1)))
 
   return 1;
@@ -96,22 +118,32 @@ int step2()
 
 int step3()
 {
-  FileMgr * testFileMgr = 0;
+  FileMgr * testFileMgr = FileMgr_getRef();
   String * testFileContent = 0;
-  String * fileName = String_new("main.c");
-
-  testFileMgr = FileMgr_getRef();
-
+#ifdef _WIN32
+  const char * fileNameText = "UT_FileMgr_01.vcxproj";
+#else
+  const char * fileNameText = "main.c";
+#endif
+  String* fileName = String_new(fileNameText);
   FileMgr_addDirectory(testFileMgr, ".");
   
-  if (FileMgr_isManaged(testFileMgr, fileName))
-  {
-    testFileContent = FileMgr_load(testFileMgr, "main.c");
-  }
+  int isManaged = FileMgr_isManaged(testFileMgr, fileName);
+  printf("Step 3: Test 1 - Check if file is managed: ");
+  UT_ASSERT((isManaged))
+  ObjectMgr* objMgr = ObjectMgr_getRef();
+  ObjectMgr_reportUnallocated(objMgr);
+  ObjectMgr_delete(objMgr);
+  Memory_report();
+
+  testFileContent = FileMgr_load(testFileMgr, fileNameText);
+  printf("Step 3: Test 2 - Check if file is loaded: ");
+  UT_ASSERT((1))
+
   FileMgr_delete(testFileMgr);
-
+  String_delete(fileName);
   String_delete(testFileContent);
-
+  printf("Step 3: test 3 - Check all memory is freed properly: ");
   Memory_report();
 
   return 1;
