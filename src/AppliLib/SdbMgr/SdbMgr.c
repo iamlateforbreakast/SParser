@@ -50,11 +50,14 @@ PUBLIC SdbMgr* SdbMgr_new(String * name)
   SdbMgr* this = 0;
 
   this = (SdbMgr*)Object_new(sizeof(SdbMgr), &sdbMgrClass);
-  this->object.size = sizeof(SdbMgr);
-  
-  SdbMgr_open(this, name);
-  sdbMgr = this;
-  
+  if (this!=0)
+  {
+    this->object.size = sizeof(SdbMgr);
+    this->name = 0;
+    SdbMgr_open(this, name);
+    sdbMgr = this;
+  }
+
   return this;
 }
 
@@ -126,6 +129,7 @@ PUBLIC unsigned int SdbMgr_getSize(SdbMgr * this)
 **************************************************/
 PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement, List * result)
 {
+  unsigned int nbResults = 0;
   int rc = 0;
   sqlite3_stmt *res = 0;
   int step = 0;
@@ -133,7 +137,6 @@ PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement, List * r
   unsigned int count = 0;
   int i;
   String * temp = 0;
-  unsigned int nbResults = 0;
   
   Error_new(ERROR_DBG, "SdbMgr: %s\n", statement);
   rc = sqlite3_prepare_v2(this->db, statement, -1, &res, 0);
@@ -181,10 +184,10 @@ PRIVATE unsigned int SdbMgr_open(SdbMgr* this, String* sdbName)
 **************************************************/
 PRIVATE void SdbMgr_close(SdbMgr* this)
 {
-  unsigned int result = 0;
   sqlite3_backup* pBackup;
   sqlite3* pFile;
   sqlite3* pMemory = this->db;
+  int result = 0;
   
   result = sqlite3_open(String_getBuffer(this->name), &pFile);
   if (result==SQLITE_OK)

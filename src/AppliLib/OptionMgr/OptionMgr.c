@@ -199,7 +199,11 @@ PUBLIC unsigned int OptionMgr_readFromFile(OptionMgr * this)
   
   fileName = OptionMgr_getOption(this,"Config file name");
   path1 = String_copy(fileName);
+#ifdef _WIN32
+  String_prepend(path1,".\\");
+#else
   String_prepend(path1,"./");
+#endif
   if ((fullPath = FileMgr_addFile(fileMgr, String_getBuffer(path1))) != 0)
   {
     /* File exists and is managed */

@@ -60,7 +60,7 @@ PRIVATE Class grammarContextClass =
   .f_new = (Constructor)0,
   .f_delete = (Destructor)0,
   .f_copy = (Copy_Operator)0,
-  .f_comp = (Copy_Operator)0,
+  .f_comp = (Comp_Operator)0,
   .f_print = (Printer)0,
   .f_size = (Sizer)&GrammarContext_getSize
 };
