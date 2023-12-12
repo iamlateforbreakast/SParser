@@ -142,7 +142,7 @@ PUBLIC void Grammar2_delete(Grammar2 * this)
        o = (GrammarContext*)List_removeHead(this->contexts);
        Object_delete((Object*)o);
        List_delete(this->contexts);
-       Object_delete(&this->object);
+       Object_deallocate(&this->object);
      }
      else if (this->object.refCount>1)
      {
@@ -460,6 +460,8 @@ PRIVATE unsigned int Grammar2_isFileToBeIgnored(Grammar2 * this, String * fileNa
     unsigned int result = 0;
 
     char * buffer = String_getBuffer(fileName);
+    if (Memory_ncmp(buffer, "TestObject.h", 12)) return 1;
+    if (Memory_ncmp(buffer, "MyAllocator.h", 13)) return 1;
     if (Memory_ncmp(buffer, "signal.h", 8)) return 1;
     if (Memory_ncmp(buffer, "unistd.h", 8)) return 1;
     if (Memory_ncmp(buffer, "dirent.h", 8)) return 1;
