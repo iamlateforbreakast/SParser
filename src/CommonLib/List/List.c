@@ -168,7 +168,18 @@ PUBLIC int List_compare(List * this, List * compared)
 **************************************************/
 PUBLIC void List_print(List * this)
 {
-  PRINT((" ~ List Object: %d", this->object.id));
+  ListNode* iterator = 0;
+  if (this != 0)
+  {
+    PRINT((" ~ List Object: %d\n", this->object.uniqId));
+    iterator = this->tail;
+    while (iterator != 0)
+    {
+      Object_print((Object*)iterator->item);
+      PRINT(("\n"));
+      iterator = iterator->next;
+    }
+  }
 }
 
 /**********************************************//** 
@@ -366,12 +377,12 @@ PUBLIC void* List_removeTail(List* this)
   if ((this != 0) && (this->nbNodes != 0))
   {
     tailNode = this->tail;
-    item = this->tail->item;
+    item = Object_getRef((Object*)this->tail->item);
     if (this->tail->next != 0)
     {
       this->tail = this->tail->next;
       this->tail->prev = 0;
-      this->iterator = this->tail;
+      //this->iterator = this->tail;
     }
     else
     {
