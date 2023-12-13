@@ -583,7 +583,8 @@ PRIVATE unsigned int FileMgr_existFS(FileMgr * this, String * fullName)
   if (FileIo_isOpen(f)) 
   {
     result = 1;
-    FileIo_delete(f);
   }
+    FileIo_delete(f);
+
   return result;
 }
