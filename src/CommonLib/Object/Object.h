@@ -12,6 +12,7 @@ typedef struct Object Object;
 struct Object
 {
   unsigned int id;
+  unsigned int uniqId;
   Class * class;
   void (*delete)(Object * this);
   Object * (*copy)(Object * this);
