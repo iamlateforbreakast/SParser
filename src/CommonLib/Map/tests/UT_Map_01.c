@@ -16,20 +16,7 @@
 
 #define NB_KEYS (250)
 
-const char* text = "For a long time I used to go to bed early. Sometimes, when I had put out my candle,"
-"my eyes would close so quickly that I had not even time to say I'm going to sleep. And half an hour"
-"later the thought that it was time to go to sleep would awaken me; I would try to put away the book"
-"which, I imagined, was still in my hands, and to blow out the light; I had been thinking all the time,"
-"while I was asleep, of what I had just been reading, but my thoughts had run into a channel of their"
-"own, until I myself seemed actually to have become the subject of my book : a church, a quartet, the"
-"rivalry between François Iand Charles V. This impression would persist for some moments after I was"
-"awake; it did not disturb my mind, but it lay like scales upon my eyesand prevented them from"
-"registering the fact that the candle was no longer burning. Then it would begin to seem unintelligible,"
-"as the thoughts of a former existence must be to a reincarnate spirit; the subject of my book would"
-"separate itself from me, leaving me free to choose whether I would form part of it or no;and at the"
-"same time my sight would return and I would be astonished to find myself in a state of darkness,"
-"pleasantand restful enough for the eyes, and even more, perhaps, for my mind, to which it appeared"
-"incomprehensible, without a cause, a matter dark indeed.";
+#include "Words1000.h"
 
 String ** keys;
 TestObject ** testObjects;
@@ -37,7 +24,7 @@ int nbTokens = 0;
 
 int init_keys()
 {
-  String * fullText = String_new(text);
+  String * fullText = String_new(words1000);
   List * tokens = 0;
 
   tokens = String_splitToken(fullText, " ");
