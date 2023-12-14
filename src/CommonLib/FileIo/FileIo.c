@@ -1,8 +1,17 @@
+/**********************************************//**
+  @file FileIo.c
+
+  @brief A FileIo class.
+  This class provides a status and operation for 
+  various File I/O operations.
+**************************************************/
 #include "FileIo.h"
 #include "String2.h"
 #include "List.h"
+#include "Object.h"
 #include "Memory.h"
 #include "Error.h"
+#include "Debug.h"
 #include <stdio.h>
 #include <limits.h>
 #include <stdlib.h>
@@ -16,15 +25,41 @@
 #include <dirent.h>
 #endif
 
+#define DEBUG (0)
+
+/**********************************************//**
+  @class FileiIo
+**************************************************/
 struct FileIo
 {
+  Object object;
   FILE* f;
   int status;
 };
 
+/**********************************************//**
+  @private Class Description
+**************************************************/
+PRIVATE Class fileIoClass =
+{
+  .f_new = 0,
+  .f_delete = (Destructor)&FileIo_delete,
+  .f_copy = (Copy_Operator)&FileIo_copy,
+  .f_comp = (Comp_Operator)&FileIo_comp,
+  .f_print = (Printer)&FileIo_print,
+  .f_size = (Sizer)&FileIo_getSize
+};
+
+/********************************************************//**
+  @brief Create a new instance of the class FileIo.
+  @public
+  @memberof FileIo
+  @return New FileIo instance or NULL if failed to allocate.
+*************************************************************/
 PUBLIC FileIo * FileIo_new()
 {
-  FileIo* this = (FileIo*)malloc(sizeof(FileIo));
+  FileIo* this = (FileIo*)Object_new(sizeof(FileIo), &fileIoClass);
+
   if (this)
   {
     this->status = UNKNOWN;
@@ -33,23 +68,81 @@ PUBLIC FileIo * FileIo_new()
   return this;
 }
 
+/********************************************************//**
+  @brief Delte an instance of the class FileIo.
+  @public
+  @memberof FileIo
+  @return none
+*************************************************************/
 PUBLIC void FileIo_delete(FileIo* this)
 {
   if (this)
   {
-      if (this->status == FILE_OPEN)
-      {
-          fclose(this->f);
-      }
-    free(this);
+    if (this->status == FILE_OPEN)
+    {
+      fclose(this->f);
+    }
+    Object_deallocate(&this->object);
   }
 }
 
+/********************************************************//**
+  @brief Copy an instance of the class FileIo.
+  @public
+  @memberof FileIo
+  @return Copy of the instance.
+*************************************************************/
+PUBLIC FileIo* FileIo_copy(FileIo* this)
+{
+  return 0;
+}
+
+/********************************************************//**
+  @brief Compare an instance of the class FileIo to another one.
+  @public
+  @memberof FileIo
+  @return 0 if equal.
+*************************************************************/
+PUBLIC int FileIo_comp(FileIo* this, FileIo* compare)
+{
+  return 0;
+}
+
+/********************************************************//**
+  @brief Print an instance of the class FileIo.
+  @public
+  @memberof FileIo
+  @return none.
+*************************************************************/
+PUBLIC void FileIo_print(FileIo* this)
+{
+}
+
+/********************************************************//**
+  @brief Return the size of an instance of the class FileIo.
+  @public
+  @memberof FileIo
+  @return Size in bytes.
+*************************************************************/
+PUBLIC unsigned int FileIo_getSize(FileIo* this)
+{
+  if (this == 0) return sizeof(FileIo);
+
+  return sizeof(FileIo);
+}
+
+/********************************************************//**
+  @brief Open an instance of the class FileIo for reading/writing.
+  @public
+  @memberof FileIo
+  @param[in] String Full path of file to open
+  @return none
+*************************************************************/
 PUBLIC void FileIo_openFile(FileIo * this, String * fullFileName)
 {
 #ifdef _WIN32
   errno_t err = fopen_s(&this->f, String_getBuffer(fullFileName), "rb+");
-  printf("Errno: %d\n", err);
+  TRACE(("Errno: %d\n", err));
 #else
   this->f = fopen(String_getBuffer(fullFileName), "rb+");
 #endif
@@ -59,11 +152,18 @@ PUBLIC void FileIo_openFile(FileIo * this, String * fullFileName)
   }
 }
 
+/********************************************************//**
+  @brief Create a new file.
+  @public
+  @memberof FileIo
+  @param[in] String Full path of file to create
+  @return none
+*************************************************************/
 PUBLIC void FileIo_createFile(FileIo* this, String* fullFileName)
 {
 #ifdef _WIN32
     errno_t err = fopen_s(&this->f, "test.file" /*String_getBuffer(fullFileName)*/, "wb");
-    printf("Errno: %d\n", err);
+    TRACE(("Errno: %d\n", err));
 #else
     this->f = fopen(String_getBuffer(fullFileName), "wb");
 #endif
@@ -73,6 +173,13 @@ PUBLIC void FileIo_createFile(FileIo* this, String* fullFileName)
     }
 }
 
+/********************************************************//**
+  @brief Create a new file.
+  @public
+  @memberof FileIo
+  @param[in] String Full path of file to create
+  @return none
+*************************************************************/
 PUBLIC void FileIo_openDir(FileIo* this, String* fullFileName)
 {
     //this->f = fopen(String_getBuffer(fullFileName), "rb"));
@@ -87,7 +194,7 @@ PUBLIC void FileIo_write(FileIo* this, char * buffer, int length)
   if ((this) && (this->status == FILE_OPEN))
   {
     int l = fwrite(buffer, length, 1, this->f);
-    printf("Length=%d\n", l);
+    TRACE(("Length=%d\n", l));
   }
 }
 
@@ -115,9 +222,9 @@ PUBLIC List * FileIo_listDirs(FileIo * this, String * directory)
 #ifdef _WIN32
   WIN32_FIND_DATA FindFileData;
   HANDLE hFind;
-  TCHAR dir[MAX_PATH];
+  //TCHAR dir[MAX_PATH];
 
-  char * dirText = "C:\\Users\\remion_t\\source\\repos\\SParse-SP6\\UT_FileIo_01\\*";
+  //char * dirText = "C:\\Users\\remion_t\\source\\repos\\SParse-SP6\\UT_FileIo_01\\*";
   hFind = FindFirstFile(_T("*"), &FindFileData);
   if (hFind == INVALID_HANDLE_VALUE)
   {
@@ -127,7 +234,7 @@ PUBLIC List * FileIo_listDirs(FileIo * this, String * directory)
   {        
     do {
       //_tprintf(_T("The first file found is %s\n"), FindFileData.cFileName);
-      if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
+      if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 2)
       {
         char text[MAX_PATH];
         size_t nb = 0;
@@ -168,34 +275,35 @@ return result;
 
 PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
 {
-    List* result = List_new();
+  List* result = List_new();
 #ifdef _WIN32
-    WIN32_FIND_DATA FindFileData;
-    HANDLE hFind;
-    TCHAR dir[MAX_PATH];
+  WIN32_FIND_DATA FindFileData;
+  HANDLE hFind;
+  //TCHAR dir[MAX_PATH];
 
-    char * dirText = "C:\\Users\\remion_t\\source\\repos\\SParse-SP6\\UT_FileIo_01\\*";
-    hFind = FindFirstFile(_T("*"), &FindFileData);
-    if (hFind == INVALID_HANDLE_VALUE)
-    {
-        printf("FindFirstFile failed (%d)\n", GetLastError());
-    }
-    else
-    {        
-        do {
-            //_tprintf(_T("The first file found is %s\n"), FindFileData.cFileName);
-          if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
-          {
-            char text[MAX_PATH];
-            size_t nb = 0;
-            wcstombs_s(&nb, text, 100, FindFileData.cFileName, wcslen(FindFileData.cFileName));
-            printf("=>%s\n", text);
-            String* s = String_new(text);
-            List_insertTail(result, s);
-          }
-        } while (FindNextFile(hFind, &FindFileData));
-        FindClose(hFind);
-    }
+  //char * dirText = "C:\\Users\\remion_t\\source\\repos\\SParse-SP6\\UT_FileIo_01\\*";
+  hFind = FindFirstFile(_T("*"), &FindFileData);
+  if (hFind == INVALID_HANDLE_VALUE)
+  {
+    printf("FindFirstFile failed (%d)\n", GetLastError());
+  }
+  else
+  {        
+    do {
+      //_tprintf(_T("The first file found is %s\n"), FindFileData.cFileName);
+      if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
+      {
+        char text[MAX_PATH];
+        size_t nb = 0;
+        wcstombs_s(&nb, text, 100, FindFileData.cFileName, wcslen(FindFileData.cFileName));
+        PRINT(("=>%s\n", text));
+        String* s = String_new(text);
+        List_insertTail(result, s);
+        String_delete(s);
+      }
+    } while (FindNextFile(hFind, &FindFileData));
+    FindClose(hFind);
+  }
 #else
   struct dirent *directoryEntry = 0;
   String * name = 0;
@@ -266,19 +374,20 @@ PUBLIC String * FileIo_getCwd(FileIo * this)
 
 PUBLIC int FileIo_fSeekSet(FileIo* this, int pos)
 {
-  fseek(this->f, pos, SEEK_SET);
+  if (this->status == 1)
+    fseek(this->f, pos, SEEK_SET);
 
   return 0;
 }
 
 PUBLIC int FileIo_ftell(FileIo* this)
 {
-  return ftell(this->f);
+  if (this->status == 1)
+    return ftell(this->f);
+  return 0;
 }
-
 PUBLIC FileIoStatus FileIo_isOpen(FileIo * this)
 {
   if (this->status == FILE_OPEN) return 1;
-
   return 0;
 }
