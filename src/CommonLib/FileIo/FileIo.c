@@ -239,7 +239,8 @@ PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
 
 PUBLIC int FileIo_fSeekEnd(FileIo * this, int pos)
 {
-  fseek(this->f, pos, SEEK_END);
+  if (this->status == 1)
+    fseek(this->f, pos, SEEK_END);
 
   return 0;
 }
