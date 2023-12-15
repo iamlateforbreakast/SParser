@@ -18,10 +18,7 @@
 #include "Debug.h"
 #include "FileIo.h"
 
-//#include <unistd.h>
-//#include <dirent.h>
-//#include <stat.h>
-//#include <stdio.h>
+#define DEBUG (0)
 
 #define FILEMGR_MAX_PATH (1024)
 
@@ -213,7 +210,7 @@ PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryN
   
   /* Merge directory name with current path to have the full path of the directory*/
   FileMgr_mergePath(this, fullPathDirectory, addedDirectory);
-  Error_new(ERROR_INFO, "Full directoryPath: %s\n", String_getBuffer(fullPathDirectory));
+  Error_new(ERROR_INFO, "Added directory with absolute path: %s\n", String_getBuffer(fullPathDirectory));
   /* TODO: Check if merged path exist on filesystem */
   
   /* add directory to this->directories */
@@ -222,7 +219,7 @@ PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryN
   /* For each directory */
   /* List_forEach(this->directories, FileMgr_listFiles, this); */
   fullPathDirectory = List_getNext(this->directories);
-  //printf("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory));
+  printf("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory));
   while (fullPathDirectory!=0)
   {
     PRINT(("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory)));
@@ -408,7 +405,7 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   
   List* tokenPath1 = String_splitToken(path1, this->separator);
   List* tokenPath2 = String_splitToken(path2, this->separator);
-  s = List_removeTail(tokenPath2);
+  s = (String*)List_removeTail(tokenPath2);
   while (s!=0)
   {
     if (String_compare(s, twoDots)==0)
@@ -584,7 +581,7 @@ PRIVATE unsigned int FileMgr_existFS(FileMgr * this, String * fullName)
   {
     result = 1;
   }
-    FileIo_delete(f);
+  FileIo_delete(f);
 
   return result;
 }
