@@ -14,6 +14,10 @@ typedef struct FileIo FileIo;
 
 PUBLIC FileIo * FileIo_new();
 PUBLIC void FileIo_delete();
+PUBLIC FileIo* FileIo_copy(FileIo* this);
+PUBLIC int FileIo_comp(FileIo* this, FileIo* compare);
+PUBLIC void FileIo_print(FileIo* this);
+PUBLIC unsigned int FileIo_getSize(FileIo* this);
 PUBLIC void FileIo_openFile(FileIo* this, String* fullFileName);
 PUBLIC void FileIo_createFile(FileIo* this, String* fullFileName);
 PUBLIC void FileIo_openDir(FileIo* this, String* fullFileName);
