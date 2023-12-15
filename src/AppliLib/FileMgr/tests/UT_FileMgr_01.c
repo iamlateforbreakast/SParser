@@ -4,9 +4,11 @@
 #include "FileIo.h"
 #include "Memory.h"
 #include "ObjectMgr.h"
+#include "Debug.h"
 
 #include <stdio.h>
 
+#define DEBUG (1)
 #define UT_ASSERT(cond) if ((cond)) \
                           { printf("Passed\n");} \
                           else { printf("Failed\n"); return 0;}
@@ -50,7 +52,7 @@ int step1()
 #else
   FileMgr_setRootLocation(testFileMgr1, "../../OptionMgr/tests");
 #endif
-  TRACE(("  Root location: %s\n", String_getBuffer(((TestFileMgr*)testFileMgr1)->rootLocation)));
+  TRACE(("\n  Root location: %s\n", String_getBuffer(((TestFileMgr*)testFileMgr1)->rootLocation)));
   TRACE(("  Current location: %s\n", String_getBuffer(currentLocation)));
   UT_ASSERT((1))
 
@@ -73,6 +75,8 @@ int step1()
 
   /* Test 7 */
   printf("Step 1: test 7 - Check all memory is freed properly: ");
+  ObjectMgr * objMgr = ObjectMgr_getRef();
+  ObjectMgr_reportUnallocated(objMgr);
   TRACE(("  Memory Allocation request: %d\n", Memory_getAllocRequestNb()));
   TRACE(("  Memory Free requests: %d\n", Memory_getFreeRequestNb()));
   UT_ASSERT((Memory_getAllocRequestNb()==(Memory_getFreeRequestNb()+1)))
@@ -104,10 +108,11 @@ int step2()
 
   /* Test 2 */
   FileIo_delete(f);
-  ObjectMgr_delete(objMgr);
   String_delete(mergedLocation);
   String_delete(testLocation);
   FileMgr_delete(testFileMgr1);
+  ObjectMgr_reportUnallocated(objMgr);
+  ObjectMgr_delete(objMgr);
   printf("Step 2: test 3 - Check all memory is freed properly: ");
   Memory_report();
 
