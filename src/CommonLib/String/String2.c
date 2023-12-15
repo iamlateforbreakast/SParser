@@ -453,7 +453,9 @@ PUBLIC List* String_splitToken(String* this, const char* separator)
 #endif
   while (token != 0)
   {
-    List_insertHead(result, String_new(token));
+    String* tokenS = String_new(token);
+    List_insertHead(result, tokenS);
+    String_delete(tokenS);
 #ifndef _WIN32
     token = strtok(0, separator);
 #else
@@ -497,5 +499,6 @@ PUBLIC unsigned int String_getSize(String* this)
 **************************************************/
 PUBLIC void String_print(String* this)
 {
-  PRINT(("%s", String_getBuffer(this)));
+  //PRINT((" ~ String Object: %d 0x%x\n", this->object.uniqId, this));
+  PRINT((" ~ String Object: %d 0x%x %s\n", this->object.uniqId, this, String_getBuffer(this)));
 }
