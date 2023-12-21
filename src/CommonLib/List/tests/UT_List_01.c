@@ -72,9 +72,9 @@ int step1()
 
   PRINT(("Step 1: Test 5 - Check all memory is freed: "));
   return 0;
-  }
+}
 
-  PRINT(("Step 1: test 3 - Print both lists: \n"));
+  /*PRINT(("Step 1: test 3 - Print both lists: \n"));
   PRINT((" List1 ------------->\n"));
   List_forEach(testList1, (void (*)(void* o))&TestObject_print);
   PRINT((" List2 ------------->\n"));
