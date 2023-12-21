@@ -18,9 +18,9 @@
 
 #include "Grammar2.parse.h"
 
-#define DEBUG (0)
+#define DEBUG (1)
 
-#define MAX_BUFFER_SIZE  (1024*1024)
+#define MAX_BUFFER_SIZE  (1024 * 1024)
 
 extern int Grammar2_parse (void * scanner, Grammar2 * this);
 extern void * Grammar2_scan_string (const char * yystr , void * yyscanner);
@@ -460,6 +460,7 @@ PRIVATE unsigned int Grammar2_isFileToBeIgnored(Grammar2 * this, String * fileNa
     unsigned int result = 0;
 
     char * buffer = String_getBuffer(fileName);
+    if (Memory_ncmp(buffer, "Words1000.h", 11)) return 1;
     if (Memory_ncmp(buffer, "TestObject.h", 12)) return 1;
     if (Memory_ncmp(buffer, "MyAllocator.h", 13)) return 1;
     if (Memory_ncmp(buffer, "signal.h", 8)) return 1;
