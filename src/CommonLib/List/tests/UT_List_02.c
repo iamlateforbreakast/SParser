@@ -39,7 +39,7 @@ int step1()
     items[i] = TestObject_newFromAllocator((Allocator*)testAlloc);
     //items[i]->x = i;
     //items[i]->y = MAX_OBJECT_NB - i;
-    List_insertHead(testList, items[i]);
+    List_insertHead(testList, items[i], 1);
     TRACE(("Nb items %d\n", List_getNbNodes(testList)));
     TRACE(("  Allocated %d bytes at %x\n", ((Object*)items[i])->class->f_size(0), items[i]));
   }
@@ -53,6 +53,7 @@ int step1()
   }
   UT_ASSERT((1));
   
+  printf("Nb objects left allocated in custom allocator: %d\n", MyAllocator_report((Allocator*)testAlloc));
   PRINT(("Step 1: test 4 - Delete List from allocator: "));
   List_delete(testList);
   UT_ASSERT((1));
@@ -84,8 +85,8 @@ int step2()
     items[i] = TestObject_newFromAllocator((Allocator*)testAlloc);
     //items[i]->x = i;
     //items[i]->y = MAX_OBJECT_NB - i;
-    List_insertTail(testList, items[i]);
-    TRACE(("Nb items %d\n", List_getNbNodes(testList)));
+    List_insertTail(testList, items[i], 1);
+    TRACE(("  Nb items %d\n", List_getNbNodes(testList)));
     TRACE(("  Allocated %d bytes at %x\n", ((Object*)items[i])->class->f_size(0), items[i]));
   }
   UT_ASSERT((List_getNbNodes(testList) == MAX_OBJECT_NB));
@@ -95,6 +96,7 @@ int step2()
   {
     removed[i] = List_removeTail(testList);
     TRACE(("  Removed %d bytes at %x\n", ((Object*)removed[i])->class->f_size(0), removed[i]));
+    TestObject_delete(removed[i]);
   }
   UT_ASSERT((1));
   
