@@ -147,7 +147,11 @@ PUBLIC Pool* Pool_newFromFile(char* fileName, unsigned int nbMemChunks, unsigned
     //fclose(newPool->file);
     // If file exists
     // else
+#ifdef _WIN32
+    errno_t err = fopen_s(&newPool->file, fileName, "rb+");
+#else
     newPool->file = fopen(fileName, "rb+");
+#endif
     if (newPool->file != 0)
     {
         printf("File %s exists\n", fileName);
@@ -165,7 +169,11 @@ PUBLIC Pool* Pool_newFromFile(char* fileName, unsigned int nbMemChunks, unsigned
     {
         // Create the file
         printf("File %s is created\n", fileName);
-        newPool->file = fopen(fileName, "wb+");
+#ifdef _WIN32
+        errno_t err = fopen_s(&newPool->file, fileName, "rb+");
+#else
+        newPool->file = fopen(fileName, "rb+");
+#endif
         //newPool->file = fopen("test.pool", "wb+");
         //newPool->file = fopen(fileName, "wb+");
         if (newPool->file != 0)
