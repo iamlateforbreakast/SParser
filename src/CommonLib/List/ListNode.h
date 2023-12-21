@@ -51,16 +51,22 @@ PRIVATE Class listNodeClass =
   @memberof List
   @return New instance.
 **************************************************/
-PRIVATE ListNode* ListNode_new(Object* object)
+PRIVATE ListNode* ListNode_new(Object* object, int isOwner)
 {
   ListNode* this = 0;
 
   this = (ListNode*)Object_new(sizeof(ListNode), &listNodeClass);
   // TODO: Check if allocation failed
+  if (this != 0)
+  {
+    if (isOwner) 
+      this->item = object;
+    else 
   this->item = Object_getRef(object);
-  this->isOwned = 0;
+    this->isOwner = isOwner;
   this->next = 0;
   this->prev = 0;
+  }
 
   return this;
 }
@@ -71,16 +77,22 @@ PRIVATE ListNode* ListNode_new(Object* object)
   @memberof List
   @return New instance.
 **************************************************/
-PRIVATE ListNode* ListNode_newFromAllocator(Allocator* allocator, Object* object)
+PRIVATE ListNode* ListNode_newFromAllocator(Allocator* allocator, Object* object, int isOwner)
 {
   ListNode* this = 0;
 
   this = (ListNode*)Object_newFromAllocator(&listNodeClass, allocator);
   // TODO: Check if allocation failed
+  if (this != 0)
+  {
+    if (isOwner)
   this->item = object;
-  this->isOwned = 0;
+    else
+      this->item = Object_getRef(object);
+    this->isOwner = isOwner;
   this->next = 0;
   this->prev = 0;
+  }
 
   return this;
 }
@@ -95,8 +107,9 @@ PRIVATE void ListNode_delete(ListNode* this)
 
   if (this != 0)
   {
-    if ((this->item) && ((Object*)this->item)->delete != 0)
+    if ((this->item) && (((Object*)this->item)->delete != 0))
     {
+      if (this->isOwner)
       ((Object*)this->item)->delete(this->item);
     }
     Object_deallocate(&this->object);
@@ -116,7 +129,7 @@ PRIVATE ListNode* ListNode_copy(ListNode* this)
 
   if (this != 0)
   {
-    copy = ListNode_new(((Object*)this->item));
+    copy = ListNode_new(((Object*)this->item), 0);
   }
 
   return copy;
