@@ -44,20 +44,20 @@ Class listClass =
   @brief Create a new instance of the class List.
   @public
   @memberof List
-  @return New instance.
+  @return New instance or 0 if allocation failed.
 **************************************************/
 PUBLIC List* List_new()
 {
   List * this = 0;
   
   this = (List*)Object_new(sizeof(List),&listClass);
-  // TODO: Check if allocation failed
+  
   if (this != 0)
   {
-  this->head = 0;
-  this->tail = 0;
-  this->iterator = this->head;
-  this->nbNodes = 0;
+    this->head = 0;
+    this->tail = 0;
+    this->iterator = this->head;
+    this->nbNodes = 0;
   }
   
   return this;
@@ -67,20 +67,21 @@ PUBLIC List* List_new()
   @brief Create a new instance of the class List using a custom allocator
   @public
   @memberof List
-  @return New instance.
+  @param[in] Allocator
+  @return New instance or 0 is allocation failed.
 **************************************************/
 PUBLIC List * List_newFromAllocator(Allocator * allocator)
 {
   List * this = 0;
 
   this = (List*)Object_newFromAllocator(&listClass, allocator);
-  // TODO: Check if allocation failed
+  
   if (this != 0)
   {
-  this->head = 0;
-  this->tail = 0;
-  this->iterator = this->head;
-  this->nbNodes = 0;
+    this->head = 0;
+    this->tail = 0;
+    this->iterator = this->head;
+    this->nbNodes = 0;
   }
 
   return this;
@@ -95,14 +96,14 @@ PUBLIC void List_delete(List* this)
 {
   if (this!=0)
   {
-      ListNode * node = 0;
+    ListNode * node = 0;
       
-      /* De-allocate the specific members */
-      while ((node = this->tail)!=0)
-      {
-        this->tail = node->next;
-        ListNode_delete(node);
-      }
+    /* De-allocate the specific members */
+    while ((node = this->tail)!=0)
+    {
+      this->tail = node->next;
+      ListNode_delete(node);
+    }
     if (this->object.refCount == 1)
     {
       this->nbNodes = 0;
@@ -209,8 +210,8 @@ PUBLIC void List_insertHead(List* this, void* item, int isOwner)
   }
   else
   {
-      this->head->next = newNode;
-      if (this->iterator == 0) this->iterator = newNode;
+    this->head->next = newNode;
+    if (this->iterator == 0) this->iterator = newNode;
   }
   this->head = newNode;
 
@@ -423,6 +424,11 @@ PUBLIC void * List_getHead(List * this)
   return result;
 }
 
+/**********************************************//** 
+  @brief Reset iterator position to be the head.
+  @public
+  @memberof List.
+**************************************************/
 PUBLIC void List_resetIterator(List * this)
 {
   if (this!=0)
