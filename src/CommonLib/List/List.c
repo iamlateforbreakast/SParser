@@ -52,10 +52,13 @@ PUBLIC List* List_new()
   
   this = (List*)Object_new(sizeof(List),&listClass);
   // TODO: Check if allocation failed
+  if (this != 0)
+  {
   this->head = 0;
   this->tail = 0;
   this->iterator = this->head;
   this->nbNodes = 0;
+  }
   
   return this;
 }
@@ -72,10 +75,13 @@ PUBLIC List * List_newFromAllocator(Allocator * allocator)
 
   this = (List*)Object_newFromAllocator(&listClass, allocator);
   // TODO: Check if allocation failed
+  if (this != 0)
+  {
   this->head = 0;
   this->tail = 0;
   this->iterator = this->head;
   this->nbNodes = 0;
+  }
 
   return this;
 }
@@ -89,20 +95,16 @@ PUBLIC void List_delete(List* this)
 {
   if (this!=0)
   {
-    if (this->object.refCount == 1)
-    {
       ListNode * node = 0;
       
       /* De-allocate the specific members */
       while ((node = this->tail)!=0)
       {
         this->tail = node->next;
-        //if ((node->isOwned) && (((Object*)node->item)->delete!=0))
-        //{
-        //  ((Object*)node->item)->delete(node->item);
-        //}
         ListNode_delete(node);
       }
+    if (this->object.refCount == 1)
+    {
       this->nbNodes = 0;
       this->iterator = 0;
       this->head = 0;
@@ -138,7 +140,7 @@ PUBLIC List* List_copy(List* this)
       if (((Object*)iterator->item)->copy!=0)
       {
         node = (ListNode *)((Object*)iterator->item)->copy(iterator->item);
-        List_insertHead(copy, node);
+        List_insertHead(copy, node, iterator->isOwner);
       }
       iterator = iterator->next;
     }
@@ -188,18 +190,17 @@ PUBLIC void List_print(List * this)
   @memberof List
   @param[in] item Reference to item.
 **************************************************/
-PUBLIC void List_insertHead(List* this, void* item)
+PUBLIC void List_insertHead(List* this, void* item, int isOwner)
 {
   ListNode* newNode = 0;
   
   if (this->object.allocator)
-    newNode = (ListNode*)ListNode_newFromAllocator(this->object.allocator, item);
+    newNode = (ListNode*)ListNode_newFromAllocator(this->object.allocator, item, isOwner);
   else
-    newNode = (ListNode*)ListNode_new(item);
+    newNode = (ListNode*)ListNode_new(item, isOwner);
   newNode->item = item;
   newNode->next = 0;
   newNode->prev = this->head;
-  newNode->isOwned = 1;
   /* The following test case for empty list. */
   if (this->nbNodes == 0)
   {
@@ -222,14 +223,14 @@ PUBLIC void List_insertHead(List* this, void* item)
   @memberof List
   @param[in] item Reference to item.
 **************************************************/
-PUBLIC void List_insertTail(List* this, void* item)
+PUBLIC void List_insertTail(List* this, void* item, int isOwner)
 {
   ListNode* newNode = 0;
   
   if (this->object.allocator)
-    newNode = (ListNode*)ListNode_newFromAllocator(this->object.allocator, item);
+    newNode = (ListNode*)ListNode_newFromAllocator(this->object.allocator, item, isOwner);
   else
-    newNode = (ListNode*)ListNode_new(item);
+    newNode = (ListNode*)ListNode_new(item, isOwner);
   newNode->item = item;
   newNode->next = this->tail;
   newNode->prev = 0;
@@ -345,6 +346,9 @@ PUBLIC void * List_removeHead(List * this)
   {
     headNode = this->head;
     item = this->head->item;
+    /* The item is removed so prevent delete */
+    this->head->item = 0;
+    this->head->isOwner = 0;
     if (this->head->prev!=0)
     {
       this->head = this->head->prev;
@@ -377,7 +381,9 @@ PUBLIC void* List_removeTail(List* this)
   if ((this != 0) && (this->nbNodes != 0))
   {
     tailNode = this->tail;
-    item = Object_getRef((Object*)this->tail->item);
+    item = this->tail->item;
+    this->tail->item = 0;
+    this->tail->isOwner = 0;
     if (this->tail->next != 0)
     {
       this->tail = this->tail->next;
