@@ -55,7 +55,7 @@ PRIVATE ListNode* ListNode_new(Object* object, int isOwner)
 {
   ListNode* this = 0;
 
-  this = (ListNode*)Object_new(sizeof(ListNode), &listNodeClass)
+  this = (ListNode*)Object_new(sizeof(ListNode), &listNodeClass);
     
   if (this != 0)
   {
@@ -111,7 +111,7 @@ PRIVATE void ListNode_delete(ListNode* this)
       if (this->isOwner)
         ((Object*)this->item)->delete(this->item);
       else
-        ((Object*)this->item)->deRef(this->item);
+        Object_deRef((Object*)this->item);
     }
     Object_deallocate(&this->object);
   }
