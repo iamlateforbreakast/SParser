@@ -28,6 +28,7 @@ PUBLIC void Object_deallocate(Object* this);
 PUBLIC Object * Object_copy(Object * this);
 PUBLIC int Object_comp(Object * this, Object * compared);
 PUBLIC char * Object_print(Object * this);
-PUBLIC Object* Object_getRef(Object* this);
+PUBLIC Object* Object_getRef(Object * this);
+PUBLIC void Object_deRef(Object * this);
 
 #endif /* _OBJECT_H_ */

@@ -11,6 +11,7 @@
 #include "ObjectMgr.h"
 #include "ObjectStore.h"
 #include "Allocator.h"
+#include "Error.h"
 
 /**********************************************//**
   @private
@@ -173,4 +174,17 @@ PUBLIC Object* Object_getRef(Object* this)
   this->refCount++;
   
   return this;
+}
+
+/**********************************************//** 
+  @brief De-reference to an instance of the class Object.
+  @public
+  @memberof Object
+**************************************************/
+PUBLIC void Object_deRef(Object * this)
+{
+  if ((this->refCount)>1)
+    this->refCount--;
+  else
+    Error_new(ERROR_NORMAL, "Attempt to de-reference an object not referenced.\n");
 }
