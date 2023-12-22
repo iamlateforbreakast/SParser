@@ -263,7 +263,7 @@ PUBLIC List * FileIo_listDirs(FileIo * this, String * directory)
           //String * fullName = String_copy(directory);
           name = String_new(directoryEntry->d_name);
           //FileMgr_mergePath(this, fullName, name);
-          List_insertHead(result,name);
+          List_insertHead(result,name, 1);
           printf("%s\n",String_getBuffer(name));
         }
       }
@@ -321,7 +321,7 @@ PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
         printf("%s\n",String_getBuffer(name));
         //FileMgr_mergePath(this, fullName, name);
         //FileDesc_setFullName(fileDesc, fullName);
-        List_insertHead(result, (void*)name);
+        List_insertHead(result, (void*)name, 1);
         //String_delete(name);
       }
       else

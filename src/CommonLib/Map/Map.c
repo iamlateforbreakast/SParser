@@ -165,13 +165,13 @@ PUBLIC unsigned int Map_insert(Map * this,String * s, void * p)
       {
         this->htable[key] = List_new();
         entry = MapEntry_new(Object_getRef((Object*)s), Object_getRef((Object*)p));
-        List_insertHead(this->htable[key], entry);
+        List_insertHead(this->htable[key], entry, 1);
         result = 1;
       }
       else if (i==String_getLength(s)) 
       {
         entry = MapEntry_new(Object_getRef((Object*)s), Object_getRef((Object*)p));
-        List_insertHead(this->htable[key], entry);
+        List_insertHead(this->htable[key], entry, 1);
       }
     }
   }
@@ -347,7 +347,7 @@ PUBLIC List * Map_getAll(Map * this)
       while (n!= 0)
       {
         pItem =  MapEntry_getItem(n);
-        List_insertHead(result, pItem);
+        List_insertHead(result, pItem, 1);
         n = (MapEntry*)List_getNext(this->htable[i]);
       }
     }
