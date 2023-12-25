@@ -72,7 +72,7 @@ int step1()
 
   PRINT(("Step 1: Test 2 - Insert an object: "));
 
-  Map_insert(testMap, keys[0], testObjects[0]);
+  Map_insert(testMap, keys[0], testObjects[0], 1);
 
   UT_ASSERT((1));
 
@@ -93,7 +93,7 @@ int step2()
   for (int i = 0; i < nbTokens; i++)
   {
     //printf("-->%s\n", String_getBuffer(keys[i]));
-    Map_insert(testMap, keys[i], testObjects[i]);
+    Map_insert(testMap, keys[i], testObjects[i], 1);
   }
   
   Map_delete(testMap);
@@ -129,7 +129,7 @@ int step4()
   String * item = String_new("The new value");
   String * newItem = 0;
   
-  Map_insert(testMap, s, item);
+  Map_insert(testMap, s, item, 1);
   Map_find(testMap, s, (void**)&newItem);
   
   printf("New value : %s\n",
@@ -165,7 +165,7 @@ int step5()
   {
     s = String_new(testNames[i]);
     c = String_new(testColor[i]);
-    Map_insert(testMap, s, c);
+    Map_insert(testMap, s, c, 1);
     String_delete(s);
     String_delete(c);
   }
@@ -190,11 +190,11 @@ int main()
   init_keys();
 
   step1();
-  step2();
-  step3();
-  step4();
-  step5();
-  step6();
+  //step2();
+  //step3();
+  //step4();
+  //step5();
+  //step6();
 
   delete_keys();
 

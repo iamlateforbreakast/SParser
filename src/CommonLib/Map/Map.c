@@ -140,7 +140,7 @@ PUBLIC int Map_comp(Map* this, Map* compared)
   @memberof Map
   @return 1 is inserted
 **************************************************/
-PUBLIC unsigned int Map_insert(Map * this,String * s, void * p)
+PUBLIC unsigned int Map_insert(Map * this,String * s, void * p, int isOwner)
 {
   unsigned int result = 0;
   unsigned int key = 0;
@@ -164,13 +164,13 @@ PUBLIC unsigned int Map_insert(Map * this,String * s, void * p)
       if (this->htable[key] == 0)
       {
         this->htable[key] = List_new();
-        entry = MapEntry_new(Object_getRef((Object*)s), Object_getRef((Object*)p));
+        entry = MapEntry_new(s, p, isOwner);
         List_insertHead(this->htable[key], entry, 1);
         result = 1;
       }
       else if (i==String_getLength(s)) 
       {
-        entry = MapEntry_new(Object_getRef((Object*)s), Object_getRef((Object*)p));
+        entry = MapEntry_new(s, p, isOwner);
         List_insertHead(this->htable[key], entry, 1);
       }
     }

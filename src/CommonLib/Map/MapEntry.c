@@ -13,6 +13,7 @@ struct MapEntry
   Object object;
   String * s;
   void * item;
+  int isOwner;
 };
 
 /**********************************************//**
@@ -28,13 +29,14 @@ PRIVATE Class mapEntryClass =
   .f_size = (Sizer)&MapEntry_getSize
 };
 
-PUBLIC MapEntry * MapEntry_new(String * s, void * item)
+PUBLIC MapEntry * MapEntry_new(String * s, void * item, int isOwner)
 {
   MapEntry * this = 0;
 
   this = (MapEntry*)Object_new(sizeof(MapEntry),&mapEntryClass);
   this->s = s;
   this->item = item;
+  this->isOwner = isOwner;
 
   return this;
 }
@@ -42,9 +44,12 @@ PUBLIC MapEntry * MapEntry_new(String * s, void * item)
 PUBLIC void MapEntry_delete(MapEntry * this)
 {
   String_delete(this->s);
-  if (((Object*)this->item)->delete!=0)
+  if ((this->item) && (((Object*)this->item)->delete!=0))
   {
-    ((Object*)this->item)->delete(this->item);
+    if (this->isOwner)
+      ((Object*)this->item)->delete(this->item);
+    else
+      Object_deRef((Object*)this->item);
   }
   Object_deallocate(&this->object);
 }
