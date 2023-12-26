@@ -454,8 +454,8 @@ PUBLIC List* String_splitToken(String* this, const char* separator)
   while (token != 0)
   {
     String* tokenS = String_new(token);
-    List_insertHead(result, tokenS, 0);
-    String_delete(tokenS);
+    List_insertHead(result, tokenS, 1);
+    //String_delete(tokenS);
 #ifndef _WIN32
     token = strtok(0, separator);
 #else
