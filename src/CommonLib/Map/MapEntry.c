@@ -34,12 +34,27 @@ PUBLIC MapEntry * MapEntry_new(String * s, void * item, int isOwner)
   MapEntry * this = 0;
 
   this = (MapEntry*)Object_new(sizeof(MapEntry),&mapEntryClass);
-  this->s = s;
-  // if isOwner
-  this->item = item;
-  // else
-  // this->item = Object_getRef(item);
+
+  if (this==0) return 0;
+
   this->isOwner = isOwner;
+  if (isOwner)
+  {
+    this->s = s;
+    this->item = item;
+  }
+  else
+  {
+    this->s = s;
+    this->item = Object_getRef((Object*)item);
+  }
+
+  return this;
+}
+
+PUBLIC MapEntry * MapEntry_newFromAllocator(Allocator * allocator, String * s, void * item, int isOwner)
+{
+  MapEntry * this = 0;
 
   return this;
 }

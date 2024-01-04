@@ -60,7 +60,7 @@ PUBLIC Map* Map_new()
   {
     for (int i = 0; i < HTABLE_SIZE; i++)
     {
-      this->htable[i] = List_new();
+      this->htable[i] = 0;
     }
   }
 
@@ -83,7 +83,7 @@ PUBLIC Map* Map_newFromAllocator(Allocator * allocator)
   {
     for (int i = 0; i < HTABLE_SIZE; i++)
     {
-      this->htable[i] = List_new();
+      this->htable[i] = 0;
     }
   }
 

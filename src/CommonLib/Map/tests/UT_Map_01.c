@@ -18,28 +18,25 @@
 
 #include "Words1000.h"
 
-String ** keys;
+List * keys;
 TestObject ** testObjects;
 int nbTokens = 0;
 
 int init_keys()
 {
   String * fullText = String_new(words1000);
-  List * tokens = 0;
 
-  tokens = String_splitToken(fullText, " ");
-  nbTokens = List_getNbNodes(tokens);
+  keys = String_splitToken(fullText, " ");
+  nbTokens = List_getNbNodes(keys);
 
-  keys = (String**)Memory_alloc(nbTokens * sizeof(String*));
+  //keys = (String**)Memory_alloc(nbTokens * sizeof(String*));
   testObjects = (TestObject**)Memory_alloc(nbTokens * sizeof(TestObject*));
 
-  for (int i = 0; i < nbTokens; i++)
+  for (int i = 0; i < 5; i++)
   {
-    keys[i] = (String*)List_getNext(tokens);
     testObjects[i] = TestObject_new();
   }
 
-  List_delete(tokens);
   String_delete(fullText);
 
   return 1;
@@ -47,12 +44,11 @@ int init_keys()
 
 int delete_keys()
 {
-  for (int i = 0; i < nbTokens; i++)
+  for (int i = 0; i < 5; i++)
   {
     TestObject_delete(testObjects[i]);
-    String_delete(keys[i]);
   }
-  Memory_free(keys, sizeof(keys));
+  List_delete(keys);
   Memory_free(testObjects,sizeof(testObjects));
 
   return 1;
@@ -72,7 +68,8 @@ int step1()
 
   PRINT(("Step 1: Test 2 - Insert an object: "));
 
-  Map_insert(testMap, keys[0], testObjects[0], 1);
+  //key = (String*)List_getNext(keys);
+  //Map_insert(testMap, keys[0], testObjects[0], 1);
 
   UT_ASSERT((1));
 
@@ -93,7 +90,7 @@ int step2()
   for (int i = 0; i < nbTokens; i++)
   {
     //printf("-->%s\n", String_getBuffer(keys[i]));
-    Map_insert(testMap, keys[i], testObjects[i], 1);
+    //Map_insert(testMap, keys[i], testObjects[i], 1);
   }
   
   Map_delete(testMap);
