@@ -35,7 +35,10 @@ PUBLIC MapEntry * MapEntry_new(String * s, void * item, int isOwner)
 
   this = (MapEntry*)Object_new(sizeof(MapEntry),&mapEntryClass);
   this->s = s;
+  // if isOwner
   this->item = item;
+  // else
+  // this->item = Object_getRef(item);
   this->isOwner = isOwner;
 
   return this;
