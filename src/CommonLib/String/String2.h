@@ -9,6 +9,7 @@
 typedef struct String String;
 
 PUBLIC String * String_new(const char * constString);
+PUBLIC String * String_newByRef(const char * constString);
 PUBLIC void String_delete(String * this);
 PUBLIC String * String_copy(String * this);
 PUBLIC String * String_getRef(String * this);
