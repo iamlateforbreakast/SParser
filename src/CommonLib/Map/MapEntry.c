@@ -61,13 +61,19 @@ PUBLIC MapEntry * MapEntry_newFromAllocator(Allocator * allocator, String * s, v
 
 PUBLIC void MapEntry_delete(MapEntry * this)
 {
-  String_delete(this->s);
+  
   if ((this->item) && (((Object*)this->item)->delete!=0))
   {
     if (this->isOwner)
+    {
+      String_delete(this->s);
       ((Object*)this->item)->delete(this->item);
+    }
     else
+    {
+      Object_deRef((Object*)this->s);
       Object_deRef((Object*)this->item);
+    }
   }
   Object_deallocate(&this->object);
 }

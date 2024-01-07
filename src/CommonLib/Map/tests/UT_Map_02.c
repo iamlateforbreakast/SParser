@@ -1,6 +1,11 @@
+/* UT_Map_02.c */
+
 #include "Map.h"
-#include "MyAllocator.h"
+#include "String2.h"
+#include "TestObject.h"
 #include "ObjectStore.h"
+#include "MyAllocator.h"
+#include "Memory.h"
 #include "Debug.h"
 
 #include <stdio.h>
@@ -11,8 +16,14 @@
                           { printf("Passed\n");} \
                           else { printf("Failed\n"); return 0;}
 
+#include "Words1000.h"
+
 MyAllocator * testAlloc = 0;
 AllocInfo * allocInfo = 0;
+
+List * keys;
+TestObject ** testObjects;
+int nbTokens = 0;
 
 Map * testMap = 0;
 
@@ -30,8 +41,8 @@ int step2()
   String * s = String_new("Hello world");
   String * item = String_new("The value");
   
-  PRINT(("Step 2: Test 1 - Insert a string item: "));
-  Map_insert(testMap, s, (void**)item);
+  PRINT(("Step 2: Test 1 - Insert an object: "));
+  Map_insert(testMap, s, (void**)item, 1);
   UT_ASSERT((1));
 
   return 1;

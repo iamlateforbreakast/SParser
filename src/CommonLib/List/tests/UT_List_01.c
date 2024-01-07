@@ -1,3 +1,4 @@
+/* UT_LIST_01.C */
 #include "List.h"
 #include "Object.h"
 #include "ObjectMgr.h"
@@ -113,8 +114,6 @@ int step2()
   for (i=0; i< MAX_OBJECT_NB/2;i++)
   {
     items[i] = TestObject_new();
-    //items[i]->x = i;
-    //items[i]->y = LIST_SIZE - i;
     List_insertHead(testList1, items[i], 1);
     List_insertHead(testList2, items[i], 1);
     printf("Test List1: Nb items %d\n", List_getNbNodes(testList1));

@@ -347,7 +347,7 @@ PUBLIC List * Map_getAll(Map * this)
       while (n!= 0)
       {
         pItem =  MapEntry_getItem(n);
-        List_insertHead(result, pItem, 1);
+        List_insertHead(result, pItem, 0);
         n = (MapEntry*)List_getNext(this->htable[i]);
       }
     }

@@ -10,11 +10,10 @@
 #include <stdio.h>
 
 #define DEBUG (0)
+
 #define UT_ASSERT(cond) if ((cond)) \
                           { printf("Passed\n");} \
                           else { printf("Failed\n"); return 0;}
-
-#define NB_KEYS (250)
 
 #include "Words1000.h"
 
@@ -24,7 +23,7 @@ int nbTokens = 0;
 
 int init_keys()
 {
-  String * fullText = String_new(words1000);
+  String * fullText = String_newByRef(words1000);
 
   keys = String_splitToken(fullText, " ");
   nbTokens = List_getNbNodes(keys);
@@ -56,20 +55,19 @@ int delete_keys()
 
 int step1()
 {
-  Map* testMap = 0;
+  Map * testMap = 0;
+  String * key = 0;
 
-  Memory_report();
-
-  PRINT(("Step 1: Test 1 - Build a Map: "));
+    PRINT(("Step 1: Test 1 - Create an instance of class Map: "));
 
   testMap = Map_new();
 
-  UT_ASSERT((1));
+  UT_ASSERT((testMap!=0));
 
   PRINT(("Step 1: Test 2 - Insert an object: "));
 
-  //key = (String*)List_getNext(keys);
-  //Map_insert(testMap, keys[0], testObjects[0], 1);
+  key = (String*)List_getNext(keys);
+  Map_insert(testMap, key, testObjects[0], 0);
 
   UT_ASSERT((1));
 
@@ -86,11 +84,16 @@ int step1()
 int step2()
 {
   Map * testMap = Map_new();
+  String * key = 0;
   
+  PRINT(("Step 2: Test 1 - Insert %d object: ", nbTokens));
+
+  List_resetIterator(keys);
   for (int i = 0; i < nbTokens; i++)
   {
-    //printf("-->%s\n", String_getBuffer(keys[i]));
-    //Map_insert(testMap, keys[i], testObjects[i], 1);
+    key = (String*)List_getNext(keys);
+    printf("-->%s\n", String_getBuffer(key));
+    Map_insert(testMap, key, testObjects[i], 1);
   }
   
   Map_delete(testMap);
@@ -187,7 +190,7 @@ int main()
   init_keys();
 
   step1();
-  //step2();
+  step2();
   //step3();
   //step4();
   //step5();
@@ -195,6 +198,9 @@ int main()
 
   delete_keys();
 
+  ObjectMgr* objMgr = ObjectMgr_getRef();
+  ObjectMgr_report(objMgr);
+  ObjectMgr_reportUnallocated(objMgr);
   Memory_report();
 
   return 0;

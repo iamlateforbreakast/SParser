@@ -3,7 +3,7 @@
 #ifndef _WORDS1000_H_
 #define _WORDS1000_H_
 
-const char* words1000 = "hang holistic oceanic development decorous fence question songs chase relation adamant guitar writer ruthless "
+char words1000[] = "hang holistic oceanic development decorous fence question songs chase relation adamant guitar writer ruthless "
 "harass unnatural invite bite aloof numberless answer yam carriage apparatus graceful wonderful demonic gruesome "
 "imaginary bewildered hypnotic deer therapeutic nasty relax righteous apathetic wrong mother clever impress mix harm "
 "aspiring hook drip frog fairies workable mass monkey key sneeze window chunky ambiguous ice well-off matter thoughtful "
