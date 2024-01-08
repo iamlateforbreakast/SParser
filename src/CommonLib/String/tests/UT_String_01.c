@@ -1,21 +1,49 @@
+/* UT_String_01.c */
 #include "ObjectMgr.h"
 #include "Object.h"
 #include "String2.h"
+#include "Memory.h"
+#include "Debug.h"
+
 #include <stdio.h>
+
+#define DEBUG (1)
+#define UT_ASSERT(cond) if ((cond)) \
+                          { printf("Passed\n");} \
+                          else { printf("Failed\n"); return 0;}
 
 int step1()
 {
+  int isPassed = 1;
+
   String * testString = 0;
 
+  PRINT(("Step 1: Test 1 - Create an instance of class String: "));
   testString = String_new("Hello World!");
 
+  isPassed = isPassed && (testString!=0);
+
+  UT_ASSERT((isPassed));
+
+  PRINT(("Step 1: Test 2 - Delete instance of String: "));
   String_delete(testString);
 
-  return 0;
+  UT_ASSERT((1));
+
+  PRINT(("Step 1: Test 3 - Check all memory is freed: "));
+  ObjectMgr * objectMgr = ObjectMgr_getRef();
+  isPassed = isPassed && (ObjectMgr_report(objectMgr) == 1);
+  UT_ASSERT((isPassed));
+  TRACE(("Nb objects left allocated: %d\n", ObjectMgr_report(objectMgr)));
+  ObjectMgr_delete(objectMgr);
+
+  return isPassed;
 }
 
 int step2()
 {
+  int isPassed = 1;
+
   String * testString = 0;
   String * testPattern = 0;
 
@@ -23,44 +51,52 @@ int step2()
   testString = String_new("Hello World!");
   testPattern = String_new("World");
 
-  if (String_isContained(testString, testPattern))
-  {
-    printf("Step 2: Passed\n");
-  }
-  else
-  {
-    printf("Step 2: Failed\n");
-  }
+  PRINT(("Step 2: Test 1 - Check string is contained in another one: "));
+  isPassed = isPassed && (String_isContained(testString, testPattern));
+
+  UT_ASSERT((isPassed));
 
   String_delete(testString);
+  String_delete(testPattern);
 
-  return 0;
+  PRINT(("Step 2: Test 2 - Check all memory is freed: "));
+  ObjectMgr * objectMgr = ObjectMgr_getRef();
+  isPassed = isPassed && (ObjectMgr_report(objectMgr) == 1);
+  TRACE(("  Nb objects left allocated: %d\n", ObjectMgr_report(objectMgr)));
+  UT_ASSERT((isPassed));
+  ObjectMgr_delete(objectMgr);
+
+  return isPassed;
 }
 
 int step3()
 {
-  String * testString = 0;
-  const char * testPattern = "*.c";
+  int isPassed = 1;
 
-  testString = String_new("test.c");
+  String * testString = String_new("test.c");
+  const char * testPattern = "*.c";
   
-  if (String_matchWildcard(testString, testPattern))
-  {
-    printf("Step 3: Passed\n");
-  }
-  else
-  {
-    printf("Step 3: Failed\n");
-  }
-  
+  PRINT(("Step 3: Test 1 - Check a string matches a pattern: "));
+  isPassed = isPassed && String_matchWildcard(testString, testPattern); 
+  UT_ASSERT((isPassed));
+
   String_delete(testString);
   
-  return 0;
+  PRINT(("Step 3: Test 2 - Check all memory is freed: "));
+  ObjectMgr * objectMgr = ObjectMgr_getRef();
+  isPassed = isPassed && (ObjectMgr_report(objectMgr) == 1);
+  TRACE(("  Nb objects left allocated: %d\n", ObjectMgr_report(objectMgr)));
+  UT_ASSERT((isPassed));
+  ObjectMgr_delete(objectMgr);
+  
+  return isPassed;
 }
 
 
 int step4()
 {
+  int isPassed = 1;
+
   String * testString = 0;
   const char * testPatterns[] = { "*.txt", "*.[ch]","*.c" };
   const char * testStrings[] = {  "test.c", "test.h", "/cygdrive/c/Solo/CSW_3.0.3_19wk35/payload/pl/plParam.c" };
@@ -77,48 +113,62 @@ int step4()
     String_delete(testString);
   }
   
-  if (nbChecksOk == sizeof(results)/sizeof(results[0]))
-  {
-    printf("Step 4: Passed\n");
-  }
-  else
-  {
-    printf("Step 4: Failed\n");
-  }
+  isPassed = isPassed && (nbChecksOk == sizeof(results)/sizeof(results[0]));
+  
+  PRINT(("Step 4: Test 2 - Check all memory is freed: "));
+  ObjectMgr * objectMgr = ObjectMgr_getRef();
+  isPassed = isPassed && (ObjectMgr_report(objectMgr) == 1);
+  TRACE(("  Nb objects left allocated: %d\n", ObjectMgr_report(objectMgr)));
+  UT_ASSERT((isPassed));
+  ObjectMgr_delete(objectMgr);
 
-  return 0;
+  return isPassed;
 }
 
 int step5()
 {
-    String* testString = String_new("TestString");
-    String* compareString = 0;
+  int isPassed = 1;
 
-    char* compareText[] = {"AestString", "U", "test", "TestString5", "TestString"};
+  String* testString = String_new("TestString");
+  String* compareString = 0;
 
-    int comp = 0;
+  char* compareText[] = {"AestString", "U", "test", "TestString5", "TestString"};
 
-    for(int i = 0; i < 5; i++)
-    {
-        compareString = String_new(compareText[i]);
-        comp = String_compare(testString, compareString);
-        printf("Compare %s with %s result = %d\n", String_getBuffer(testString), String_getBuffer(compareString), comp);
-        String_delete(compareString);
-    }
+  int comp = 0;
 
-    return 0;
+  for (int i = 0; i < 5; i++)
+  {
+    compareString = String_newByRef(compareText[i]);
+    comp = String_compare(testString, compareString);
+    printf("Compare %s with %s result = %d\n", String_getBuffer(testString), String_getBuffer(compareString), comp);
+    String_delete(compareString);
+  }
+
+  PRINT(("Step 5: Test 2 - Check all memory is freed: "));
+  ObjectMgr * objectMgr = ObjectMgr_getRef();
+  isPassed = isPassed && (ObjectMgr_report(objectMgr) == 1);
+  TRACE(("  Nb objects left allocated: %d\n", ObjectMgr_report(objectMgr)));
+  UT_ASSERT((isPassed));
+  ObjectMgr_delete(objectMgr);
+
+  return isPassed;
 }
 
 int step6()
 {
+  int isPassed = 1;
+
   String * testString = String_new("TestString");
 
   String_append(testString, "123");
 
   printf("String append %s\n", String_getBuffer(testString));
 
-  return 0;
+  String_delete(testString);
+
+  return isPassed;
 }
+
 int main()
 {
   step1();
@@ -127,6 +177,10 @@ int main()
   step4();
   step5();
   step6();
+
+  ObjectMgr* objMgr = ObjectMgr_getRef();;
+  ObjectMgr_reportUnallocated(objMgr);
+  Memory_report();
 
   return 0;
 }
