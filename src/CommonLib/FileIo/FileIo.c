@@ -241,7 +241,7 @@ PUBLIC List * FileIo_listDirs(FileIo * this, String * directory)
         wcstombs_s(&nb, text, 100, FindFileData.cFileName, wcslen(FindFileData.cFileName));
         printf("=>%s\n", text);
         String* s = String_new(text);
-        List_insertTail(result, s);
+        List_insertTail(result, s, 1);
       }
     } while (FindNextFile(hFind, &FindFileData));
     FindClose(hFind);
@@ -298,7 +298,7 @@ PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
         wcstombs_s(&nb, text, 100, FindFileData.cFileName, wcslen(FindFileData.cFileName));
         PRINT(("=>%s\n", text));
         String* s = String_new(text);
-        List_insertTail(result, s);
+        List_insertTail(result, s, 1);
         String_delete(s);
       }
     } while (FindNextFile(hFind, &FindFileData));
