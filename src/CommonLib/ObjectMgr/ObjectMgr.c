@@ -10,6 +10,7 @@
 #include "Object.h"
 //#include "Error.h"
 #include "Memory.h"
+#include "Debug,h"
 
 #include <stdio.h>
 #include <string.h>
