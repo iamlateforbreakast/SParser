@@ -38,6 +38,7 @@ struct ObjectMgr
   ObjectInfo allocatedObjects[MAX_NB_OBJECTS];
   unsigned int freeSpace;
   unsigned int usedSpace;
+  unsigned int nextId;
 };
 
 PRIVATE ObjectMgr * objectMgr = 0;
@@ -60,7 +61,9 @@ PRIVATE ObjectMgr * ObjectMgr_new()
   this->object.size = sizeof(ObjectMgr);
   this->object.refCount = 1;
   this->object.id =0;
+  this->object.uniqId = 0;
   
+  this->nextId = 1;
   this->allocRequestId = 1;
   this->freeRequestId = 0;
   this->nbAllocatedObjects = 1;
@@ -178,6 +181,8 @@ PUBLIC Object * ObjectMgr_allocate(ObjectMgr * this, unsigned int size)
         //printf("Nb objects %d\n", this->nbAllocatedObjects );
         this->allocatedObjects[this->usedSpace].ptr = result;
         result->id = this->usedSpace;
+        result->uniqId = this->nextId;
+        this->nextId++;
         if (this->nbAllocatedObjects >this->maxNbObjectAllocated) this->maxNbObjectAllocated = this->nbAllocatedObjects;
         this->nbAllocatedObjects++;
       }
@@ -258,11 +263,11 @@ PUBLIC void ObjectMgr_deallocate(ObjectMgr * this, Object * object)
 PUBLIC void ObjectMgr_reportUnallocated(ObjectMgr* this)
 {
   int idx = this->usedSpace;
-  printf("Id of first unallocated object: ");
+  PRINT(("Id of first unallocated object: "));
 
   for (int i=0; i<10; i++)
   {
-    printf(" %d", idx);
+    PRINT((" %d", this->allocatedObjects[idx].ptr->uniqId));
     idx =  this->allocatedObjects[idx].prevId;
     if (idx==END_OF_QUEUE) break;
   }
