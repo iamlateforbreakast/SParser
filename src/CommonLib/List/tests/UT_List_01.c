@@ -59,7 +59,7 @@ int step1()
   }
   UT_ASSERT((List_getNbNodes(testList) == MAX_OBJECT_NB * 2));
 
-  PRINT(("Step 1: Test 3 - Remove %d objects from list: ", MAX_OBJECT_NB));
+  PRINT(("Step 1: Test 3 - Remove %d objects from list: ", MAX_OBJECT_NB * 2));
   for (i = 0; i < MAX_OBJECT_NB * 2; i++)
   {
     removed[i] = List_removeHead(testList);
@@ -75,7 +75,7 @@ int step1()
   PRINT(("Step 1: Test 5 - Check all memory is freed: "));
   ObjectMgr * objectMgr = ObjectMgr_getRef();
   UT_ASSERT((ObjectMgr_report(objectMgr) == 1));
-  printf("Nb objects left allocated: %d\n", ObjectMgr_report(objectMgr));
+  TRACE(("Nb objects left allocated: %d\n", ObjectMgr_report(objectMgr)));
   ObjectMgr_delete(objectMgr);
 
   return 0;
@@ -89,39 +89,39 @@ int step2()
 
   int i = 0;
 
-  PRINT(("Step 1: Test 1 - Build 2 Lists: "));
+  PRINT(("Step 2: Test 1 - Build 2 Lists: "));
   testList1 = List_new();
   testList2 = List_new();
 
   UT_ASSERT((1));
 
-  PRINT(("Step 1: test 2 - Insert head and insert tail: \n"));
+  PRINT(("Step 2: test 2 - Insert head and insert tail: \n"));
 
   for (i=0; i< MAX_OBJECT_NB; i++)
   {
     List_insertHead(testList1, items[i], 1);
-    PRINT((" Nb items %d\n", List_getNbNodes(testList1)));
+    TRACE((" Nb items %d\n", List_getNbNodes(testList1)));
   }
   for (i= MAX_OBJECT_NB; i < MAX_OBJECT_NB * 2; i++)
   {
     List_insertTail(testList2, items[i], 1);
-    PRINT((" Nb items %d\n", List_getNbNodes(testList2)));
+    TRACE((" Nb items %d\n", List_getNbNodes(testList2)));
   }
 
-  PRINT(("Step 1: test 3 - Print both lists: \n"));
+  PRINT(("Step 2: test 3 - Print both lists: \n"));
   PRINT((" List1 ------------->\n"));
   List_forEach(testList1, (void (*)(void* o))&TestObject_print);
   PRINT((" List2 ------------->\n"));
   List_forEach(testList2, (void (*)(void* o))&TestObject_print);
 
-  /*PRINT(("Step 1: test 4 - Merge both lists: \n"));
+  PRINT(("Step 2: test 4 - Merge both lists: \n"));
   List_merge(testList1, testList2);
   PRINT((" List1 + List2 ----->\n"));
   List_forEach(testList1, (void (*)(void* o))&TestObject_print);
 
   //testList3 = List_copy(testList1);
   //PRINT((" Copy of List1 ------>\n"));
-  //List_forEach(testList3, (void (*)(void* o))&TestObject_print);*/
+  //List_forEach(testList3, (void (*)(void* o))&TestObject_print);
 
   List_delete(testList1);
   List_delete(testList2);
