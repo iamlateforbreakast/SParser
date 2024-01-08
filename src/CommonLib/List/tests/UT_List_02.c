@@ -19,28 +19,45 @@ ObjectStore* objectStore = 0;
 MyAllocator* testAlloc = 0;
 AllocInfo* allocInfo = 0;
 
+TestObject * items[MAX_OBJECT_NB];
+TestObject * removed[MAX_OBJECT_NB];
+
+int init_testobjects()
+{
+  for (int i = 0; i < MAX_OBJECT_NB; i++)
+  {
+    items[i] = TestObject_newFromAllocator((Allocator*)testAlloc);
+  }
+
+  return 1;
+}
+
+int delete_testobjects()
+{
+  for (int i = 0; i < MAX_OBJECT_NB; i++)
+  {
+    TestObject_delete(items[i]);
+  }
+  return 1;
+}
+
 int step1()
 {
   List* testList = 0;
-
-  TestObject * items[MAX_OBJECT_NB];
-  TestObject * removed[MAX_OBJECT_NB];
 
   int i = 0;
 
   PRINT(("Step 1: Test 1 - Create a list from a custom allocator: "));
   testList = List_newFromAllocator((Allocator*)testAlloc);
 
-  UT_ASSERT((1));
+  UT_ASSERT((testList!=0));
 
   PRINT(("Step 1: Test 2 - Insert %d objects in list: ", MAX_OBJECT_NB));
   for (i = 0; i < MAX_OBJECT_NB; i++)
   {
-    items[i] = TestObject_newFromAllocator((Allocator*)testAlloc);
-    //items[i]->x = i;
-    //items[i]->y = MAX_OBJECT_NB - i;
+    
     List_insertHead(testList, items[i], 1);
-    TRACE(("Nb items %d\n", List_getNbNodes(testList)));
+    TRACE(("  Nb items %d\n", List_getNbNodes(testList)));
     TRACE(("  Allocated %d bytes at %x\n", ((Object*)items[i])->class->f_size(0), items[i]));
   }
   UT_ASSERT((List_getNbNodes(testList) == MAX_OBJECT_NB));
@@ -69,9 +86,6 @@ int step2()
 {
   List* testList = 0;
 
-  TestObject * items[MAX_OBJECT_NB];
-  TestObject * removed[MAX_OBJECT_NB];
-
   int i = 0;
 
   PRINT(("Step 2: Test 1 - Create a list from a custom allocator: "));
@@ -82,9 +96,6 @@ int step2()
   PRINT(("Step 2: Test 2 - Insert %d objects in list: ", MAX_OBJECT_NB));
   for (i = 0; i < MAX_OBJECT_NB; i++)
   {
-    items[i] = TestObject_newFromAllocator((Allocator*)testAlloc);
-    //items[i]->x = i;
-    //items[i]->y = MAX_OBJECT_NB - i;
     List_insertTail(testList, items[i], 1);
     TRACE(("  Nb items %d\n", List_getNbNodes(testList)));
     TRACE(("  Allocated %d bytes at %x\n", ((Object*)items[i])->class->f_size(0), items[i]));

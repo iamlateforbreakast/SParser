@@ -25,32 +25,22 @@ List * keys;
 TestObject ** testObjects;
 int nbTokens = 0;
 
-Map * testMap = 0;
-
 int step1()
 {
+  Map * testMap = 0;
+
   PRINT(("Step 1: Test 1 - Create an instance of Map using a custom allocator: "));
   testMap = Map_newFromAllocator((Allocator*)testAlloc);
   UT_ASSERT((1));
 
-  return 1;
-}
-
-int step2()
-{
   String * s = String_new("Hello world");
   String * item = String_new("The value");
   
-  PRINT(("Step 2: Test 1 - Insert an object: "));
+  PRINT(("Step 1: Test 2 - Insert an object: "));
   Map_insert(testMap, s, (void**)item, 1);
   UT_ASSERT((1));
 
-  return 1;
-}
-
-int step3()
-{
-  PRINT(("Step 3: Test 1 - Delete the map: "));
+  PRINT(("Step 1: Test 3 - Delete the map: "));
   Map_delete(testMap);
   UT_ASSERT((1));
 
@@ -70,5 +60,6 @@ int main()
   step3();
 
   ObjectStore_deleteAllocator(objectStore, allocInfo);
+  //ObjectMgr_reportUnallocated(objMgr);
   ObjectStore_delete(objectStore);
 }

@@ -187,6 +187,8 @@ int step6()
 
 int main()
 {
+  ObjectMgr* objMgr = ObjectMgr_getRef();
+
   init_keys();
 
   step1();
@@ -198,7 +200,6 @@ int main()
 
   delete_keys();
 
-  ObjectMgr* objMgr = ObjectMgr_getRef();
   ObjectMgr_report(objMgr);
   ObjectMgr_reportUnallocated(objMgr);
   Memory_report();
