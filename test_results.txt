@@ -1,0 +1,30 @@
+Package    Class        Test          LINUX   WIN32
+===================================================
+COMMONLIB  Allocator    X
+COMMONLIB  Array        X
+COMMONLIB  Debug        X
+COMMONLIB  Error        X
+COMMONLIB  BTree        UT_BTree_01   FAILED  FAILED
+COMMONLIB  BTree        UT_BTree_02   FAILED  FAILED
+COMMONLIB  FileIo       UT_FileIo_01  FAILED  FAILED           
+COMMONLIB  List         UT_List_01    FAILED  FAILED
+COMMONLIB  List         UT_List_02    FAILED  FAILED
+COMMONLIB  Memory       X
+COMMONLIB  Map          UT_Map_01     FAILED  FAILED
+COMMONLIB  Map          UT_Map_02     FAILED  FAILED
+COMMONLIB  Object       X
+COMMONLIB  ObjectMgr    X
+COMMONLIB  ObjectStore  X
+COMMONLIB  Pool         X
+COMMONLIB  SkipList     X
+COMMONLIB  String       X
+COMMONLIB  Times        X
+COMMONLIB  Types        X
+
+APPLILIB   FileMgr      X
+APPLILIB   OptionMgr    X
+APPLILIB   SdbMgr       X
+APPLILIB   TimeMgr      X
+
+PARSELIB   FileReader   X
+PARSELIB   SParse       X
