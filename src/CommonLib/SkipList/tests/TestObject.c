@@ -4,6 +4,7 @@
 #include "Types.h"
 #include "Object.h"
 #include "ObjectStore.h"
+#include "Debug.h"
 
 struct TestObject
 {
