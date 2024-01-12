@@ -28,10 +28,9 @@ int init_keys()
   keys = String_splitToken(fullText, " ");
   nbTokens = List_getNbNodes(keys);
 
-  //keys = (String**)Memory_alloc(nbTokens * sizeof(String*));
   testObjects = (TestObject**)Memory_alloc(nbTokens * sizeof(TestObject*));
 
-  for (int i = 0; i < 5; i++)
+  for (int i = 0; i < nbTokens; i++)
   {
     testObjects[i] = TestObject_new();
   }
@@ -43,7 +42,7 @@ int init_keys()
 
 int delete_keys()
 {
-  for (int i = 0; i < 5; i++)
+  for (int i = 0; i < nbTokens; i++)
   {
     TestObject_delete(testObjects[i]);
   }
@@ -92,13 +91,13 @@ int step2()
   for (int i = 0; i < nbTokens; i++)
   {
     key = (String*)List_getNext(keys);
-    printf("-->%s\n", String_getBuffer(key));
-    Map_insert(testMap, key, testObjects[i], 1);
+    TRACE(("-->%s\n", String_getBuffer(key)));
+    Map_insert(testMap, key, testObjects[i], 0);
   }
   
   Map_delete(testMap);
 
-  Memory_report();
+  //Memory_report();
 
   return 0;
 }
@@ -135,8 +134,8 @@ int step4()
   printf("New value : %s\n",
           String_getBuffer(newItem));
   
-  String_delete(s);
-  String_delete(item);
+  //String_delete(s);
+  //String_delete(item);
 
   Map_delete(testMap);
 
@@ -193,7 +192,7 @@ int main()
 
   step1();
   step2();
-  //step3();
+  step3();
   //step4();
   //step5();
   //step6();
