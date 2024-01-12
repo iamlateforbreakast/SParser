@@ -11,6 +11,7 @@ typedef struct Object Object;
 
 struct Object
 {
+  int marker; 
   unsigned int id;
   unsigned int uniqId;
   Class * class;
