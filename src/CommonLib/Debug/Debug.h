@@ -1,6 +1,7 @@
 /* Debug.h */
 
 #include <stdarg.h>
+#include <stdio.h>
 
 #define TRACE(x) do { if (DEBUG) dbg_printf x; } while (0)
 

@@ -147,7 +147,8 @@ PUBLIC unsigned int Map_insert(Map * this,String * s, void * p, int isOwner)
   unsigned int i = 0;
   void * entry =0;
   MapEntry * me = 0;
-  
+ 
+   
   /* Check if there is an entry under s */
   if ((me = Map_findEntry(this, s))!=0)
   {

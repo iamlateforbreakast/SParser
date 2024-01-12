@@ -45,7 +45,7 @@ PUBLIC MapEntry * MapEntry_new(String * s, void * item, int isOwner)
   }
   else
   {
-    this->s = s;
+    this->s = (String*)Object_getRef((Object*)s);
     this->item = Object_getRef((Object*)item);
   }
 

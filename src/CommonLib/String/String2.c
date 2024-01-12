@@ -453,7 +453,7 @@ PUBLIC List* String_splitToken(String* this, const char* separator)
 #endif
   while (token != 0)
   {
-    String* tokenS = String_new(token);
+    String* tokenS = String_newByRef(token);
     List_insertHead(result, tokenS, 1);
     //String_delete(tokenS);
 #ifndef _WIN32
