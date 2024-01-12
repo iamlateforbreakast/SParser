@@ -107,7 +107,10 @@ PUBLIC void Object_delete(Object * this)
 PUBLIC void Object_deallocate(Object* this)
 {
   if (this->marker != 0x0B5EC7)
-    Error_new(ERROR_INFO, "Object_delallocate uses a invalid object\n");
+  {
+    Error_new(ERROR_DBG, "Object_de-allocate uses a invalid object\n");
+    return;
+  }
   if (this->allocator == 0)
     ObjectMgr_deallocate(Object_objMgrPtr, this);
   else
