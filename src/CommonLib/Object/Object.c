@@ -36,6 +36,7 @@ PUBLIC Object * Object_new(unsigned int size, Class * class)
   }
   this = ObjectMgr_allocate(Object_objMgrPtr, size);
   this->class = class;
+  this->marker = 0x0B5EC7;
   if (this->class!=0)
   {
     this->delete = class->f_delete;
@@ -71,6 +72,7 @@ PUBLIC Object* Object_newFromAllocator(Class* class, Allocator * allocator)
   this = ObjectStore_createObject(Object_objectStore, class, allocator);
   if (this != 0)
   {
+    this->marker = 0x0B5EC7;
     this->class = class;
     if (this->class != 0)
     {
@@ -104,6 +106,8 @@ PUBLIC void Object_delete(Object * this)
 **************************************************/
 PUBLIC void Object_deallocate(Object* this)
 {
+  if (this->marker != 0x0B5EC7)
+    Error_new(ERROR_INFO, "Object_delallocate uses a invalid object\n");
   if (this->allocator == 0)
     ObjectMgr_deallocate(Object_objMgrPtr, this);
   else
