@@ -10,10 +10,15 @@
 #include <stdio.h>
 
 #define DEBUG (0)
-
+#ifdef _WIN32
 #define UT_ASSERT(cond) if ((cond)) \
                           { printf("Passed\n");} \
                           else { printf("Failed\n"); return 0;}
+#else
+#define UT_ASSERT(cond) if ((cond)) \
+                          { printf("\x1b[32mPassed\x1b[0m\n");} \
+                          else { printf("\x1b[31mFailed\x1b[0m\n"); return 0;}
+#endif
 
 #include "Words1000.h"
 
@@ -57,7 +62,7 @@ int step1()
   Map * testMap = 0;
   String * key = 0;
 
-    PRINT(("Step 1: Test 1 - Create an instance of class Map: "));
+  PRINT(("Step 1: Test 1 - Create an instance of class Map: "));
 
   testMap = Map_new();
 
@@ -75,7 +80,7 @@ int step1()
 
   UT_ASSERT((1));
 
-  Memory_report();
+  //Memory_report();
 
   return 0;
 }
@@ -95,6 +100,8 @@ int step2()
     Map_insert(testMap, key, testObjects[i], 0);
   }
   
+  UT_ASSERT((1));
+
   Map_delete(testMap);
 
   //Memory_report();
@@ -109,9 +116,13 @@ int step3()
   String * s = String_new("Hello world");
   String * item = 0;
   
+  PRINT(("Step 3: Test 1 - Insert %d object: ", nbTokens));
+
   Map_find(testMap, s, (void**)&item);
  
-  printf("Value : %s\n", String_getBuffer(item));
+  TRACE(("Value : %s\n", String_getBuffer(item)));
+
+  UT_ASSERT((item==0));
 
   String_delete(s);
   
@@ -162,17 +173,16 @@ int step5()
 
   for (i=0; i<sizeof(testNames)/sizeof(const char *); i++)
   {
-    s = String_new(testNames[i]);
-    c = String_new(testColor[i]);
+    s = String_newByRef(testNames[i]);
+    c = String_newByRef(testColor[i]);
     Map_insert(testMap, s, c, 1);
-    String_delete(s);
-    String_delete(c);
+    //String_delete(s);
+    //String_delete(c);
   }
 
   l = Map_getAll(testMap);
-
   List_delete(l);
-
+  
   Map_delete(testMap);
 
   return 0;
@@ -193,9 +203,9 @@ int main()
   step1();
   step2();
   step3();
-  //step4();
-  //step5();
-  //step6();
+  step4();
+  step5();
+  step6();
 
   delete_keys();
 
