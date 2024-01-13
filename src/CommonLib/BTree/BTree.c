@@ -21,9 +21,10 @@ BTree * BTree_new(unsigned int order)
 	BTree* tree;
 
 	tree = (BTree*)malloc(sizeof(BTree));
-	tree->pool = NULL; //Pool_new(nodePool, nbObjects);
+	//tree->pool = NULL; //Pool_new(nodePool, nbObjects);
 	tree->root = NULL;
 	tree->nbNodes = 0;
+	tree->order = order;
 	tree->depth = 0;
 	tree->nbObjects = 0;
 

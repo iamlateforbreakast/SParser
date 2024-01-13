@@ -12,8 +12,8 @@
 
 typedef struct BTree
 {
-	void* pool;
 	Node* root;
+	unsigned int order;
 	unsigned int depth;
 	unsigned short int nbObjects;
 	unsigned short int nbNodes;
@@ -21,7 +21,7 @@ typedef struct BTree
 	unsigned int nodeSize;
 } BTree;
 
-PUBLIC BTree * BTree_new();
+PUBLIC BTree * BTree_new(unsigned int order);
 PUBLIC BTree * BTree_newFromFile(char* fileName);
 PUBLIC void BTree_free(BTree * tree);
 PUBLIC void BTree_add(BTree * tree, Key key, Object object);

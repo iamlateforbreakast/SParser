@@ -15,9 +15,9 @@ typedef struct Node
 {
 	unsigned short int nbKeyUsed;
 	unsigned short int isLeaf;
-	unsigned int keys[ORDER * 2 - 1];
-	Object leaves[ORDER * 2];
-	Node* children[ORDER * 2];	
+	unsigned int * keys;
+	Object * leaves;
+	Node* children;	
 } Node;
 
 PUBLIC Node * Node_new(unsigned short int isLeaf);
