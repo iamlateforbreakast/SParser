@@ -1,7 +1,7 @@
-all: clean default
+all: UT_BTree
 
-default: UT_BTree.c ../BTree.c ../BTree.h ../Node.c ../Node.h
-	gcc -g UT_BTree.c ../BTree.c -I../../include -I.. ../../libCommon.a -o UT_Btree
+UT_BTree: UT_BTree.c ../BTree.c ../BTree.h ../Node.c ../Node.h TestObject.c TestObject.h
+	gcc -g UT_BTree.c ../BTree.c TestObject.c -I../../include -I.. ../../libCommon.a -o UT_Btree
 
 clean:
 	rm -rf UT_BTree ../*.o
