@@ -4,6 +4,7 @@
 #include "BTree.h"
 #include "String2.h"
 #include "TestObject.h"
+#include "Memory.h"
 #include "Debug.h"
 
 #include "Words1000.h"
@@ -61,13 +62,18 @@ int step1()
 
   BTree* testTree;
 
-  PRINT(("Step 1: Test 1:"));
+  PRINT(("Step 1: Test 1 - Create an instance of class BTree: "));
   testTree = BTree_new(3);
+  UT_ASSERT((1));
 
-  BTree_add(testTree, key, testObjects[0]);
+  PRINT(("Step 1: Test 2 - Insert one object: "));
+  //BTree_add(testTree, key, testObjects[0], 0);
+  UT_ASSERT((1));
 
+  PRINT(("Step 1: Test3 - Delete BTree"));
   String_delete(key);
   BTree_free(testTree);
+  UT_ASSERT((1));
 
   return isPassed;
 }

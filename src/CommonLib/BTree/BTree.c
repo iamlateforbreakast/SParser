@@ -37,7 +37,7 @@ BTree * BTree_new(unsigned int order)
 * input: a beamweight range to store in the tree
 * output: A fully allocated beamweihgt tree
 *********************************************************************************/
-void BTree_add(BTree* tree, Key key, Object object)
+void BTree_add(BTree* tree, Key key, Object object, int isOwner)
 {
 	if (tree->root == NULL)
 	{
@@ -56,13 +56,13 @@ void BTree_add(BTree* tree, Key key, Object object)
 		Node* newRoot = Node_new(FALSE);
 		newRoot->children[0] = tree->root;
 		Node* childForInsertion = Node_splitNode(newRoot, tree->root, key);
-		Node_insert(childForInsertion, key, object);
+		Node_insert(childForInsertion, key, object, isOwner);
 		tree->root = newRoot;
 		tree->depth++;
 		tree->nbObjects++;
 		return;
 	}
-  	Node_insert(tree->root, key, object);
+  	Node_insert(tree->root, key, object, isOwner);
 	tree->nbObjects++;
 }
 

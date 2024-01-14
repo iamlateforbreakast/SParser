@@ -1,9 +1,10 @@
 #include "Node.h"
 #include "Pool.h"
+#include "Memory.h"
 #include "Error.h"
 #include "Debug.h"
 
-#define DEBUG (1)
+#define DEBUG (0)
 /*********************************************************************************
 *
 * Private Functions Declarations
@@ -110,7 +111,7 @@ PUBLIC void Node_free(Node* node)
 * input: beamWeightRange
 * output: none
 *********************************************************************************/
-PUBLIC void Node_insert(Node* node, Key key, Object object)
+PUBLIC void Node_insert(Node* node, Key key, Object object, int isOwner)
 {
 	if (node->isLeaf == TRUE) 
 	{
