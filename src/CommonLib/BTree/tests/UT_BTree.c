@@ -67,7 +67,7 @@ int step1()
   UT_ASSERT((1));
 
   PRINT(("Step 1: Test 2 - Insert one object: "));
-  //BTree_add(testTree, key, testObjects[0], 0);
+  BTree_add(testTree, key, testObjects[0], 0);
   UT_ASSERT((1));
 
   PRINT(("Step 1: Test3 - Delete BTree: "));
@@ -80,7 +80,9 @@ int step1()
 
 int main(void)
 {
+	init_keys();
 	step1();
+	delete_keys();
 	//BTree* testTree;
 	//unsigned int keys[NB_ITEMS];
 	//unsigned int items[NB_ITEMS];
