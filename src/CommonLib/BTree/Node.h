@@ -5,7 +5,7 @@
 #define _NODE_
 
 #include "Types.h"
-#include "CommonTypes.h"
+#include "Object.h"
 
 #define ORDER (3)
 
@@ -21,10 +21,10 @@ typedef struct Node
 } Node;
 
 PUBLIC Node * Node_new(unsigned short int isLeaf);
-PUBLIC Node* Node_splitNode(Node* node, Node* nodeToSplit, Key key);
-PUBLIC void Node_insert(Node* node, Key key, Object object, int isOwner);
-PUBLIC Object Node_remove(Node* node, Key key, unsigned int* keyToUpdate);
-PUBLIC Object Node_search(Node* node, Key key, unsigned int isFoundAlready);
+PUBLIC Node* Node_splitNode(Node* node, Node* nodeToSplit, Object * key);
+PUBLIC void Node_insert(Node* node, Object * key, Object * object, int isOwner);
+PUBLIC Object * Node_remove(Node* node, Object * key, unsigned int* keyToUpdate);
+PUBLIC Object * Node_search(Node* node, Object * key, unsigned int isFoundAlready);
 PUBLIC void Node_free(Node* node);
 PUBLIC void Node_print(Node* node, unsigned int depth);
 

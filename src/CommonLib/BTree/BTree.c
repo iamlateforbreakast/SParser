@@ -21,8 +21,8 @@ BTree * BTree_new(unsigned int order)
 	BTree* tree;
 
 	tree = (BTree*)malloc(sizeof(BTree));
-	//tree->pool = NULL; //Pool_new(nodePool, nbObjects);
-	tree->root = NULL;
+	//tree->pool = 0; //Pool_new(nodePool, nbObjects);
+	tree->root = 0;
 	tree->nbNodes = 0;
 	tree->order = order;
 	tree->depth = 0;
@@ -37,11 +37,11 @@ BTree * BTree_new(unsigned int order)
 * input: a beamweight range to store in the tree
 * output: A fully allocated beamweihgt tree
 *********************************************************************************/
-void BTree_add(BTree* tree, Key key, Object object, int isOwner)
+void BTree_add(BTree* tree, Object * key, Object * object, int isOwner)
 {
-	if (tree->root == NULL)
+	if (tree->root == 0)
 	{
-		Node* newLeaf = Node_new(TRUE);
+		Node* newLeaf = Node_new(1);
 		newLeaf->nbKeyUsed = 1;
 		newLeaf->leaves[0] = object;
 		newLeaf->keys[0] = key;
@@ -53,7 +53,7 @@ void BTree_add(BTree* tree, Key key, Object object, int isOwner)
 	if (tree->root->nbKeyUsed == ORDER * 2 - 1)
 	{ 
 		printf("Splitting root\n");
-		Node* newRoot = Node_new(FALSE);
+		Node* newRoot = Node_new(0);
 		newRoot->children[0] = tree->root;
 		Node* childForInsertion = Node_splitNode(newRoot, tree->root, key);
 		Node_insert(childForInsertion, key, object, isOwner);
@@ -71,11 +71,11 @@ void BTree_add(BTree* tree, Key key, Object object, int isOwner)
 * input: key
 * output: A reference to a beamWeightRange
 *********************************************************************************/
-Object BTree_get(BTree* tree, Key key)
+Object * BTree_get(BTree* tree, Object * key)
 {
-	Object object = NULL;
+	Object * object = 0;
 
-	object = Node_search(tree->root,key, FALSE);
+	object = Node_search(tree->root,key, 0);
 
 	return object;
 }
@@ -86,12 +86,12 @@ Object BTree_get(BTree* tree, Key key)
 * input: a beamweight range to store in the tree
 * output: A fully allocated beamweihgt tree
 *********************************************************************************/
-Object BTree_remove(BTree* tree, Key key)
+Object * BTree_remove(BTree* tree, Object * key)
 {
-	Object object = NULL;
+	Object * object = 0;
 	Node* root = tree->root;
 
-  	if (root->nbKeyUsed == 0) return NULL;
+  	if (root->nbKeyUsed == 0) return 0;
 
 	if (root->isLeaf)
 	{
@@ -117,7 +117,7 @@ Object BTree_remove(BTree* tree, Key key)
 	}
 	else
 	{
-		object = Node_remove(root, key, NULL);
+		object = Node_remove(root, key, 0);
 		// Check the resulting tree so that there is at least 1 Key used at root level
 		if (tree->root->nbKeyUsed < 1)
 		{
@@ -127,13 +127,13 @@ Object BTree_remove(BTree* tree, Key key)
 			Node_free(root);
 		}
 		// Check something was actually removed
-		if (object != NULL)
+		if (object != 0)
 		{
 			tree->nbObjects--;
 		}
 		else
 		{
-			printf("Key %d removed returned NULL\n", key);
+			printf("Key %d removed returned 0\n", key);
 		}
 		return object;
 	}
@@ -147,7 +147,7 @@ Object BTree_remove(BTree* tree, Key key)
 *********************************************************************************/
 void BTree_print(BTree* tree)
 {
-	if (tree == NULL) return;
+	if (tree == 0) return;
 	printf("Tree:\n");
 	printf(" Nb items: %d\n", tree->nbObjects);
 	printf(" Nb Nodes: %d\n", tree->nbNodes);
@@ -168,7 +168,7 @@ void BTree_print(BTree* tree)
 *********************************************************************************/
 PUBLIC BTree * BTree_newFromFile(char * fileName)
 {
-	BTree* tree = NULL;
+	BTree* tree = 0;
 
 	return tree;
 }

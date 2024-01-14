@@ -23,7 +23,7 @@ PRIVATE void Node_stealRightKey(Node* node, unsigned int idxKeyStealFrom, unsign
 *********************************************************************************/
 PUBLIC Node* Node_new(unsigned short int isLeaf)
 {
-	Node* node = NULL;
+	Node* node = 0;
     const unsigned int size = sizeof(node->nbKeyUsed) + sizeof(node->isLeaf)
 	                        + (ORDER * 2 - 1) * sizeof(Object*)
 							+ (ORDER * 2) * sizeof(Object*)
@@ -37,7 +37,7 @@ PUBLIC Node* Node_new(unsigned short int isLeaf)
 
 	for (int i = 0; i < ORDER * 2; i++)
 	{
-		node->children[i] = NULL;
+		node->children[i] = 0;
 		node->leaves[i] = 0;
 	}
 	for (int i = 0; i < ORDER * 2 - 1; i++)
@@ -51,15 +51,15 @@ PUBLIC Node* Node_new(unsigned short int isLeaf)
 /*********************************************************************************
 * Node_search
 * input: the key to look for
-* output: the beam weight range if found otherwise NULL 
+* output: the beam weight range if found otherwise 0
 *********************************************************************************/
-PUBLIC Object Node_search(Node* node, Key key, unsigned int isFoundAlready)
+PUBLIC Object * Node_search(Node* node, Object * key, unsigned int isFoundAlready)
 {
-	if (node == NULL)
+	if (node == 0)
 	{
-		Error_new(ERROR_FATAL,"Node_search node== NULL\n");
+		Error_new(ERROR_FATAL,"Node_search node== 0\n");
 	}
-	if (node->isLeaf == TRUE)
+	if (node->isLeaf == 1)
 	{
 		for (int i = 0; i < node->nbKeyUsed; i++)
 		{
@@ -71,7 +71,7 @@ PUBLIC Object Node_search(Node* node, Key key, unsigned int isFoundAlready)
 		if (isFoundAlready)
 			return node->leaves[node->nbKeyUsed - 1];
 		else
-			return NULL;
+			return 0;
 	}
 	else
 	{
@@ -79,19 +79,19 @@ PUBLIC Object Node_search(Node* node, Key key, unsigned int isFoundAlready)
 		{
 			if (key < node->keys[i])
 			{
-				if (node->children[i] == NULL)
+				if (node->children[i] == 0)
 				{
-					Error_new(ERROR_FATAL, "Node_search node== NULL\n");
+					Error_new(ERROR_FATAL, "Node_search node== 0\n");
 				}
 				return Node_search(node->children[i], key, isFoundAlready);
 			}
 			if (key == node->keys[i])
-				return Node_search(node->children[i], key, TRUE);
+				return Node_search(node->children[i], key, 1);
 		}
 		return Node_search(node->children[node->nbKeyUsed], key, isFoundAlready);
 	}
 
-	return NULL;
+	return 0;
  }
 
 /*********************************************************************************
@@ -102,7 +102,7 @@ PUBLIC Object Node_search(Node* node, Key key, unsigned int isFoundAlready)
 PUBLIC void Node_free(Node* node)
 {
   if (node == 0) return;
-  if (node->isLeaf == TRUE)
+  if (node->isLeaf == 1)
   {
     for (int i = 0; i < node->nbKeyUsed + 1; i++)
 	{
@@ -118,9 +118,9 @@ PUBLIC void Node_free(Node* node)
 * input: beamWeightRange
 * output: none
 *********************************************************************************/
-PUBLIC void Node_insert(Node* node, Key key, Object object, int isOwner)
+PUBLIC void Node_insert(Node* node, Object * key, Object * object, int isOwner)
 {
-	if (node->isLeaf == TRUE) 
+	if (node->isLeaf == 1) 
 	{
 		for (int i = 0; i < node->nbKeyUsed; i++)
 		{
@@ -156,7 +156,7 @@ PUBLIC void Node_insert(Node* node, Key key, Object object, int isOwner)
 			if (key < node->keys[i])
 				break;
 		}
-		if (node->children[i] == NULL)
+		if (node->children[i] == 0)
 		{
 			Error_new(ERROR_NORMAL, "insert key: %d\n", key);
 			Node_print(node, 3);
@@ -185,11 +185,11 @@ PUBLIC void Node_insert(Node* node, Key key, Object object, int isOwner)
 * input: the key to remove
 * output: none
 *********************************************************************************/
-PUBLIC Object Node_remove(Node* node, Key key, unsigned int * keyToUpdate)
+PUBLIC Object * Node_remove(Node* node, Object * key, unsigned int * keyToUpdate)
 { 
-	Object object = NULL;
+	Object * object = 0;
 
-	if (node->isLeaf == TRUE)
+	if (node->isLeaf == 1)
 	{
 		for (int i = 0; i < node->nbKeyUsed; i++)
 		{
@@ -212,7 +212,7 @@ PUBLIC Object Node_remove(Node* node, Key key, unsigned int * keyToUpdate)
 			}
 		}
 		// Check the key was found will descending
-		if (keyToUpdate != NULL)
+		if (keyToUpdate != 0)
 		{
 			*keyToUpdate = node->keys[node->nbKeyUsed - 1];
 			node->nbKeyUsed--;
@@ -220,7 +220,7 @@ PUBLIC Object Node_remove(Node* node, Key key, unsigned int * keyToUpdate)
 			return object;
 		}
 		else 
-			return NULL;
+			return 0;
 
 	}
 	else
@@ -279,7 +279,7 @@ PUBLIC Object Node_remove(Node* node, Key key, unsigned int * keyToUpdate)
 		
     }
 
-	return NULL;
+	return 0;
 }
 
 /*********************************************************************************
@@ -289,7 +289,7 @@ PUBLIC Object Node_remove(Node* node, Key key, unsigned int * keyToUpdate)
 *********************************************************************************/
 PUBLIC void Node_print(Node* node, unsigned int depth)
 {
-	if (node == NULL) return;
+	if (node == 0) return;
 	TRACE((" Node NbUsed: %d\n", node->nbKeyUsed));
 	TRACE((" Keys: "));
 	for (int i = 0; i < ORDER * 2 - 1; i++)
@@ -300,7 +300,7 @@ PUBLIC void Node_print(Node* node, unsigned int depth)
 			PRINT((".. "));
 	}
 	TRACE(("\n"));
-	if ((node->isLeaf==FALSE) && (depth>0))
+	if ((node->isLeaf==0) && (depth>0))
 	{
 		for (int i = 0; i <= node->nbKeyUsed; i++)
 		{
@@ -316,7 +316,7 @@ PUBLIC void Node_print(Node* node, unsigned int depth)
 * input: the key that caused the split
 * output: The sub tree where the key should be inserted
 *********************************************************************************/
-PUBLIC Node* Node_splitNode(Node* node, Node* nodeToSplit, Key key)
+PUBLIC Node* Node_splitNode(Node* node, Node* nodeToSplit, Object * key)
 {
 	Node* newChild;
 
@@ -346,8 +346,8 @@ PUBLIC Node* Node_splitNode(Node* node, Node* nodeToSplit, Key key)
 	{
 		newChild->leaves[i] = nodeToSplit->leaves[ORDER + i];
 		newChild->children[i] = nodeToSplit->children[ORDER + i];
-		nodeToSplit->leaves[ORDER + i] = NULL;
-		nodeToSplit->children[ORDER + i] = NULL;
+		nodeToSplit->leaves[ORDER + i] = 0;
+		nodeToSplit->children[ORDER + i] = 0;
 	}
 	newChild->nbKeyUsed = ORDER - 1;
 	nodeToSplit->nbKeyUsed = ORDER - 1;
@@ -395,7 +395,7 @@ PRIVATE void Node_shiftLeft(Node* node, unsigned int idxKey)
 *********************************************************************************/
 PRIVATE Node * Node_mergeNodes(Node* node, unsigned int idxLeft, unsigned idxRight)
 {
-	Node* mergedNode = NULL;
+	Node* mergedNode = 0;
 
 	Node * leftChild = node->children[idxLeft];
 	Node * rightChild = node->children[idxRight];
