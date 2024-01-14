@@ -13,11 +13,11 @@ typedef struct Node Node;
 
 typedef struct Node
 {
-	unsigned short int nbKeyUsed;
-	unsigned short int isLeaf;
-	unsigned int * keys;
-	Object * leaves;
-	Node** children;	
+	unsigned int nbKeyUsed;
+	unsigned int isLeaf;
+	Object ** keys;
+	Object ** leaves;
+	Node ** children;	
 } Node;
 
 PUBLIC Node * Node_new(unsigned short int isLeaf);
