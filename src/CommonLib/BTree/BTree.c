@@ -10,6 +10,8 @@
 ****************************************************/
 #include "BTree.h"
 #include "Node.h"
+#include "Memory.h"
+#include "Debug.h"
 
 /*********************************************************************************
 * BTree_new
@@ -20,7 +22,7 @@ BTree * BTree_new(unsigned int order)
 {
 	BTree* tree;
 
-	tree = (BTree*)malloc(sizeof(BTree));
+	tree = (BTree*)Memory_alloc(sizeof(BTree));
 	//tree->pool = 0; //Pool_new(nodePool, nbObjects);
 	tree->root = 0;
 	tree->nbNodes = 0;
@@ -133,7 +135,7 @@ Object * BTree_remove(BTree* tree, Object * key)
 		}
 		else
 		{
-			printf("Key %d removed returned 0\n", key);
+			PRINT(("Key %d removed returned 0\n", key));
 		}
 		return object;
 	}
@@ -147,18 +149,17 @@ Object * BTree_remove(BTree* tree, Object * key)
 *********************************************************************************/
 void BTree_print(BTree* tree)
 {
-	if (tree == 0) return;
-	printf("Tree:\n");
-	printf(" Nb items: %d\n", tree->nbObjects);
-	printf(" Nb Nodes: %d\n", tree->nbNodes);
-	printf(" Depth: %d\n", tree->depth);
+  if (tree == 0) return;
+  PRINT(("Tree:\n"));
+  PRINT((" Nb items: %d\n", tree->nbObjects));
+  PRINT((" Nb Nodes: %d\n", tree->nbNodes));
+  PRINT((" Depth: %d\n", tree->depth));
 
-	if (tree->depth > 0)
-	{
-		printf("Root 0-0:\n");
-		Node_print(tree->root, tree->depth - 1);
-	}
-	    
+  if (tree->depth > 0)
+  {
+    PRINT(("Root 0-0:\n"));
+    Node_print(tree->root, tree->depth - 1);
+  }
 }
 
 /*********************************************************************************
@@ -168,9 +169,9 @@ void BTree_print(BTree* tree)
 *********************************************************************************/
 PUBLIC BTree * BTree_newFromFile(char * fileName)
 {
-	BTree* tree = 0;
+  BTree* tree = 0;
 
-	return tree;
+  return tree;
 }
 
 /*********************************************************************************
@@ -180,8 +181,8 @@ PUBLIC BTree * BTree_newFromFile(char * fileName)
 *********************************************************************************/
 PUBLIC void BTree_delete(BTree* tree)
 {
-	Node_free(tree->root);
+  Node_free(tree->root);
 	
-	free(tree);
+  Memory_free(tree);
 }
 	
