@@ -25,15 +25,15 @@ PUBLIC Node* Node_new(unsigned short int isLeaf)
 {
 	Node* node = NULL;
     const unsigned int size = sizeof(node->nbKeyUsed) + sizeof(node->isLeaf)
-	                        + ORDER * sizeof(Object*)
-							+ (ORDER + 1)* sizeof(Object*)
-							+ (ORDER + 1)* sizeof(Node*);
+	                        + (ORDER * 2 - 1) * sizeof(Object*)
+							+ (ORDER * 2) * sizeof(Object*)
+							+ (ORDER * 2) * sizeof(Node*);
 	node = (Node*)Memory_alloc(size);
 	node->isLeaf = isLeaf;
 	node->nbKeyUsed = 0;
     node->keys = node + sizeof(node->nbKeyUsed) + sizeof(node->isLeaf);
-	node->leaves = node->keys + ORDER * sizeof(Object*);
-    node->children = node->leaves + ORDER * sizeof(Object*);
+	node->leaves = node->keys + (ORDER * 2 - 1) * sizeof(Object*);
+    node->children = node->leaves + (ORDER * 2) * sizeof(Object*);
 
 	for (int i = 0; i < ORDER * 2; i++)
 	{
