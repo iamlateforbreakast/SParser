@@ -2,6 +2,7 @@
 #include "BTree.h"
 #include "String2.h"
 #include "TestObject.h"
+#include "ObjectMgr.h"
 #include "Memory.h"
 #include "Debug.h"
 
@@ -17,6 +18,8 @@
                           { printf("\x1b[32mPassed\x1b[0m\n");} \
                           else { printf("\x1b[31mFailed\x1b[0m\n"); return 0;}
 #endif
+
+#define ORDER (3)
 
 List * keys;
 TestObject ** testObjects;
@@ -62,15 +65,15 @@ int step1()
   BTree* testTree;
 
   PRINT(("Step 1: Test 1 - Create an instance of class BTree: "));
-  testTree = BTree_new(3);
+  testTree = BTree_new(ORDER);
   UT_ASSERT((1));
 
   PRINT(("Step 1: Test 2 - Insert one object: "));
-  BTree_add(testTree, key, testObjects[0], 0);
+  BTree_add(testTree, (Object*)key, (Object*)testObjects[0], 0);
   UT_ASSERT((1));
 
   PRINT(("Step 1: Test 3 - Remove the object: "));
-  removedObject = BTree_remove(testTree, key);
+  removedObject = (TestObject*)BTree_remove(testTree, (Object*)key);
   UT_ASSERT((1));
 	
   PRINT(("Step 1: Test 4 - Delete BTree: "));
@@ -85,14 +88,47 @@ int step2()
 {
   int isPassed = 1;
 
+  BTree* testTree;
+  String * key = 0;
+
+  List_resetIterator(keys);
+
+  PRINT(("Step 2: Test 1 - Create an instance of class BTree: "));
+  testTree = BTree_new(ORDER);
+  UT_ASSERT((1));
+
+  PRINT(("Step 2: Test 2 - Insert %d object: ", ORDER + 1));
+  for (int i=0; i< ORDER * 2; i++)
+  {
+	key = List_getNext(keys);
+    BTree_add(testTree, (Object*)key, (Object*)testObjects[i], 0);
+  }
+  UT_ASSERT((1));
+
+  BTree_print(testTree);
+
+  PRINT(("Step 2: Test 3 - Delete BTree: "));
+  String_delete(key);
+  BTree_delete(testTree);
+  UT_ASSERT((1));
+
   return isPassed;
 }
 
 int main(void)
 {
+  ObjectMgr* objMgr = ObjectMgr_getRef();
+
   init_keys();
+
   step1();
+  step2();
+
   delete_keys();
+
+  ObjectMgr_report(objMgr);
+  ObjectMgr_reportUnallocated(objMgr);
+  Memory_report();
 
   //printf("Btree size of pool in   bytes: %d\n", BTree_reportSizeInBytes(testTree));
   //printf("Btree size of pool in Kibytes: %d\n", BTree_reportSizeInBytes(testTree) / 1024);

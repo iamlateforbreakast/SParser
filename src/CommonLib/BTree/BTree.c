@@ -183,6 +183,6 @@ PUBLIC void BTree_delete(BTree* tree)
 {
   Node_free(tree->root);
 	
-  Memory_free(tree);
+  Memory_free(tree, sizeof(BTree));
 }
 	

@@ -102,14 +102,14 @@ PUBLIC Object * Node_search(Node* node, Object * key, unsigned int isFoundAlread
 PUBLIC void Node_free(Node* node)
 {
   if (node == 0) return;
-  if (node->isLeaf == 1)
+  if (node->isLeaf == 0)
   {
     for (int i = 0; i < node->nbKeyUsed + 1; i++)
 	{
-		//free(node->leaves[i]);
+      Memory_free(node->children[i], sizeof(Node));
 	}
-	return;
   }
+  Memory_free(node,sizeof(node));
 }
 
 /*********************************************************************************
@@ -299,7 +299,7 @@ PUBLIC void Node_print(Node* node, unsigned int depth)
 		else
 			PRINT((".. "));
 	}
-	TRACE(("\n"));
+	PRINT(("\n"));
 	if ((node->isLeaf==0) && (depth>0))
 	{
 		for (int i = 0; i <= node->nbKeyUsed; i++)
