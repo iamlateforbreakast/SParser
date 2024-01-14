@@ -70,9 +70,9 @@ int step1()
   //BTree_add(testTree, key, testObjects[0], 0);
   UT_ASSERT((1));
 
-  PRINT(("Step 1: Test3 - Delete BTree"));
+  PRINT(("Step 1: Test3 - Delete BTree: "));
   String_delete(key);
-  BTree_free(testTree);
+  BTree_delete(testTree);
   UT_ASSERT((1));
 
   return isPassed;

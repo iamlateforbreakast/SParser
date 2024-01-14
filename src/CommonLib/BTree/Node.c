@@ -101,14 +101,15 @@ PUBLIC Object Node_search(Node* node, Key key, unsigned int isFoundAlready)
 *********************************************************************************/
 PUBLIC void Node_free(Node* node)
 {
-	if (node->isLeaf == TRUE)
+  if (node == 0) return;
+  if (node->isLeaf == TRUE)
+  {
+    for (int i = 0; i < node->nbKeyUsed + 1; i++)
 	{
-		for (int i = 0; i < node->nbKeyUsed + 1; i++)
-		{
-			//free(node->leaves[i]);
-		}
-		return;
+		//free(node->leaves[i]);
 	}
+	return;
+  }
 }
 
 /*********************************************************************************
@@ -163,14 +164,14 @@ PUBLIC void Node_insert(Node* node, Key key, Object object, int isOwner)
 		}
 		if (node->children[i]->nbKeyUsed < ORDER * 2 - 1) //&& (node->nbKeyUsed < ORDER * 2 - 1))
 		{
-			Node_insert(node->children[i], key, object);
+			Node_insert(node->children[i], key, object, isOwner);
 			return;
 		}
 		else
 		{
 			TRACE(("Splitting node.\n"));
 			Node* newChild = Node_splitNode(node, node->children[i], key);
-			Node_insert(newChild, key, object);
+			Node_insert(newChild, key, object, isOwner);
 			return;
 		}
 	    //Node* childNode = Node_split(node, key);

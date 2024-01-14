@@ -174,11 +174,11 @@ PUBLIC BTree * BTree_newFromFile(char * fileName)
 }
 
 /*********************************************************************************
-* BTree_free
+* BTree_delete
 * input: None
 * output: None
 *********************************************************************************/
-PUBLIC void BTree_free(BTree* tree)
+PUBLIC void BTree_delete(BTree* tree)
 {
 	Node_free(tree->root);
 	
