@@ -119,12 +119,12 @@ int step2()
   PRINT((" List1 + List2 ----->\n"));
   List_forEach(testList1, (void (*)(void* o))&TestObject_print);
 
-  //testList3 = List_copy(testList1);
-  //PRINT((" Copy of List1 ------>\n"));
-  //List_forEach(testList3, (void (*)(void* o))&TestObject_print);
+  testList3 = List_copy(testList1);
+  PRINT((" Copy of List1 ------>\n"));
+  List_forEach(testList3, (void (*)(void* o))&TestObject_print);
 
   List_delete(testList1);
-  List_delete(testList2);
+  List_delete(testList3);
 
   //Memory_report();
 
