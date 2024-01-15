@@ -23,7 +23,7 @@ typedef struct Node
 PUBLIC Node * Node_new(unsigned short int isLeaf);
 PUBLIC Node* Node_splitNode(Node* node, Node* nodeToSplit, Object * key);
 PUBLIC void Node_insert(Node* node, Object * key, Object * object, int isOwner);
-PUBLIC Object * Node_remove(Node* node, Object * key, unsigned int* keyToUpdate);
+PUBLIC Object * Node_remove(Node* node, Object * key, Object ** keyToUpdate);
 PUBLIC Object * Node_search(Node* node, Object * key, unsigned int isFoundAlready);
 PUBLIC void Node_free(Node* node);
 PUBLIC void Node_print(Node* node, unsigned int depth);

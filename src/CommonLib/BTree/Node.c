@@ -63,7 +63,7 @@ PUBLIC Object * Node_search(Node* node, Object * key, unsigned int isFoundAlread
 	{
 		for (int i = 0; i < node->nbKeyUsed; i++)
 		{
-			if (node->keys[i] == key)
+			if (Object_comp(node->keys[i], key)==0)
 			{
 				return node->leaves[i];
 			}
@@ -77,7 +77,7 @@ PUBLIC Object * Node_search(Node* node, Object * key, unsigned int isFoundAlread
 	{
 		for (int i = 0; i < node->nbKeyUsed; i++)
 		{
-			if (key < node->keys[i])
+			if (Object_comp(key,node->keys[i])<0)
 			{
 				if (node->children[i] == 0)
 				{
@@ -85,7 +85,7 @@ PUBLIC Object * Node_search(Node* node, Object * key, unsigned int isFoundAlread
 				}
 				return Node_search(node->children[i], key, isFoundAlready);
 			}
-			if (key == node->keys[i])
+			if (Object_comp(key, node->keys[i])==0)
 				return Node_search(node->children[i], key, 1);
 		}
 		return Node_search(node->children[node->nbKeyUsed], key, isFoundAlready);
@@ -124,12 +124,12 @@ PUBLIC void Node_insert(Node* node, Object * key, Object * object, int isOwner)
 	{
 		for (int i = 0; i < node->nbKeyUsed; i++)
 		{
-			if (key == node->keys[i])
+			if (Object_comp(key, node->keys[i])==0)
 			{
 				Error_new(ERROR_NORMAL, "Duplicate Key\n");
 				return;
 			}
-			if (key < node->keys[i])
+			if (Object_comp(key, node->keys[i])<0)
 			{
 				for (int j = node->nbKeyUsed-1; j >= i; j--)
 					node->keys[j + 1] = node->keys[j];
@@ -153,7 +153,7 @@ PUBLIC void Node_insert(Node* node, Object * key, Object * object, int isOwner)
 		int i = 0;
 		for (i = 0; i < node->nbKeyUsed; i++)
 		{
-			if (key < node->keys[i])
+			if (Object_comp(key, node->keys[i])<0)
 				break;
 		}
 		if (node->children[i] == 0)
@@ -185,7 +185,7 @@ PUBLIC void Node_insert(Node* node, Object * key, Object * object, int isOwner)
 * input: the key to remove
 * output: none
 *********************************************************************************/
-PUBLIC Object * Node_remove(Node* node, Object * key, unsigned int * keyToUpdate)
+PUBLIC Object * Node_remove(Node* node, Object * key, Object ** keyToUpdate)
 { 
 	Object * object = 0;
 
@@ -193,7 +193,7 @@ PUBLIC Object * Node_remove(Node* node, Object * key, unsigned int * keyToUpdate
 	{
 		for (int i = 0; i < node->nbKeyUsed; i++)
 		{
-			if (node->keys[i] == key)
+			if (Object_comp(node->keys[i], key)==0)
 			{
 				//Can we remove if node->nbKeyUsed => ORDER then can remove
 				object = node->leaves[i];
@@ -228,10 +228,10 @@ PUBLIC Object * Node_remove(Node* node, Object * key, unsigned int * keyToUpdate
 		// Search which child contains the key
 		for (int i = 0; i < node->nbKeyUsed; i++)
 		{
-			if (key <= node->keys[i])
+			if (Object_comp(key, node->keys[i])<=0)
 			{
 				// The key is found already while descending the tree, remember it
-				if (key <= node->keys[i]) keyToUpdate = &node->keys[i]; /* BUG: <= should be == */
+				if (Object_comp(key, node->keys[i])<=0) keyToUpdate = &node->keys[i]; /* BUG: <= should be == */
 				object = Node_remove(node->children[i], key, keyToUpdate);
 				// Check if the number of children is at least ORDER
 				if (node->children[i]->nbKeyUsed < ORDER - 1)
@@ -295,7 +295,7 @@ PUBLIC void Node_print(Node* node, unsigned int depth)
 	for (int i = 0; i < ORDER * 2 - 1; i++)
 	{
 		if (i < node->nbKeyUsed)
-			PRINT(("%d ", node->keys[i]));
+			PRINT(("%x ", node->keys[i]));
 		else
 			PRINT((".. "));
 	}
@@ -327,7 +327,7 @@ PUBLIC Node* Node_splitNode(Node* node, Node* nodeToSplit, Object * key)
 	for (k = 0; k < node->nbKeyUsed; k++)
 	{
 		/* TBC: node->nbKeyUsed is assumed less than ORDER*2-1 */
-		if (nodeToSplit->keys[ORDER - 1] < node->keys[k]) break;
+		if (Object_comp(nodeToSplit->keys[ORDER - 1], node->keys[k])<0) break;
 	}
 	for (unsigned int j = node->nbKeyUsed; j > k; j--)
 		node->keys[j] = node->keys[j - 1];
@@ -353,10 +353,15 @@ PUBLIC Node* Node_splitNode(Node* node, Node* nodeToSplit, Object * key)
 	nodeToSplit->nbKeyUsed = ORDER - 1;
 
 
-	if (key < node->keys[k])
+	if (Object_comp(key, node->keys[k])<0)
 		return node->children[k];
 	else
 		return node->children[k + 1];
+}
+
+PUBLIC unsigned int Node_getSize(Node * node)
+{
+  return 0;
 }
 
 PRIVATE void Node_shiftRight(Node* node, unsigned int idxKey)
