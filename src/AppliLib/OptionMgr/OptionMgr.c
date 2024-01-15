@@ -81,7 +81,7 @@ PRIVATE OptionMgr * OptionMgr_new()
   {
     optionName = String_new(optionDefault[j].name);
     optionValue = String_new(optionDefault[j].value);
-    Map_insert(this->options, optionName, optionValue);
+    Map_insert(this->options, optionName, optionValue, 1);
   }
 
   return this;
@@ -160,7 +160,7 @@ PUBLIC unsigned int OptionMgr_getSize(OptionMgr * this)
 PUBLIC String * OptionMgr_getOption(OptionMgr * this, const char * name)
 {
   String * result = 0;
-  String * optionName = String_new(name);
+  String * optionName = String_newByRef(name);
 
   Map_find(this->options, optionName, (void**)&result);
  
@@ -179,7 +179,7 @@ PUBLIC void OptionMgr_setOption(OptionMgr * this, const char * optionName, Strin
   String * option = String_new(optionName);
   /* find optionName in this->map */
   /* if not found insert value */
-  Map_insert(this->options, option, value);
+  Map_insert(this->options, option, value, 1);
   /* else modify value found in map */
 }
 
@@ -241,7 +241,7 @@ PUBLIC unsigned int OptionMgr_readFromCmdLine(OptionMgr * this, const int argc, 
   {
     for (j=0; j<nbOptions; j++)
     {
-      if (Memory_cmp(optionDefault[j].flag, (void*)argv[i]))
+      if (Memory_cmp(optionDefault[j].flag, (void*)argv[i])==0)
       {
         optionName = String_new(optionDefault[j].name);
         if (((i+1)<=argc))
@@ -262,7 +262,7 @@ PUBLIC unsigned int OptionMgr_readFromCmdLine(OptionMgr * this, const int argc, 
     }
     if ((isFound) && (optionValue!=0))
     {
-      Map_insert(this->options, optionName, optionValue);
+      Map_insert(this->options, optionName, optionValue, 1);
     }
     else
     {
