@@ -80,6 +80,7 @@ PRIVATE FileMgr * FileMgr_new()
   this->separator = "/";
 #endif
   
+  FileIo_delete(f);
   /* TODO: Check this->rootLocation has a valid length */
   
   return this;
@@ -214,12 +215,12 @@ PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryN
   /* TODO: Check if merged path exist on filesystem */
   
   /* add directory to this->directories */
-  List_insertHead(this->directories,fullPathDirectory);
+  List_insertHead(this->directories,fullPathDirectory, 1);
   
   /* For each directory */
   /* List_forEach(this->directories, FileMgr_listFiles, this); */
   fullPathDirectory = List_getNext(this->directories);
-  printf("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory));
+  PRINT(("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory)));
   while (fullPathDirectory!=0)
   {
     PRINT(("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory)));
@@ -257,7 +258,7 @@ PUBLIC String * FileMgr_addFile(FileMgr * this, const char * fileName)
       /* If exists add to the list of files */
       fileDesc = FileDesc_new();
       FileDesc_setFullName(fileDesc, fullName);
-      List_insertHead(this->files, (void*)fileDesc);
+      List_insertHead(this->files, (void*)fileDesc, 1);
       result = fullName;
     }
     else
@@ -343,7 +344,7 @@ PUBLIC List * FileMgr_filterFiles(FileMgr * this, const char * pattern)
   {
     if (String_matchWildcard(FileDesc_getName(fd), pattern))
     {
-      List_insertHead(result, fd);
+      List_insertHead(result, fd, 1);
     }
   }
   
@@ -365,7 +366,7 @@ PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory)
     String* fullFileName = String_copy(directory);
     FileMgr_mergePath(this, fullFileName, fileName);
     FileDesc_setFullName(fileDesc, fullFileName);
-    List_insertTail(this->files, (void*)fileDesc);
+    List_insertTail(this->files, (void*)fileDesc, 1);
     Error_new(ERROR_INFO,"List files: %s\n", String_getBuffer(fullFileName));
     //String_delete(name);
   }
@@ -373,7 +374,7 @@ PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory)
   {
     String * fullDirPath = String_copy(directory);
     FileMgr_mergePath(this, fullDirPath, dirName);
-    List_insertHead(this->directories, (void*)fullDirPath);
+    List_insertHead(this->directories, (void*)fullDirPath, 1);
     Error_new(ERROR_INFO,"Add directory: %s\n", String_getBuffer(fullDirPath));
   }
   FileIo_delete(f);
@@ -419,7 +420,7 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
     }
     else
     {
-      List_insertHead(tokenPath1, s);
+      List_insertHead(tokenPath1, s, 1);
     }
     s = List_removeTail(tokenPath2);
   }
@@ -501,7 +502,7 @@ PUBLIC FileDesc * FileMgr_searchFile(FileMgr * this, String * name, List * prefe
         isFound = 1;
         c = FileDesc_new();
         FileDesc_setFullName(c, fullPath);
-        List_insertHead(this->files, (void*)c);
+        List_insertHead(this->files, (void*)c, 1);
         result = c;
       }
       else
