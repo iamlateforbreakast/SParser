@@ -153,7 +153,7 @@ PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement, List * r
       {
         //printf("SdbMgr: Query performed\n");
         temp = String_new((char *)sqlite3_column_text(res, i));
-        List_insertHead(result, temp);
+        List_insertHead(result, temp, 0);
       }
     step = sqlite3_step(res);
     nbResults++;

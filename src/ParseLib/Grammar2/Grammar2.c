@@ -113,7 +113,7 @@ PUBLIC Grammar2 * Grammar2_new(FileReader * fr, SdbMgr * sdbMgr)
   this->current = (GrammarContext*)Object_new(sizeof(GrammarContext),&grammarContextClass);
   this->current->lastNode = 0;
   this->current->includeNodeBranch = 0;
-  List_insertHead(this->contexts, this->current);
+  List_insertHead(this->contexts, this->current, 1);
   
   this->buffer = &internalBuffer[0];
   Memory_set(this->buffer, 0, MAX_BUFFER_SIZE);
@@ -439,7 +439,7 @@ PUBLIC char * Grammar2_processNewFile(Grammar2 * this, String * fileName)
     o->includeNodeBranch = 1;
     this->current = o;
    
-   List_insertHead(this->contexts, o);
+   List_insertHead(this->contexts, o, 1);
    }
    
    return result;

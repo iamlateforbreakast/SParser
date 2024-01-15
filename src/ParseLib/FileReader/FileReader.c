@@ -96,7 +96,7 @@ PUBLIC FileReader * FileReader_new(FileDesc * fileDesc)
   
   /* associate buffer containing the file to the fileRead */
   newFileContent = FileDesc_load(this->fileDesc);
-  List_insertHead(this->buffers, newFileContent);
+  List_insertHead(this->buffers, newFileContent, 1);
   this->currentBuffer = newFileContent;
   
   FileMgr_delete(fileMgr);
@@ -213,7 +213,7 @@ PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
   if (dirList==0) dirList=List_new();
  
   /* In all cases make sure the current dir. is in the search path */
-  List_insertTail(dirList, String_new("."));
+  List_insertTail(dirList, String_new("."), 0);
   
   fileDesc = FileMgr_searchFile(fileMgr, fileName, dirList);
   
@@ -224,7 +224,7 @@ PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
     {
       Error_new(ERROR_FATAL, "NewFileContent is null");
     }
-    List_insertHead(this->buffers, newFileContent);
+    List_insertHead(this->buffers, newFileContent, 1);
     this->currentBuffer = newFileContent;
     result = String_getBuffer(newFileContent);
   }
@@ -297,12 +297,12 @@ PRIVATE void FileReader_getListPreferredDir(FileReader * this)
         case 4:
           if ((buf[i]==' ') || (buf[i]=='\n')) 
           {
-            List_insertHead(prefDir->dirs, String_subString(optionValue, j, i-j));
+            List_insertHead(prefDir->dirs, String_subString(optionValue, j, i-j), 0);
             state = 5;
           }
           if (buf[i]==']')
           {
-            List_insertHead(prefDir->dirs, String_subString(optionValue, j, i-j));
+            List_insertHead(prefDir->dirs, String_subString(optionValue, j, i-j), 0);
             state = 6;
           }
           break;
@@ -311,7 +311,7 @@ PRIVATE void FileReader_getListPreferredDir(FileReader * this)
           {
             if (buf[i]==']')
             {
-              List_insertHead(prefDir->dirs, String_subString(optionValue, j, i-j));
+              List_insertHead(prefDir->dirs, String_subString(optionValue, j, i-j), 0);
               state = 6;
             }
             else
@@ -322,7 +322,7 @@ PRIVATE void FileReader_getListPreferredDir(FileReader * this)
           }      
           break;
         case 6:
-          List_insertHead(prefDir->dirs, String_subString(optionValue, j, i-j-1));
+          List_insertHead(prefDir->dirs, String_subString(optionValue, j, i-j-1), 0);
           break;
         default:
           break;
@@ -330,7 +330,7 @@ PRIVATE void FileReader_getListPreferredDir(FileReader * this)
     }
     if (state==6)
     {
-      List_insertHead(this->preferredDirs, prefDir);
+      List_insertHead(this->preferredDirs, prefDir, 1);
     }
     else
     {
