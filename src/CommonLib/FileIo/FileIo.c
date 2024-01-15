@@ -296,10 +296,9 @@ PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
         char text[MAX_PATH];
         size_t nb = 0;
         wcstombs_s(&nb, text, 100, FindFileData.cFileName, wcslen(FindFileData.cFileName));
-        PRINT(("=>%s\n", text));
+        TRACE(("=>%s\n", text));
         String* s = String_new(text);
         List_insertTail(result, s, 1);
-        String_delete(s);
       }
     } while (FindNextFile(hFind, &FindFileData));
     FindClose(hFind);
@@ -322,7 +321,6 @@ PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
         //FileMgr_mergePath(this, fullName, name);
         //FileDesc_setFullName(fileDesc, fullName);
         List_insertHead(result, (void*)name, 1);
-        //String_delete(name);
       }
       else
       {
