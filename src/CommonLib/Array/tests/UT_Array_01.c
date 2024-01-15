@@ -6,9 +6,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define DEBUG (0)
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("Passed\n");} \
-                          else { printf("Failed\n"); return 0;}
+                          { printf("\x1b[32mPassed\x1b[0m\n");} \
+                          else { printf("\x1b[31mFailed\x1b[0m\n"); return 0;}
+                          
 #define STEP_PASS (1)
 #define STEP_FAIL (0)
 

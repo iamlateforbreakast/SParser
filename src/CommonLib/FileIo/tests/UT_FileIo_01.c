@@ -8,9 +8,15 @@
 #include <stdio.h>
 
 #define DEBUG (0)
+#ifdef _WIN32
 #define UT_ASSERT(cond) if ((cond)) \
                           { printf("Passed\n");} \
                           else { printf("Failed\n"); return 0;}
+#else
+#define UT_ASSERT(cond) if ((cond)) \
+                          { printf("\x1b[32mPassed\x1b[0m\n");} \
+                          else { printf("\x1b[31mFailed\x1b[0m\n"); return 0;}
+#endif
 
 #define BUFFER_SIZE_BYTES (1000)
 
@@ -114,6 +120,7 @@ int step6()
 	List_delete(listOfFiles);
 	String_delete(currentPath);
 	FileIo_delete(f);
+  
 	return 1;
 }
 
