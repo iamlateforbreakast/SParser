@@ -31,17 +31,17 @@ int step1()
   UT_ASSERT((testOptionMgr1 == testOptionMgr1))
 
   /* Test 2 */
-  OptionMgr_delete(testOptionMgr1);
+  OptionMgr_delete((OptionMgr*)testOptionMgr1);
   PRINT(("Step 1: Test 2 - Check ref is not null: "));
   UT_ASSERT((optionMgr!=0))
 
   /* Test 3 */
-  OptionMgr_delete(testOptionMgr2);
+  OptionMgr_delete((OptionMgr*)testOptionMgr2);
   PRINT(("Step 1: Test 3 - Check ref is null: "));
   UT_ASSERT((optionMgr == 0))
 
   /* Test 4 */
-  OptionMgr_delete(testOptionMgr2);
+  OptionMgr_delete((OptionMgr*)testOptionMgr2);
   PRINT(("Step 1: Test 4 - Check delete can be called again: "));
   UT_ASSERT((optionMgr == 0))
 
@@ -55,15 +55,20 @@ int step1()
 int step2()
 {
   testOptionMgr* testOptionMgr1 = OptionMgr_getRef();
+  const char dbName[] = "test.db";
+  const char inputDir[] = ".";
   String * option = 0;
 
-  option = OptionMgr_getOption(testOptionMgr1,"DB Name");
+  PRINT(("Step 2: Test 1 - Check option DB Name is read correctly: "));
+  option = OptionMgr_getOption((OptionMgr*)testOptionMgr1,"DB Name");
+  UT_ASSERT(Memory_cmp(String_getBuffer(option), dbName) == 0);
   TRACE(("  DB Name option = %s\n", String_getBuffer(option)));
 
-  option = OptionMgr_getOption(testOptionMgr1, "Input Directory");
+  option = OptionMgr_getOption((OptionMgr*)testOptionMgr1, "Input Directory");
+  UT_ASSERT(Memory_cmp(String_getBuffer(option), inputDir) == 0);
   TRACE(("  Input option = %s\n", String_getBuffer(option)));
 
-  OptionMgr_delete(testOptionMgr1);
+  OptionMgr_delete((OptionMgr*)testOptionMgr1);
   PRINT(("Step 2: Test 3 - Check all memory is freed properly: "));
   UT_ASSERT((Memory_getAllocRequestNb() == (Memory_getFreeRequestNb() + 1)))
 
@@ -73,16 +78,19 @@ int step2()
 int step3()
 {
   OptionMgr* testOptionMgr1 = OptionMgr_getRef();
-  String * option = String_new("Yes");
+  String * optionIn = String_new("Yes");
+  String* optionOut = 0;
 
-  OptionMgr_setOption(testOptionMgr1, "Reset after initialisation", option);
+  PRINT(("Step 3: Test 1 - Check a new option can be created and read: "));
+  OptionMgr_setOption(testOptionMgr1, "Reset after initialisation", optionIn);
 
-  option = OptionMgr_getOption(testOptionMgr1, "Reset after initialisation");
-  printf("  Reset after init. option = %s\n", String_getBuffer(option));
+  optionOut = OptionMgr_getOption(testOptionMgr1, "Reset after initialisation");
+  UT_ASSERT((Memory_cmp(String_getBuffer(optionIn), String_getBuffer(optionOut)) == 0));
+  TRACE(("  Reset after init. option = %s\n", String_getBuffer(optionOut)));
   OptionMgr_delete(testOptionMgr1);
 
   /* Test 5 */
-  printf("Step 3: Test 1 - Check all memory is freed properly: ");
+  PRINT(("Step 3: Test 2 - Check all memory is freed properly: "));
   UT_ASSERT((Memory_getAllocRequestNb() == (Memory_getFreeRequestNb() + 1)))
 
   return 0;
@@ -95,15 +103,17 @@ int step4()
   String * option = 0;
   OptionMgr* testOptionMgr1 = OptionMgr_getRef();
 
+  PRINT(("Step 4: Test 1 - Check options can be set from commandline: "));
   OptionMgr_readFromCmdLine(testOptionMgr1, argc, argv);
 
   option = OptionMgr_getOption(testOptionMgr1,"DB Name");
-  printf("  DB Name option = %s\n", String_getBuffer(option));
+  UT_ASSERT((Memory_cmp(String_getBuffer(option), argv[2]) == 0));
+  TRACE(("  DB Name option = %s\n", String_getBuffer(option)));
 
   /* Test 5 */
   //String_delete(option);
   OptionMgr_delete(testOptionMgr1);
-  printf("Step 4: Test 1 - Check all memory is freed properly: ");
+  printf("Step 4: Test 2 - Check all memory is freed properly: ");
   UT_ASSERT((Memory_getAllocRequestNb() == (Memory_getFreeRequestNb() + 1)))
 
   return 0;
@@ -116,6 +126,7 @@ int step5()
   String* currentWorkingDir = FileIo_getCwd(f);
   OptionMgr* testOptionMgr1 = OptionMgr_getRef();
 
+  PRINT(("Step 5: Test 1 - Check options can be read from file: "));
   printf("  Working directory: %s\n", String_getBuffer(currentWorkingDir));
 
   OptionMgr_readFromFile(testOptionMgr1);
@@ -128,7 +139,7 @@ int step5()
   FileIo_delete(f);
   String_delete(currentWorkingDir);
   OptionMgr_delete(testOptionMgr1);
-  printf("Step 5: Test 1 - Check all memory is freed properly: ");
+  printf("Step 5: Test 2 - Check all memory is freed properly: ");
   UT_ASSERT((Memory_getAllocRequestNb() == (Memory_getFreeRequestNb() + 1)))
 
   return 0;
@@ -136,7 +147,7 @@ int step5()
 
 int step6()
 {
-
+  return 0;
 }
 
 int main()
