@@ -1,24 +1,25 @@
-Package    Class        Test          LINUX   WIN32
-===================================================
+Package    Class        Test            LINUX   WIN32
+=====================================================
 COMMONLIB  Allocator    X
 COMMONLIB  Array        X
 COMMONLIB  Debug        X
-COMMONLIB  Error        X
-COMMONLIB  BTree        UT_BTree_01   FAILED  FAILED
-COMMONLIB  BTree        UT_BTree_02   FAILED  FAILED
-COMMONLIB  FileIo       UT_FileIo_01  FAILED  FAILED           
-COMMONLIB  List         UT_List_01    FAILED  FAILED
-COMMONLIB  List         UT_List_02    FAILED  FAILED
+COMMONLIB  Error        UT_Error_01     PASSED  PASSED
+COMMONLIB  BTree        UT_BTree_01     FAILED  FAILED
+COMMONLIB  BTree        UT_BTree_02     FAILED  FAILED
+COMMONLIB  FileIo       UT_FileIo_01    FAILED  PASSED          
+COMMONLIB  List         UT_List_01      FAILED  PASSED
+COMMONLIB  List         UT_List_02      FAILED  PASSED
 COMMONLIB  Memory       X
-COMMONLIB  Map          UT_Map_01     FAILED  FAILED
-COMMONLIB  Map          UT_Map_02     FAILED  FAILED
+COMMONLIB  Map          UT_Map_01       FAILED  PASSED
+COMMONLIB  Map          UT_Map_02       FAILED  FAILED
 COMMONLIB  Object       X
 COMMONLIB  ObjectMgr    X
 COMMONLIB  ObjectStore  X
 COMMONLIB  Pool         X
-COMMONLIB  SkipList     X
-COMMONLIB  String       X
-COMMONLIB  Times        X
+COMMONLIB  SkipList     UT_SkipList_01  FAILED  FAILED
+COMMONLIB  SkipList     UT_SkipList_02  FAILED  FAILED
+COMMONLIB  String       UT_String_01    FAILED  FAILED
+COMMONLIB  Times        UT_Times_01     PASSED  FAILED
 COMMONLIB  Types        X
 
 APPLILIB   FileMgr      X
