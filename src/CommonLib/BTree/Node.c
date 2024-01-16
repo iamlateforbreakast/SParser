@@ -24,25 +24,28 @@ PRIVATE void Node_stealRightKey(Node* node, unsigned int idxKeyStealFrom, unsign
 PUBLIC Node* Node_new(unsigned short int isLeaf)
 {
 	Node* node = 0;
-    const unsigned int size = sizeof(node->nbKeyUsed) + sizeof(node->isLeaf)
+    const unsigned int size = sizeof(Node)
 	                        + (ORDER * 2 - 1) * sizeof(Object*)
 							+ (ORDER * 2) * sizeof(Object*)
 							+ (ORDER * 2) * sizeof(Node*);
 	node = (Node*)Memory_alloc(size);
+	Memory_set(node, 0, size);
 	node->isLeaf = isLeaf;
 	node->nbKeyUsed = 0;
-    node->keys = node + sizeof(node->nbKeyUsed) + sizeof(node->isLeaf);
-	node->leaves = node->keys + (ORDER * 2 - 1) * sizeof(Object*);
-    node->children = node->leaves + (ORDER * 2) * sizeof(Object*);
-
+    node->keys = &node->buffer[0];
+	node->leaves = &node->buffer[5];
+    node->children = &node->buffer[11];
+    PRINT(("New node:\n"));
+	PRINT(("Size - Total %d Header %d\n", size, sizeof(Node)));
+	PRINT(("Node %x Keys %x Leaves %x Children %x\n", node, node->keys, node->leaves, node->children));
 	for (int i = 0; i < ORDER * 2; i++)
 	{
-		node->children[i] = 0;
-		node->leaves[i] = 0;
+		//(*node->children)[i] = 0;
+		//(*node->leaves)[i] = 0;
 	}
 	for (int i = 0; i < ORDER * 2 - 1; i++)
 	{
-		node->keys[i] = 0;
+		//*node->keys[i] = 0;
 	}
 
 	return node;
@@ -231,7 +234,7 @@ PUBLIC Object * Node_remove(Node* node, Object * key, Object ** keyToUpdate)
 			if (Object_comp(key, node->keys[i])<=0)
 			{
 				// The key is found already while descending the tree, remember it
-				if (Object_comp(key, node->keys[i])<=0) keyToUpdate = &node->keys[i]; /* BUG: <= should be == */
+				if (Object_comp(key, node->keys[i])==0) keyToUpdate = &node->keys[i]; /* BUG: <= should be == */
 				object = Node_remove(node->children[i], key, keyToUpdate);
 				// Check if the number of children is at least ORDER
 				if (node->children[i]->nbKeyUsed < ORDER - 1)

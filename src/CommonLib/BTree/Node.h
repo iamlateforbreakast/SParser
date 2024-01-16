@@ -17,7 +17,8 @@ typedef struct Node
 	unsigned int isLeaf;
 	Object ** keys;
 	Object ** leaves;
-	Node ** children;	
+	Node ** children;
+	Object* buffer[18];	
 } Node;
 
 PUBLIC Node * Node_new(unsigned short int isLeaf);

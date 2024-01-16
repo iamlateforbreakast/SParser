@@ -28,6 +28,7 @@ int nbTokens = 0;
 int init_keys()
 {
   String * fullText = String_newByRef(words1000);
+  String * key = 0;
 
   keys = String_splitToken(fullText, " ");
   nbTokens = List_getNbNodes(keys);
@@ -36,6 +37,7 @@ int init_keys()
 
   for (int i = 0; i < nbTokens; i++)
   {
+	key = (String*)List_getNext(keys);
     testObjects[i] = TestObject_new();
   }
 
@@ -63,6 +65,7 @@ int step1()
   String * key = (String*)List_getHead(keys);
 
   BTree* testTree;
+  List_resetIterator(keys);
 
   PRINT(("Step 1: Test 1 - Create an instance of class BTree: "));
   testTree = BTree_new(ORDER);
@@ -77,7 +80,7 @@ int step1()
   UT_ASSERT((1));
 	
   PRINT(("Step 1: Test 4 - Delete BTree: "));
-  String_delete(key);
+  //String_delete(key);
   BTree_delete(testTree);
   UT_ASSERT((1));
 
@@ -104,12 +107,12 @@ int step2()
   for (int i=0; i< n; i++)
   {
 	key = List_getNext(keys);
-	Object_print(key);
+	Object_print((Object*)key);
     BTree_add(testTree, (Object*)key, (Object*)testObjects[i], 0);
   }
   UT_ASSERT((1));
 
-  BTree_print(testTree);
+  //BTree_print(testTree);
 
   List_resetIterator(keys);
   PRINT(("Step 2: test 3 - Remove %d objects: ", n));
@@ -119,9 +122,55 @@ int step2()
 	removedObjects[i] = (TestObject*)BTree_remove(testTree, (Object*)key);
   }
 
-  BTree_print(testTree);
+  //BTree_print(testTree);
   
   PRINT(("Step 2: Test 4 - Delete BTree: "));
+  String_delete(key);
+  BTree_delete(testTree);
+  UT_ASSERT((1));
+
+  return isPassed;
+}
+
+int step3()
+{
+  int isPassed = 1;
+
+  BTree* testTree;
+  String * key = 0;
+  TestObject * removedObjects[ORDER * 10];
+
+  int n = 24; /*ORDER * 2;*/
+
+  List_resetIterator(keys);
+
+  PRINT(("Step 3: Test 1 - Create an instance of class BTree: "));
+  testTree = BTree_new(ORDER);
+  UT_ASSERT((1));
+
+  PRINT(("Step 3: Test 2 - Insert %d object: ", n));
+  for (int i=0; i< n; i++)
+  {
+	key = List_getNext(keys);
+	Object_print((Object*)key);
+    BTree_add(testTree, (Object*)key, (Object*)testObjects[i], 0);
+  }
+  UT_ASSERT((1));
+
+  BTree_print(testTree);
+
+  List_resetIterator(keys);
+  PRINT(("Step 3: test 3 - Remove %d objects: ", n));
+  for (int i=0; i< n; i++)
+  {
+	PRINT(("Remove %d\n", i));
+	key = List_getNext(keys);
+	removedObjects[i] = (TestObject*)BTree_remove(testTree, (Object*)key);
+  }
+
+  BTree_print(testTree);
+  
+  PRINT(("Step 3: Test 4 - Delete BTree: "));
   String_delete(key);
   BTree_delete(testTree);
   UT_ASSERT((1));
@@ -135,9 +184,9 @@ int main(void)
 
   init_keys();
 
-  step1();
-  step2();
-
+  //step1();
+  //step2();
+  step3();
   delete_keys();
 
   ObjectMgr_report(objMgr);
