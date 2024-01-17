@@ -105,14 +105,23 @@ PUBLIC Object * Node_search(Node* node, Object * key, unsigned int isFoundAlread
 PUBLIC void Node_free(Node* node)
 {
   if (node == 0) return;
+  if (node->isLeaf == 1)
+  {
+    /* TBC */
+  }
+  Memory_free(node,sizeof(Node));
+}
+
+PUBLIC void Node_freeRecurse(Node * node)
+{
+  if (node == 0) return;
   if (node->isLeaf == 0)
   {
-    for (int i = 0; i < node->nbKeyUsed + 1; i++)
+	for (int i = 0; i < node->nbKeyUsed + 1; i++)
 	{
-      Memory_free(node->children[i], sizeof(Node));
+      //Memory_free(node->leaves[i], sizeof(Node));
 	}
   }
-  Memory_free(node,sizeof(node));
 }
 
 /*********************************************************************************
@@ -265,8 +274,9 @@ PUBLIC Object * Node_remove(Node* node, Object * key, Object ** keyToUpdate)
 			if (node->children[node->nbKeyUsed - 1]->nbKeyUsed <= ORDER - 1)
 			{
 				// Merge node left and right
-				TRACE(("ERROR: Need to merge\n"));
+				PRINT(("ERROR: Need to merge\n"));
 				Node_mergeNodes(node, node->nbKeyUsed - 1, node->nbKeyUsed);
+				//node->nbKeyUsed--;
 			}
 			else
 			{
@@ -298,7 +308,8 @@ PUBLIC void Node_print(Node* node, unsigned int depth)
 	for (int i = 0; i < ORDER * 2 - 1; i++)
 	{
 		if (i < node->nbKeyUsed)
-			PRINT(("%x ", node->keys[i]));
+			//PRINT(("%x ", node->keys[i]));
+			Object_print(node->keys[i]);
 		else
 			PRINT((".. "));
 	}
@@ -307,7 +318,7 @@ PUBLIC void Node_print(Node* node, unsigned int depth)
 	{
 		for (int i = 0; i <= node->nbKeyUsed; i++)
 		{
-			TRACE(("Child %d-%d:\n", depth, i));
+			PRINT(("Child %d-%d:\n", depth, i));
 		    Node_print(node->children[i], depth - 1);
 		}
 	}
@@ -407,7 +418,9 @@ PRIVATE Node * Node_mergeNodes(Node* node, unsigned int idxLeft, unsigned idxRig
 
 	Node * leftChild = node->children[idxLeft];
 	Node * rightChild = node->children[idxRight];
-
+    PRINT(("\nNode_mergNodes ----------------------\n"));
+	PRINT(("Left node number of keys before merge %d\n", leftChild->nbKeyUsed));
+	PRINT(("Right node nummber of keys before merge %d\n", rightChild->nbKeyUsed));
 	// Demote the key from the parent node into the left child
 	leftChild->keys[leftChild->nbKeyUsed] = node->keys[idxLeft];
 	// Promote the last key of the right child to the parent node
@@ -418,14 +431,18 @@ PRIVATE Node * Node_mergeNodes(Node* node, unsigned int idxLeft, unsigned idxRig
 	for (int i = 0; i < rightChild->nbKeyUsed; i++)
 	{
 		leftChild->keys[leftChild->nbKeyUsed + i] = rightChild->keys[i];
+		PRINT(("Copying right node keys[%d] in left node keys[%d]\n", i, leftChild->nbKeyUsed + i));
 	}
 	for (int i = 0; i <= rightChild->nbKeyUsed; i++)
 	{
 		leftChild->children[leftChild->nbKeyUsed + i] = rightChild->children[i];
+		PRINT(("Copying right node children[%d] in left node children[%d]\n", i, leftChild->nbKeyUsed + i));
 		leftChild->leaves[leftChild->nbKeyUsed + i] = rightChild->leaves[i];
+		PRINT(("Copying right node leaves[%d] in left node leaves[%d]\n", i, leftChild->nbKeyUsed + i));
 	}
 	leftChild->nbKeyUsed = leftChild->nbKeyUsed + rightChild->nbKeyUsed;
-
+    PRINT(("Left merged node number of keys after merge %d\n", leftChild->nbKeyUsed));
+	PRINT(("parent node number of keys after merge %d\n", node->nbKeyUsed));
 	// Update parent node and discard right child
 	Node_shiftLeft(node, idxRight);
 	Node_free(rightChild);

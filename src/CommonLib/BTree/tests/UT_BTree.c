@@ -138,9 +138,9 @@ int step3()
 
   BTree* testTree;
   String * key = 0;
-  TestObject * removedObjects[ORDER * 10];
+  TestObject * removedObjects[500];
 
-  int n = 24; /*ORDER * 2;*/
+  int n = 100; /*ORDER * 2;*/
 
   List_resetIterator(keys);
 
@@ -163,12 +163,14 @@ int step3()
   PRINT(("Step 3: test 3 - Remove %d objects: ", n));
   for (int i=0; i< n; i++)
   {
-	PRINT(("Remove %d\n", i));
 	key = List_getNext(keys);
+	PRINT(("Remove %d ", i));
+	Object_print(key);
 	removedObjects[i] = (TestObject*)BTree_remove(testTree, (Object*)key);
+	  BTree_print(testTree);
+
   }
 
-  BTree_print(testTree);
   
   PRINT(("Step 3: Test 4 - Delete BTree: "));
   String_delete(key);

@@ -188,7 +188,9 @@ PUBLIC Object * BTree_remove(BTree* tree, Object * key)
 	{
 		object = Node_remove(root, key, 0);
 		// Check the resulting tree so that there is at least 1 Key used at root level
-		if (tree->root->nbKeyUsed < 1)
+		PRINT(("Tree root number of keys after remove %d\n", root->nbKeyUsed));
+		if ((root->nbKeyUsed + 1) == 0) root->nbKeyUsed = 0;
+		if (root->nbKeyUsed < 1)
 		{
 			printf("Tree should collapse\n");
 			Node * newRoot = root->children[0];
