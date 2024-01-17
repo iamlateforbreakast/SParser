@@ -23,6 +23,7 @@
 
 List * keys;
 TestObject ** testObjects;
+TestObject ** removedObjects;
 int nbTokens = 0;
 
 int init_keys()
@@ -34,6 +35,7 @@ int init_keys()
   nbTokens = List_getNbNodes(keys);
 
   testObjects = (TestObject**)Memory_alloc(nbTokens * sizeof(TestObject*));
+  removedObjects = (TestObject**)Memory_alloc(nbTokens * sizeof(TestObject*));
 
   for (int i = 0; i < nbTokens; i++)
   {
@@ -54,7 +56,8 @@ int delete_keys()
   }
   List_delete(keys);
   Memory_free(testObjects,sizeof(testObjects));
-
+  Memory_free(removedObjects, sizeof(removedObjects));
+  
   return 1;
 }
 
@@ -93,7 +96,6 @@ int step2()
 
   BTree* testTree;
   String * key = 0;
-  TestObject * removedObjects[ORDER * 2];
 
   int n = 6; /*ORDER * 2;*/
 
@@ -138,9 +140,8 @@ int step3()
 
   BTree* testTree;
   String * key = 0;
-  TestObject * removedObjects[500];
 
-  int n = 100; /*ORDER * 2;*/
+  int n = 800; /*ORDER * 2;*/
 
   List_resetIterator(keys);
 
