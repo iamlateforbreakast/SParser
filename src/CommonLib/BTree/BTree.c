@@ -23,7 +23,6 @@ struct BTree
 	unsigned int order;
 	unsigned int depth;
 	unsigned short int nbObjects;
-	unsigned short int nbNodes;
 	unsigned int nodeSize;
 };
 
@@ -55,7 +54,6 @@ PUBLIC BTree * BTree_new(unsigned int order)
   if (tree == 0) return 0;
 
   tree->root = 0;
-  tree->nbNodes = 0;
   tree->order = order;
   tree->depth = 0;
   tree->nbObjects = 0;
@@ -72,7 +70,7 @@ PUBLIC void BTree_delete(BTree* this)
 {
   if (this!=0)
   {
-    Node_free(this->root);
+    Node_free(this->root, this->order);
 	
     //Memory_free(this, sizeof(BTree));
 	/* De-allocate the base object */
@@ -110,7 +108,7 @@ PUBLIC void BTree_add(BTree* tree, Object * key, Object * object, int isOwner)
 {
 	if (tree->root == 0)
 	{
-		Node* newLeaf = Node_new(1);
+		Node* newLeaf = Node_new(1, tree->order);
 		newLeaf->nbKeyUsed = 1;
 		newLeaf->leaves[0] = object;
 		newLeaf->keys[0] = key;
@@ -119,19 +117,20 @@ PUBLIC void BTree_add(BTree* tree, Object * key, Object * object, int isOwner)
 		tree->nbObjects=1;
 		return;
 	}
-	if (tree->root->nbKeyUsed == ORDER * 2 - 1)
+	if (tree->root->nbKeyUsed == tree->order * 2 - 1)
 	{ 
-		printf("Splitting root\n");
-		Node* newRoot = Node_new(0);
+		PRINT(("Splitting root\n"));
+		Node* newRoot = Node_new(0, tree->order);
 		newRoot->children[0] = tree->root;
-		Node* childForInsertion = Node_splitNode(newRoot, tree->root, key);
-		Node_insert(childForInsertion, key, object, isOwner);
+		Node* childForInsertion = Node_splitNode(newRoot, tree->order, tree->root, key);
+		Node_insert(childForInsertion, tree->order, key, object, isOwner);
 		tree->root = newRoot;
 		tree->depth++;
 		tree->nbObjects++;
 		return;
 	}
-  	Node_insert(tree->root, key, object, isOwner);
+	/* Root is not empty and not full */
+  	Node_insert(tree->root, tree->order, key, object, isOwner);
 	tree->nbObjects++;
 }
 
@@ -144,7 +143,7 @@ PUBLIC Object * BTree_get(BTree* tree, Object * key)
 {
 	Object * object = 0;
 
-	object = Node_search(tree->root,key, 0);
+	object = Node_search(tree->root, tree->order, key, 0);
 
 	return object;
 }
@@ -164,16 +163,16 @@ PUBLIC Object * BTree_remove(BTree* tree, Object * key)
 
 	if (root->isLeaf)
 	{
-		for (int i = 0; i < root->nbKeyUsed; i++)
+		for (unsigned int i = 0; i < root->nbKeyUsed; i++)
 		{
 			if (Object_comp(key, root->keys[i])==0)
 			{
 				object = root->leaves[i];
-				for (int j = i; j < root->nbKeyUsed; j++)
+				for (unsigned int j = i; j < root->nbKeyUsed; j++)
 				{
 					root->keys[j] = root->keys[j + 1];
 				}
-				for (int j = 0; j <= root->nbKeyUsed; j++)
+				for (unsigned int j = 0; j <= root->nbKeyUsed; j++)
 				{
 					root->children[j] = root->children[j + 1];
 					root->leaves[j] = root->leaves[j + 1];
@@ -186,16 +185,14 @@ PUBLIC Object * BTree_remove(BTree* tree, Object * key)
 	}
 	else
 	{
-		object = Node_remove(root, key, 0);
+		object = Node_remove(root, tree->order, key, 0);
 		// Check the resulting tree so that there is at least 1 Key used at root level
-		PRINT(("Tree root number of keys after remove %d\n", root->nbKeyUsed));
-		if ((root->nbKeyUsed + 1) == 0) root->nbKeyUsed = 0;
-		if (root->nbKeyUsed < 1)
+		if (tree->root->nbKeyUsed < 1)
 		{
-			printf("Tree should collapse\n");
+			PRINT(("Tree should collapse\n"));
 			Node * newRoot = root->children[0];
 			tree->root->isLeaf = 1; /* Hack to avoid recursion when freeing */
-			Node_free(tree->root);
+			Node_free(tree->root, tree->order);
 			tree->root = newRoot;
 			tree->depth--;
 		}
@@ -223,13 +220,12 @@ PUBLIC void BTree_print(BTree* tree)
   if (tree == 0) return;
   PRINT(("Tree:\n"));
   PRINT((" Nb items: %d\n", tree->nbObjects));
-  PRINT((" Nb Nodes: %d\n", tree->nbNodes));
   PRINT((" Depth: %d\n", tree->depth));
 
   if (tree->depth > 0)
   {
     PRINT(("Root 0-0:\n"));
-    Node_print(tree->root, tree->depth - 1);
+    Node_print(tree->root, tree->order, tree->depth - 1);
   }
 }
 
@@ -259,4 +255,13 @@ PUBLIC unsigned int BTree_getSize(BTree * this)
   return sizeof(BTree); 
 }
 
-	
+/*********************************************************************************
+* @brief BTree_getNbNodes
+* @public
+* @memberof BTree
+* @return Size of instance
+*********************************************************************************/
+PUBLIC unsigned int BTree_getNbNodes(BTree* this)
+{
+  return Node_getNbNodes(this->root);
+}
