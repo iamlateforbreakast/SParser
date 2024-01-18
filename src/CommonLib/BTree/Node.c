@@ -64,7 +64,7 @@ PUBLIC Object * Node_search(Node* node, Object * key, unsigned int isFoundAlread
 	}
 	if (node->isLeaf == 1)
 	{
-		for (int i = 0; i < node->nbKeyUsed; i++)
+		for (unsigned int i = 0; i < node->nbKeyUsed; i++)
 		{
 			if (Object_comp(node->keys[i], key)==0)
 			{
@@ -78,7 +78,7 @@ PUBLIC Object * Node_search(Node* node, Object * key, unsigned int isFoundAlread
 	}
 	else
 	{
-		for (int i = 0; i < node->nbKeyUsed; i++)
+		for (unsigned int i = 0; i < node->nbKeyUsed; i++)
 		{
 			if (Object_comp(key,node->keys[i])<0)
 			{
@@ -134,7 +134,7 @@ PUBLIC void Node_insert(Node* node, Object * key, Object * object, int isOwner)
 {
 	if (node->isLeaf == 1) 
 	{
-		for (int i = 0; i < node->nbKeyUsed; i++)
+		for (unsigned int i = 0; i < node->nbKeyUsed; i++)
 		{
 			if (Object_comp(key, node->keys[i])==0)
 			{
@@ -163,7 +163,7 @@ PUBLIC void Node_insert(Node* node, Object * key, Object * object, int isOwner)
 	{
 		/* TBC: Check if node is full */
 		int i = 0;
-		for (i = 0; i < node->nbKeyUsed; i++)
+		for (unsigned i = 0; i < node->nbKeyUsed; i++)
 		{
 			if (Object_comp(key, node->keys[i])<0)
 				break;
@@ -203,7 +203,7 @@ PUBLIC Object * Node_remove(Node* node, Object * key, Object ** keyToUpdate)
 
 	if (node->isLeaf == 1)
 	{
-		for (int i = 0; i < node->nbKeyUsed; i++)
+		for (unsigned int i = 0; i < node->nbKeyUsed; i++)
 		{
 			if (Object_comp(node->keys[i], key)==0)
 			{
@@ -238,7 +238,7 @@ PUBLIC Object * Node_remove(Node* node, Object * key, Object ** keyToUpdate)
 	else
 	{
 		// Search which child contains the key
-		for (int i = 0; i < node->nbKeyUsed; i++)
+		for (unsigned int i = 0; i < node->nbKeyUsed; i++)
 		{
 			if (Object_comp(key, node->keys[i])<=0)
 			{
@@ -394,11 +394,11 @@ PRIVATE void Node_shiftRight(Node* node, unsigned int idxKey)
 
 PRIVATE void Node_shiftLeft(Node* node, unsigned int idxKey)
 {
-	for (int j = idxKey; j < node->nbKeyUsed; j++)
+	for (unsigned int j = idxKey; j < node->nbKeyUsed; j++)
 	{
 		node->keys[j] = node->keys[j + 1];
 	}
-	for (int j = idxKey; j <= node->nbKeyUsed; j++)
+	for (unsigned int j = idxKey; j <= node->nbKeyUsed; j++)
 	{
 		node->children[j] = node->children[j + 1];
 		node->leaves[j] = node->leaves[j + 1];
@@ -428,12 +428,12 @@ PRIVATE Node * Node_mergeNodes(Node* node, unsigned int idxLeft, unsigned idxRig
 	leftChild->nbKeyUsed++;
 
 	// Move all key, children, leaves from the right child node to the left
-	for (int i = 0; i < rightChild->nbKeyUsed; i++)
+	for (unsigned int i = 0; i < rightChild->nbKeyUsed; i++)
 	{
 		leftChild->keys[leftChild->nbKeyUsed + i] = rightChild->keys[i];
 		PRINT(("Copying right node keys[%d] in left node keys[%d]\n", i, leftChild->nbKeyUsed + i));
 	}
-	for (int i = 0; i <= rightChild->nbKeyUsed; i++)
+	for (unsigned int i = 0; i <= rightChild->nbKeyUsed; i++)
 	{
 		leftChild->children[leftChild->nbKeyUsed + i] = rightChild->children[i];
 		PRINT(("Copying right node children[%d] in left node children[%d]\n", i, leftChild->nbKeyUsed + i));
