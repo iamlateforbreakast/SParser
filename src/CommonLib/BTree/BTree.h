@@ -24,7 +24,7 @@ PUBLIC void BTree_print(BTree * tree);
 PUBLIC unsigned int BTree_sizeof(BTree* tree);
 PUBLIC unsigned int BTree_reportSizeInBytes(BTree * tree);
 PUBLIC unsigned int BTree_getSize(BTree * this);
-
+PUBLIC unsigned int BTree_getNbNodes(BTree* this);
 
 #endif /* _BTREE_ */
 
