@@ -10,7 +10,7 @@
 * Private Functions Declarations
 *
 *********************************************************************************/
-PRIVATE Node * Node_mergeNodes(Node* node, unsigned int idx1, unsigned int idx2);
+PRIVATE Node* Node_mergeNodes(Node* node, unsigned int order, unsigned int idxLeft, unsigned idxRight);
 PRIVATE void Node_shiftRight(Node* node, unsigned int idxKey);
 PRIVATE void Node_shiftLeft(Node* node, unsigned int idxKey);
 PRIVATE void Node_stealLeftKey(Node* node, unsigned int idxChildStealFrom, unsigned int idxChildGiveTo);
@@ -21,32 +21,26 @@ PRIVATE void Node_stealRightKey(Node* node, unsigned int idxKeyStealFrom, unsign
 * input: isLeaf TRUE if creating a terminal node
 * output: the newly created beam weight node
 *********************************************************************************/
-PUBLIC Node* Node_new(unsigned short int isLeaf)
+PUBLIC Node* Node_new(unsigned short int isLeaf, unsigned int order)
 {
 	Node* node = 0;
     const unsigned int size = sizeof(Node)
-	                        + (ORDER * 2 - 1) * sizeof(Object*)
-							+ (ORDER * 2) * sizeof(Object*)
-							+ (ORDER * 2) * sizeof(Node*);
+	                        + (order * 2 - 1) * sizeof(Object*)
+							+ (order * 2) * sizeof(Object*)
+							+ (order * 2) * sizeof(Node*);
 	node = (Node*)Memory_alloc(size);
 	Memory_set(node, 0, size);
 	node->isLeaf = isLeaf;
 	node->nbKeyUsed = 0;
     node->keys = &node->buffer[0];
-	node->leaves = &node->buffer[5];
-    node->children = &node->buffer[11];
-    PRINT(("New node:\n"));
-	PRINT(("Size - Total %d Header %d\n", size, sizeof(Node)));
-	PRINT(("Node %x Keys %x Leaves %x Children %x\n", node, node->keys, node->leaves, node->children));
-	for (int i = 0; i < ORDER * 2; i++)
-	{
+	node->leaves = &node->buffer[order * 2 - 1];
+    node->children = &node->buffer[order * 2* 2 - 1];
+    TRACE(("New node:\n"));
+	TRACE(("Size - Total %d Header %d\n", size, sizeof(Node)));
+	TRACE(("Node %x Keys %x Leaves %x Children %x\n", node, node->keys, node->leaves, node->children));
 		//(*node->children)[i] = 0;
 		//(*node->leaves)[i] = 0;
-	}
-	for (int i = 0; i < ORDER * 2 - 1; i++)
-	{
 		//*node->keys[i] = 0;
-	}
 
 	return node;
 }
@@ -56,7 +50,7 @@ PUBLIC Node* Node_new(unsigned short int isLeaf)
 * input: the key to look for
 * output: the beam weight range if found otherwise 0
 *********************************************************************************/
-PUBLIC Object * Node_search(Node* node, Object * key, unsigned int isFoundAlready)
+PUBLIC Object* Node_search(Node* node, unsigned int order, Object* key, unsigned int isFoundAlready)
 {
 	if (node == 0)
 	{
@@ -86,12 +80,12 @@ PUBLIC Object * Node_search(Node* node, Object * key, unsigned int isFoundAlread
 				{
 					Error_new(ERROR_FATAL, "Node_search node== 0\n");
 				}
-				return Node_search(node->children[i], key, isFoundAlready);
+				return Node_search(node->children[i], order, key, isFoundAlready);
 			}
 			if (Object_comp(key, node->keys[i])==0)
-				return Node_search(node->children[i], key, 1);
+				return Node_search(node->children[i], order, key, 1);
 		}
-		return Node_search(node->children[node->nbKeyUsed], key, isFoundAlready);
+		return Node_search(node->children[node->nbKeyUsed], order, key, isFoundAlready);
 	}
 
 	return 0;
@@ -102,7 +96,7 @@ PUBLIC Object * Node_search(Node* node, Object * key, unsigned int isFoundAlread
 * input: none
 * output: none
 *********************************************************************************/
-PUBLIC void Node_free(Node* node)
+PUBLIC void Node_free(Node* node, unsigned int order)
 {
   if (node == 0) return;
   if (node->isLeaf == 1)
@@ -112,12 +106,12 @@ PUBLIC void Node_free(Node* node)
   Memory_free(node,sizeof(Node));
 }
 
-PUBLIC void Node_freeRecurse(Node * node)
+PUBLIC void Node_freeRecurse(Node * node, unsigned int order)
 {
   if (node == 0) return;
   if (node->isLeaf == 0)
   {
-	for (int i = 0; i < node->nbKeyUsed + 1; i++)
+    for (unsigned int i = 0; i < node->nbKeyUsed + 1; i++)
 	{
       //Memory_free(node->leaves[i], sizeof(Node));
 	}
@@ -130,11 +124,11 @@ PUBLIC void Node_freeRecurse(Node * node)
 * input: beamWeightRange
 * output: none
 *********************************************************************************/
-PUBLIC void Node_insert(Node* node, Object * key, Object * object, int isOwner)
+PUBLIC void Node_insert(Node* node, unsigned int order, Object * key, Object * object, int isOwner)
 {
 	if (node->isLeaf == 1) 
 	{
-		for (unsigned int i = 0; i < node->nbKeyUsed; i++)
+		for (int i = 0; i < node->nbKeyUsed; i++)
 		{
 			if (Object_comp(key, node->keys[i])==0)
 			{
@@ -144,7 +138,10 @@ PUBLIC void Node_insert(Node* node, Object * key, Object * object, int isOwner)
 			if (Object_comp(key, node->keys[i])<0)
 			{
 				for (int j = node->nbKeyUsed-1; j >= i; j--)
+			  {
+				TRACE(("Node_insert j=%d i=%d\n", j, i));
 					node->keys[j + 1] = node->keys[j];
+			  }
 				for (int j = node->nbKeyUsed; j >= i; j--) 
 					node->leaves[j + 1] = node->leaves[j];
 				node->keys[i] = key;
@@ -162,8 +159,8 @@ PUBLIC void Node_insert(Node* node, Object * key, Object * object, int isOwner)
 	else
 	{
 		/* TBC: Check if node is full */
-		int i = 0;
-		for (unsigned i = 0; i < node->nbKeyUsed; i++)
+		unsigned int i = 0;
+		for (i = 0; i < node->nbKeyUsed; i++)
 		{
 			if (Object_comp(key, node->keys[i])<0)
 				break;
@@ -171,19 +168,19 @@ PUBLIC void Node_insert(Node* node, Object * key, Object * object, int isOwner)
 		if (node->children[i] == 0)
 		{
 			Error_new(ERROR_NORMAL, "insert key: %d\n", key);
-			Node_print(node, 3);
+			Node_print(node, order, 3);
 			Error_new(ERROR_FATAL,"Exiting\n");
 		}
-		if (node->children[i]->nbKeyUsed < ORDER * 2 - 1) //&& (node->nbKeyUsed < ORDER * 2 - 1))
+		if (node->children[i]->nbKeyUsed < order * 2 - 1) //&& (node->nbKeyUsed < ORDER * 2 - 1))
 		{
-			Node_insert(node->children[i], key, object, isOwner);
+			Node_insert(node->children[i], order, key, object, isOwner);
 			return;
 		}
 		else
 		{
 			TRACE(("Splitting node.\n"));
-			Node* newChild = Node_splitNode(node, node->children[i], key);
-			Node_insert(newChild, key, object, isOwner);
+			Node* newChild = Node_splitNode(node, order, node->children[i], key);
+			Node_insert(newChild, order, key, object, isOwner);
 			return;
 		}
 	    //Node* childNode = Node_split(node, key);
@@ -197,7 +194,7 @@ PUBLIC void Node_insert(Node* node, Object * key, Object * object, int isOwner)
 * input: the key to remove
 * output: none
 *********************************************************************************/
-PUBLIC Object * Node_remove(Node* node, Object * key, Object ** keyToUpdate)
+PUBLIC Object * Node_remove(Node* node, unsigned int order, Object * key, Object ** keyToUpdate)
 { 
 	Object * object = 0;
 
@@ -210,11 +207,11 @@ PUBLIC Object * Node_remove(Node* node, Object * key, Object ** keyToUpdate)
 				//Can we remove if node->nbKeyUsed => ORDER then can remove
 				object = node->leaves[i];
 				// Shift all children and leaves left
-				for (int j = i; j < node->nbKeyUsed; j++)
+				for (unsigned int j = i; j < node->nbKeyUsed; j++)
 				{
 					node->keys[j] = node->keys[j + 1];
 				}
-				for (int j = i; j <= node->nbKeyUsed; j++)
+				for (unsigned int j = i; j <= node->nbKeyUsed; j++)
 				{
 					node->children[j] = node->children[j + 1];
 					node->leaves[j] = node->leaves[j + 1];
@@ -244,14 +241,14 @@ PUBLIC Object * Node_remove(Node* node, Object * key, Object ** keyToUpdate)
 			{
 				// The key is found already while descending the tree, remember it
 				if (Object_comp(key, node->keys[i])==0) keyToUpdate = &node->keys[i]; /* BUG: <= should be == */
-				object = Node_remove(node->children[i], key, keyToUpdate);
+				object = Node_remove(node->children[i], order, key, keyToUpdate);
 				// Check if the number of children is at least ORDER
-				if (node->children[i]->nbKeyUsed < ORDER - 1)
+				if (node->children[i]->nbKeyUsed < order - 1)
 				{
-					if (node->children[i + 1]->nbKeyUsed <= ORDER - 1)
+					if (node->children[i + 1]->nbKeyUsed <= order - 1)
 					{
 						// Merge node left and right
-						Node_mergeNodes(node, i, i + 1);
+						Node_mergeNodes(node, order, i, i + 1);
 					}
 					else
 					{
@@ -267,15 +264,15 @@ PUBLIC Object * Node_remove(Node* node, Object * key, Object ** keyToUpdate)
 			}
 			/* SHould there be more checks here */
 		}
-		object = Node_remove(node->children[node->nbKeyUsed], key, keyToUpdate);
+		object = Node_remove(node->children[node->nbKeyUsed], order, key, keyToUpdate);
 		// Now assess if the node needs to be re-balanced
-		if (node->children[node->nbKeyUsed]->nbKeyUsed < ORDER - 1)
+		if (node->children[node->nbKeyUsed]->nbKeyUsed < order - 1)
 		{
-			if (node->children[node->nbKeyUsed - 1]->nbKeyUsed <= ORDER - 1)
+			if (node->children[node->nbKeyUsed - 1]->nbKeyUsed <= order - 1)
 			{
 				// Merge node left and right
-				PRINT(("ERROR: Need to merge\n"));
-				Node_mergeNodes(node, node->nbKeyUsed - 1, node->nbKeyUsed);
+				TRACE(("ERROR: Need to merge\n"));
+				Node_mergeNodes(node, order, node->nbKeyUsed - 1, node->nbKeyUsed);
 				//node->nbKeyUsed--;
 			}
 			else
@@ -300,26 +297,27 @@ PUBLIC Object * Node_remove(Node* node, Object * key, Object ** keyToUpdate)
 * input: None
 * output: None
 *********************************************************************************/
-PUBLIC void Node_print(Node* node, unsigned int depth)
+PUBLIC void Node_print(Node* node, unsigned int order, unsigned int depth)
 {
 	if (node == 0) return;
 	TRACE((" Node NbUsed: %d\n", node->nbKeyUsed));
 	TRACE((" Keys: "));
-	for (int i = 0; i < ORDER * 2 - 1; i++)
+	for (unsigned int i = 0; i < order * 2 - 1; i++)
 	{
 		if (i < node->nbKeyUsed)
-			//PRINT(("%x ", node->keys[i]));
-			Object_print(node->keys[i]);
+		PRINT(("%x ", node->keys[i]));
+		//Object_print(node->keys[i]);
 		else
 			PRINT((".. "));
 	}
 	PRINT(("\n"));
 	if ((node->isLeaf==0) && (depth>0))
 	{
-		for (int i = 0; i <= node->nbKeyUsed; i++)
+		for (unsigned int i = 0; i <= node->nbKeyUsed; i++)
 		{
-			PRINT(("Child %d-%d:\n", depth, i));
-		    Node_print(node->children[i], depth - 1);
+			PRINT(("Child %d-%d:\n",
+			  depth, i));
+		    Node_print(node->children[i], order, depth - 1);
 		}
 	}
 }
@@ -330,18 +328,18 @@ PUBLIC void Node_print(Node* node, unsigned int depth)
 * input: the key that caused the split
 * output: The sub tree where the key should be inserted
 *********************************************************************************/
-PUBLIC Node* Node_splitNode(Node* node, Node* nodeToSplit, Object * key)
+PUBLIC Node* Node_splitNode(Node* node, unsigned int order, Node* nodeToSplit, Object * key)
 {
 	Node* newChild;
 
-	newChild = Node_new(nodeToSplit->isLeaf);
+	newChild = Node_new(nodeToSplit->isLeaf, order);
 
 	unsigned int k;
 
 	for (k = 0; k < node->nbKeyUsed; k++)
 	{
 		/* TBC: node->nbKeyUsed is assumed less than ORDER*2-1 */
-		if (Object_comp(nodeToSplit->keys[ORDER - 1], node->keys[k])<0) break;
+		if (Object_comp(nodeToSplit->keys[order - 1], node->keys[k])<0) break;
 	}
 	for (unsigned int j = node->nbKeyUsed; j > k; j--)
 		node->keys[j] = node->keys[j - 1];
@@ -350,21 +348,21 @@ PUBLIC Node* Node_splitNode(Node* node, Node* nodeToSplit, Object * key)
 		node->leaves[j] = node->leaves[j - 1];
 		node->children[j] = node->children[j - 1];
 	}
-	node->keys[k] = nodeToSplit->keys[ORDER - 1];
+	node->keys[k] = nodeToSplit->keys[order - 1];
 	node->children[k] = nodeToSplit;
 	node->children[k + 1] = newChild;
 	node->nbKeyUsed++;
-	for (int i = 0; i < ORDER - 1; i++)
-		newChild->keys[i] = nodeToSplit->keys[ORDER + i];
-	for (int i = 0; i < ORDER; i++)
+	for (unsigned int i = 0; i < order - 1; i++)
+		newChild->keys[i] = nodeToSplit->keys[order + i];
+	for (unsigned int i = 0; i < order; i++)
 	{
-		newChild->leaves[i] = nodeToSplit->leaves[ORDER + i];
-		newChild->children[i] = nodeToSplit->children[ORDER + i];
-		nodeToSplit->leaves[ORDER + i] = 0;
-		nodeToSplit->children[ORDER + i] = 0;
+		newChild->leaves[i] = nodeToSplit->leaves[order + i];
+		newChild->children[i] = nodeToSplit->children[order + i];
+		nodeToSplit->leaves[order + i] = 0;
+		nodeToSplit->children[order + i] = 0;
 	}
-	newChild->nbKeyUsed = ORDER - 1;
-	nodeToSplit->nbKeyUsed = ORDER - 1;
+	newChild->nbKeyUsed = order - 1;
+	nodeToSplit->nbKeyUsed = order - 1;
 
 
 	if (Object_comp(key, node->keys[k])<0)
@@ -376,6 +374,16 @@ PUBLIC Node* Node_splitNode(Node* node, Node* nodeToSplit, Object * key)
 PUBLIC unsigned int Node_getSize(Node * node)
 {
   return 0;
+}
+PUBLIC unsigned int Node_getNbNodes(Node* node)
+{
+  if (node->isLeaf) return 1;
+  unsigned int result = node->nbKeyUsed;
+  for (unsigned int i = 0; i <= node->nbKeyUsed; i++)
+  {
+	result = result + Node_getNbNodes(node->children[i]);
+  }
+  return result;
 }
 
 PRIVATE void Node_shiftRight(Node* node, unsigned int idxKey)
@@ -412,15 +420,13 @@ PRIVATE void Node_shiftLeft(Node* node, unsigned int idxKey)
 * input: index of the right node to merge
 * output: The merged node
 *********************************************************************************/
-PRIVATE Node * Node_mergeNodes(Node* node, unsigned int idxLeft, unsigned idxRight)
+PRIVATE Node * Node_mergeNodes(Node* node, unsigned int order, unsigned int idxLeft, unsigned idxRight)
 {
 	Node* mergedNode = 0;
 
 	Node * leftChild = node->children[idxLeft];
 	Node * rightChild = node->children[idxRight];
-    PRINT(("\nNode_mergNodes ----------------------\n"));
-	PRINT(("Left node number of keys before merge %d\n", leftChild->nbKeyUsed));
-	PRINT(("Right node nummber of keys before merge %d\n", rightChild->nbKeyUsed));
+
 	// Demote the key from the parent node into the left child
 	leftChild->keys[leftChild->nbKeyUsed] = node->keys[idxLeft];
 	// Promote the last key of the right child to the parent node
@@ -431,21 +437,17 @@ PRIVATE Node * Node_mergeNodes(Node* node, unsigned int idxLeft, unsigned idxRig
 	for (unsigned int i = 0; i < rightChild->nbKeyUsed; i++)
 	{
 		leftChild->keys[leftChild->nbKeyUsed + i] = rightChild->keys[i];
-		PRINT(("Copying right node keys[%d] in left node keys[%d]\n", i, leftChild->nbKeyUsed + i));
 	}
 	for (unsigned int i = 0; i <= rightChild->nbKeyUsed; i++)
 	{
 		leftChild->children[leftChild->nbKeyUsed + i] = rightChild->children[i];
-		PRINT(("Copying right node children[%d] in left node children[%d]\n", i, leftChild->nbKeyUsed + i));
 		leftChild->leaves[leftChild->nbKeyUsed + i] = rightChild->leaves[i];
-		PRINT(("Copying right node leaves[%d] in left node leaves[%d]\n", i, leftChild->nbKeyUsed + i));
 	}
 	leftChild->nbKeyUsed = leftChild->nbKeyUsed + rightChild->nbKeyUsed;
-    PRINT(("Left merged node number of keys after merge %d\n", leftChild->nbKeyUsed));
-	PRINT(("parent node number of keys after merge %d\n", node->nbKeyUsed));
+
 	// Update parent node and discard right child
 	Node_shiftLeft(node, idxRight);
-	Node_free(rightChild);
+	Node_free(rightChild, order);
 
 	return mergedNode;
 }
