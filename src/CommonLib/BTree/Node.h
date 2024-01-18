@@ -7,8 +7,6 @@
 #include "Types.h"
 #include "Object.h"
 
-#define ORDER (3)
-
 typedef struct Node Node;
 
 typedef struct Node
@@ -21,13 +19,13 @@ typedef struct Node
 	Object* buffer[18];	
 } Node;
 
-PUBLIC Node * Node_new(unsigned short int isLeaf);
-PUBLIC Node* Node_splitNode(Node* node, Node* nodeToSplit, Object * key);
-PUBLIC void Node_insert(Node* node, Object * key, Object * object, int isOwner);
-PUBLIC Object * Node_remove(Node* node, Object * key, Object ** keyToUpdate);
-PUBLIC Object * Node_search(Node* node, Object * key, unsigned int isFoundAlready);
-PUBLIC void Node_free(Node* node);
-PUBLIC void Node_print(Node* node, unsigned int depth);
-
+PUBLIC Node * Node_new(unsigned short int isLeaf, unsigned int order);
+PUBLIC Node* Node_splitNode(Node * node, unsigned int order, Node* nodeToSplit, Object * key);
+PUBLIC void Node_insert(Node * node, unsigned int order, Object * key, Object * object, int isOwner);
+PUBLIC Object * Node_remove(Node * node, unsigned int order, Object * key, Object ** keyToUpdate);
+PUBLIC Object * Node_search(Node * node, unsigned int order, Object * key, unsigned int isFoundAlready);
+PUBLIC void Node_free(Node * node, unsigned int order);
+PUBLIC void Node_print(Node * node, unsigned int order, unsigned int depth);
+PUBLIC unsigned int Node_getNbNodes(Node * node);
 #endif /* _NODE_ */
 
