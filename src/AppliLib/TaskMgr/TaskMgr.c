@@ -3,13 +3,15 @@
 #include "Object.h"
 #include "Mutex.h"
 
-#ifdef WIN32
-#include <windows.h>
 #include <stdlib.h>
-#include <string.h>
 #include <stdio.h>
+
+#ifndef WIN32
+#include <pthread.h>
+#else
+#include <windows.h>
 #include <conio.h>
-//#include <process.h>
+#include <process.h>
 #endif
 
 //HANDLE  hRunMutex;                   // "Keep Running" mutex
@@ -27,23 +29,30 @@
 
 //while (WaitForSingleObject(hRunMutex, 75L) == WAIT_TIMEOUT);
 
+typedef struct Job{
+  fct;
+  **arg
+} Job;
+
 struct TaskMgr
 {
   Object object;
   int maxTask;
+  int taskId[2];
+  int nbJobs;
   Mutex runMutex;
   Mutex clockMutex;
 };
 
 Class taskMgrClass = {
-  .f_new = 0
+  .f_new = 0,
+  .f_delete = (Destructor)&TaskMgr_delete
 };
 
 PUBLIC TaskMgr * TaskMgr_new(int maxTask)
 {
   // Mutex_create(this->runMutex, TRUE);
-  // Mutex_create(clockMutex, FALSE);
-  // Create N task
+  // Mutex_create(this->clockMutex, FALSE);
   // 
 }
 
@@ -72,30 +81,28 @@ PUBLIC void TaskMgr_delete(TaskMgr * this)
   //if (hRunMutex) CloseHandle(hRunMutex);
 }
 
-PUBLIC void TaskMgr_createTask(TaskMgr* this)
+PUBLIC int TaskMgr_createTask(TaskMgr* this, funct, ** args)
 {
-
+#ifndef WIN32
+err = pthread_create(&(tid[i]), NULL, &TaskMgr_executeTaskBody, NULL);
+#else
+hThreads[ThreadNr] = 
+                (HANDLE)_beginthread(TaskMgr_executeTaskBody, 0, (void*)(uintptr_t)ThreadNr);
+#endif
 }
 
-PRIVATE void Mutex_createMutex()
+PRIVATE void TaskMgr_executeTaskBody()
 {
+  //wait run mutex
+
+  // wait clock mutex
+
+  //wait run mutex with timeout
+
+  //terminate
 }
 
-PRIVATE
 /*
-
-void KbdFunc(void) // Dispatch and count threads.
-{
-    int         KeyInfo;
-
-        {
-            ++ThreadNr;
-            hThreads[ThreadNr] = 
-                (HANDLE)_beginthread(BounceProc, 0, (void*)(uintptr_t)ThreadNr);
- 
-
-    ShutDown();
-}
 
 void BounceProc(void* pMyID)
 {
