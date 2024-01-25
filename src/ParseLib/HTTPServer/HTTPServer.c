@@ -1,7 +1,16 @@
 /* HTTPServer.c */
 
 #include "HTTPServer.h"
-
+#include "Object.h"
+#ifndef WIN32
+#include <sys/socket.h>
+#include <netinet/ip.h>
+#else
+#include <winsock2.h>
+#endif
+/**********************************************//**
+  @class HTTPServer
+**************************************************/
 struct HTTPServer
 {
   Object object;
@@ -10,35 +19,52 @@ struct HTTPServer
   int fd;
 };
 
+/**********************************************//**
+  @private Class Description
+**************************************************/
 Class httpServerClass =
 {
-    .f_new = 0,
-    .f_delete = (Destructor)&HTTPServer_delete
+  .f_new = 0,
+  .f_delete = (Destructor)&HTTPServer_delete,
+  .f_copy = (Copy_Operator)&HTTPServer_copy,
+  .f_comp = (Comp_Operator)&HTTPServer_compare,
+  .f_print = (Printer)&HTTPServer_print,
+  .f_size = (Sizer)&HTTPServer_getSize
 };
 
+/**********************************************//**
+  @brief Create a new instance of the class HTTPServer.
+  @public
+  @memberof HTTPServer
+  @param[in] none
+  @return New instance of class HHTPServer.
+**************************************************/
 PUBLIC HTTPServer * HTTPServer_new()
 {
-  if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        perror("socket failed");
-        exit(EXIT_FAILURE);
+  HTTPServer * this = 0;
+
+  this = (HTTPServer*)Object_new(sizeof(HTTPServer),&httpServerClass);
+
+  if (this==0) return 0;
+
+  if ((this->fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        printf("socket failed");
+        exit(1);
+  }
   // config socket
-  server_addr.sin_family = AF_INET;
-  server_addr.sin_addr.s_addr = INADDR_ANY;
-  server_addr.sin_port = htons(PORT);
+  this->server_addr.sin_family = AF_INET;
+  this->server_addr.sin_addr.s_addr = INADDR_ANY;
+  this->server_addr.sin_port = htons(this->port);
 
   // bind socket to port
-  if (bind(server_fd, 
-            (struct sockaddr *)&server_addr, 
-            sizeof(server_addr)) < 0)
+  if (bind(this->fd, 
+            (struct sockaddr *)&this->server_addr, 
+            sizeof(this->server_addr)) < 0)
   {
-    perror("bind failed");
-    exit(EXIT_FAILURE);
+    printf("bind failed");
+    exit(1);
   }
-  // listen for connections
-  if (listen(server_fd, 10) < 0) {
-        perror("listen failed");
-        exit(EXIT_FAILURE);
-  }
+  
   return 0;
 }
 
@@ -47,18 +73,47 @@ PUBLIC void HTTPServer_delete(HTTPServer * this)
 
 }
 
-/*#include <stdio.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+PUBLIC HTTPServer * HTTPServer_copy(HTTPServer * this)
+{
+  return 0;
+}
 
-#if defined(_WIN32) || defined(_WIN64)
-    #include <winsock2.h>
-#else
-    #include <sys/socket.h>
-    #include <arpa/inet.h>
-#endif
+PUBLIC int HTTPServer_compare(HTTPServer * this, HTTPServer * compared)
+{
+  return 0;
+}
+
+PUBLIC void HTTPServer_print(HTTPServer * this)
+{
+
+}
+
+PUBLIC unsigned int HTTPServer_getSize(HTTPServer * this)
+{
+  return sizeof(HTTPServer);
+} 
+
+PUBLIC void HTTPServer_start(HTTPServer * this)
+{
+// listen for connections
+  if (listen(this->fd, 10) < 0) {
+        printf("listen failed");
+        exit(1);
+  }
+
+  //Task taskHandler = 
+
+  //Task_start(Task);
+
+
+}
+
+PUBLIC void HTTPServer_handleConnection()
+{
+
+}
+
+/*
 
 #define MSG_SIZE 1024
 #define REPLY_SIZE 65536
