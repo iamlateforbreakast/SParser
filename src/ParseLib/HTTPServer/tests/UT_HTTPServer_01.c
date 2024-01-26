@@ -1,16 +1,27 @@
-/* HTTPServer.h */
-#ifndef _HTTPSERVER_H_
-#define _HTTPSERVER_H_
+/* UT_HTTPServer_01.c */
 
-#include "Types.h"
+#include "HTTPServer.h"
 
-typedef struct HTTPServer HTTPServer;
+int step1()
+{
+    int isPassed = 1;
 
-PUBLIC HTTPServer * HTTPServer_new();
-PUBLIC void HTTPServer_delete(HTTPServer * this);
-PUBLIC HTTPServer* HTTPServer_copy(HTTPServer* this);
-PUBLIC int HTTPServer_compare(HTTPServer* this, HTTPServer* compared);
-PUBLIC void HTTPServer_print(HTTPServer* this);
-PUBLIC unsigned int HTTPServer_getSize(HTTPServer* this);
-//PUBLIC void HTTPServer_start(HTTPServer* this);
-#endif /* _HTTPSERVER_H_ */
+    HTTPServer * httpServer = 0;
+
+    httpServer = HTTPServer_new();
+
+    HTTPServer_start(httpServer);
+
+    HTTPServer_delete(httpServer);
+
+    return isPassed;
+}
+
+int main()
+{
+  int isPassed = 1;
+
+  step1();
+
+  return isPassed;
+}

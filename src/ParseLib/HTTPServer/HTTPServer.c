@@ -4,6 +4,8 @@
 #include "Object.h"
 #include "Debug.h"
 
+#include <stdlib.h>
+
 #ifndef WIN32
 #include <sys/socket.h>
 #include <netinet/ip.h>
@@ -60,8 +62,10 @@ PUBLIC HTTPServer* HTTPServer_new()
   }
 #endif
 
+  this->port = 8080;
+
   if ((this->fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-    printf("socket failed");
+    PRINT(("socket failed"));
     exit(1);
   }
   // config socket
@@ -77,12 +81,13 @@ PUBLIC HTTPServer* HTTPServer_new()
     printf("bind failed");
     exit(1);
   }
-  return 0;
+
+  return this;
 }
 
 PUBLIC void HTTPServer_delete(HTTPServer* this)
 {
-
+  close(this->fd);
 }
 
 PUBLIC HTTPServer* HTTPServer_copy(HTTPServer* this)
@@ -111,6 +116,21 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
   if (listen(this->fd, 10) < 0) {
     printf("listen failed");
     exit(1);
+  }
+
+  while (1) {
+    // client info
+    struct sockaddr_in client_addr;
+    socklen_t client_addr_len = sizeof(client_addr);
+    int *client_fd = malloc(sizeof(int));
+
+    // accept client connection
+    if ((*client_fd = accept(this->fd, 
+                           (struct sockaddr *)&client_addr, 
+                            &client_addr_len)) < 0) {
+            PRINT(("accept failed"));
+            continue;
+        }
   }
 }
 
