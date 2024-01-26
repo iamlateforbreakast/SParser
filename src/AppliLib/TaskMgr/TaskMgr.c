@@ -38,8 +38,7 @@ struct TaskMgr
 {
   Object object;
   int maxTask;
-  int taskId[2];
-  int nbJobs;
+  Task taskId[2];
   Mutex runMutex;
   Mutex clockMutex;
 };
@@ -83,12 +82,7 @@ PUBLIC void TaskMgr_delete(TaskMgr * this)
 
 PUBLIC int TaskMgr_createTask(TaskMgr* this, funct, ** args)
 {
-#ifndef WIN32
-err = pthread_create(&(tid[i]), NULL, &TaskMgr_executeTaskBody, NULL);
-#else
-hThreads[ThreadNr] = 
-                (HANDLE)_beginthread(TaskMgr_executeTaskBody, 0, (void*)(uintptr_t)ThreadNr);
-#endif
+
 }
 
 PRIVATE void TaskMgr_executeTaskBody()
