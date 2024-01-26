@@ -18,11 +18,6 @@ TaskMgr * taskMgr = 0;
 
 typedef struct Task
 {
-#ifndef WIN32
-  pthread_t id;
-#else
-  HANDLE id;
-#endif
   void (*body)(Object * this, int nbParams, void **params);
   int nbParams;
   void **params;
@@ -41,7 +36,7 @@ PUBLIC Task * Task_create(void (*body)(Object * this, int nbParams, void **param
   hThreads[ThreadNr] = 
                 (HANDLE)_beginthread(TaskMgr_executeTaskBody, 0, (void*)(uintptr_t)ThreadNr);
 #endif
-  TaskMgr_startTask(Task * this);
+  //TaskMgr_startTask(this);
 
   return 0;
 }
@@ -49,7 +44,13 @@ PUBLIC Task * Task_create(void (*body)(Object * this, int nbParams, void **param
 
 PRIVATE void Task_executeBody()
 {
-  //
+  //wait run mutex
+
+  // wait clock mutex
+
+  //wait run mutex with timeout
+
+  //terminate
 
   //this->body(this->object, this->nbParams, this->params);
 

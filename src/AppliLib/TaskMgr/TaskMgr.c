@@ -2,6 +2,7 @@
 #include "TaskMgr.h"
 #include "Object.h"
 #include "Mutex.h"
+#include "Task.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -29,47 +30,71 @@
 
 //while (WaitForSingleObject(hRunMutex, 75L) == WAIT_TIMEOUT);
 
-typedef struct Job{
-  fct;
-  **arg
-} Job;
+#define MAX_TASKS (10)
 
 struct TaskMgr
 {
   Object object;
   int maxTask;
-  Task taskId[2];
+  int nbThreads;
+  int isStarted;
+  Task * taskId[MAX_TASKS];
   Mutex runMutex;
-  Mutex clockMutex;
+  //Mutex clockMutex;
+#ifndef WIN32
+  pthread_t id;
+#else
+  HANDLE id;
+#endif
 };
 
 Class taskMgrClass = {
   .f_new = 0,
-  .f_delete = (Destructor)&TaskMgr_delete
+  .f_delete = (Destructor)&TaskMgr_delete,
+  .f_comp = 0,
+  .f_copy = 0,
+  .f_print = 0,
+  .f_size = (Sizer)&TaskMgr_getSize
 };
 
 PUBLIC TaskMgr * TaskMgr_new(int maxTask)
 {
-  // Mutex_create(this->runMutex, TRUE);
-  // Mutex_create(this->clockMutex, FALSE);
-  // 
+  TaskMgr * this = 0;
+  this = (TaskMgr*)Object_new(sizeof(TaskMgr), &taskMgrClass);
+
+  Mutex_create(this->runMutex, 1);
+
+  // create thread();
+  this->nbThreads = 1;
 }
 
-// start
-// stop
-
-PUBLIC void TaskMgr_delete(TaskMgr * this)
+PUBLIC int TaskMgr_start(TaskMgr * taskMgr, Task * task)
 {
-  // Mutex_release(this->runMutex);
-  // 
-  //     // Tell all threads to die
-  ReleaseMutex(hRunMutex);
+  // Release mutex
+  for (int i=0; i<this->maxTask; i++)
+  {
+    if (taskId[i] == 0) taskId[i] = task;
+  }
+  return 0;
+}
+
+PUBLIC void TaskMgr_stop(TaskMgr * this)
+{
+ReleaseMutex(hRunMutex);
 
   while (ThreadNr > 0)
   {
     // Wait for each thread to complete
     WaitForSingleObject(hThreads[--ThreadNr], INFINITE);
   }
+}
+
+PUBLIC void TaskMgr_delete(TaskMgr * this)
+{
+  // Mutex_release(this->runMutex);
+  // 
+  //     // Tell all threads to die
+  
 
   // Clean up display when done
   WaitForSingleObject(hScreenMutex, INFINITE);
@@ -80,12 +105,7 @@ PUBLIC void TaskMgr_delete(TaskMgr * this)
   //if (hRunMutex) CloseHandle(hRunMutex);
 }
 
-PUBLIC int TaskMgr_createTask(TaskMgr* this, funct, ** args)
-{
-
-}
-
-PRIVATE void TaskMgr_executeTaskBody()
+PRIVATE void TaskMgr_threadBody()
 {
   //wait run mutex
 
