@@ -8,7 +8,6 @@ typedef struct TaskMgr TaskMgr;
 
 PUBLIC TaskMgr * TaskMgr_new();
 PUBLIC void TaskMgr_delete(TaskMgr * this);
-
-// create Async task(function)
-// create Sync task(function)
+PUBLIC void TaskMgr_print(TaskMgr * this);
+PUBLIC unsigned int TaskMgr_getSize(TaskMgr * this);
 #endif /* _TASKMGR_H_ */

@@ -53,7 +53,7 @@ Class taskMgrClass = {
   .f_delete = (Destructor)&TaskMgr_delete,
   .f_comp = 0,
   .f_copy = 0,
-  .f_print = 0,
+  .f_print = (Printer),&TaskMgr_print,
   .f_size = (Sizer)&TaskMgr_getSize
 };
 
@@ -68,24 +68,31 @@ PUBLIC TaskMgr * TaskMgr_new(int maxTask)
   this->nbThreads = 1;
 }
 
-PUBLIC int TaskMgr_start(TaskMgr * taskMgr, Task * task)
+PUBLIC int TaskMgr_start(TaskMgr * this, Task * task)
 {
+  int isStarted = 0;
   // Release mutex
   for (int i=0; i<this->maxTask; i++)
   {
-    if (taskId[i] == 0) taskId[i] = task;
+    if (this->taskId[i] == 0) 
+    {
+      this->taskId[i] = task;
+      isStarted = 1;
+      break;
+    }
   }
-  return 0;
+  return isStarted;
 }
 
 PUBLIC void TaskMgr_stop(TaskMgr * this)
 {
-ReleaseMutex(hRunMutex);
-
+  //ReleaseMutex(hRunMutex);
+  Mutex_release();
   while (ThreadNr > 0)
   {
     // Wait for each thread to complete
-    WaitForSingleObject(hThreads[--ThreadNr], INFINITE);
+    //WaitForSingleObject(hThreads[--ThreadNr], INFINITE);
+    TaskMgr_waitForThread(this);
   }
 }
 
@@ -97,12 +104,24 @@ PUBLIC void TaskMgr_delete(TaskMgr * this)
   
 
   // Clean up display when done
-  WaitForSingleObject(hScreenMutex, INFINITE);
-  ClearScreen();
+  //WaitForSingleObject(hScreenMutex, INFINITE);
+  //ClearScreen();
 
   // All threads done. Clean up handles.
   //if (hScreenMutex) CloseHandle(hScreenMutex);
   //if (hRunMutex) CloseHandle(hRunMutex);
+}
+
+PUBLIC void TaskMgr_print(TaskMgr * this)
+{
+
+}
+
+PUBLIC unsigned int TaskMgr_getSize(TaskMgr * this)
+{
+  if (this == 0) return sizeof(TaskMgr);
+
+  return sizeof(this);
 }
 
 PRIVATE void TaskMgr_threadBody()

@@ -27,7 +27,7 @@ typedef struct Task
 
 PUBLIC Task * Task_create(void (*body)(Object * this, int nbParams, void **params))
 {
-  Task this = 0;
+  Task * this = 0;
   
   this = (Task*)Memory_alloc(size(Task));
 #ifndef WIN32

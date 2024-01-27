@@ -3,6 +3,7 @@
 #define _MUTEX_H_
 
 #include "Types.h"
+#include <pthread.h>
 
 typedef struct Mutex
 {
