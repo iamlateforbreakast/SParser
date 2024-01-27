@@ -16,19 +16,6 @@
 #include <process.h>
 #endif
 
-//HANDLE  hRunMutex;                   // "Keep Running" mutex
-//HANDLE  hScreenMutex;                // "Screen update" mutex
-//HANDLE  hThreads[MAX_THREADS] = { NULL }; // Handles for created threads
-
-//hScreenMutex = CreateMutexW(NULL, FALSE, NULL);  // Cleared
-//hRunMutex = CreateMutexW(NULL, TRUE, NULL);      // Set
-
-//WaitForSingleObject(hScreenMutex, INFINITE);
-
-//WaitForSingleObject(hThreads[--ThreadNr], INFINITE);
-
-//hThreads[ThreadNr] = (HANDLE)_beginthread(BounceProc, 0, (void*)(uintptr_t)ThreadNr);
-
 //while (WaitForSingleObject(hRunMutex, 75L) == WAIT_TIMEOUT);
 
 #define MAX_TASKS (10)
