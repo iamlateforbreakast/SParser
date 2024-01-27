@@ -29,18 +29,15 @@ PUBLIC Task * Task_create(void (*body)(Object * this, int nbParams, void **param
 {
   Task * this = 0;
   
-  this = (Task*)Memory_alloc(size(Task));
-#ifndef WIN32
-  err = pthread_create(&(tid[i]), NULL, &TaskMgr_executeTaskBody, NULL);
-#else
-  hThreads[ThreadNr] = 
-                (HANDLE)_beginthread(TaskMgr_executeTaskBody, 0, (void*)(uintptr_t)ThreadNr);
-#endif
+  this = (Task*)Memory_alloc(sizeof(Task));
+
   //TaskMgr_startTask(this);
 
   return 0;
 }
 
+    // Wait for each thread to complete
+    //WaitForSingleObject(hThreads[--ThreadNr], INFINITE);
 
 PRIVATE void Task_executeBody()
 {

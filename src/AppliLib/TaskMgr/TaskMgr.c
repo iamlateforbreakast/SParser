@@ -3,6 +3,7 @@
 #include "Object.h"
 #include "Mutex.h"
 #include "Task.h"
+#include "Memory.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -31,6 +32,7 @@
 //while (WaitForSingleObject(hRunMutex, 75L) == WAIT_TIMEOUT);
 
 #define MAX_TASKS (10)
+#define MAX_THREADS (1)
 
 struct TaskMgr
 {
@@ -40,11 +42,10 @@ struct TaskMgr
   int isStarted;
   Task * taskId[MAX_TASKS];
   Mutex runMutex;
-  //Mutex clockMutex;
 #ifndef WIN32
-  pthread_t id;
+  pthread_t threadHandle[MAX_THREADS];
 #else
-  HANDLE id;
+  HANDLE threadHandle[MAX_THREADS];
 #endif
 };
 
@@ -53,19 +54,33 @@ Class taskMgrClass = {
   .f_delete = (Destructor)&TaskMgr_delete,
   .f_comp = 0,
   .f_copy = 0,
-  .f_print = (Printer),&TaskMgr_print,
+  .f_print = (Printer)&TaskMgr_print,
   .f_size = (Sizer)&TaskMgr_getSize
 };
+
+PRIVATE void * TaskMgr_threadBody(void * this);
+PRIVATE void TaskMgr_waitForThread();
 
 PUBLIC TaskMgr * TaskMgr_new(int maxTask)
 {
   TaskMgr * this = 0;
   this = (TaskMgr*)Object_new(sizeof(TaskMgr), &taskMgrClass);
 
-  Mutex_create(this->runMutex, 1);
+  //Mutex_new(&this->runMutex, 0);
 
-  // create thread();
-  this->nbThreads = 1;
+  this->nbThreads = MAX_THREADS;
+
+  for (int i; i<this->nbThreads; ++i)
+  {
+#ifndef WIN32
+    int err = pthread_create(&(this->threadHandle[i]), NULL, &TaskMgr_threadBody, this);
+#else
+    hThreads[ThreadNr] = 
+                (HANDLE)_beginthread(TaskMgr_threadBody, 0, (void*)this);
+#endif
+  }
+
+  return this;
 }
 
 PUBLIC int TaskMgr_start(TaskMgr * this, Task * task)
@@ -81,35 +96,27 @@ PUBLIC int TaskMgr_start(TaskMgr * this, Task * task)
       break;
     }
   }
+
+  TaskMgr_waitForThread(this);
+
   return isStarted;
 }
 
 PUBLIC void TaskMgr_stop(TaskMgr * this)
 {
-  //ReleaseMutex(hRunMutex);
-  Mutex_release();
-  while (ThreadNr > 0)
+  Mutex_release(&this->runMutex);
+  while (this->nbThreads > 0)
   {
-    // Wait for each thread to complete
-    //WaitForSingleObject(hThreads[--ThreadNr], INFINITE);
     TaskMgr_waitForThread(this);
+    this->nbThreads--;
   }
 }
 
 PUBLIC void TaskMgr_delete(TaskMgr * this)
 {
   // Mutex_release(this->runMutex);
-  // 
-  //     // Tell all threads to die
-  
 
-  // Clean up display when done
-  //WaitForSingleObject(hScreenMutex, INFINITE);
-  //ClearScreen();
-
-  // All threads done. Clean up handles.
-  //if (hScreenMutex) CloseHandle(hScreenMutex);
-  //if (hRunMutex) CloseHandle(hRunMutex);
+  Mutex_delete(&this->runMutex);
 }
 
 PUBLIC void TaskMgr_print(TaskMgr * this)
@@ -124,7 +131,7 @@ PUBLIC unsigned int TaskMgr_getSize(TaskMgr * this)
   return sizeof(this);
 }
 
-PRIVATE void TaskMgr_threadBody()
+PRIVATE void * TaskMgr_threadBody(void * this)
 {
   //wait run mutex
 
@@ -133,13 +140,11 @@ PRIVATE void TaskMgr_threadBody()
   //wait run mutex with timeout
 
   //terminate
-}
-
-/*
-
-void BounceProc(void* pMyID)
-{
-    do
+  for (int i=0; i<20; ++i)
+  {
+    printf("Here\n");
+  }
+  /*do
     {
         // Wait for display to be available, then lock it.
         WaitForSingleObject(hScreenMutex, INFINITE);
@@ -147,7 +152,13 @@ void BounceProc(void* pMyID)
         ReleaseMutex(hScreenMutex);
     }
     // Repeat while RunMutex is still taken.
-    while (WaitForSingleObject(hRunMutex, 75L) == WAIT_TIMEOUT);
-}*/
+    while (WaitForSingleObject(hRunMutex, 75L) == WAIT_TIMEOUT);*/
+}
 
-
+PRIVATE void TaskMgr_waitForThread(TaskMgr * this)
+{
+  for (int i=0; i<this->nbThreads; ++i)
+  {
+    pthread_join(this->threadHandle[i], NULL);
+  } 
+}

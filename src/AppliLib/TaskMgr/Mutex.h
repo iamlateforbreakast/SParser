@@ -37,6 +37,8 @@ PRIVATE void Mutex_delete(Mutex * this)
 //int pthread_mutex_destroy(this->mutex);
 //int pthread_cond_destroy(pthread_cond_t *cond);
 //CloseHandle(this->mutex);
+  //if (hScreenMutex) CloseHandle(hScreenMutex);
+  //if (hRunMutex) CloseHandle(hRunMutex);
 }
 
 PRIVATE void Mutex_take(Mutex * this)
