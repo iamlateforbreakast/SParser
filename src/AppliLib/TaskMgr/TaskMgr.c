@@ -83,8 +83,9 @@ PUBLIC int TaskMgr_start(TaskMgr * this, Task * task)
       break;
     }
   }
-
-  TaskMgr_waitForThread(this);
+  
+  pthread_cond_signal(&cond)
+  //TaskMgr_waitForThread(this);
 
   return isStarted;
 }
@@ -121,9 +122,10 @@ PUBLIC unsigned int TaskMgr_getSize(TaskMgr * this)
 PRIVATE void * TaskMgr_threadBody(void * this)
 {
   //wait run mutex
-
+  //pthread_mutex_lock(&lock);
+  
   // wait clock mutex
-
+  pthread_cond_wait(&cond, &lock); 
   //wait run mutex with timeout
 
   //terminate
@@ -131,6 +133,16 @@ PRIVATE void * TaskMgr_threadBody(void * this)
   {
     printf("Here\n");
   }
+      // acquire a lock 
+    ; 
+    printf("Waiting on condition variable cond\n");
+
+    // release lock 
+    pthread_mutex_unlock(&lock); 
+
+    printf("Returning thread\n"); 
+
+    return NULL; 
   /*do
     {
         // Wait for display to be available, then lock it.
