@@ -41,6 +41,8 @@ struct TaskMgr
   Task * taskId[MAX_TASKS];
 #ifndef WIN32
   pthread_t threadHandle[MAX_THREADS];
+  pthread_mutex_t mutex;
+  pthread_cond_t isWork;
   Mutex runMutex;
 #else
   HANDLE threadHandle[MAX_THREADS];
@@ -77,12 +79,23 @@ PUBLIC TaskMgr* TaskMgr_new()
   this->nbThreads = MAX_THREADS;
 
   for (int i = 0; i < MAX_TASKS; ++i) this->taskId[i] = 0;
+
+#ifndef WIN32
+  if (pthread_mutex_init(&this->mutex, NULL) != 0) { 
+        printf("\n mutex init has failed\n"); 
+        return 0; 
+    }
+  pthread_cond_init(&this->isWork, 0);
+  pthread_mutex_lock(&this->mutex);
+#else
   InitializeCriticalSection(&this->cond);
   EnterCriticalSection(&this->cond);
+#endif
   for (int i = 0; i < this->nbThreads; ++i)
   {
 #ifndef WIN32
     int err = pthread_create(&(this->threadHandle[i]), NULL, &TaskMgr_threadBody, this);
+    pthread_detach(&(this->threadHandle[i]));
 #else
     this->threadHandle[i] = CreateThread(
       NULL,                         // default security attributes
@@ -99,13 +112,18 @@ PUBLIC TaskMgr* TaskMgr_new()
 
 PUBLIC void TaskMgr_delete(TaskMgr* this)
 {
-  //Mutex_release(this->runMutex);
-  //Mutex_delete(&this->runMutex);
+#ifndef WIN32
+  pthread_mutex_destroy(&this->mutex);
+  pthread_cond_destroy(&this->isWork);
+#else
+#endif
 }
+
 PUBLIC TaskMgr* TaskMgr_getRef()
 {
   return 0;
 }
+
 PUBLIC int TaskMgr_start(TaskMgr * this, Task * task)
 {
   int isQueued = 0;
@@ -119,8 +137,15 @@ PUBLIC int TaskMgr_start(TaskMgr * this, Task * task)
       break;
     }
   }
+#ifndef WIN32
+  if (isQueued) 
+  {
+    pthread_cond_broadcast(&this->isWork);
+    pthread_mutex_unlock(&this->mutex);
+  }
+#else
   if (isQueued) LeaveCriticalSection(&this->cond);
-  
+#endif
   //pthread_cond_signal(&cond);
   //TaskMgr_waitForThread(this);
   for (int i = 0; i < this->nbThreads; ++i)
@@ -159,22 +184,29 @@ PUBLIC unsigned int TaskMgr_getSize(TaskMgr * this)
   return sizeof(this);
 }
 
+#ifndef WIN32
+PRIVATE void* TaskMgr_threadBody(void* p)
+#else
 DWORD WINAPI TaskMgr_threadBody(LPVOID lpParam)
-//PRIVATE void* TaskMgr_threadBody(void* this)
+#endif
 {
   int nextTask = -1;
   Task* task = 0;
+  #ifndef WIN32
+  TaskMgr * this = (TaskMgr*)p;
+  #else
   TaskMgr * this = (TaskMgr*)lpParam;
+  #endif
   while (1)
   {
+    #ifndef WIN32
+    pthread_mutex_lock(&this->mutex);
+    while (nextTask == -1 /*&& !tm->stop*/)
+            pthread_cond_wait(&(this->isWork), &(this->mutex));
+    #else
     EnterCriticalSection(&this->cond);
-  //wait run mutex
-  //pthread_mutex_lock(&lock);
-  
-  // wait clock mutex
-#ifndef WIN32
-  pthread_cond_wait(&cond, &lock); 
-#else
+    #endif
+
     // check for work
     for (int i = 0; i < MAX_TASKS; i++)
     {
@@ -184,7 +216,11 @@ DWORD WINAPI TaskMgr_threadBody(LPVOID lpParam)
         break;
       }
     }
+#ifndef WIN32
+    pthread_mutex_unlock(&this->mutex);  
+#else
     LeaveCriticalSection(&this->cond);
+#endif
     if (nextTask == -1)
     {
       // No work to do
@@ -195,7 +231,6 @@ DWORD WINAPI TaskMgr_threadBody(LPVOID lpParam)
       // Something to do
       Task_executeBody(this->taskId[nextTask]);
     }
-#endif
     nextTask = -1;
   //wait run mutex with timeout
 

@@ -28,6 +28,8 @@ int msleep(long msec) {
   return 1;
 }
 #else
+#include <time.h>
+#include <errno.h>
 int msleep(long msec)
 {
   struct timespec ts;
