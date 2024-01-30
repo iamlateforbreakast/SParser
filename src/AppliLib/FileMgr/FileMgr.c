@@ -315,7 +315,7 @@ PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
         result = String_new(0);
         String_setBuffer(result, buffer,1);
       }
-      FileIo_delete(f);
+      
     }
   }
   else
@@ -323,7 +323,7 @@ PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
     /* ERROR case: File is not in the list of managed files */
     Error_new(ERROR_FATAL, "File is not in the list of managed files.");
   }
-  
+  FileIo_delete(f);
   String_delete(name);
   
   return result;
