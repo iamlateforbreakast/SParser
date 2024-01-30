@@ -7,7 +7,7 @@
 typedef struct Task Task;
 typedef struct TaskMgr TaskMgr;
 
-PUBLIC TaskMgr * TaskMgr_new();
+PUBLIC TaskMgr * TaskMgr_getRef();
 PUBLIC void TaskMgr_delete(TaskMgr * this);
 PUBLIC void TaskMgr_print(TaskMgr * this);
 PUBLIC unsigned int TaskMgr_getSize(TaskMgr * this);

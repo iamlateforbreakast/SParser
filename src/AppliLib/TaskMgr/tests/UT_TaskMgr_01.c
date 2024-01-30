@@ -1,6 +1,7 @@
 /* UT_TaskMgr_01.c */
 #include "Task.h"
 #include "TaskMgr.h"
+#include "Memory.h"
 #include "Debug.h"
 #include <pthread.h>
 
@@ -113,6 +114,12 @@ int step1()
 	clock = clock + 1;
   }
 
+  for (int i=0;i<5;++i) Task_destroy(testTasks[i]);
+
+  TaskMgr * taskMgr =  TaskMgr_getRef();
+
+  TaskMgr_delete(taskMgr);
+
   return isPassed;
 }
 
@@ -154,6 +161,8 @@ int main()
   int isPassed = 1;
 
   step1();
+
+  Memory_report();
 
   return isPassed;
 }

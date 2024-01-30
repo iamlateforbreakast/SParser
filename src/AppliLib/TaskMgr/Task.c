@@ -31,7 +31,7 @@ PUBLIC Task* Task_create(void * (*body)(void* p), int nbParams, void ** params)
 {
   Task* this = 0;
 
-  if (taskMgr == 0) taskMgr = TaskMgr_new();
+  if (taskMgr == 0) taskMgr = TaskMgr_getRef();
 
   this = (Task*)Memory_alloc(sizeof(Task));
   this->body = body;

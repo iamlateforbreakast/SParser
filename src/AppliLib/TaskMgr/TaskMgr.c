@@ -22,6 +22,8 @@
 
 #define DEBUG (0)
 
+PRIVATE TaskMgr * taskMgr = 0;
+
 /**********************************************//**
   @private
 **************************************************/
@@ -72,7 +74,7 @@ Class taskMgrClass = {
   @memberof Map
   @return New taskMgr instance or NULL if failed to allocate.
 ************************************************************/
-PUBLIC TaskMgr* TaskMgr_new()
+PRIVATE TaskMgr* TaskMgr_new()
 {
   TaskMgr * this = 0;
   this = (TaskMgr*)Object_new(sizeof(TaskMgr), &taskMgrClass);
@@ -104,6 +106,12 @@ PUBLIC TaskMgr* TaskMgr_new()
   return this;
 }
 
+PUBLIC TaskMgr * TaskMgr_getRef()
+{
+  if (!taskMgr) taskMgr = TaskMgr_new();
+  return taskMgr;
+}
+
 PUBLIC void TaskMgr_delete(TaskMgr* this)
 {
 #ifndef WIN32
@@ -111,6 +119,7 @@ PUBLIC void TaskMgr_delete(TaskMgr* this)
   pthread_cond_destroy(&this->isWork);
 #else
 #endif
+  Object_deallocate(&this->object);
 }
 
 

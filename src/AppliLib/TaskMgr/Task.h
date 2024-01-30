@@ -7,6 +7,7 @@
 typedef struct Task Task;
 
 PUBLIC Task* Task_create(void * (*body)(void* p), int nbParams, void ** params);
+PUBLIC void Task_destroy(Task* this);
 PUBLIC void Task_start(Task* this);
 PUBLIC int Task_isReady(Task* this);
 PUBLIC int Task_isRunning(Task* this);
