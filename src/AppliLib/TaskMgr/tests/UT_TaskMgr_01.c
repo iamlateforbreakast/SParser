@@ -85,12 +85,12 @@ int step1()
   };
 
   Task * testTasks[4];
-  int params[][2] = { { 1, 50 }, { 2, 20 }, { 3, 40 }, {4, 20} };
+  int params[][2] = { { 1, 50 }, { 2, 20 }, { 3, 40 }, {4, 20}, {5, 50} };
 
-  for (int i=0;i<4;++i) testTasks[i] = Task_create(&taskBody, 1, (void **)&params[i]);
+  for (int i=0;i<5;++i) testTasks[i] = Task_create(&taskBody, 1, (void **)&params[i]);
 
   struct event events[] = {
-	{10, testTasks[0]}, {50, testTasks[1]}, {60, testTasks[2]}, {10, testTasks[3]}
+	{10, testTasks[0]}, {50, testTasks[1]}, {60, testTasks[2]}, {60, testTasks[3]}, {80, testTasks[4]}
   };
 
   int evtIdx = 0;
