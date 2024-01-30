@@ -20,7 +20,7 @@
 //while (WaitForSingleObject(hRunMutex, 75L) == WAIT_TIMEOUT);
 
 #define MAX_TASKS (5)
-#define MAX_THREADS (1)
+#define MAX_THREADS (2)
 
 /**********************************************//**
   @private
@@ -32,6 +32,7 @@ DWORD WINAPI TaskMgr_threadBody(LPVOID lpParam);
 #endif
 PRIVATE void TaskMgr_waitForThread(TaskMgr* this);
 PRIVATE int TaskMgr_isWorkAvailable(TaskMgr * this);
+PRIVATE int TaskMgr_createWorkerThreads(TaskMgr* this);
 
 /**********************************************//**
   @class TaskMgr
@@ -93,23 +94,12 @@ PUBLIC TaskMgr* TaskMgr_new()
 
   for (int i = 0; i < MAX_TASKS; ++i) this->taskId[i] = 0;
 
-  for (int i = 0; i < this->nbThreads; ++i)
-  {
-#ifndef WIN32
-    int err = pthread_create(&(this->threadHandle[i]), NULL, &TaskMgr_threadBody, this);
-    pthread_detach(this->threadHandle[i]);
-#else
-    this->threadHandle[i] = CreateThread(
-      NULL,                         // default security attributes
-      0,                            // use default stack size  
-      TaskMgr_threadBody,           // thread function name
-      this,                         // argument to thread function 
-      CREATE_SUSPENDED,             // use default creation flags 
-      &this->dwThreadIdArray[i]);   // returns the thread identifier 
-#endif
-  }
+  TaskMgr_createWorkerThreads(this);
 
+#ifndef WIN32
   pthread_mutex_unlock(&this->mutex);
+#endif
+
 
   return this;
 }
@@ -123,10 +113,6 @@ PUBLIC void TaskMgr_delete(TaskMgr* this)
 #endif
 }
 
-PUBLIC TaskMgr* TaskMgr_getRef()
-{
-  return 0;
-}
 
 PUBLIC int TaskMgr_start(TaskMgr * this, Task * task)
 {
@@ -230,7 +216,6 @@ DWORD WINAPI TaskMgr_threadBody(LPVOID lpParam)
     {
       // No work to do
 #ifndef WIN32
-      // Signal nno work
 #else
       SuspendThread(GetCurrentThread());
 #endif
@@ -273,6 +258,25 @@ PRIVATE void TaskMgr_waitForThread(TaskMgr * this)
   } 
 }
 
+PRIVATE int TaskMgr_createWorkerThreads(TaskMgr* this)
+{
+  for (int i = 0; i < this->nbThreads; ++i)
+  {
+#ifndef WIN32
+    int err = pthread_create(&(this->threadHandle[i]), NULL, &TaskMgr_threadBody, this);
+    pthread_detach(this->threadHandle[i]);
+#else
+    this->threadHandle[i] = CreateThread(
+      NULL,                         // default security attributes
+      0,                            // use default stack size  
+      TaskMgr_threadBody,           // thread function name
+      this,                         // argument to thread function 
+      CREATE_SUSPENDED,             // use default creation flags 
+      &this->dwThreadIdArray[i]);   // returns the thread identifier 
+#endif
+  }
+  return 0;
+}
 PRIVATE int TaskMgr_isWorkAvailable(TaskMgr * this)
 {
   int nextTask = -1;
