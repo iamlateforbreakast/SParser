@@ -2,6 +2,7 @@
 #include "Task.h"
 #include "TaskMgr.h"
 #include "Debug.h"
+#include <pthread.h>
 
 #ifdef _WIN32
 #include <windows.h>	/* WinAPI */
@@ -52,6 +53,11 @@ int msleep(long msec)
 }
 #endif
 
+pthread_t thrId;
+pthread_cond_t cond;
+pthread_mutex_t mutex;
+int somethingToBeDone = 0;
+
 void* taskBody1(void* this)
 {
   for (int i = 0; i < 20; ++i)
@@ -98,7 +104,7 @@ int step1()
   Task* testTask3 = Task_create(&taskBody3);
 
   struct event events[] = {
-	{50, testTask1}, {20, testTask2}, {10, testTask3}
+	{10, testTask1}, {20, testTask2}, {30, testTask3}
   };
 
   int evtIdx = 0;
@@ -123,6 +129,39 @@ int step1()
   }
 
   return isPassed;
+}
+
+void * thread(void*)
+{
+  PRINT(("Thread created\n"));
+  pthread_mutex_lock(&mutex);
+  PRINT(("Thread takes mutex\n"));
+  while (!somethingToBeDone)
+    pthread_cond_wait(&cond, &mutex);
+  PRINT(("Doing stuff\n"));
+  somethingToBeDone = 0;
+  pthread_mutex_unlock(&mutex);
+}
+
+int step2()
+{
+  pthread_mutex_init(&mutex, 0);
+  pthread_cond_init(&cond,0);
+
+  pthread_mutex_lock(&mutex);
+  PRINT(("Main thread takes mutex\n"));
+  int err = pthread_create(&thrId, NULL, &thread, 0);
+  pthread_detach(thrId);
+
+  somethingToBeDone = 1;
+  pthread_cond_broadcast(&cond);
+  PRINT(("Main thread broaadcast\n"));
+  pthread_mutex_unlock(&mutex);
+  PRINT(("Main thread release mutex\n"));
+  msleep(1000);
+
+  pthread_cond_destroy(&cond);
+  pthread_mutex_destroy(&mutex);
 }
 
 int main()
