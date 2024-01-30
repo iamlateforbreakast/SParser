@@ -61,7 +61,9 @@ int somethingToBeDone = 0;
 void* taskBody(void* params)
 {
   int id = *(int*)params;
-  for (int i = 0; i < 20; ++i)
+  int duration = *((int*)params+1);
+
+  for (int i = 0; i < duration; ++i)
   {
     PRINT(("Here %d-%d\n",id,i));
     msleep(100);
@@ -82,13 +84,13 @@ int step1()
 	Task * f;
   };
 
-  int params[][1] = { { 1 }, { 2 }, { 3 } };
-  Task* testTask1 = Task_create(&taskBody, 1, (void **)&params[0]);
-  Task* testTask2 = Task_create(&taskBody, 1, (void **)&params[1]);
-  Task* testTask3 = Task_create(&taskBody, 1, (void **)&params[2]);
+  Task * testTasks[4];
+  int params[][2] = { { 1, 50 }, { 2, 20 }, { 3, 40 }, {4, 20} };
+
+  for (int i=0;i<4;++i) testTasks[i] = Task_create(&taskBody, 1, (void **)&params[i]);
 
   struct event events[] = {
-	{10, testTask1}, {50, testTask2}, {60, testTask3}
+	{10, testTasks[0]}, {50, testTasks[1]}, {60, testTasks[2]}, {10, testTasks[3]}
   };
 
   int evtIdx = 0;

@@ -17,10 +17,10 @@
 #include <process.h>
 #endif
 
-//while (WaitForSingleObject(hRunMutex, 75L) == WAIT_TIMEOUT);
-
 #define MAX_TASKS (5)
 #define MAX_THREADS (2)
+
+#define DEBUG (0)
 
 /**********************************************//**
   @private
@@ -132,9 +132,9 @@ PUBLIC int TaskMgr_start(TaskMgr * this, Task * task)
   {
     this->isWorkAvailable = 1;
     pthread_cond_broadcast(&this->isWork);
-    PRINT(("Broadcast\n"));
+    TRACE(("Broadcast\n"));
     pthread_mutex_unlock(&this->mutex);
-    PRINT(("Main thread releases mutex\n"));
+    TRACE(("Main thread releases mutex\n"));
   }
 #else
   if (isQueued) LeaveCriticalSection(&this->cond);
@@ -184,19 +184,19 @@ DWORD WINAPI TaskMgr_threadBody(LPVOID lpParam)
   #else
   TaskMgr * this = (TaskMgr*)lpParam;
   #endif
-  PRINT(("Starting thread\n"));
+  TRACE(("Starting thread\n"));
   while (1)
   {
     #ifndef WIN32
     pthread_mutex_lock(&this->mutex);
-    PRINT(("Worker took mutex\n"));
+    TRACE(("Worker took mutex\n"));
     while (!this->isWorkAvailable)
       pthread_cond_wait(&(this->isWork), &(this->mutex));
     #else
     EnterCriticalSection(&this->cond);
     #endif
   
-    PRINT(("Waking up\n"));
+    TRACE(("Waking up\n"));
     // check for work
     for (int i = 0; i < MAX_TASKS; i++)
     {
@@ -211,7 +211,7 @@ DWORD WINAPI TaskMgr_threadBody(LPVOID lpParam)
 #else
     LeaveCriticalSection(&this->cond);
 #endif
-    PRINT(("Next task %d\n", nextTask));
+    TRACE(("Next task %d\n", nextTask));
     if (nextTask == -1)
     {
       // No work to do
