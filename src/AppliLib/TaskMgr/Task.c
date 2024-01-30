@@ -3,6 +3,7 @@
 #include "Object.h"
 #include "Task.h"
 #include "Memory.h"
+#include "Debug.h"
 
 #ifndef WIN32
 #include <pthread.h>
@@ -16,7 +17,7 @@ struct Task
 {
   void* (*body)(void* p);
   int nbParams;
-  void** params;
+  void * params[5];
   int isReady;
   int isRunning;
   int isCompleted;
@@ -26,7 +27,7 @@ struct Task
 
 PRIVATE TaskMgr* taskMgr = 0;
 
-PUBLIC Task* Task_create(void * (*body)(void* p))
+PUBLIC Task* Task_create(void * (*body)(void* p), int nbParams, void ** params)
 {
   Task* this = 0;
 
@@ -34,6 +35,8 @@ PUBLIC Task* Task_create(void * (*body)(void* p))
 
   this = (Task*)Memory_alloc(sizeof(Task));
   this->body = body;
+  this->nbParams = nbParams;
+  this->params[0] = params[0];
   this->isReady = 0;
   this->isRunning = 0;
   this->isCompleted = 0;
@@ -78,7 +81,8 @@ PUBLIC void Task_executeBody(Task* this)
   this->isCompleted = 0;
   this->isReady = 0;
 
-  this->body(0);
+  //PRINT(("Arg: %d\n", (int)this->params[0]));
+  this->body(&this->params[0]);
 
   this->isCompleted = 1;
   this->isRunning = 0;
