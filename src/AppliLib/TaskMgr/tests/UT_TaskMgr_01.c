@@ -58,34 +58,17 @@ pthread_cond_t cond;
 pthread_mutex_t mutex;
 int somethingToBeDone = 0;
 
-void* taskBody1(void* this)
+void* taskBody(void* params)
 {
+  int id = *(int*)params;
   for (int i = 0; i < 20; ++i)
   {
-    PRINT(("Here 1-%d\n",i));
+    PRINT(("Here %d-%d\n",id,i));
     msleep(100);
-  }
 
-  return 0;
-}
 
-void* taskBody2(void* this)
-{
-  for (int i = 0; i < 5; ++i)
-  {
-	PRINT(("Here 2-%d\n", i));
-	msleep(500);
-  }
 
-  return 0;
-}
 
-void* taskBody3(void* this)
-{
-  for (int i = 0; i < 5; ++i)
-  {
-	PRINT(("Here 3-%d\n", i));
-	msleep(500);
   }
 
   return 0;
@@ -99,12 +82,13 @@ int step1()
 	Task * f;
   };
 
-  Task* testTask1 = Task_create(&taskBody1);
-  Task* testTask2 = Task_create(&taskBody2);
-  Task* testTask3 = Task_create(&taskBody3);
+  int params[][1] = { { 1 }, { 2 }, { 3 } };
+  Task* testTask1 = Task_create(&taskBody, 1, (void **)&params[0]);
+  Task* testTask2 = Task_create(&taskBody, 1, (void **)&params[1]);
+  Task* testTask3 = Task_create(&taskBody, 1, (void **)&params[2]);
 
   struct event events[] = {
-	{10, testTask1}, {20, testTask2}, {30, testTask3}
+	{10, testTask1}, {50, testTask2}, {60, testTask3}
   };
 
   int evtIdx = 0;
@@ -117,9 +101,8 @@ int step1()
 
   while (clock<100)
   {
-	PRINT(("Main thread\n"));
+	PRINT(("Main thread clock: %d ms\n", clock * 100));
 	msleep(100);
-	clock = clock + 1;
 	while ((evtIdx<(sizeof(events)/sizeof(struct event))) && (clock<events[evtIdx].t))
 	{
 	  Task_start(events[evtIdx].f);
