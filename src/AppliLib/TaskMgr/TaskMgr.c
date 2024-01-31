@@ -241,18 +241,7 @@ DWORD WINAPI TaskMgr_threadBody(LPVOID lpParam)
     
   }
 
-
-
   return 0;
-  /*do
-    {
-        // Wait for display to be available, then lock it.
-        WaitForSingleObject(hScreenMutex, INFINITE);
-
-        ReleaseMutex(hScreenMutex);
-    }
-    // Repeat while RunMutex is still taken.
-    while (WaitForSingleObject(hRunMutex, 75L) == WAIT_TIMEOUT);*/
 }
 
 PRIVATE void TaskMgr_waitForThread(TaskMgr * this)

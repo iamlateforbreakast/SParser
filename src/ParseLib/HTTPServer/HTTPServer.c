@@ -65,7 +65,11 @@ PUBLIC HTTPServer* HTTPServer_new()
   this->port = 8080;
 
   if ((this->fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-    PRINT(("socket failed"));
+    PRINT(("socket failed\n"));
+    exit(1);
+  }
+  if (setsockopt(this->fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &(int){1}, sizeof(int))<0) {
+    PRINT(("setsocopt failed\n"));
     exit(1);
   }
   // config socket
@@ -112,6 +116,13 @@ PUBLIC unsigned int HTTPServer_getSize(HTTPServer* this)
 
 PUBLIC void HTTPServer_start(HTTPServer* this)
 {
+  char response[] = "HTTP/1.1 200 OK\r\n"
+      "Content-Type: text/html; charset=UTF-8\r\n\r\n"
+      "<doctype !html><html><head><title>Hello World</title></head>"
+      "<body><h1>Hello world!</h1></body></html>\r\n";
+
+  char szBuff[100];
+
   // listen for connections
   if (listen(this->fd, 10) < 0) {
     printf("listen failed");
@@ -123,15 +134,46 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
     struct sockaddr_in client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
     int *client_fd = malloc(sizeof(int));
+    char *responseBuffer = (char*)malloc(4096);
 
     // accept client connection
     if ((*client_fd = accept(this->fd, 
                            (struct sockaddr *)&client_addr, 
                             &client_addr_len)) < 0) {
             PRINT(("accept failed"));
-            continue;
+            break;
         }
+    PRINT(("Received connection\n"));
+
+    int msg_len = recv(*client_fd, &responseBuffer[0], 4095, 0);
+
+    
+    printf("Bytes Received: %d, message: %s\n", msg_len, responseBuffer);
+
+    msg_len = send(*client_fd, response, sizeof(response), 0);
+    if (msg_len == 0) {
+      printf("Client closed connection\n");
+      close(this->fd);
+      return -1;
+    }
+
+    /*if (msg_len == -1) {
+      fprintf(stderr, "recv() failed with error %d\n", -1); //WSAGetLastError());
+      //WSACleanup();
+      return -1;
+    }
+
+      if (msg_len == 0) {
+        printf("Client closed connection\n");
+        close(this->fd);
+        return -1;
+      }*/
+    free(responseBuffer);
+    free(client_fd);
+    close(this->fd);
+    exit(1);
   }
+  
 }
 
 /*
