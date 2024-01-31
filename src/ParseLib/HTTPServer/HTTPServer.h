@@ -11,6 +11,7 @@ PUBLIC void HTTPServer_delete(HTTPServer * this);
 PUBLIC HTTPServer* HTTPServer_copy(HTTPServer* this);
 PUBLIC int HTTPServer_compare(HTTPServer* this, HTTPServer* compared);
 PUBLIC void HTTPServer_print(HTTPServer* this);
+PUBLIC void HTTPServer_start(HTTPServer* this);
 PUBLIC unsigned int HTTPServer_getSize(HTTPServer* this);
 //PUBLIC void HTTPServer_start(HTTPServer* this);
 #endif /* _HTTPSERVER_H_ */
