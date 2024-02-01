@@ -18,16 +18,22 @@
 #include "ObjectMgr.h"
 #include "TimeMgr.h"
 
+#include <windows.h>
 #include <signal.h>
 
 /**********************************************//** 
   \private
 **************************************************/
-struct sigaction action;
 
-PRIVATE void sighandler(int signum, siginfo_t *info, void *ptr) ;
 PRIVATE void start_application(String * inputDir, String * dbName);
 PRIVATE void print_usage();
+
+#ifndef WIN32
+struct sigaction action;
+PRIVATE void sighandler(int signum, siginfo_t* info, void* ptr);
+#else
+PRIVATE BOOL WINAPI ConsoleHandler(DWORD);
+#endif
 
 /**********************************************//** 
   \brief Inital entry point for the application.
@@ -46,18 +52,23 @@ PUBLIC int main(const int argc, const char** argv)
   String * inputDir = 0;
   String * dbName = 0;
   
+#ifndef WIN32
   action.sa_sigaction = sighandler;
   action.sa_flags = SA_SIGINFO;
- 
+  sigaction(SIGINT, &action, 0);
   sigaction(SIGTERM, &action, 0);
   sigaction(SIGSEGV, &action, 0);
-  //sigaction(SIGSEGV, &action, 0);
-  sigaction(SIGINT, &action, 0);
-  //sigaction(SIGTERM, &action, 0);
+  sigaction(SIGSEGV, &action, 0);
+  sigaction(SIGTERM, &action, 0);
   sigaction(SIGHUP, &action, 0);
-  
+#else
+  if (!SetConsoleCtrlHandler((PHANDLER_ROUTINE)ConsoleHandler, TRUE)) {
+    PRINT(("Unable to install handler!\n"));
+    return EXIT_FAILURE;
+  }
+#endif
   /* Initialise OptionMgr from command line */
-  OptionMgr_readFromCmdLine(optionMgr, argc, argv);
+   OptionMgr_readFromCmdLine(optionMgr, argc, argv);
   
   if (OptionMgr_isOptionEnabled(optionMgr, "Print help"))
   {
@@ -68,7 +79,7 @@ PUBLIC int main(const int argc, const char** argv)
   else
   {
     /* Initialise OptionMgr from file */
-    OptionMgr_readFromFile(optionMgr);
+      OptionMgr_readFromFile(optionMgr);
     
     /* Retrieve database name */
     dbName = OptionMgr_getOption(optionMgr, "DB Name");
@@ -125,12 +136,12 @@ PRIVATE void start_application(String * inputDir, String * dbName)
   
   SParse_delete(sparse);
   
-  TimeMgr_report(timeMgr);
+  //TimeMgr_report(timeMgr);
     
   /* Cleanup */
   TimeMgr_delete(timeMgr);
   String_delete(totalExecutionTime);
-  //FileMgr_delete(fileMgr);
+  FileMgr_delete(fileMgr);
 }
 
 /**********************************************//** 
@@ -150,6 +161,7 @@ PRIVATE void print_usage()
   PRINT(("-help\t\tDisplay this help and exit\n"));
 }
 
+#ifndef WIN32
 /**********************************************//** 
   \brief Display and exit when signal is received
   \param signum TBC
@@ -166,3 +178,19 @@ PRIVATE void sighandler(int signum, siginfo_t *info, void *ptr)
                   "Signal originates from process %lu\n",
                   (unsigned long)info->si_pid);
 }
+#else
+BOOL WINAPI ConsoleHandler(DWORD dwType)
+{
+  switch (dwType) {
+  case CTRL_C_EVENT:
+    PRINT(("ctrl-c\n"));
+    break;
+  case CTRL_BREAK_EVENT:
+    PRINT(("break\n"));
+    break;
+  default:
+    PRINT(("Some other event\n"));
+  }
+  return TRUE;
+}
+#endif
