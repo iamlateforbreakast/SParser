@@ -18,7 +18,9 @@
 #include "ObjectMgr.h"
 #include "TimeMgr.h"
 
+#ifdef WIN32
 #include <windows.h>
+#endif
 #include <signal.h>
 
 /**********************************************//** 
