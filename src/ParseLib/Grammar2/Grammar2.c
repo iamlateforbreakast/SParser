@@ -467,6 +467,7 @@ PRIVATE unsigned int Grammar2_isFileToBeIgnored(Grammar2 * this, String * fileNa
     if (Memory_ncmp(buffer, "unistd.h", 8)) return 1;
     if (Memory_ncmp(buffer, "dirent.h", 8)) return 1;
     if (Memory_ncmp(buffer, "stdio.h", 7)) return 1;
+    if (Memory_ncmp(buffer, "pthread.h", 10)) return 1;
     if (Memory_ncmp(buffer, "sqlite3.h", 9)) return 1;
     if (Memory_ncmp(buffer, "stdarg.h", 8)) return 1;
     if (Memory_ncmp(buffer, "stdlib.h", 8)) return 1;
