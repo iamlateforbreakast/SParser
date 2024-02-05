@@ -164,6 +164,7 @@ PUBLIC unsigned int FileMgr_getSize(FileMgr* this)
 **************************************************/
 PUBLIC unsigned int FileMgr_setRootLocation(FileMgr* this, const char * location)
 {
+  // TODO: is this used by anybody? What is the purpose
   unsigned int result = 0;
   
   String * newLocation = String_new(location);
@@ -229,6 +230,7 @@ PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryN
   }
   
   String_delete(addedDirectory);
+  // TODO: String_delete(fullPathDirectory);
   
   return result;
 }
@@ -406,9 +408,12 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   
   List* tokenPath1 = String_splitToken(path1, this->separator);
   List* tokenPath2 = String_splitToken(path2, this->separator);
+  //List_print(tokenPath2);
   s = (String*)List_removeTail(tokenPath2);
+  //String_print(s);
   while (s!=0)
   {
+    //printf("  mergePath: processing %s\n", String_getBuffer(s));
     if (String_compare(s, twoDots)==0)
     {
       String_delete(s);
@@ -424,16 +429,22 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
     }
     s = List_removeTail(tokenPath2);
   }
-  s = List_getNext(tokenPath1);
+    //s = List_getNext(tokenPath1);
+  List_print(tokenPath1);
   #ifndef _WIN32
   String_append(result, this->separator);
   #endif
-  String_append(result, String_getBuffer(s));
+  //String_append(result, String_getBuffer(s));
 
-  while ((s = List_getNext(tokenPath1)) != 0)
+  s = (String*)List_removeTail(tokenPath1);
+  PRINT(("Concatenate %s\n", String_getBuffer(s)));
+  //while ((s = List_getNext(tokenPath1)) != 0)
+  while (s!=0)
   {
-    String_append(result, this->separator);
     String_append(result, String_getBuffer(s));
+    String_delete(s);
+    s = (String*)List_removeTail(tokenPath1);
+    if (s!=0) String_append(result, this->separator);
     //printf("%s\n", String_getBuffer(s)); 
   }
 
@@ -442,7 +453,7 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
     Error_new(ERROR_INFO, "String length = %d\n", String_getLength(result));
     Error_new(ERROR_INFO, "Str length = %d\n", Memory_len(String_getBuffer(result)));
   }
-  //Error_new(ERROR_INFO,"Merged path: %s\n", String_getBuffer(result));
+  Error_new(ERROR_INFO,"Merged path: %s\n", String_getBuffer(result));
   String_stealBuffer(path1, result);
   String_delete(result);
   List_delete(tokenPath1);
@@ -528,7 +539,7 @@ PUBLIC FileDesc * FileMgr_searchFile(FileMgr * this, String * name, List * prefe
 }
 
 /**************************************************
- @brief FileMgr_mergePath
+ @brief FileMgr_isManaged
  
  This function merges 2 paths into one.
  
@@ -566,17 +577,18 @@ PRIVATE FileDesc * FileMgr_isManaged(FileMgr * this, String * fullName)
 }
 
 /**********************************************//** 
-  @brief TBD
+  @brief Check if a file exists on the filesystem
   @details TBD
   @private
+  @param [in] Absolute path name
   @memberof FileMgr
+  @return 1 if file exists.
 **************************************************/
 PRIVATE unsigned int FileMgr_existFS(FileMgr * this, String * fullName)
 {
   unsigned int result = 0;
   FileIo * f = FileIo_new();
 
-  //f=fopen(String_getBuffer(fullName),"rb");
   FileIo_openFile(f, fullName);
   if (FileIo_isOpen(f)) 
   {
