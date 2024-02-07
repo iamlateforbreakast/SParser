@@ -5,6 +5,7 @@ CFLAGS = @CFLAGS@ -I../AppliLib/include -I./include -I../CommonLib/include
 SOURCES = \
 	./SParse/SParse.c \
 	./HTTPServer/HTTPServer.c \
+ 	./Configuration/Configuration.c \
 	./FileReader/FileReader.c
 
 HEADERS = $(SOURCES:.c=.h) ./Grammar2/Grammar2.h
