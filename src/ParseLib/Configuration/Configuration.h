@@ -3,6 +3,7 @@
 #define _CONFIGURATION_H_
 
 #include "Types.h"
+#include "String2.h"
 
 typedef struct Configuration Configuration;
 

@@ -4,6 +4,12 @@
 #include "Memory.h"
 #include "Object.h"
 
+struct Buffer
+{
+  String * Buffer;
+  char * currentPtr;
+  char * startPtr;
+};
 
 /**********************************************//**
   @class TransUnit
@@ -13,8 +19,7 @@ struct TransUnit
   Object object;
   FileDesc* file;
   List* buffers;
-  String* currentBuffer;
-  int currentPos;
+  struct Buffer * currentBuffer;
 };
 
 /**********************************************//**
@@ -76,39 +81,39 @@ PUBLIC unsigned int TransUnit_getSize(TransUnit* this)
 
 PUBLIC String * TransUnit_getNextBuffer(TransUnit * this)
 {
-  char* ptr = this->currentPtr;  //String_getBuffer(this->currentBuffer);
+  char* ptr = this->currentBuffer->currentPtr;  //String_getBuffer(this->currentBuffer);
   int isReadyToEmit = 0;
 
   while (!isReadyToEmit)
   {
-    if (Memory_ncmp(ptr, "//", 2))
+    if (Memory_ncmp(this->currentBuffer->currentPtr, "//", 2))
     {
       // Consume until the end of line
       // ptr = ptr + TransUnit_readLineComment(this);
     }
-    else if (Memory_ncmp(ptr, "/*", 2))
+    else if (Memory_ncmp(this->currentBuffer->currentPtr, "/*", 2))
     {
       // Consume until */
       // ptr = ptr + TransUnit_readMultilineComment(this);
     }
-    else if (Memory_ncmp(ptr, "#include", 8))
+    else if (Memory_ncmp(this->currentBuffer->currentPtr, "#include", 8))
     {
       // Read file name
       // Open file name
       // Push new buffer
     }
-    else if (Memory_ncmp(ptr, "#define", 7))
+    else if (Memory_ncmp(this->currentBuffer->currentPtr, "#define", 7))
     {
       // Consume macro definition
       // TransUnit_readMacroDefinition(this);
     }
-    else if (Memory_ncmp(ptr, "#ifndef", 6))
+    else if (Memory_ncmp(this->currentBuffer->currentPtr, "#ifndef", 6))
     {
       // Evaluate condition
     }
     else
     {
-      ptr++;
+      this->currentBuffer->currentPtr++;
     }
   }
   // New String

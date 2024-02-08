@@ -2,6 +2,10 @@
 #ifndef _PRODUCT_H_
 #define _PRODUCT_H_
 
+#include "List.h"
+#include "String2.h"
+#include "Object.h"
+
 typedef struct Product Product;
 
 struct Product
