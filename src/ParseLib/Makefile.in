@@ -35,4 +35,4 @@ clean:
 	make clean -C ./Grammar2
 	@CLEAN@ include $(OBJECTS) libParse.a
 
-.PHONY:	clean all
+.PHONY:	include clean all
