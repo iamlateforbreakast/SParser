@@ -2,6 +2,7 @@
 
 #include "HTTPServer.h"
 #include "Object.h"
+#include "Memory.h"
 #include "Debug.h"
 
 #include <stdlib.h>
@@ -9,6 +10,7 @@
 #ifndef WIN32
 #include <sys/socket.h>
 #include <netinet/ip.h>
+#include <unistd.h>
 #else
 #include <winsock2.h>
 #endif
@@ -146,8 +148,13 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
     int client_addr_len = sizeof(client_addr);
     int *client_fd = malloc(sizeof(int));
     char *requestBuffer = (char*)malloc(REQUEST_BUFFER_SIZE);
+    char * path = malloc(1024);
+    char * method = malloc(10);
+    char * version = malloc(10);
+    char * host = malloc(256);
+    char * userAgent = malloc(256);
 
-    memset(requestBuffer, 0, REQUEST_BUFFER_SIZE);
+    Memory_set(requestBuffer, 0, REQUEST_BUFFER_SIZE);
     // accept client connection
     if ((*client_fd = accept(this->fd, 
                            (struct sockaddr *)&client_addr, 
@@ -160,12 +167,24 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
     int msg_len = recv(*client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
 
     
-    PRINT(("Bytes Received: %d, message: %s\n", msg_len, requestBuffer));
+    PRINT(("Bytes Received: %d\n%s\n", msg_len, requestBuffer));
 
+    sscanf(requestBuffer,"%s %s %s\nHost: %s\nUser-Agent: %s\n", 
+           method, path, version, host, userAgent);
+    //sscanf(requestBuffer, "Host: %s\n", host);
+    PRINT(("Method: %s\n", method));
+    PRINT(("Path: %s\n", path));
+    PRINT(("Version: %s\n", version));
+    PRINT(("Host: %s\n", host));
+    PRINT(("User-Agent: %s\n", userAgent));
     msg_len = send(*client_fd, response, sizeof(response), 0);
     if (msg_len == 0) {
       PRINT(("Client closed connection\n"));
+#ifndef WIN32
+      close(this->fd);
+#else
       closesocket(this->fd);
+#endif
     }
 
     /*if (msg_len == -1) {
@@ -181,7 +200,16 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
       }*/
     free(requestBuffer);
     free(client_fd);
+    free(path);
+    free(version);
+    free(method);
+    free(host);
+    free(userAgent);
+#ifndef WIN32
+    close(this->fd);
+#else
     closesocket(this->fd);
+#endif
     exit(1);
   }
 }
