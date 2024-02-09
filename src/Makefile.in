@@ -1,6 +1,6 @@
 CFLAGS = @CFLAGS@ -I./AppliLib/include -I./ParseLib/include -I./CommonLib/include
 
-LDFLAGS = @LDFLAGS@ -L./CommonLib -L./AppliLib -L./ParseLib -lCommon -lAppli -lParse -lsqlite3
+LDFLAGS = @LDFLAGS@ -L./CommonLib -L./AppliLib -L./ParseLib -lParse -lAppli -lCommon -lsqlite3
 
 .c.o:
 	@CC@ $(CFLAGS) $< -o $@
