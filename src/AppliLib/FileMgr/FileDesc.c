@@ -152,17 +152,18 @@ PUBLIC String * FileDesc_load(FileDesc * this)
   FileIo_openFile(f, FileDesc_getFullName(this));
   if (FileIo_isOpen(f))
   {
-	  FileIo_fSeekEnd(f, 0);
-	  int length=FileIo_ftell(f);
-	  FileIo_fSeekSet(f, 0);
-        
-	  char * buffer = (char*)Memory_alloc(length+1);
+    FileIo_fSeekEnd(f, 0);
+    int length=FileIo_ftell(f);
+    FileIo_fSeekSet(f, 0);
+    
+    char * buffer = (char*)Memory_alloc(length+1);
     if (buffer)
     {
       FileIo_read(f, buffer, length);
       buffer[length] = 0;
       fileContent = String_new(buffer); 
     }
+    memory_free(buffer, length + 1);
   }
   FileIo_delete(f);
   return fileContent;
