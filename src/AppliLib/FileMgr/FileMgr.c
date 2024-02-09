@@ -241,9 +241,8 @@ PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryN
   @memberof FileMgr
   @return Status.
 **************************************************/
-PUBLIC String * FileMgr_addFile(FileMgr * this, const char * fileName)
+PUBLIC FileDesc * FileMgr_addFile(FileMgr * this, const char * fileName)
 {
-  String * result = 0;
   FileDesc * fileDesc = 0;
   String * fullName = String_copy(this->rootLocation);
   String * addedFile = String_new(fileName);
@@ -261,7 +260,6 @@ PUBLIC String * FileMgr_addFile(FileMgr * this, const char * fileName)
       fileDesc = FileDesc_new();
       FileDesc_setFullName(fileDesc, fullName);
       List_insertHead(this->files, (void*)fileDesc, 1);
-      result = fullName;
     }
     else
     {
@@ -275,7 +273,7 @@ PUBLIC String * FileMgr_addFile(FileMgr * this, const char * fileName)
   
   String_delete(addedFile);
   
-  return result;
+  return fileDesc;
 }
 
 /**********************************************//** 
@@ -401,8 +399,8 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   String* result = String_new(0);
   // TODO: CHeck initial condition of validity length > 0
   
-  //Error_new(ERROR_INFO, "mergePath: path1 %s\n", String_getBuffer(path1));
-  //Error_new(ERROR_INFO, "mergePath: path2 %s\n", String_getBuffer(path2));
+  Error_new(ERROR_INFO, "mergePath: path1 %s\n", String_getBuffer(path1));
+  Error_new(ERROR_INFO, "mergePath: path2 %s\n", String_getBuffer(path2));
 
   /* TODO: check if path2 is absolute path in which case copy and return */
   
@@ -430,7 +428,7 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
     s = List_removeTail(tokenPath2);
   }
     //s = List_getNext(tokenPath1);
-  List_print(tokenPath1);
+  //List_print(tokenPath1);
   #ifndef _WIN32
   String_append(result, this->separator);
   #endif
