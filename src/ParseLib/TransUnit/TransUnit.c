@@ -18,8 +18,8 @@ struct Buffer
 struct TransUnit
 {
   Object object;
-  FileDesc* file;
-  List* buffers;
+  FileDesc * file;
+  List * buffers;
   struct Buffer * currentBuffer;
 };
 
@@ -35,6 +35,9 @@ PRIVATE Class transUnitClass =
   .f_print = (Printer)&TransUnit_print,
   .f_size = (Sizer)&TransUnit_getSize
 };
+
+PRIVATE void TransUnit_consumeLineComment(TransUnit* this);
+PRIVATE void TransUnit_consumeMultilineComment(TransUnit* this);
 
 /**********************************************//**
   @brief Create a new TransUnit object.
@@ -112,7 +115,7 @@ PUBLIC String * TransUnit_getNextBuffer(TransUnit * this)
       // ptr = ptr + TransUnit_readLineComment(this);
       if (this->currentBuffer->currentPtr == this->currentBuffer->startPtr)
       {
-
+        TransUnit_consumeLineComment(this);
       }
       else
         isReadyToEmit = 1;
@@ -121,6 +124,7 @@ PUBLIC String * TransUnit_getNextBuffer(TransUnit * this)
     {
       // Consume until */
       // ptr = ptr + TransUnit_readMultilineComment(this);
+      TransUnit_consumeMultilineComment(this);
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#include", 8))
     {
@@ -148,4 +152,14 @@ PUBLIC String * TransUnit_getNextBuffer(TransUnit * this)
   }
   // New String
   return 0;
+}
+
+PRIVATE void TransUnit_consumeLineComment(TransUnit* this)
+{
+
+}
+
+PRIVATE void TransUnit_consumeMultilineComment(TransUnit* this)
+{
+
 }
