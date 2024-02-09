@@ -4,11 +4,12 @@
 #include "Memory.h"
 #include "Object.h"
 
+
 struct Buffer
 {
-  String * Buffer;
+  String * string;
   char * currentPtr;
-  char * startPtr;
+  char* startPtr;
 };
 
 /**********************************************//**
@@ -50,8 +51,17 @@ PUBLIC TransUnit * TransUnit_new(FileDesc * file)
 
   this = (TransUnit*)Object_new(sizeof(TransUnit), &transUnitClass);
   
-  newFileContent = FileDesc_load(file);
-  List_insertHead(this->buffers, newFileContent, 1);
+  if (this == 0) return 0;
+
+  this->file = file;
+  this->buffers = List_new();
+
+  struct Buffer* buffer = Memory_alloc(sizeof(struct Buffer));
+  buffer->string = FileDesc_load(file);
+  buffer->startPtr = String_getBuffer(buffer->string);
+  buffer->currentPtr = buffer->startPtr;
+
+  List_insertHead(this->buffers, buffer, 0);
   
   return this;
 }
@@ -65,7 +75,17 @@ PUBLIC void TransUnit_delete(TransUnit * this)
 {
   if (this == 0) return;
 
+  /* De-allocate the specific members */
+  struct Buffer* buffer = 0;
+  while ((buffer = List_removeTail(this->buffers)) != 0)
+  {
+    String_delete(buffer->string);
+    buffer->startPtr = 0;
+    buffer->currentPtr = 0;
+    Memory_free(buffer, sizeof(struct Buffer));
+  }
   List_delete(this->buffers);
+  /* De-allocate the base object */
   Object_deallocate(&this->object);
 }
 
@@ -90,6 +110,12 @@ PUBLIC String * TransUnit_getNextBuffer(TransUnit * this)
     {
       // Consume until the end of line
       // ptr = ptr + TransUnit_readLineComment(this);
+      if (this->currentBuffer->currentPtr == this->currentBuffer->startPtr)
+      {
+
+      }
+      else
+        isReadyToEmit = 1;
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "/*", 2))
     {
@@ -110,6 +136,10 @@ PUBLIC String * TransUnit_getNextBuffer(TransUnit * this)
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#ifndef", 6))
     {
       // Evaluate condition
+    }
+    else if (0) //nothing to read
+    {
+      //unstack
     }
     else
     {
