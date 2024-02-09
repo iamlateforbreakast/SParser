@@ -15,10 +15,14 @@ int step1()
 {
   int isPassed = 1;
   TransUnit* testTransUnit = 0;
-  FileDesc* testFile = FileDesc_new();
+  FileMgr * fileMgr = FileMgr_getRef();
+  FileMgr_addFile(fileMgr, "test.c");
+  FileMgr_addFile(fileMgr, "test.h");
+
+  FileDesc* testFile = FileMgr_isManaged(fileMgr, "test.c");
 
   PRINT(("Step 1: Test 1 - Create an instance of class TransUnit: "));
-  testTransUnit = TransUnit_new(0);
+  testTransUnit = TransUnit_new(testFile);
   UT_ASSERT((testTransUnit != 0));
 
   PRINT(("Step 1: Test 2 - Delete an instance of class TransUnit: "));
@@ -29,6 +33,7 @@ int step1()
   UT_ASSERT((ObjectMgr_report(objectMgr) == 1));
   TRACE(("Nb objects left allocated: %d\n", ObjectMgr_report(objectMgr)));
 
+  FileMgr_delete(fileMgr);
   ObjectMgr_delete(objectMgr);
 
   return isPassed;
