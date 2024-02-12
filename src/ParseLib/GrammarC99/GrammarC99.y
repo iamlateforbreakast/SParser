@@ -3,7 +3,7 @@
 #include <stdio.h>
 extern char yytext[];
 void yyerror(void * scanner, GrammarC99 * grammar, char const * s);
-int yylex(void * yylval_param, void * yyscanner, GrammarC99 * gramamr);
+int yylex(void * yylval_param, void * yyscanner, GrammarC99 * grammar);
 %}
 
 %pure-parser
@@ -209,7 +209,7 @@ init_declarator
 	;
 
 storage_class_specifier
-	: TYPEDEF { declarator.type = 1; }
+	: TYPEDEF { printf("Typedef\n"); }
 	| EXTERN
 	| STATIC
 	| AUTO
@@ -241,7 +241,7 @@ struct_or_union_specifier
 	;
 
 struct_or_union
-	: STRUCT { Declarator_setState(1); }
+	: STRUCT { /*Declarator_setState(1);*/ }
 	| UNION
 	;
 

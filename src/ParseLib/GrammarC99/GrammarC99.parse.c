@@ -78,7 +78,7 @@
 #include <stdio.h>
 extern char yytext[];
 void yyerror(void * scanner, GrammarC99 * grammar, char const * s);
-int yylex(void * yylval_param, void * yyscanner, GrammarC99 * gramamr);
+int yylex(void * yylval_param, void * yyscanner, GrammarC99 * grammar);
 
 #line 84 "GrammarC99.parse.c"
 
@@ -1777,13 +1777,13 @@ yyreduce:
 
   case 92: /* storage_class_specifier: TYPEDEF  */
 #line 212 "GrammarC99.y"
-                  { declarator.type = 1; }
+                  { printf("Typedef\n"); }
 #line 1782 "GrammarC99.parse.c"
     break;
 
   case 115: /* struct_or_union: STRUCT  */
 #line 244 "GrammarC99.y"
-                 { Declarator_setState(1); }
+                 { /*Declarator_setState(1);*/ }
 #line 1788 "GrammarC99.parse.c"
     break;
 

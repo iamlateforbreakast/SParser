@@ -8,13 +8,20 @@ IS                      ((u|U)|(u|U)?(l|L|ll|LL)|(l|L|ll|LL)(u|U))
 
 %{
 #include <stdio.h>
-//#include "Declarator.h"
+#include "GrammarC99.h"
+#include "Error.h"
 #include "GrammarC99.parse.h"
 void comment(void);
 int check_type(void);
 void count(void);
 extern void yyerror(char const *s);
 %}
+
+%option noyywrap
+%option stack
+%option reentrant
+%option prefix="GrammarC99"
+%option bison-bridge
 
 %%
 "/*"			{ comment(); }
@@ -59,9 +66,9 @@ extern void yyerror(char const *s);
 "volatile"		{ count(); return(VOLATILE); }
 "while"			{ count(); return(WHILE); }
 
-{L}({L}|{D})*		{ count(); yylval.sval=strdup(yytext); return(check_type()); }
+{L}({L}|{D})*		{ count(); yylval->sval=strdup(yytext); return(check_type()); }
 
-0[xX]{H}+{IS}?		{ count(); yylval.sval = "CONST"; return(CONSTANT); }
+0[xX]{H}+{IS}?		{ count(); yylval->sval = "CONST"; return(CONSTANT); }
 0[0-7]*{IS}?		{ count(); return(CONSTANT); }
 [1-9]{D}*{IS}?		{ count(); return(CONSTANT); }
 L?'(\\.|[^\\'\n])+'	{ count(); return(CONSTANT); }
@@ -74,7 +81,7 @@ L?'(\\.|[^\\'\n])+'	{ count(); return(CONSTANT); }
 0[xX]{H}+"."{H}*{P}{FS}?     { count(); return(CONSTANT); }
 
 
-L?\"(\\.|[^\\"\n])*\"	{ count(); yylval.sval = "STR"; return(STRING_LITERAL); }
+L?\"(\\.|[^\\"\n])*\"	{ count(); yylval->sval = "STR"; return(STRING_LITERAL); }
 
 "..."			{ count(); return(ELLIPSIS); }
 ">>="			{ count(); return(RIGHT_ASSIGN); }
@@ -128,23 +135,23 @@ L?\"(\\.|[^\\"\n])*\"	{ count(); yylval.sval = "STR"; return(STRING_LITERAL); }
 
 %%
 
-int yywrap(void)
+/*int yywrap(void)
 {
 	return 1;
-}
+}*/
 
 
 void comment(void)
 {
-	char c, prev = 0;
+	/*char c, prev = 0;
   
-	while ((c = input()) != 0)      /* (EOF maps to 0) */
-	{
+	while ((c = input()) != 0)      (EOF maps to 0) 
+		{
 		if (c == '/' && prev == '*')
 			return;
 		prev = c;
 	}
-	yyerror("unterminated comment");
+	yyerror("unterminated comment");*/
 }
 
 
@@ -152,7 +159,7 @@ int column = 0;
 
 void count(void)
 {
-	int i;
+	/*int i;
 
 	for (i = 0; yytext[i] != '\0'; i++)
 		if (yytext[i] == '\n')
@@ -162,7 +169,7 @@ void count(void)
 		else
 			column++;
 
-	ECHO;
+	ECHO;*/
 }
 
 
@@ -180,12 +187,12 @@ int check_type(void)
 /*
 *	it actually will only return IDENTIFIER
 */
-    printf("\nIdentifier seen %s\n", yytext);
+    //printf("\nIdentifier seen %s\n", yytext);
     //Declarator_setName(yytext);
 	return IDENTIFIER;
 }
 
-void scanString(const char * buffer)
-{
-  yy_scan_string(buffer);
-}
+//void scanString(const char * buffer)
+//{
+//  yy_scan_string(buffer);
+//}
