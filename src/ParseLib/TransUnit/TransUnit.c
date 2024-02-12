@@ -4,11 +4,12 @@
 #include "Memory.h"
 #include "Object.h"
 
+
 struct Buffer
 {
-  String * Buffer;
+  String * string;
   char * currentPtr;
-  char * startPtr;
+  char* startPtr;
 };
 
 /**********************************************//**
@@ -17,8 +18,8 @@ struct Buffer
 struct TransUnit
 {
   Object object;
-  FileDesc* file;
-  List* buffers;
+  FileDesc * file;
+  List * buffers;
   struct Buffer * currentBuffer;
 };
 
@@ -35,6 +36,9 @@ PRIVATE Class transUnitClass =
   .f_size = (Sizer)&TransUnit_getSize
 };
 
+PRIVATE void TransUnit_consumeLineComment(TransUnit* this);
+PRIVATE void TransUnit_consumeMultilineComment(TransUnit* this);
+
 /**********************************************//**
   @brief Create a new TransUnit object.
   @public
@@ -50,8 +54,17 @@ PUBLIC TransUnit * TransUnit_new(FileDesc * file)
 
   this = (TransUnit*)Object_new(sizeof(TransUnit), &transUnitClass);
   
-  newFileContent = FileDesc_load(file);
-  List_insertHead(this->buffers, newFileContent, 1);
+  if (this == 0) return 0;
+
+  this->file = file;
+  this->buffers = List_new();
+
+  struct Buffer* buffer = Memory_alloc(sizeof(struct Buffer));
+  buffer->string = FileDesc_load(file);
+  buffer->startPtr = String_getBuffer(buffer->string);
+  buffer->currentPtr = buffer->startPtr;
+
+  List_insertHead(this->buffers, buffer, 0);
   
   return this;
 }
@@ -65,7 +78,17 @@ PUBLIC void TransUnit_delete(TransUnit * this)
 {
   if (this == 0) return;
 
+  /* De-allocate the specific members */
+  struct Buffer* buffer = 0;
+  while ((buffer = List_removeTail(this->buffers)) != 0)
+  {
+    String_delete(buffer->string);
+    buffer->startPtr = 0;
+    buffer->currentPtr = 0;
+    Memory_free(buffer, sizeof(struct Buffer));
+  }
   List_delete(this->buffers);
+  /* De-allocate the base object */
   Object_deallocate(&this->object);
 }
 
@@ -90,11 +113,18 @@ PUBLIC String * TransUnit_getNextBuffer(TransUnit * this)
     {
       // Consume until the end of line
       // ptr = ptr + TransUnit_readLineComment(this);
+      if (this->currentBuffer->currentPtr == this->currentBuffer->startPtr)
+      {
+        TransUnit_consumeLineComment(this);
+      }
+      else
+        isReadyToEmit = 1;
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "/*", 2))
     {
       // Consume until */
       // ptr = ptr + TransUnit_readMultilineComment(this);
+      TransUnit_consumeMultilineComment(this);
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#include", 8))
     {
@@ -111,6 +141,10 @@ PUBLIC String * TransUnit_getNextBuffer(TransUnit * this)
     {
       // Evaluate condition
     }
+    else if (0) //nothing to read
+    {
+      //unstack
+    }
     else
     {
       this->currentBuffer->currentPtr++;
@@ -118,4 +152,14 @@ PUBLIC String * TransUnit_getNextBuffer(TransUnit * this)
   }
   // New String
   return 0;
+}
+
+PRIVATE void TransUnit_consumeLineComment(TransUnit* this)
+{
+
+}
+
+PRIVATE void TransUnit_consumeMultilineComment(TransUnit* this)
+{
+
 }
