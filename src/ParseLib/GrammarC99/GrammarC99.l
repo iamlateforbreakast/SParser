@@ -11,6 +11,11 @@ IS                      ((u|U)|(u|U)?(l|L|ll|LL)|(l|L|ll|LL)(u|U))
 #include "GrammarC99.h"
 #include "Error.h"
 #include "GrammarC99.parse.h"
+#define YY_DECL int GrammarC99_lex(YYSTYPE * yylval_param, void * yyscanner, GrammarC99 * grammar)
+#define YY_NO_INPUT
+
+/* TODO: Define YY_USER_INIT */
+/* TODO: Define YY_USER_ACTION */
 void comment(void);
 int check_type(void);
 void count(void);

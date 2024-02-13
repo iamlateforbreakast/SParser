@@ -24,11 +24,11 @@ int step1()
 
   PRINT(("Step 1: Test 1 - Create an instance of class GrammarC99: "));
   testC99 = (GrammarC99*)GrammarC99_new();
-  UT_ASSERT((testC99 != 0));
+  UT_ASSERT((((Object*)testC99)->marker == 0x0B5EC7));
 
   PRINT(("Step 1: Test 2 - Delete an instance of class GrammarC99: "));
-  GrammarC99_delete(testC99);
-  UT_ASSERT((1));
+  GrammarC99_delete((Grammar*)testC99);
+  UT_ASSERT((((Object*)testC99)->marker == 0));
 
   PRINT(("Step 1: Test 3 - Check all memory is freed: "));
   ObjectMgr* objectMgr = ObjectMgr_getRef();

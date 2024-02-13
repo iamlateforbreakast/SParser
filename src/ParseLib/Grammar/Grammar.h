@@ -2,10 +2,14 @@
 #ifndef _GRAMMAR_H_
 #define _GRAMMAR_H_
 
+#include "Types.h"
+#include "Object.h"
+
 typedef struct Grammar Grammar;
 
 struct Grammar
 {
+  Object object;
   Grammar * (*new)(void);
   void (*delete)(Grammar * this);
   Grammar * (*copy)(Grammar * this);

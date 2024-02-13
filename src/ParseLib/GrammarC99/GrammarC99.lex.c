@@ -4848,12 +4848,17 @@ static const struct yy_trans_info *yy_start_state_list[3] =
 #include "GrammarC99.h"
 #include "Error.h"
 #include "GrammarC99.parse.h"
+#define YY_DECL int GrammarC99_lex(YYSTYPE * yylval_param, void * yyscanner, GrammarC99 * grammar)
+#define YY_NO_INPUT
+
+/* TODO: Define YY_USER_INIT */
+/* TODO: Define YY_USER_ACTION */
 void comment(void);
 int check_type(void);
 void count(void);
 extern void yyerror(char const *s);
-#line 4855 "GrammarC99.lex.c"
-#line 4856 "GrammarC99.lex.c"
+#line 4860 "GrammarC99.lex.c"
+#line 4861 "GrammarC99.lex.c"
 
 #define INITIAL 0
 
@@ -5117,9 +5122,9 @@ YY_DECL
 		}
 
 	{
-#line 26 "GrammarC99.l"
+#line 31 "GrammarC99.l"
 
-#line 5122 "GrammarC99.lex.c"
+#line 5127 "GrammarC99.lex.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -5173,506 +5178,506 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 27 "GrammarC99.l"
+#line 32 "GrammarC99.l"
 { comment(); }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 28 "GrammarC99.l"
+#line 33 "GrammarC99.l"
 { /* consume //-comment */ }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 31 "GrammarC99.l"
+#line 36 "GrammarC99.l"
 { count(); return(AUTO); }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 32 "GrammarC99.l"
+#line 37 "GrammarC99.l"
 { count(); return(BOOL); }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 33 "GrammarC99.l"
+#line 38 "GrammarC99.l"
 { count(); return(BREAK); }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 34 "GrammarC99.l"
+#line 39 "GrammarC99.l"
 { count(); return(CASE); }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 35 "GrammarC99.l"
+#line 40 "GrammarC99.l"
 { count(); return(CHAR); }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 36 "GrammarC99.l"
+#line 41 "GrammarC99.l"
 { count(); return(COMPLEX); }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 37 "GrammarC99.l"
+#line 42 "GrammarC99.l"
 { count(); return(CONST); }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 38 "GrammarC99.l"
+#line 43 "GrammarC99.l"
 { count(); return(CONTINUE); }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 39 "GrammarC99.l"
+#line 44 "GrammarC99.l"
 { count(); return(DEFAULT); }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 40 "GrammarC99.l"
+#line 45 "GrammarC99.l"
 { count(); return(DO); }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 41 "GrammarC99.l"
+#line 46 "GrammarC99.l"
 { count(); return(DOUBLE); }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 42 "GrammarC99.l"
+#line 47 "GrammarC99.l"
 { count(); return(ELSE); }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 43 "GrammarC99.l"
+#line 48 "GrammarC99.l"
 { count(); return(ENUM); }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 44 "GrammarC99.l"
+#line 49 "GrammarC99.l"
 { count(); return(EXTERN); }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 45 "GrammarC99.l"
+#line 50 "GrammarC99.l"
 { count(); return(FLOAT); }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 46 "GrammarC99.l"
+#line 51 "GrammarC99.l"
 { count(); return(FOR); }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 47 "GrammarC99.l"
+#line 52 "GrammarC99.l"
 { count(); return(GOTO); }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 48 "GrammarC99.l"
+#line 53 "GrammarC99.l"
 { count(); return(IF); }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 49 "GrammarC99.l"
+#line 54 "GrammarC99.l"
 { count(); return(IMAGINARY); }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 50 "GrammarC99.l"
+#line 55 "GrammarC99.l"
 { count(); return(INLINE); }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 51 "GrammarC99.l"
+#line 56 "GrammarC99.l"
 { count(); return(INT); }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 52 "GrammarC99.l"
+#line 57 "GrammarC99.l"
 { count(); return(LONG); }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 53 "GrammarC99.l"
+#line 58 "GrammarC99.l"
 { count(); return(REGISTER); }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 54 "GrammarC99.l"
+#line 59 "GrammarC99.l"
 { count(); return(RESTRICT); }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 55 "GrammarC99.l"
+#line 60 "GrammarC99.l"
 { count(); return(RETURN); }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 56 "GrammarC99.l"
+#line 61 "GrammarC99.l"
 { count(); return(SHORT); }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 57 "GrammarC99.l"
+#line 62 "GrammarC99.l"
 { count(); return(SIGNED); }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 58 "GrammarC99.l"
+#line 63 "GrammarC99.l"
 { count(); return(SIZEOF); }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 59 "GrammarC99.l"
+#line 64 "GrammarC99.l"
 { count(); return(STATIC); }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 60 "GrammarC99.l"
+#line 65 "GrammarC99.l"
 { count(); return(STRUCT); }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 61 "GrammarC99.l"
+#line 66 "GrammarC99.l"
 { count(); return(SWITCH); }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 62 "GrammarC99.l"
+#line 67 "GrammarC99.l"
 { count(); return(TYPEDEF); }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 63 "GrammarC99.l"
+#line 68 "GrammarC99.l"
 { count(); return(UNION); }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 64 "GrammarC99.l"
+#line 69 "GrammarC99.l"
 { count(); return(UNSIGNED); }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 65 "GrammarC99.l"
+#line 70 "GrammarC99.l"
 { count(); return(VOID); }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 66 "GrammarC99.l"
+#line 71 "GrammarC99.l"
 { count(); return(VOLATILE); }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 67 "GrammarC99.l"
+#line 72 "GrammarC99.l"
 { count(); return(WHILE); }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 69 "GrammarC99.l"
+#line 74 "GrammarC99.l"
 { count(); yylval->sval=strdup(yytext); return(check_type()); }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 71 "GrammarC99.l"
+#line 76 "GrammarC99.l"
 { count(); yylval->sval = "CONST"; return(CONSTANT); }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 72 "GrammarC99.l"
+#line 77 "GrammarC99.l"
 { count(); return(CONSTANT); }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 73 "GrammarC99.l"
+#line 78 "GrammarC99.l"
 { count(); return(CONSTANT); }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 74 "GrammarC99.l"
+#line 79 "GrammarC99.l"
 { count(); return(CONSTANT); }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 76 "GrammarC99.l"
+#line 81 "GrammarC99.l"
 { count(); return(CONSTANT); }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 77 "GrammarC99.l"
+#line 82 "GrammarC99.l"
 { count(); return(CONSTANT); }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 78 "GrammarC99.l"
+#line 83 "GrammarC99.l"
 { count(); return(CONSTANT); }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 79 "GrammarC99.l"
+#line 84 "GrammarC99.l"
 { count(); return(CONSTANT); }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 80 "GrammarC99.l"
+#line 85 "GrammarC99.l"
 { count(); return(CONSTANT); }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 81 "GrammarC99.l"
+#line 86 "GrammarC99.l"
 { count(); return(CONSTANT); }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 84 "GrammarC99.l"
+#line 89 "GrammarC99.l"
 { count(); yylval->sval = "STR"; return(STRING_LITERAL); }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 86 "GrammarC99.l"
+#line 91 "GrammarC99.l"
 { count(); return(ELLIPSIS); }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 87 "GrammarC99.l"
+#line 92 "GrammarC99.l"
 { count(); return(RIGHT_ASSIGN); }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 88 "GrammarC99.l"
+#line 93 "GrammarC99.l"
 { count(); return(LEFT_ASSIGN); }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 89 "GrammarC99.l"
+#line 94 "GrammarC99.l"
 { count(); return(ADD_ASSIGN); }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 90 "GrammarC99.l"
+#line 95 "GrammarC99.l"
 { count(); return(SUB_ASSIGN); }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 91 "GrammarC99.l"
+#line 96 "GrammarC99.l"
 { count(); return(MUL_ASSIGN); }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 92 "GrammarC99.l"
+#line 97 "GrammarC99.l"
 { count(); return(DIV_ASSIGN); }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 93 "GrammarC99.l"
+#line 98 "GrammarC99.l"
 { count(); return(MOD_ASSIGN); }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 94 "GrammarC99.l"
+#line 99 "GrammarC99.l"
 { count(); return(AND_ASSIGN); }
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 95 "GrammarC99.l"
+#line 100 "GrammarC99.l"
 { count(); return(XOR_ASSIGN); }
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 96 "GrammarC99.l"
+#line 101 "GrammarC99.l"
 { count(); return(OR_ASSIGN); }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 97 "GrammarC99.l"
+#line 102 "GrammarC99.l"
 { count(); return(RIGHT_OP); }
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 98 "GrammarC99.l"
+#line 103 "GrammarC99.l"
 { count(); return(LEFT_OP); }
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 99 "GrammarC99.l"
+#line 104 "GrammarC99.l"
 { count(); return(INC_OP); }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 100 "GrammarC99.l"
+#line 105 "GrammarC99.l"
 { count(); return(DEC_OP); }
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 101 "GrammarC99.l"
+#line 106 "GrammarC99.l"
 { count(); return(PTR_OP); }
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 102 "GrammarC99.l"
+#line 107 "GrammarC99.l"
 { count(); return(AND_OP); }
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 103 "GrammarC99.l"
+#line 108 "GrammarC99.l"
 { count(); return(OR_OP); }
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 104 "GrammarC99.l"
+#line 109 "GrammarC99.l"
 { count(); return(LE_OP); }
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 105 "GrammarC99.l"
+#line 110 "GrammarC99.l"
 { count(); return(GE_OP); }
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
-#line 106 "GrammarC99.l"
+#line 111 "GrammarC99.l"
 { count(); return(EQ_OP); }
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 107 "GrammarC99.l"
+#line 112 "GrammarC99.l"
 { count(); return(NE_OP); }
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 108 "GrammarC99.l"
+#line 113 "GrammarC99.l"
 { count(); return(';'); }
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 109 "GrammarC99.l"
+#line 114 "GrammarC99.l"
 { count(); return('{'); }
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
-#line 110 "GrammarC99.l"
+#line 115 "GrammarC99.l"
 { count(); return('}'); }
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 111 "GrammarC99.l"
+#line 116 "GrammarC99.l"
 { count(); return(','); }
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
-#line 112 "GrammarC99.l"
+#line 117 "GrammarC99.l"
 { count(); return(':'); }
 	YY_BREAK
 case 79:
 YY_RULE_SETUP
-#line 113 "GrammarC99.l"
+#line 118 "GrammarC99.l"
 { count(); return('='); }
 	YY_BREAK
 case 80:
 YY_RULE_SETUP
-#line 114 "GrammarC99.l"
+#line 119 "GrammarC99.l"
 { count(); return('('); }
 	YY_BREAK
 case 81:
 YY_RULE_SETUP
-#line 115 "GrammarC99.l"
+#line 120 "GrammarC99.l"
 { count(); return(')'); }
 	YY_BREAK
 case 82:
 YY_RULE_SETUP
-#line 116 "GrammarC99.l"
+#line 121 "GrammarC99.l"
 { count(); return('['); }
 	YY_BREAK
 case 83:
 YY_RULE_SETUP
-#line 117 "GrammarC99.l"
+#line 122 "GrammarC99.l"
 { count(); return(']'); }
 	YY_BREAK
 case 84:
 YY_RULE_SETUP
-#line 118 "GrammarC99.l"
+#line 123 "GrammarC99.l"
 { count(); return('.'); }
 	YY_BREAK
 case 85:
 YY_RULE_SETUP
-#line 119 "GrammarC99.l"
+#line 124 "GrammarC99.l"
 { count(); return('&'); }
 	YY_BREAK
 case 86:
 YY_RULE_SETUP
-#line 120 "GrammarC99.l"
+#line 125 "GrammarC99.l"
 { count(); return('!'); }
 	YY_BREAK
 case 87:
 YY_RULE_SETUP
-#line 121 "GrammarC99.l"
+#line 126 "GrammarC99.l"
 { count(); return('~'); }
 	YY_BREAK
 case 88:
 YY_RULE_SETUP
-#line 122 "GrammarC99.l"
+#line 127 "GrammarC99.l"
 { count(); return('-'); }
 	YY_BREAK
 case 89:
 YY_RULE_SETUP
-#line 123 "GrammarC99.l"
+#line 128 "GrammarC99.l"
 { count(); return('+'); }
 	YY_BREAK
 case 90:
 YY_RULE_SETUP
-#line 124 "GrammarC99.l"
+#line 129 "GrammarC99.l"
 { count(); return('*'); }
 	YY_BREAK
 case 91:
 YY_RULE_SETUP
-#line 125 "GrammarC99.l"
+#line 130 "GrammarC99.l"
 { count(); return('/'); }
 	YY_BREAK
 case 92:
 YY_RULE_SETUP
-#line 126 "GrammarC99.l"
+#line 131 "GrammarC99.l"
 { count(); return('%'); }
 	YY_BREAK
 case 93:
 YY_RULE_SETUP
-#line 127 "GrammarC99.l"
+#line 132 "GrammarC99.l"
 { count(); return('<'); }
 	YY_BREAK
 case 94:
 YY_RULE_SETUP
-#line 128 "GrammarC99.l"
+#line 133 "GrammarC99.l"
 { count(); return('>'); }
 	YY_BREAK
 case 95:
 YY_RULE_SETUP
-#line 129 "GrammarC99.l"
+#line 134 "GrammarC99.l"
 { count(); return('^'); }
 	YY_BREAK
 case 96:
 YY_RULE_SETUP
-#line 130 "GrammarC99.l"
+#line 135 "GrammarC99.l"
 { count(); return('|'); }
 	YY_BREAK
 case 97:
 YY_RULE_SETUP
-#line 131 "GrammarC99.l"
+#line 136 "GrammarC99.l"
 { count(); return('?'); }
 	YY_BREAK
 case 98:
 /* rule 98 can match eol */
 YY_RULE_SETUP
-#line 133 "GrammarC99.l"
+#line 138 "GrammarC99.l"
 { count(); }
 	YY_BREAK
 case 99:
 YY_RULE_SETUP
-#line 134 "GrammarC99.l"
+#line 139 "GrammarC99.l"
 { /* Add code to complain about unmatched characters */ }
 	YY_BREAK
 case 100:
 YY_RULE_SETUP
-#line 136 "GrammarC99.l"
+#line 141 "GrammarC99.l"
 ECHO;
 	YY_BREAK
-#line 5675 "GrammarC99.lex.c"
+#line 5680 "GrammarC99.lex.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -6888,7 +6893,7 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 136 "GrammarC99.l"
+#line 141 "GrammarC99.l"
 
 
 /*int yywrap(void)

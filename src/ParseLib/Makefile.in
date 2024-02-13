@@ -9,7 +9,7 @@ SOURCES = \
 	./TransUnit/TransUnit.c \
 	./FileReader/FileReader.c
 
-HEADERS = $(SOURCES:.c=.h) ./Grammar2/Grammar2.h
+HEADERS = $(SOURCES:.c=.h) ./Grammar2/Grammar2.h ./GrammarC99/GrammarC99.h ./Grammar/Grammar.h
 
 GRAMMAR_OBJECTS = ./Grammar2/Grammar2.parse.o ./Grammar2/Grammar2.lex.o ./Grammar2/Grammar2.o
 
