@@ -55,7 +55,7 @@
 #define YYSKELETON_NAME "yacc.c"
 
 /* Pure parsers.  */
-#define YYPURE 1
+#define YYPURE 2
 
 /* Push parsers.  */
 #define YYPUSH 0
@@ -63,7 +63,8 @@
 /* Pull parsers.  */
 #define YYPULL 1
 
-
+/* Substitute the type names.  */
+#define YYSTYPE         GRAMMARC99_STYPE
 /* Substitute the variable and function names.  */
 #define yyparse         GrammarC99_parse
 #define yylex           GrammarC99_lex
@@ -80,7 +81,7 @@ extern char yytext[];
 void yyerror(void * scanner, GrammarC99 * grammar, char const * s);
 int yylex(void * yylval_param, void * yyscanner, GrammarC99 * grammar);
 
-#line 84 "GrammarC99.parse.c"
+#line 85 "GrammarC99.parse.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -533,7 +534,7 @@ void free (void *); /* INFRINGES ON USER NAME SPACE */
 
 #if (! defined yyoverflow \
      && (! defined __cplusplus \
-         || (defined YYSTYPE_IS_TRIVIAL && YYSTYPE_IS_TRIVIAL)))
+         || (defined GRAMMARC99_STYPE_IS_TRIVIAL && GRAMMARC99_STYPE_IS_TRIVIAL)))
 
 /* A type that is properly aligned for any stack member.  */
 union yyalloc
@@ -655,41 +656,41 @@ static const yytype_int8 yytranslate[] =
       65
 };
 
-#if YYDEBUG
+#if GRAMMARC99_DEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    47,    47,    48,    49,    50,    54,    55,    56,    57,
-      58,    59,    60,    61,    62,    63,    67,    68,    72,    73,
-      74,    75,    76,    77,    81,    82,    83,    84,    85,    86,
-      90,    91,    95,    96,    97,    98,   102,   103,   104,   108,
-     109,   110,   114,   115,   116,   117,   118,   122,   123,   124,
-     128,   129,   133,   134,   138,   139,   143,   144,   148,   149,
-     153,   154,   158,   159,   163,   164,   165,   166,   167,   168,
-     169,   170,   171,   172,   173,   177,   178,   182,   186,   187,
-     191,   192,   193,   194,   195,   196,   197,   198,   202,   203,
-     207,   208,   212,   213,   214,   215,   216,   220,   221,   222,
-     223,   224,   225,   226,   227,   228,   229,   230,   231,   232,
-     233,   234,   238,   239,   240,   244,   245,   249,   250,   254,
-     258,   259,   260,   261,   265,   266,   270,   271,   272,   276,
-     277,   278,   279,   280,   284,   285,   289,   290,   294,   295,
-     296,   300,   304,   305,   310,   311,   312,   313,   314,   315,
-     316,   317,   318,   319,   320,   321,   322,   326,   327,   328,
-     329,   333,   334,   339,   340,   344,   345,   349,   350,   351,
-     355,   356,   360,   361,   365,   366,   367,   371,   372,   373,
-     374,   375,   376,   377,   378,   379,   380,   381,   385,   386,
-     387,   391,   392,   393,   394,   398,   402,   403,   407,   408,
-     412,   413,   414,   415,   416,   417,   421,   422,   423,   427,
-     428,   432,   433,   437,   438,   442,   443,   447,   448,   449,
-     453,   454,   455,   456,   457,   458,   462,   463,   464,   465,
-     466,   470,   471,   475,   476,   480,   481,   485,   486
+       0,    49,    49,    50,    51,    52,    56,    57,    58,    59,
+      60,    61,    62,    63,    64,    65,    69,    70,    74,    75,
+      76,    77,    78,    79,    83,    84,    85,    86,    87,    88,
+      92,    93,    97,    98,    99,   100,   104,   105,   106,   110,
+     111,   112,   116,   117,   118,   119,   120,   124,   125,   126,
+     130,   131,   135,   136,   140,   141,   145,   146,   150,   151,
+     155,   156,   160,   161,   165,   166,   167,   168,   169,   170,
+     171,   172,   173,   174,   175,   179,   180,   184,   188,   189,
+     193,   194,   195,   196,   197,   198,   199,   200,   204,   205,
+     209,   210,   214,   215,   216,   217,   218,   222,   223,   224,
+     225,   226,   227,   228,   229,   230,   231,   232,   233,   234,
+     235,   236,   240,   241,   242,   246,   247,   251,   252,   256,
+     260,   261,   262,   263,   267,   268,   272,   273,   274,   278,
+     279,   280,   281,   282,   286,   287,   291,   292,   296,   297,
+     298,   302,   306,   307,   312,   313,   314,   315,   316,   317,
+     318,   319,   320,   321,   322,   323,   324,   328,   329,   330,
+     331,   335,   336,   341,   342,   346,   347,   351,   352,   353,
+     357,   358,   362,   363,   367,   368,   369,   373,   374,   375,
+     376,   377,   378,   379,   380,   381,   382,   383,   387,   388,
+     389,   393,   394,   395,   396,   400,   404,   405,   409,   410,
+     414,   415,   416,   417,   418,   419,   423,   424,   425,   429,
+     430,   434,   435,   439,   440,   444,   445,   449,   450,   451,
+     455,   456,   457,   458,   459,   460,   464,   465,   466,   467,
+     468,   472,   473,   477,   478,   482,   483,   487,   488
 };
 #endif
 
 /** Accessing symbol of state STATE.  */
 #define YY_ACCESSING_SYMBOL(State) YY_CAST (yysymbol_kind_t, yystos[State])
 
-#if YYDEBUG || 0
+#if GRAMMARC99_DEBUG || 0
 /* The user-facing name of the symbol whose (internal) number is
    YYSYMBOL.  No bounds checking.  */
 static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
@@ -1303,7 +1304,7 @@ static const yytype_int8 yyr2[] =
 enum { YYENOMEM = -2 };
 
 #define yyerrok         (yyerrstatus = 0)
-#define yyclearin       (yychar = YYEMPTY)
+#define yyclearin       (yychar = GRAMMARC99_EMPTY)
 
 #define YYACCEPT        goto yyacceptlab
 #define YYABORT         goto yyabortlab
@@ -1315,7 +1316,7 @@ enum { YYENOMEM = -2 };
 
 #define YYBACKUP(Token, Value)                                    \
   do                                                              \
-    if (yychar == YYEMPTY)                                        \
+    if (yychar == GRAMMARC99_EMPTY)                                        \
       {                                                           \
         yychar = (Token);                                         \
         yylval = (Value);                                         \
@@ -1331,12 +1332,12 @@ enum { YYENOMEM = -2 };
   while (0)
 
 /* Backward compatibility with an undocumented macro.
-   Use YYerror or YYUNDEF. */
-#define YYERRCODE YYUNDEF
+   Use GRAMMARC99_error or GRAMMARC99_UNDEF. */
+#define YYERRCODE GRAMMARC99_UNDEF
 
 
 /* Enable debugging if requested.  */
-#if YYDEBUG
+#if GRAMMARC99_DEBUG
 
 # ifndef YYFPRINTF
 #  include <stdio.h> /* INFRINGES ON USER NAME SPACE */
@@ -1456,12 +1457,12 @@ do {                                    \
 /* Nonzero means print parse trace.  It is left uninitialized so that
    multiple parsers can coexist.  */
 int yydebug;
-#else /* !YYDEBUG */
+#else /* !GRAMMARC99_DEBUG */
 # define YYDPRINTF(Args) ((void) 0)
 # define YY_SYMBOL_PRINT(Title, Kind, Value, Location)
 # define YY_STACK_PRINT(Bottom, Top)
 # define YY_REDUCE_PRINT(Rule)
-#endif /* !YYDEBUG */
+#endif /* !GRAMMARC99_DEBUG */
 
 
 /* YYINITDEPTH -- initial size of the parser's stacks.  */
@@ -1569,7 +1570,7 @@ YYSTYPE yylval YY_INITIAL_VALUE (= yyval_default);
 
   YYDPRINTF ((stderr, "Starting parse\n"));
 
-  yychar = YYEMPTY; /* Cause a token to be read.  */
+  yychar = GRAMMARC99_EMPTY; /* Cause a token to be read.  */
 
   goto yysetstate;
 
@@ -1679,25 +1680,25 @@ yybackup:
   /* Not known => get a lookahead token if don't already have one.  */
 
   /* YYCHAR is either empty, or end-of-input, or a valid lookahead.  */
-  if (yychar == YYEMPTY)
+  if (yychar == GRAMMARC99_EMPTY)
     {
       YYDPRINTF ((stderr, "Reading a token\n"));
       yychar = yylex (&yylval, scanner, grammar);
     }
 
-  if (yychar <= YYEOF)
+  if (yychar <= GRAMMARC99_EOF)
     {
-      yychar = YYEOF;
+      yychar = GRAMMARC99_EOF;
       yytoken = YYSYMBOL_YYEOF;
       YYDPRINTF ((stderr, "Now at end of input.\n"));
     }
-  else if (yychar == YYerror)
+  else if (yychar == GRAMMARC99_error)
     {
       /* The scanner already issued an error message, process directly
          to error recovery.  But do not keep the error token as
          lookahead, it is too special and may lead us to an endless
          loop in error recovery. */
-      yychar = YYUNDEF;
+      yychar = GRAMMARC99_UNDEF;
       yytoken = YYSYMBOL_YYerror;
       goto yyerrlab1;
     }
@@ -1734,7 +1735,7 @@ yybackup:
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 
   /* Discard the shifted token.  */
-  yychar = YYEMPTY;
+  yychar = GRAMMARC99_EMPTY;
   goto yynewstate;
 
 
@@ -1770,43 +1771,43 @@ yyreduce:
   switch (yyn)
     {
   case 88: /* init_declarator_list: init_declarator  */
-#line 202 "GrammarC99.y"
+#line 204 "GrammarC99.y"
                           {printf("\n-->Init declarator matched\n%s\n", (yyvsp[0].sval));}
-#line 1776 "GrammarC99.parse.c"
+#line 1777 "GrammarC99.parse.c"
     break;
 
   case 92: /* storage_class_specifier: TYPEDEF  */
-#line 212 "GrammarC99.y"
+#line 214 "GrammarC99.y"
                   { printf("Typedef\n"); }
-#line 1782 "GrammarC99.parse.c"
+#line 1783 "GrammarC99.parse.c"
     break;
 
   case 115: /* struct_or_union: STRUCT  */
-#line 244 "GrammarC99.y"
+#line 246 "GrammarC99.y"
                  { /*Declarator_setState(1);*/ }
-#line 1788 "GrammarC99.parse.c"
+#line 1789 "GrammarC99.parse.c"
     break;
 
   case 231: /* translation_unit: external_declaration  */
-#line 470 "GrammarC99.y"
+#line 472 "GrammarC99.y"
                                {printf("Translation Unit1: %s\n",(yyvsp[0].sval));}
-#line 1794 "GrammarC99.parse.c"
+#line 1795 "GrammarC99.parse.c"
     break;
 
   case 232: /* translation_unit: translation_unit external_declaration  */
-#line 471 "GrammarC99.y"
+#line 473 "GrammarC99.y"
                                                 {printf("-->Translation Unit2: %s\n",(yyvsp[-1].sval));}
-#line 1800 "GrammarC99.parse.c"
+#line 1801 "GrammarC99.parse.c"
     break;
 
   case 233: /* external_declaration: function_definition  */
-#line 475 "GrammarC99.y"
+#line 477 "GrammarC99.y"
                               { printf("\n-->Function definition\n%s\n",(yyvsp[0].sval)); }
-#line 1806 "GrammarC99.parse.c"
+#line 1807 "GrammarC99.parse.c"
     break;
 
 
-#line 1810 "GrammarC99.parse.c"
+#line 1811 "GrammarC99.parse.c"
 
       default: break;
     }
@@ -1848,7 +1849,7 @@ yyreduce:
 yyerrlab:
   /* Make sure we have latest lookahead translation.  See comments at
      user semantic actions for why this is necessary.  */
-  yytoken = yychar == YYEMPTY ? YYSYMBOL_YYEMPTY : YYTRANSLATE (yychar);
+  yytoken = yychar == GRAMMARC99_EMPTY ? YYSYMBOL_YYEMPTY : YYTRANSLATE (yychar);
   /* If not already recovering from an error, report this error.  */
   if (!yyerrstatus)
     {
@@ -1861,17 +1862,17 @@ yyerrlab:
       /* If just tried and failed to reuse lookahead token after an
          error, discard it.  */
 
-      if (yychar <= YYEOF)
+      if (yychar <= GRAMMARC99_EOF)
         {
           /* Return failure if at end of input.  */
-          if (yychar == YYEOF)
+          if (yychar == GRAMMARC99_EOF)
             YYABORT;
         }
       else
         {
           yydestruct ("Error: discarding",
                       yytoken, &yylval, scanner, grammar);
-          yychar = YYEMPTY;
+          yychar = GRAMMARC99_EMPTY;
         }
     }
 
@@ -1973,7 +1974,7 @@ yyexhaustedlab:
 | yyreturnlab -- parsing is finished, clean up and return.  |
 `----------------------------------------------------------*/
 yyreturnlab:
-  if (yychar != YYEMPTY)
+  if (yychar != GRAMMARC99_EMPTY)
     {
       /* Make sure we have latest lookahead translation.  See comments at
          user semantic actions for why this is necessary.  */
@@ -1999,7 +2000,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 490 "GrammarC99.y"
+#line 492 "GrammarC99.y"
 
 #include <stdio.h>
 

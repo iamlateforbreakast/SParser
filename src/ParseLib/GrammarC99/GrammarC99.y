@@ -6,19 +6,21 @@ void yyerror(void * scanner, GrammarC99 * grammar, char const * s);
 int yylex(void * yylval_param, void * yyscanner, GrammarC99 * grammar);
 %}
 
-%pure-parser
-//%define api.pure full
-%name-prefix "GrammarC99_"
-//%define api.prefix {GrammarC99_}
+//%pure-parser
+%define api.pure full
+//%name-prefix "GrammarC99_"
+%define api.prefix {GrammarC99_}
+%define api.value.type { MyType }
 %output "GrammarC99.parse.c"
 %lex-param {void * scanner}
 %lex-param {GrammarC99 * grammar}
 %parse-param {void * scanner} 
 %parse-param {GrammarC99 * grammar}
+%code requires { #include "MyType.h" }
 
-%union {
-  char* sval;
-}
+//%union {
+//  char* sval;
+//}
 
 %type <sval> function_definition
 %type <sval> translation_unit
