@@ -111,6 +111,7 @@ PUBLIC void Object_deallocate(Object* this)
     Error_new(ERROR_DBG, "Object_de-allocate uses a invalid object\n");
     return;
   }
+  this->marker = 0;
   if (this->allocator == 0)
     ObjectMgr_deallocate(Object_objMgrPtr, this);
   else
