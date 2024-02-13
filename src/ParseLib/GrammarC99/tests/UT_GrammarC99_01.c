@@ -1,114 +1,70 @@
-/* GrammarC99 */
-
+/* UT_GrammarC99_01.c */
 #include "GrammarC99.h"
-#include "TransUnit.h"
-#include "Object.h"
-#include "Error.h"
+#include "FileMgr.h"
+#include "ObjectMgr.h"
+#include "Memory.h"
+#include "Debug.h"
 
-extern int GrammarC99_parse(void* scanner, GrammarC99* this);
-extern void* GrammarC99_scan_string(const char* yystr, void* yyscanner);
-extern int GrammarC99lex_init(void* scanner);
-extern int GrammarC99lex_destroy(void* yyscanner);
+#include <stdio.h>
 
-/**********************************************//**
-  @class GrammarC99
-**************************************************/
-struct GrammarC99
+#define DEBUG (0)
+#ifdef _WIN32
+#define UT_ASSERT(cond) if ((cond)) \
+                          { printf("Passed\n");} \
+                          else { printf("Failed\n"); return 0;}
+#else
+#define UT_ASSERT(cond) if ((cond)) \
+                          { printf("\x1b[32mPassed\x1b[0m\n");} \
+                          else { printf("\x1b[31mFailed\x1b[0m\n"); return 0;}
+#endif
+
+int step1()
 {
-  Grammar grammar;
-  TransUnit* transUnit;
-  void* scanner;
-  //SdbMgr * sdbMgr;
-  //FileReader * reader;
-  //char * buffer;
-  //char * node_text;
-  //int node_text_position;
-  //GrammarContext * current;
-  //List * contexts;
-};
+  int isPassed = 1;
+  GrammarC99* testC99 = 0;
 
-/**********************************************//**
-  @private Class Description
-**************************************************/
-PRIVATE Class grammarC99Class =
-{
-  .f_new = (Constructor)0,
-  .f_delete = (Destructor)&GrammarC99_delete,
-  .f_copy = (Copy_Operator)0,
-  .f_comp = (Comp_Operator)0,
-  .f_print = (Printer)&GrammarC99_print,
-  .f_size = (Sizer)&GrammarC99_getSize
-};
+  FileMgr* fileMgr = FileMgr_getRef();
+  FileDesc* c_file = FileMgr_addFile(fileMgr, "test.c");
 
-/**********************************************//**
-  @brief Create an instance of the class GrammarC99.
-  @public
-  @memberof GrammarC99
-  @return New instance.
-**************************************************/
-PUBLIC Grammar* GrammarC99_new(FileDesc * fileDesc)
-{
-  GrammarC99 * this = 0;
+  PRINT(("Step 1: Test 1 - Create an instance of class GrammarC99: "));
+  testC99 = (GrammarC99*)GrammarC99_new(c_file);
+  UT_ASSERT((((Object*)testC99)->marker == 0x0B5EC7));
 
-  this = (GrammarC99*)Object_new(sizeof(GrammarC99), &grammarC99Class);
-  
-  if (this == 0) return 0;
+  PRINT(("Step 1: Test 2 - Delete an instance of class GrammarC99: "));
+  GrammarC99_delete((Grammar*)testC99);
+  UT_ASSERT((((Object*)testC99)->marker != 0x0B5EC7));
 
-  GrammarC99lex_init(&this->scanner);
-  this->transUnit = TransUnit_new(fileDesc);
-  //this->reader = fr;
-  //this->sdbMgr = sdbMgr;
-  //this->contexts = List_new(this->contexts);
-  //this->current = (GrammarContext*)Object_new(sizeof(GrammarContext),&grammarContextClass);
-  //this->current->lastNode = 0;
-  //this->current->includeNodeBranch = 0;
-  //List_insertHead(this->contexts, this->current, 1);
+  FileMgr_delete(fileMgr);
 
-  //this->buffer = &internalBuffer[0];
-  //Memory_set(this->buffer, 0, MAX_BUFFER_SIZE);
+  PRINT(("Step 1: Test 3 - Check all memory is freed: "));
+  ObjectMgr* objectMgr = ObjectMgr_getRef();
+  UT_ASSERT((ObjectMgr_report(objectMgr) == 1));
+  TRACE(("Nb objects left allocated: %d\n", ObjectMgr_report(objectMgr)));
+  ObjectMgr_delete(objectMgr);
 
-  //this->node_text_position = 0;
-
-  //if (!isInitialised) Grammar2_initSdbTables(this);
-
-  return (Grammar*)this;
+  return isPassed;
 }
 
-PUBLIC void GrammarC99_delete(Grammar* this)
+int step2()
 {
-  GrammarC99* thisC99 = (GrammarC99*)this;
-  if (this != 0)
-  {
-    if (this->object.refCount == 1)
-    {
-      GrammarC99lex_destroy(thisC99->scanner);
-      //o = (GrammarContext*)List_removeHead(this->contexts);
-      //Object_delete((Object*)o);
-      //List_delete(this->contexts);
-      Object_deallocate(&this->object);
-    }
-    else if (this->object.refCount > 1)
-    {
-      this->object.refCount--;
-    }
-  }
+  int isPassed = 1;
+  FileMgr* fileMgr = FileMgr_getRef();
+  FileDesc* c_file = FileMgr_addFile(fileMgr, "test.c");
+  GrammarC99* testC99 = (GrammarC99*)GrammarC99_new(c_file);
+
+  GrammarC99_process(testC99);
+
+  GrammarC99_delete((Grammar*)testC99);
+  FileMgr_delete(fileMgr);
+
+  return isPassed;
 }
-
-PUBLIC void GrammarC99_print(Grammar* this)
+int main()
 {
+  int isPassed = 1;
 
-}
+  step1();
+  step2();
 
-PUBLIC unsigned int GrammarC99_getSize(Grammar* this)
-{
-  return sizeof(GrammarC99);
-}
-
-PUBLIC void GrammarC99_process(GrammarC99* this)
-{
-  /* TODO: Store translation unit information */
-  Error_new(ERROR_INFO, "GrammarC99: Processing file %s", "test,c"/*FileReader_getName(this->reader)*/);
-
-  GrammarC99_scan_string("int a = 0;", this->scanner);
-  GrammarC99_parse(this->scanner, this);
+  return isPassed;
 }
