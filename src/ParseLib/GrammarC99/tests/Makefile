@@ -1,6 +1,6 @@
 all: UT_GrammarC99_01
 
-UT_GrammarC99_01: UT_GrammarC99_01.c ../GrammarC99.c ../GrammarC99.h
+UT_GrammarC99_01: UT_GrammarC99_01.c
 	gcc -g UT_GrammarC99_01.c ../GrammarC99.c \
 	../GrammarC99.lex.c ../GrammarC99.parse.c \
 	../../../CommonLib/libCommon.a \

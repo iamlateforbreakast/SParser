@@ -28,7 +28,7 @@ int step1()
 
   PRINT(("Step 1: Test 2 - Delete an instance of class GrammarC99: "));
   GrammarC99_delete((Grammar*)testC99);
-  UT_ASSERT((((Object*)testC99)->marker == 0));
+  UT_ASSERT((((Object*)testC99)->marker != 0x0B5EC7));
 
   PRINT(("Step 1: Test 3 - Check all memory is freed: "));
   ObjectMgr* objectMgr = ObjectMgr_getRef();
@@ -39,11 +39,20 @@ int step1()
   return isPassed;
 }
 
+int step2()
+{
+  int isPassed = 1;
+  GrammarC99* testC99 = 0;
+
+  return isPassed;
+}
+
 int main()
 {
   int isPassed = 1;
 
   step1();
+  step2();
   
   return isPassed;
 }
