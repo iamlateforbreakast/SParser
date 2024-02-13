@@ -1,14 +1,21 @@
 /* GrammarC99 */
 
 #include "GrammarC99.h"
+#include "TransUnit.h"
 #include "Object.h"
+#include "Error.h"
 
+extern int GrammarC99_parse(void* scanner, GrammarC99* this);
+extern void* GrammarC99_scan_string(const char* yystr, void* yyscanner);
+extern int GrammarC99lex_init(void* scanner);
+extern int GrammarC99lex_destroy(void* yyscanner);
 /**********************************************//**
   @class GrammarC99
 **************************************************/
 struct GrammarC99
 {
   Grammar grammar;
+  TransUnit* transUnit;
   void * scanner;
   //SdbMgr * sdbMgr;
   //FileReader * reader;
@@ -32,14 +39,23 @@ PRIVATE Class grammarC99Class =
   .f_size = (Sizer)&GrammarC99_getSize
 };
 
-PUBLIC Grammar * GrammarC99_new()
+/**********************************************//**
+  @brief Create an instance of the class GrammarC99.
+  @public
+  @memberof GrammarC99
+  @return New instance.
+**************************************************/
+PUBLIC Grammar* GrammarC99_new(FileDesc * fileDesc)
 {
-  Grammar * this = 0;
+  GrammarC99 * this = 0;
+  this = (GrammarC99*)Object_new(sizeof(GrammarC99), &grammarC99Class);
   
-  this = (Grammar*)Object_new(sizeof(GrammarC99), &grammarC99Class);
+  if (this == 0) return 0;
+
+  GrammarC99lex_init(&this->scanner);
+  this->transUnit = TransUnit_new(fileDesc);
   //this->reader = fr;
   //this->sdbMgr = sdbMgr;
-  //Grammar2lex_init(&this->scanner);
   
   //this->contexts = List_new(this->contexts);
   //this->current = (GrammarContext*)Object_new(sizeof(GrammarContext),&grammarContextClass);
@@ -54,16 +70,17 @@ PUBLIC Grammar * GrammarC99_new()
   
   //if (!isInitialised) Grammar2_initSdbTables(this);
 
-  return this;
+  return (Grammar*)this;
 }
 
 PUBLIC void GrammarC99_delete(Grammar * this)
 {
+  GrammarC99* thisC99 = (GrammarC99*)this;
   if (this!=0)
   {
      if (this->object.refCount==1)
      {
-       //Grammar2lex_destroy(this->scanner);
+      GrammarC99lex_destroy(thisC99->scanner);
        //o = (GrammarContext*)List_removeHead(this->contexts);
        //Object_delete((Object*)o);
        //List_delete(this->contexts);
@@ -84,4 +101,11 @@ PUBLIC void GrammarC99_print(Grammar * this)
 PUBLIC unsigned int GrammarC99_getSize(Grammar * this)
 {
   return sizeof(GrammarC99);
+}
+PUBLIC void GrammarC99_process(GrammarC99* this)
+{
+  /* TODO: Store translation unit information */
+  Error_new(ERROR_INFO, "GrammarC99: Processing file %s", "test,c"/*FileReader_getName(this->reader)*/);
+  GrammarC99_scan_string("int a = 0;", this->scanner);
+  GrammarC99_parse(this->scanner, this);
 }
