@@ -9,6 +9,7 @@
 #include "Object.h"
 #include "Memory.h"
 #include "ObjectStore.h"
+#include "Error.h"
 
 typedef struct ListNode ListNode;
 
@@ -108,6 +109,12 @@ PRIVATE void ListNode_delete(ListNode* this)
   {
     if ((this->item) && (((Object*)this->item)->delete != 0))
     {
+      if (((Object*)this->item)->marker != 0x0B5EC7)
+      {
+          Error_new(ERROR_NORMAL, "List Node: item is not an object and is being deleted\n");
+      }
+      else
+      {
       if (this->isOwner)
         ((Object*)this->item)->delete(this->item);
       else
