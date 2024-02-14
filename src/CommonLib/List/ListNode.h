@@ -119,6 +119,7 @@ PRIVATE void ListNode_delete(ListNode* this)
         ((Object*)this->item)->delete(this->item);
       else
         Object_deRef((Object*)this->item);
+      }
     }
     Object_deallocate(&this->object);
   }
