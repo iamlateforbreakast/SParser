@@ -12,6 +12,6 @@ PUBLIC Grammar* GrammarC99_new(FileDesc * fileDesc);
 PUBLIC void GrammarC99_delete(Grammar* this);
 PUBLIC void GrammarC99_print(Grammar* this);
 PUBLIC unsigned int GrammarC99_getSize(Grammar* this);
-PUBLIC void GrammarC99_process(GrammarC99* this)
+PUBLIC void GrammarC99_process(GrammarC99* this);
 
 #endif /* _GRAMMARC99_H_ */
