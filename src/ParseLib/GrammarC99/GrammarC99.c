@@ -105,7 +105,8 @@ PUBLIC unsigned int GrammarC99_getSize(Grammar * this)
 PUBLIC void GrammarC99_process(GrammarC99* this)
 {
   /* TODO: Store translation unit information */
-  Error_new(ERROR_INFO, "GrammarC99: Processing file %s", "test,c"/*FileReader_getName(this->reader)*/);
+  Error_new(ERROR_INFO, "GrammarC99: Processing file %s\n", TransUnit_getName(this->transUnit));
+  String* buffer = TransUnit_getNextBuffer(this->transUnit);
   GrammarC99_scan_string("int a = 0;", this->scanner);
   GrammarC99_parse(this->scanner, this);
 }
