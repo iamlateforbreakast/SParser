@@ -3,7 +3,11 @@
 #define _MUTEX_H_
 
 #include "Types.h"
+#ifndef WIN32
 #include <pthread.h>
+#else
+#include <windows.h>
+#endif
 
 typedef struct Mutex
 {
@@ -68,10 +72,3 @@ PRIVATE void Mutex_waitAvailability(Mutex * this)
   //     const struct timespec *restrict abstime
 }
 #endif /* _MUTEX_H_ */
-
-
-
-
-
-
-////hScreenMutex = CreateMutexW(NULL, FALSE, NULL);  // Cleared
