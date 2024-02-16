@@ -163,7 +163,7 @@ PUBLIC String * FileDesc_load(FileDesc * this)
       buffer[length] = 0;
       fileContent = String_new(buffer); 
     }
-    memory_free(buffer, length + 1);
+    Memory_free(buffer, length + 1);
   }
   FileIo_delete(f);
   return fileContent;

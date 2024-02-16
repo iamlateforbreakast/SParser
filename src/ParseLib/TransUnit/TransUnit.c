@@ -2,7 +2,7 @@
 #include "TransUnit.h"
 #include "List.h"
 #include "Map.h"
-#include "String.h"
+#include "String2.h"
 #include "Memory.h"
 #include "Error.h"
 #include "Object.h"
@@ -295,8 +295,8 @@ PRIVATE void TransUnit_consumeInclude(TransUnit* this)
 PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
 {
  
-  struct MacroDefinition* macroDefinition = NULL;
-  String* parameter = NULL;
+  struct MacroDefinition* macroDefinition = 0;
+  String* parameter = 0;
   unsigned int paramLength = 0;
 
   this->currentBuffer->currentPtr += 7;
@@ -366,7 +366,7 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
         c = StringProcessor_readChar(this, 1);
         c = StringProcessor_readChar(this, 0);
       }
-      if (macroDefinition->parameters == NULL)
+      if (macroDefinition->parameters == 0)
       {
         macroDefinition->parameters = List_new();
       }
@@ -408,7 +408,7 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
   {
     String_print(macroDefinition->name, "StringProcessor.c: Could not store macro ");
   }
-  if (Map_find(this->macros, macroDefinition->name, NULL))
+  if (Map_find(this->macros, macroDefinition->name, 0))
   {
     String_print(macroDefinition->name, "StringProcessor.c: Found the macro again->");
   }
