@@ -56,6 +56,7 @@ PRIVATE void TransUnit_consumeLineComment(TransUnit* this);
 PRIVATE void TransUnit_consumeMultilineComment(TransUnit* this);
 PRIVATE void TransUnit_consumeInclude(TransUnit* this);
 PRIVATE void TransUnit_readMacroDefinition(TransUnit* this);
+PRIVATE void TransUnit_checkMacro(TransUnit* this);
 
 /**********************************************//**
   @brief Create a new TransUnit object.
@@ -141,7 +142,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
   char* ptr = this->currentBuffer->currentPtr;  //String_getBuffer(this->currentBuffer);
   int isReadyToEmit = 0;
   int isReadingContent = 0;
-  long int start = (long int)this->currentBuffer->currentPtr;
+  int start = this->currentBuffer->nbCharRead;
 
   while ((!isReadyToEmit) && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
   {
@@ -150,74 +151,82 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
       // Consume until the end of line
       // Comment is discarded
       TransUnit_consumeLineComment(this);
-      start = (long int)this->currentBuffer->currentPtr;
+      start = this->currentBuffer->nbCharRead;
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "/*", 2))
     {
       // Consume until */
       // Comment is discarded
       TransUnit_consumeMultilineComment(this);
-      start = (long int)this->currentBuffer->currentPtr;
+      start = this->currentBuffer->nbCharRead;
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#include", 8))
     {
       // Consume include
       TransUnit_consumeInclude(this);
-      start = (long int)this->currentBuffer->currentPtr;
+      start = this->currentBuffer->nbCharRead;
+      printf("#include: start = %d\n", start);
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#define", 7))
     {
       // Consume macro definition
       TransUnit_readMacroDefinition(this);
-      start = (long int)this->currentBuffer->currentPtr;
+      start = this->currentBuffer->nbCharRead;
+      printf("#define: start = %d\n", start);
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#ifndef", 6))
     {
       // Evaluate condition
       this->currentBuffer->currentPtr += 6;
       this->currentBuffer->nbCharRead += 6;
-      start = (long int)this->currentBuffer->currentPtr;
+      TransUnit_checkMacro(this);
+      start = this->currentBuffer->nbCharRead;
+      printf("#ifndef: start = %d\n", start);
     }
-    else if (Memory_ncmp(this->currentBuffer->currentPtr, "#ifdef", 5))
+    else if (Memory_ncmp(this->currentBuffer->currentPtr, "#ifdef", 6))
     {
-      this->currentBuffer->currentPtr += 5;
-      this->currentBuffer->nbCharRead += 5;
-      start = (long int)this->currentBuffer->currentPtr;
+      this->currentBuffer->currentPtr += 6;
+      this->currentBuffer->nbCharRead += 6;
+      TransUnit_checkMacro(this);
+      start = this->currentBuffer->nbCharRead;
+      printf("#ifdef: start = %d\n", start);
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#undef", 6))
     {
       this->currentBuffer->currentPtr += 6;
       this->currentBuffer->nbCharRead += 6;
-      start = (long int)this->currentBuffer->currentPtr;
+      start = this->currentBuffer->nbCharRead;
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#if", 2))
     {
       this->currentBuffer->currentPtr += 2;
       this->currentBuffer->nbCharRead += 2;
-      start = (long int)this->currentBuffer->currentPtr;
+      start = this->currentBuffer->nbCharRead;
+      printf("#if: start = %d\n", start);
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#else", 4))
     {
       if (isReadingContent)
       {
-        String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead++);
+        String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
         return newString;
       }
       this->currentBuffer->currentPtr += 4;
       this->currentBuffer->nbCharRead += 4;
-      start = (long int)this->currentBuffer->currentPtr;
+      start = this->currentBuffer->nbCharRead;
+      printf("#else: start = %d\n", start);
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#endif", 5))
     {
       this->currentBuffer->currentPtr+=5;
       this->currentBuffer->nbCharRead +=5;
-      start = (long int)this->currentBuffer->currentPtr;
+      start = this->currentBuffer->nbCharRead;
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#error", 5))
     {
       this->currentBuffer->currentPtr += 5;
       this->currentBuffer->nbCharRead += 5;
-      start = (long int)this->currentBuffer->currentPtr;
+      start = this->currentBuffer->nbCharRead;
     }
     else if (0) //nothing to read
     {
@@ -315,7 +324,7 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
     this->currentBuffer->currentPtr++;
     this->currentBuffer->nbCharRead++;
   }
-  long int start = this->currentBuffer->nbCharRead;
+  int start = this->currentBuffer->nbCharRead;
   /* Consume macro name */
   while (IS_MACRO_LETTER(*this->currentBuffer->currentPtr))
   {
@@ -360,6 +369,22 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
   String_print(macroDefinition->body);
 }
 
+PRIVATE void TransUnit_checkMacro(TransUnit* this)
+{
+  /* Consume spaces */
+  while ((*this->currentBuffer->currentPtr == ' ') && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
+  {
+    this->currentBuffer->currentPtr++;
+    this->currentBuffer->nbCharRead++;
+  }
+  
+  /* Consume macro name */
+  while (IS_MACRO_LETTER(*this->currentBuffer->currentPtr))
+  {
+    this->currentBuffer->currentPtr++;
+    this->currentBuffer->nbCharRead++;
+  }
+}
   /* Consume macro param */
   /*if (c == '(')
   {
