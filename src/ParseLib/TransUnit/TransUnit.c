@@ -15,6 +15,7 @@ struct Buffer
   String * string;
   char * currentPtr;
   char* startPtr;
+  int nbCharRead;
 };
 
 struct MacroDefinition
@@ -84,6 +85,7 @@ PUBLIC TransUnit * TransUnit_new(FileDesc * file)
   buffer->string = FileDesc_load(file);
   buffer->startPtr = String_getBuffer(buffer->string);
   buffer->currentPtr = buffer->startPtr;
+  buffer->nbCharRead = 0;
 
   List_insertHead(this->buffers, buffer, 0);
   this->currentBuffer = buffer;
@@ -138,29 +140,28 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
 {
   char* ptr = this->currentBuffer->currentPtr;  //String_getBuffer(this->currentBuffer);
   int isReadyToEmit = 0;
+  int isReadingContent = 0;
   long int start = (long int)this->currentBuffer->currentPtr;
 
-  while ((!isReadyToEmit) && (this->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
+  while ((!isReadyToEmit) && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
   {
     if (Memory_ncmp(this->currentBuffer->currentPtr, "//", 2))
     {
       // Consume until the end of line
-      // ptr = ptr + TransUnit_readLineComment(this);
+      // Comment is discarded
       TransUnit_consumeLineComment(this);
       start = (long int)this->currentBuffer->currentPtr;
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "/*", 2))
     {
       // Consume until */
-      // ptr = ptr + TransUnit_readMultilineComment(this);
+      // Comment is discarded
       TransUnit_consumeMultilineComment(this);
       start = (long int)this->currentBuffer->currentPtr;
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#include", 8))
     {
-      // Read file name
-      // Open file name
-      // Push new buffer
+      // Consume include
       TransUnit_consumeInclude(this);
       start = (long int)this->currentBuffer->currentPtr;
     }
@@ -174,43 +175,48 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
     {
       // Evaluate condition
       this->currentBuffer->currentPtr += 6;
-      this->nbCharRead += 6;
+      this->currentBuffer->nbCharRead += 6;
       start = (long int)this->currentBuffer->currentPtr;
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#ifdef", 5))
     {
       this->currentBuffer->currentPtr += 5;
-      this->nbCharRead += 5;
+      this->currentBuffer->nbCharRead += 5;
       start = (long int)this->currentBuffer->currentPtr;
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#undef", 6))
     {
       this->currentBuffer->currentPtr += 6;
-      this->nbCharRead += 6;
+      this->currentBuffer->nbCharRead += 6;
       start = (long int)this->currentBuffer->currentPtr;
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#if", 2))
     {
       this->currentBuffer->currentPtr += 2;
-      this->nbCharRead += 2;
+      this->currentBuffer->nbCharRead += 2;
       start = (long int)this->currentBuffer->currentPtr;
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#else", 4))
     {
+      if (isReadingContent)
+      {
+        String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead++);
+        return newString;
+      }
       this->currentBuffer->currentPtr += 4;
-      this->nbCharRead += 4;
+      this->currentBuffer->nbCharRead += 4;
       start = (long int)this->currentBuffer->currentPtr;
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#endif", 5))
     {
       this->currentBuffer->currentPtr+=5;
-      this->nbCharRead+=5;
+      this->currentBuffer->nbCharRead +=5;
       start = (long int)this->currentBuffer->currentPtr;
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#error", 5))
     {
       this->currentBuffer->currentPtr += 5;
-      this->nbCharRead += 5;
+      this->currentBuffer->nbCharRead += 5;
       start = (long int)this->currentBuffer->currentPtr;
     }
     else if (0) //nothing to read
@@ -220,11 +226,12 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
     else
     {
       this->currentBuffer->currentPtr++;
-      this->nbCharRead++;
+      this->currentBuffer->nbCharRead++;
+      isReadingContent = 1;
     }
   }
   // New String
-  String * newString = String_subString(this->currentBuffer->string, 0, this->nbCharRead++);
+  String * newString = String_subString(this->currentBuffer->string, 0, this->currentBuffer->nbCharRead++);
 
 
   return newString;
@@ -234,61 +241,61 @@ PRIVATE void TransUnit_consumeLineComment(TransUnit* this)
 {
   const char* eol = "\n";
   String* lineComment = 0;
-  int start = this->nbCharRead;
+  int start = this->currentBuffer->nbCharRead;
 
-  while (!Memory_ncmp(this->currentBuffer->currentPtr, "\n", 1) && (this->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
+  while (!Memory_ncmp(this->currentBuffer->currentPtr, "\n", 1) && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
   {
     this->currentBuffer->currentPtr++;
-    this->nbCharRead++;
+    this->currentBuffer->nbCharRead++;
   }
-  this->nbCharRead = this->nbCharRead;
-  lineComment = String_subString(this->currentBuffer->string, start, this->nbCharRead - start);
+  //this->nbCharRead = this->nbCharRead;
+  lineComment = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
   String_print(lineComment);
 }
 
 PRIVATE void TransUnit_consumeMultilineComment(TransUnit* this)
 {
   String* multiLineComment = 0;
-  int start = this->nbCharRead;
+  int start = this->currentBuffer->nbCharRead;
 
-  while (!Memory_ncmp(this->currentBuffer->currentPtr, "*/", 2) && (this->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
+  while (!Memory_ncmp(this->currentBuffer->currentPtr, "*/", 2) && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
   {
     this->currentBuffer->currentPtr++;
-    this->nbCharRead++;
+    this->currentBuffer->nbCharRead++;
   }
   this->currentBuffer->currentPtr+=2;
-  this->nbCharRead+=2;
-  multiLineComment = String_subString(this->currentBuffer->string, start, this->nbCharRead - start);
+  this->currentBuffer->nbCharRead +=2;
+  multiLineComment = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
   String_print(multiLineComment);
 }
 
 PRIVATE void TransUnit_consumeInclude(TransUnit* this)
 {
   String* include = 0;
-  int start = this->nbCharRead;
+  int start = this->currentBuffer->nbCharRead;
   int isStarted = 0;
 
   this->currentBuffer->currentPtr+=8;
-  this->nbCharRead+=8;
+  this->currentBuffer->nbCharRead +=8;
 
-  while (!Memory_ncmp(this->currentBuffer->currentPtr, "\"", 1) && (this->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
+  while (!Memory_ncmp(this->currentBuffer->currentPtr, "\"", 1) && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
   {
     this->currentBuffer->currentPtr++;
-    this->nbCharRead++;
+    this->currentBuffer->nbCharRead++;
   }
-  start = this->nbCharRead;
+  start = this->currentBuffer->nbCharRead;
 
   this->currentBuffer->currentPtr++;
-  this->nbCharRead++;
-  while (!Memory_ncmp(this->currentBuffer->currentPtr, "\"", 1) && (this->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
+  this->currentBuffer->nbCharRead++;
+  while (!Memory_ncmp(this->currentBuffer->currentPtr, "\"", 1) && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
   {
     this->currentBuffer->currentPtr++;
-    this->nbCharRead++;
+    this->currentBuffer->nbCharRead++;
   }
   this->currentBuffer->currentPtr++;
-  this->nbCharRead++;
+  this->currentBuffer->nbCharRead++;
 
-  include = String_subString(this->currentBuffer->string, start, this->nbCharRead - start);
+  include = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
   String_print(include);
 }
 
@@ -300,24 +307,24 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
   unsigned int paramLength = 0;
 
   this->currentBuffer->currentPtr += 7;
-  this->nbCharRead += 7;
+  this->currentBuffer->nbCharRead += 7;
 
   /* Consume spaces */
-  while ((*this->currentBuffer->currentPtr == ' ') && (this->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
+  while ((*this->currentBuffer->currentPtr == ' ') && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
   {
     this->currentBuffer->currentPtr++;
-    this->nbCharRead++;
+    this->currentBuffer->nbCharRead++;
   }
-  long int start = this->nbCharRead;
+  long int start = this->currentBuffer->nbCharRead;
   /* Consume macro name */
   while (IS_MACRO_LETTER(*this->currentBuffer->currentPtr))
   {
     this->currentBuffer->currentPtr++;
-    this->nbCharRead++;
+    this->currentBuffer->nbCharRead++;
   }
 
   macroDefinition = Memory_alloc(sizeof(MacroDefinition));
-  macroDefinition->name = String_subString(this->currentBuffer->string, start, this->nbCharRead - start);
+  macroDefinition->name = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
   macroDefinition->parameters = 0;
   macroDefinition->body = 0;
   String_print(macroDefinition->name);
@@ -326,30 +333,30 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
   if (*this->currentBuffer->currentPtr == '(')
   {
     this->currentBuffer->currentPtr++;
-    this->nbCharRead++;
+    this->currentBuffer->nbCharRead++;
     start = (long int)this->currentBuffer->currentPtr;
-    while ((*this->currentBuffer->currentPtr != ')') && (this->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
+    while ((*this->currentBuffer->currentPtr != ')') && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
     {
       this->currentBuffer->currentPtr++;
-      this->nbCharRead++;
+      this->currentBuffer->nbCharRead++;
     }
     this->currentBuffer->currentPtr++;
-    this->nbCharRead++;
+    this->currentBuffer->nbCharRead++;
   }
   
   /* Consume macro body */
-  while ((*this->currentBuffer->currentPtr == ' ') && (this->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
+  while ((*this->currentBuffer->currentPtr == ' ') && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
   {
     this->currentBuffer->currentPtr++;
-    this->nbCharRead++;
+    this->currentBuffer->nbCharRead++;
   }
-  start = this->nbCharRead;
-  while ((*this->currentBuffer->currentPtr != '\n') && (this->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
+  start = this->currentBuffer->nbCharRead;
+  while ((*this->currentBuffer->currentPtr != '\n') && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
   {
     this->currentBuffer->currentPtr++;
-    this->nbCharRead++;
+    this->currentBuffer->nbCharRead++;
   }
-  macroDefinition->body = String_subString(this->currentBuffer->string, start, this->nbCharRead - start);
+  macroDefinition->body = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
   String_print(macroDefinition->body);
 }
 
