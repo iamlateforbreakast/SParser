@@ -1,5 +1,6 @@
 /* TransUnit.c */
 #include "TransUnit.h"
+#include "MacroDefinition.h"
 #include "List.h"
 #include "Map.h"
 #include "String2.h"
@@ -12,19 +13,11 @@
 
 struct Buffer
 {
-  String * string;
-  char * currentPtr;
+  String* string;
+  char* currentPtr;
   char* startPtr;
   int nbCharRead;
 };
-
-struct MacroDefinition
-{
-  Object object;
-  String* name;
-  String* body;
-  List* parameters;
-} MacroDefinition;
 
 /**********************************************//**
   @class TransUnit
@@ -32,10 +25,10 @@ struct MacroDefinition
 struct TransUnit
 {
   Object object;
-  FileDesc * file;
-  List * buffers;
+  FileDesc* file;
+  List* buffers;
   Map* macros;
-  struct Buffer * currentBuffer;
+  struct Buffer* currentBuffer;
   int nbCharRead;
 };
 
@@ -64,7 +57,7 @@ PRIVATE void TransUnit_checkMacro(TransUnit* this);
   @memberof TransUnit
   @return Created TransUnit instance.
 **************************************************/
-PUBLIC TransUnit * TransUnit_new(FileDesc * file)
+PUBLIC TransUnit* TransUnit_new(FileDesc* file)
 {
   TransUnit* this = 0;
   String* newFileContent = 0;
@@ -76,7 +69,7 @@ PUBLIC TransUnit * TransUnit_new(FileDesc * file)
   }
 
   this = (TransUnit*)Object_new(sizeof(TransUnit), &transUnitClass);
-  
+
   if (this == 0) return 0;
 
   this->file = file;
@@ -93,7 +86,7 @@ PUBLIC TransUnit * TransUnit_new(FileDesc * file)
   this->nbCharRead = 0;
   this->macros = Map_new();
 
-return this;
+  return this;
 }
 
 /**********************************************//**
@@ -209,6 +202,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
       if (isReadingContent)
       {
         String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
+
         return newString;
       }
       this->currentBuffer->currentPtr += 4;
@@ -218,8 +212,8 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#endif", 5))
     {
-      this->currentBuffer->currentPtr+=5;
-      this->currentBuffer->nbCharRead +=5;
+      this->currentBuffer->currentPtr += 5;
+      this->currentBuffer->nbCharRead += 5;
       start = this->currentBuffer->nbCharRead;
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#error", 5))
@@ -240,7 +234,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
     }
   }
   // New String
-  String * newString = String_subString(this->currentBuffer->string, 0, this->currentBuffer->nbCharRead++);
+  String* newString = String_subString(this->currentBuffer->string, 0, this->currentBuffer->nbCharRead++);
 
 
   return newString;
@@ -272,8 +266,8 @@ PRIVATE void TransUnit_consumeMultilineComment(TransUnit* this)
     this->currentBuffer->currentPtr++;
     this->currentBuffer->nbCharRead++;
   }
-  this->currentBuffer->currentPtr+=2;
-  this->currentBuffer->nbCharRead +=2;
+  this->currentBuffer->currentPtr += 2;
+  this->currentBuffer->nbCharRead += 2;
   multiLineComment = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
   String_print(multiLineComment);
 }
@@ -284,8 +278,8 @@ PRIVATE void TransUnit_consumeInclude(TransUnit* this)
   int start = this->currentBuffer->nbCharRead;
   int isStarted = 0;
 
-  this->currentBuffer->currentPtr+=8;
-  this->currentBuffer->nbCharRead +=8;
+  this->currentBuffer->currentPtr += 8;
+  this->currentBuffer->nbCharRead += 8;
 
   while (!Memory_ncmp(this->currentBuffer->currentPtr, "\"", 1) && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
   {
@@ -310,8 +304,7 @@ PRIVATE void TransUnit_consumeInclude(TransUnit* this)
 
 PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
 {
- 
-  struct MacroDefinition* macroDefinition = 0;
+
   String* parameter = 0;
   unsigned int paramLength = 0;
 
@@ -332,18 +325,16 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
     this->currentBuffer->nbCharRead++;
   }
 
-  macroDefinition = Memory_alloc(sizeof(MacroDefinition));
-  macroDefinition->name = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
-  macroDefinition->parameters = 0;
-  macroDefinition->body = 0;
-  String_print(macroDefinition->name);
+  
+  String * macroName = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
+  String_print(macroName);
 
   /* Consume parameters if any */
   if (*this->currentBuffer->currentPtr == '(')
   {
     this->currentBuffer->currentPtr++;
     this->currentBuffer->nbCharRead++;
-    start = (long int)this->currentBuffer->currentPtr;
+    start = this->currentBuffer->nbCharRead;
     while ((*this->currentBuffer->currentPtr != ')') && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
     {
       this->currentBuffer->currentPtr++;
@@ -352,7 +343,7 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
     this->currentBuffer->currentPtr++;
     this->currentBuffer->nbCharRead++;
   }
-  
+
   /* Consume macro body */
   while ((*this->currentBuffer->currentPtr == ' ') && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
   {
@@ -365,8 +356,11 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
     this->currentBuffer->currentPtr++;
     this->currentBuffer->nbCharRead++;
   }
-  macroDefinition->body = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
-  String_print(macroDefinition->body);
+  String * macroBody = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
+  String_print(macroBody);
+
+  MacroDefinition* macroDefinition = MacroDefinition_new();
+  Map_insert(this->macros, macroName, macroDefinition, 1);
 }
 
 PRIVATE void TransUnit_checkMacro(TransUnit* this)
@@ -377,71 +371,73 @@ PRIVATE void TransUnit_checkMacro(TransUnit* this)
     this->currentBuffer->currentPtr++;
     this->currentBuffer->nbCharRead++;
   }
-  
+  int start = this->currentBuffer->nbCharRead;
   /* Consume macro name */
   while (IS_MACRO_LETTER(*this->currentBuffer->currentPtr))
   {
     this->currentBuffer->currentPtr++;
     this->currentBuffer->nbCharRead++;
   }
+  String * macroName = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
+  //if (Map_get(this->macros, macroName))
 }
-  /* Consume macro param */
-  /*if (c == '(')
+/* Consume macro param */
+/*if (c == '(')
+{
+  c = StringProcessor_readChar(this, 1);
+  c = StringProcessor_readChar(this, 0);
+  while (c != ')')
   {
-    c = StringProcessor_readChar(this, 1);
-    c = StringProcessor_readChar(this, 0);
-    while (c != ')')
+    while ((c != ',') && (c != ')'))
     {
-      while ((c != ',') && (c != ')'))
-      {
-        paramLength++;
-        c = StringProcessor_readChar(this, 1);
-        c = StringProcessor_readChar(this, 0);
-      }
-      if (macroDefinition->parameters == 0)
-      {
-        macroDefinition->parameters = List_new();
-      }
-      parameter = StringBuffer_readback(this->currentBuffer, paramLength);
-      paramLength = 0;
-
-      List_insert(macroDefinition->parameters, parameter);
-      if (c == ',')
-      {
-        c = StringProcessor_readChar(this, 1);
-        c = StringProcessor_readChar(this, 0);
-      }
+      paramLength++;
+      c = StringProcessor_readChar(this, 1);
+      c = StringProcessor_readChar(this, 0);
     }
+    if (macroDefinition->parameters == 0)
+    {
+      macroDefinition->parameters = List_new();
+    }
+    parameter = StringBuffer_readback(this->currentBuffer, paramLength);
+    paramLength = 0;
 
-    c = StringProcessor_readChar(this, 1);
-  }
-
-  if ((c != 10) && (c != 13))
-  {
-    c = StringProcessor_readChar(this, 0);
-    while (c == 32)
+    List_insert(macroDefinition->parameters, parameter);
+    if (c == ',')
     {
       c = StringProcessor_readChar(this, 1);
       c = StringProcessor_readChar(this, 0);
     }
-    result = 0;
+  }
 
-    while ((c != 10) && (c != 13))
-    {
-      result++;
-      c = StringProcessor_readChar(this, 1);
-      c = StringProcessor_readChar(this, 0);
-    }
-    //printf("Read define: result=%d\n", result);
-    macroDefinition->body = StringBuffer_readback(this->currentBuffer, result);
-    String_print(macroDefinition->body, "#define: ");
-  }
-  if (!Map_insert(this->macros, macroDefinition->name, (void*)macroDefinition))
+  c = StringProcessor_readChar(this, 1);
+}
+
+if ((c != 10) && (c != 13))
+{
+  c = StringProcessor_readChar(this, 0);
+  while (c == 32)
   {
-    String_print(macroDefinition->name, "StringProcessor.c: Could not store macro ");
+    c = StringProcessor_readChar(this, 1);
+    c = StringProcessor_readChar(this, 0);
   }
-  if (Map_find(this->macros, macroDefinition->name, 0))
+  result = 0;
+
+  while ((c != 10) && (c != 13))
   {
-    String_print(macroDefinition->name, "StringProcessor.c: Found the macro again->");
+    result++;
+    c = StringProcessor_readChar(this, 1);
+    c = StringProcessor_readChar(this, 0);
   }
+  //printf("Read define: result=%d\n", result);
+  macroDefinition->body = StringBuffer_readback(this->currentBuffer, result);
+  String_print(macroDefinition->body, "#define: ");
+}
+if (!Map_insert(this->macros, macroDefinition->name, (void*)macroDefinition))
+{
+  String_print(macroDefinition->name, "StringProcessor.c: Could not store macro ");
+}
+if (Map_find(this->macros, macroDefinition->name, 0))
+{
+  String_print(macroDefinition->name, "StringProcessor.c: Found the macro again->");
+}
 }*/
