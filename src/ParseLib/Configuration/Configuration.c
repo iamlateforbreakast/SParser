@@ -2,6 +2,8 @@
 #include "Configuration.h"
 #include "Product.h"
 #include "Object.h"
+#include "Memory.h"
+#include "Error.h"
 
 struct Configuration
 {
@@ -22,45 +24,59 @@ PRIVATE Class configurationClass =
   .f_size = (Sizer)&Configuration_getSize
 };
 
+/**********************************************//**
+  @private Class Description
+**************************************************/
+PRIVATE Class transUnitClass =
+{
+  .f_new = (Constructor)0,
+  .f_delete = (Destructor)&Product_delete,
+  .f_copy = (Copy_Operator)0,
+  .f_comp = (Comp_Operator)0,
+  .f_print = (Printer)&Product_print,
+  .f_size = (Sizer)&Product_getSize
+};
+
 PRIVATE String * Configuration_readLabel(Configuration * this, char * p);
 PRIVATE String * Configuration_readValue(Configuration * this, char * p);
 
 PUBLIC Configuration * Configuration_new(String * input)
 {
   Configuration* c = (Configuration*)Object_new(sizeof(Configuration), &configurationClass);
-  char* p = String_getBuffer(input);
+  char* ptr = String_getBuffer(input);
   int nbCharRead = 0;
+  Product * product = 0;
 
   while (nbCharRead<String_getLength(input))
   {
-    String * s = Configuration_readLabel(c, p);
+    String * s = Configuration_readLabel(c, ptr);
     
-    if (s==0) exit(0);
+    if (s==0) Error_new(ERROR_FATAL, "Configuration error: Cannot read label\n");
 
-    String * v = Configuration_readValue(c, p);
+    String * v = Configuration_readValue(c, ptr);
 
-    if (v==0) exit(0);
+    if (v==0) Error_new(ERROR_FATAL, "Configuration error: cannot read value\n");
 
-    if (String_compare(s, "Location"))
+    if (Memory_ncmp(String_getBuffer(s), "Location", 8))
     {
-      Product_setLocation(p, v);
+      Product_setLocation(product, v);
     }
-    else if (String_compare(s, "Includes"))
+    else if (Memory_ncmp(String_getBuffer(s), "Includes", 8))
     {
-      Product_setIncludes(p, v);
+      Product_setIncludes(product, v);
     }
-    else if (String_compare(s, "Uses"))
+    else if (Memory_ncmp(String_getBuffer(s), "Uses", 4))
     {
-      Product_setUses(p, v);
+      Product_setUses(product, v);
     }
-    else if (String_compare(s, "Sources"))
+    else if (Memory_ncmp(String_getBuffer(s), "Sources", 7))
     {
-      Product_setSources(p, v);
+      Product_setSources(product, v);
     }
     else
     {
-      p = Product_new(s);
-      List_insertHead(c->products, p, 1);
+      product = Product_new(s);
+      List_insertHead(c->products, product, 1);
     }
   }
 
