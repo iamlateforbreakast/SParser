@@ -10,12 +10,15 @@
 #include "Class.h"
 #include "Object.h"
 #include "FileReader.h"
+#include "Configuration.h"
 #include "SdbMgr.h"
 #include "Error.h"
 #include "Grammar2.h"
 #include "FileMgr.h"
 #include "FileDesc.h"
 #include "List.h"
+#include "OptionMgr.h"
+#include "Debug.h"
 
 /**********************************************//** 
   @private
@@ -76,7 +79,6 @@ PUBLIC SParse *SParse_new(String * sdbName)
   SParse * this = 0;
 
   this = (SParse*)Object_new(sizeof(SParse), &sparseClass);
-  this->object.size = sizeof(SParse);
   
   /* Initialise SdbMgr */
   this->sdbMgr = SdbMgr_new(sdbName);
@@ -139,9 +141,17 @@ PUBLIC unsigned int SParse_parse(SParse * this, const char * extension)
   unsigned int result = 0;
   
   FileMgr* fileMgr  = FileMgr_getRef();
+  OptionMgr* optionMgr = OptionMgr_getRef();
   FileDesc * fd = 0;
   List * fileList = 0;
   
+  String * productList = OptionMgr_getOption(optionMgr, "Product list");
+  PRINT(("Product List = %s\n", String_getBuffer(productList)));
+  if (productList)
+  {
+    Configuration * c = Configuration_new(productList);
+    if (c==0) return;
+  }
   /* List all files with extension in all the input directories */
   fileList = FileMgr_filterFiles(fileMgr, extension);
 
@@ -149,6 +159,7 @@ PUBLIC unsigned int SParse_parse(SParse * this, const char * extension)
   while ((fd = List_getNext(fileList))!=0)
     SParse_parseFile(this, fd);
   FileMgr_delete(fileMgr);
+  OptionMgr_delete(optionMgr);
   List_delete(fileList);
   
   return result;
@@ -204,4 +215,3 @@ PRIVATE unsigned int SParse_isFileIgnored(SParse * this /* FileName * file */)
   return result;
 }
 #endif
-
