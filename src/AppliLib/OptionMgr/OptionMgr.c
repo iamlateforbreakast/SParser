@@ -15,6 +15,7 @@
 #include "Memory.h"
 #include "Error.h"
 
+#include "Debug.h"
 /**********************************************//**
   @class OptionMgr
 **************************************************/
@@ -330,32 +331,26 @@ PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
         {
           state = 2;
           optionName = String_subString(fileContent, idx, length);
+          PRINT(("OptionName= %s\n", String_getBuffer(optionName)));
         }
         else length++;
         break;
       case 2:
-        if ((*p!=' ') && (*p!='\n'))
-        {
-          if (*p=='[') 
-          {
-            multiline = 1;
-          }
-          else
+        if (*p!=' ')
           {
             // Single line
-            multiline = 0;
-          }
           state = 3;
           idx = p - String_getBuffer(fileContent);
           length = 1;
         }
         break;
       case 3:
-        if (((!multiline) && (*p=='\n')) || ((multiline) && (*p==']')))
+        if (*(p+1)=='[')
         {
           state = 0;
           /* TODO: Case of windows file */
           optionValue = String_subString(fileContent, idx, length + multiline);
+          PRINT(("OptionValue= %s\n", String_getBuffer(optionValue)));
           OptionMgr_setOption(optionMgr, String_getBuffer(optionName), optionValue);
           String_delete(optionName);
         }
@@ -369,7 +364,6 @@ PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
         break;
       }
     }
-    #if 0
     if ((state == 1) || (state == 2))
     {
       /* Error case: Syntax error */
@@ -380,7 +374,6 @@ PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
       OptionMgr_setOption(optionMgr, String_getBuffer(optionName), optionValue);
       String_delete(optionName);
     }
-    #endif
   
   
   return result;
