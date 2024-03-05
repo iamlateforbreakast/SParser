@@ -49,7 +49,8 @@ PRIVATE void TransUnit_consumeLineComment(TransUnit* this);
 PRIVATE void TransUnit_consumeMultilineComment(TransUnit* this);
 PRIVATE void TransUnit_consumeInclude(TransUnit* this);
 PRIVATE void TransUnit_readMacroDefinition(TransUnit* this);
-PRIVATE void TransUnit_checkMacro(TransUnit* this);
+PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue);
+PRIVATE void TransUnit_pushNewBuffer(TransUnit* this, String* content);
 
 /**********************************************//**
   @brief Create a new TransUnit object.
@@ -172,7 +173,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
       // Evaluate condition
       this->currentBuffer->currentPtr += 6;
       this->currentBuffer->nbCharRead += 6;
-      TransUnit_checkMacro(this);
+      TransUnit_checkMacro(this, 0);
       start = this->currentBuffer->nbCharRead;
       printf("#ifndef: start = %d\n", start);
     }
@@ -180,7 +181,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
     {
       this->currentBuffer->currentPtr += 6;
       this->currentBuffer->nbCharRead += 6;
-      TransUnit_checkMacro(this);
+      TransUnit_checkMacro(this, 1);
       start = this->currentBuffer->nbCharRead;
       printf("#ifdef: start = %d\n", start);
     }
@@ -363,7 +364,7 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
   Map_insert(this->macros, macroName, macroDefinition, 1);
 }
 
-PRIVATE void TransUnit_checkMacro(TransUnit* this)
+PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue)
 {
   /* Consume spaces */
   while ((*this->currentBuffer->currentPtr == ' ') && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
@@ -380,6 +381,20 @@ PRIVATE void TransUnit_checkMacro(TransUnit* this)
   }
   String * macroName = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
   //if (Map_get(this->macros, macroName))
+  {
+    this->currentBuffer->currentPtr++;
+    this->currentBuffer->nbCharRead++;
+  }
+}
+PRIVATE void TransUnit_pushNewBuffer(TransUnit* this, String * content)
+{
+  struct Buffer* buffer = Memory_alloc(sizeof(struct Buffer));
+  buffer->string = content;
+  buffer->startPtr = String_getBuffer(buffer->string);
+  buffer->currentPtr = buffer->startPtr;
+  buffer->nbCharRead = 0;
+  List_insertHead(this->buffers, buffer, 0);
+  this->currentBuffer = buffer;
 }
 /* Consume macro param */
 /*if (c == '(')
