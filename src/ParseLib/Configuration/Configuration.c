@@ -5,6 +5,8 @@
 #include "Memory.h"
 #include "Error.h"
 
+#define IS_LABEL_LETTER(C) (((C>'A') && (C<'Z')) || ((C>'a') && (C<'z')) || (C=='_'))
+
 struct Configuration
 {
   Object object;
@@ -22,19 +24,6 @@ PRIVATE Class configurationClass =
   .f_comp = (Comp_Operator)0,
   .f_print = (Printer)&Configuration_print,
   .f_size = (Sizer)&Configuration_getSize
-};
-
-/**********************************************//**
-  @private Class Description
-**************************************************/
-PRIVATE Class transUnitClass =
-{
-  .f_new = (Constructor)0,
-  .f_delete = (Destructor)&Product_delete,
-  .f_copy = (Copy_Operator)0,
-  .f_comp = (Comp_Operator)0,
-  .f_print = (Printer)&Product_print,
-  .f_size = (Sizer)&Product_getSize
 };
 
 PRIVATE String * Configuration_readLabel(Configuration * this, char * p);
@@ -100,6 +89,11 @@ PUBLIC unsigned int Configuration_getSize(Configuration * this)
 
 PRIVATE String* Configuration_readLabel(Configuration* this, char * p)
 {
+  while (!IS_LABEL_LETTER(*p)) p++;
+
+  while (IS_LABEL_LETTER(*p)) p++;
+
+  while (!IS_COLON(*p)) p++;
   return 0;
 }
 
