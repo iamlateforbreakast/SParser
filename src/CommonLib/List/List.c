@@ -44,14 +44,14 @@ Class listClass =
   @brief Create a new instance of the class List.
   @public
   @memberof List
-  @return New instance or 0 if allocation failed.
+  @return New instance.
 **************************************************/
 PUBLIC List* List_new()
 {
   List * this = 0;
   
   this = (List*)Object_new(sizeof(List),&listClass);
-  
+
   if (this != 0)
   {
     this->head = 0;
@@ -59,16 +59,15 @@ PUBLIC List* List_new()
     this->iterator = this->head;
     this->nbNodes = 0;
   }
-  
+
   return this;
 }
 
 /**********************************************//** 
-  @brief Create a new instance of the class List using a custom allocator
+  @brief Create a new instance of the class List using a custom allocator.
   @public
   @memberof List
-  @param[in] Allocator
-  @return New instance or 0 is allocation failed.
+  @return New instance.
 **************************************************/
 PUBLIC List * List_newFromAllocator(Allocator * allocator)
 {
@@ -96,10 +95,10 @@ PUBLIC void List_delete(List* this)
 {
   if (this!=0)
   {
-    ListNode * node = 0;
-      
+    ListNode* node = 0;
+
     /* De-allocate the specific members */
-    while ((node = this->tail)!=0)
+    while ((node = this->tail) != 0)
     {
       this->tail = node->next;
       ListNode_delete(node);
@@ -172,6 +171,7 @@ PUBLIC int List_compare(List * this, List * compared)
 PUBLIC void List_print(List * this)
 {
   ListNode* iterator = 0;
+
   if (this != 0)
   {
     PRINT((" ~ List Object: %d\n", this->object.uniqId));
@@ -210,8 +210,8 @@ PUBLIC void List_insertHead(List* this, void* item, int isOwner)
   }
   else
   {
-    this->head->next = newNode;
-    if (this->iterator == 0) this->iterator = newNode;
+      this->head->next = newNode;
+      if (this->iterator == 0) this->iterator = newNode;
   }
   this->head = newNode;
 
@@ -318,17 +318,19 @@ PUBLIC void * List_getNext(List * this)
 {
   void * result = 0;
   
-  if (this->iterator==0) 
+  if (this != 0)
   {
-    this->iterator = this->tail;
-    result = 0;
+    if (this->iterator == 0)
+    {
+      this->iterator = this->tail;
+      result = 0;
+    }
+    else
+    {
+      result = this->iterator->item;
+      this->iterator = this->iterator->next;
+    }
   }
-  else
-  {
-    result = this->iterator->item;
-    this->iterator = this->iterator->next;
-  }
-  
   
   return result;
 }
@@ -424,11 +426,6 @@ PUBLIC void * List_getHead(List * this)
   return result;
 }
 
-/**********************************************//** 
-  @brief Reset iterator position to be the head.
-  @public
-  @memberof List.
-**************************************************/
 PUBLIC void List_resetIterator(List * this)
 {
   if (this!=0)
