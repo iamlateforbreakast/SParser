@@ -4,13 +4,27 @@
 #include "Object.h"
 #include "Memory.h"
 #include "Error.h"
+#include "Debug.h"
 
-#define IS_LABEL_LETTER(C) (((C>'A') && (C<'Z')) || ((C>'a') && (C<'z')) || (C=='_'))
+#define DEBUG (1)
+
+#define IS_KEY(C) (((C>='A') && (C<='Z')) || ((C>='a') && (C<='z')) \
+                  || ((C>='0') && (C<='9')) || (C=='_'))
+#define IS_COLON(P) (Memory_ncmp(P, ":", 1))
+#define IS_LIST(P) (Memory_ncmp(P, "- ", 2))
+#define IS_LOCATION_KEY(P) (Memory_ncmp(P,"Location:", 9))
+#define IS_INCLUDES_KEY(P) (Memory_ncmp(P,"Includes:", 9))
+#define IS_USES_KEY(P) (Memory_ncmp(P,"Uses:", 5))
+#define IS_SOURCES_KEY(P) (Memory_ncmp(P,"Sources:", 8))
+#define IS_IGNORED(C) ((C==' ') || (C=='\n') || (C=='\r') || (C=='\t'))
+#define IS_STRING(C) (((C>='A') && (C<='Z')) || ((C>='a') && (C<='z')) \
+                  || ((C>='0') && (C<='9')) || (C=='_'))
+#define IS_EOL(P) (Memory_ncmp(P, "\r\n", 2))
 
 struct Configuration
 {
   Object object;
-  List * products;
+  List* products;
 };
 
 /**********************************************//**
@@ -26,78 +40,212 @@ PRIVATE Class configurationClass =
   .f_size = (Sizer)&Configuration_getSize
 };
 
-PRIVATE String * Configuration_readLabel(Configuration * this, char * p);
-PRIVATE String * Configuration_readValue(Configuration * this, char * p);
+PRIVATE List * Configuration_readProducts(Configuration* this, String* s);
+PRIVATE String * Configuration_readLocation(Configuration* this, String* s, unsigned int * idx);
+PRIVATE List * Configuration_readIncludes(Configuration* this, String* s, unsigned int * idx);
+PRIVATE List* Configuration_readUses(Configuration* this, String* s, unsigned int* idx);
+PRIVATE List* Configuration_readSources(Configuration* this, String* s, unsigned int* idx);
+PRIVATE String* Configuration_readString(Configuration* this, String* s, unsigned int* idx);
+PRIVATE List* Configuration_readList(Configuration* this, String* s, unsigned int* idx);
+PRIVATE void Configuration_readEndOfLine(Configuration* this, String* s, unsigned int* idx);
+PRIVATE unsigned int Configuration_readIndent(Configuration* this, String* s, unsigned int* idx);
 
-PUBLIC Configuration * Configuration_new(String * input)
+PUBLIC Configuration * Configuration_new(String* input)
 {
   Configuration* c = (Configuration*)Object_new(sizeof(Configuration), &configurationClass);
-  char* ptr = String_getBuffer(input);
-  int nbCharRead = 0;
-  Product * product = 0;
+  
+  if (c == 0) return 0;
 
-  while (nbCharRead<String_getLength(input))
-  {
-    String * s = Configuration_readLabel(c, ptr);
-    
-    if (s==0) Error_new(ERROR_FATAL, "Configuration error: Cannot read label\n");
-
-    String * v = Configuration_readValue(c, ptr);
-
-    if (v==0) Error_new(ERROR_FATAL, "Configuration error: cannot read value\n");
-
-    if (Memory_ncmp(String_getBuffer(s), "Location", 8))
-    {
-      Product_setLocation(product, v);
-    }
-    else if (Memory_ncmp(String_getBuffer(s), "Includes", 8))
-    {
-      Product_setIncludes(product, v);
-    }
-    else if (Memory_ncmp(String_getBuffer(s), "Uses", 4))
-    {
-      Product_setUses(product, v);
-    }
-    else if (Memory_ncmp(String_getBuffer(s), "Sources", 7))
-    {
-      Product_setSources(product, v);
-    }
-    else
-    {
-      product = Product_new(s);
-      List_insertHead(c->products, product, 1);
-    }
-  }
+  c->products = Configuration_readProducts(c, input);
 
   return c;
-};
+}
 
-PUBLIC void Configuration_delete(Configuration * this)
+PUBLIC void Configuration_delete(Configuration* this)
 {
+  List_delete(this->products);
+
   Object_deallocate(&this->object);
 }
 
-PUBLIC void Configuration_print(Configuration * this)
+PUBLIC void Configuration_print(Configuration* this)
 {
-
 }
 
-PUBLIC unsigned int Configuration_getSize(Configuration * this)
+PUBLIC unsigned int Configuration_getSize(Configuration* this)
 {
   return sizeof(Configuration);
 }
 
-PRIVATE String* Configuration_readLabel(Configuration* this, char * p)
+PRIVATE List* Configuration_readProducts(Configuration* this, String * s)
 {
-  while (!IS_LABEL_LETTER(*p)) p++;
+  char* p = String_getBuffer(s);
+  unsigned int idx1 = 0;
+  unsigned int idx2 = 0;
 
-  while (IS_LABEL_LETTER(*p)) p++;
+  while (IS_LIST(p+idx2))
+  {
+    idx2 += 2;
+    idx1 = idx2;
+    while (IS_KEY(*(p+idx2))) idx2++;
 
-  while (!IS_COLON(*p)) p++;
+    String* productName = String_subString(s, idx1, idx2);
+
+    TRACE(("\nConfiguration: Product %s\n", String_getBuffer(productName)));
+    if (!IS_COLON(p+idx2))
+    {
+      return 0;
+    }
+    idx2++;
+
+    while (IS_IGNORED(*(p+idx2))) idx2++;
+
+    String * location = Configuration_readLocation(this, s, &idx2);
+    TRACE(("Configuration: -- Location %s\n", String_getBuffer(location)));
+
+    while (IS_IGNORED(*(p + idx2))) idx2++;
+
+    List * includes = Configuration_readIncludes(this, s, &idx2);
+    if (includes)
+    {
+      TRACE(("Configuration: -- Includes\n"));
+      List_print(includes);
+    }
+
+    while (IS_IGNORED(*(p + idx2))) idx2++;
+
+    List * uses = Configuration_readUses(this, s, &idx2);
+    if (uses)
+    {
+      TRACE(("Configuration: -- Uses\n"));
+      List_print(uses);
+    }
+
+    while (IS_IGNORED(*(p + idx2))) idx2++;
+
+    List * sources = Configuration_readSources(this, s, &idx2);
+    if (sources)
+    {
+      TRACE(("Configuration: -- Sources\n"));
+      List_print(sources);
+    }
+    while (IS_IGNORED(*(p + idx2))) idx2++;
+  }
+
   return 0;
 }
 
-PRIVATE String * Configuration_readValue(Configuration * this, char * p)
+PRIVATE String * Configuration_readLocation(Configuration* this, String* s, unsigned int * idx)
 {
-  return 0;
+  char* p = String_getBuffer(s);
+
+  if (!IS_LOCATION_KEY(p + *idx)) return 0;
+
+  *idx += 10;
+
+  return Configuration_readString(this, s, idx);
+}
+
+PRIVATE List* Configuration_readIncludes(Configuration * this, String* s, unsigned int * idx)
+{
+  char* p = String_getBuffer(s);
+
+  if (!IS_INCLUDES_KEY(p + *idx)) return 0;
+
+  *idx += 10;
+
+  return Configuration_readList(this, s, idx);
+}
+
+PRIVATE List* Configuration_readUses(Configuration* this, String* s, unsigned int * idx)
+{
+  char* p = String_getBuffer(s);
+
+  if (!IS_USES_KEY(p + *idx)) return 0;
+
+  *idx += 5;
+
+  return Configuration_readList(this, s, idx);
+}
+
+PRIVATE List* Configuration_readSources(Configuration* this, String* s, unsigned int * idx)
+{
+  char* p = String_getBuffer(s);
+
+  if (!IS_SOURCES_KEY(p + *idx)) return 0;
+
+  *idx += 8;
+
+  return Configuration_readList(this, s, idx);
+}
+
+PRIVATE String* Configuration_readString(Configuration* this, String* s, unsigned int * idx)
+{
+  char* p = String_getBuffer(s);
+  unsigned int idx1 = *idx;
+
+  while (IS_STRING(*(p + *idx)))
+  {
+    (*idx)++;
+  }
+
+  return String_subString(s, idx1, *idx - idx1);;
+}
+
+PRIVATE List* Configuration_readList(Configuration* this, String* s, unsigned int* idx)
+{
+  char* p = String_getBuffer(s);
+  unsigned int idx1 = *idx;
+  List* l = 0;
+
+  if (*(p+*idx)=='[')
+  {
+    l = List_new();
+    (*idx)++;
+    while (*(p + *idx) != ']')
+    {
+      String* item = Configuration_readString(this, s, idx);
+      TRACE(("Configuration: --> %s\n", String_getBuffer(item)));
+      List_insertHead(l, item, 1);
+      if (*(p + *idx) == ',') (*idx)++;
+    }
+    (*idx)++;
+  }
+  else
+  {
+    //while (IS_IGNORED(*(p + *idx))) (*idx)++;
+    Configuration_readEndOfLine(this, s, idx);
+    int indent = Configuration_readIndent(this, s, idx);
+    int nextIndent = indent;
+    while (IS_LIST(p + *idx) && (nextIndent == indent))
+    {
+      *idx += 2;
+      String* item = Configuration_readString(this, s, idx);
+      TRACE(("Configuration: --> %s\n", String_getBuffer(item)));
+      if (l == 0) l = List_new();
+      List_insertHead(l, item, 1);
+      Configuration_readEndOfLine(this, s, idx);
+      nextIndent = Configuration_readIndent(this, s, idx);
+    }
+  }
+
+  return l;
+}
+
+PRIVATE void Configuration_readEndOfLine(Configuration* this, String* s, unsigned int* idx)
+{
+  char* p = String_getBuffer(s);
+
+  while (!IS_EOL(p + *idx)) (*idx)++;
+  *idx += 2;
+}
+
+PRIVATE unsigned int Configuration_readIndent(Configuration* this, String* s, unsigned int* idx)
+{
+  char* p = String_getBuffer(s);
+  unsigned int indent = *idx;
+
+  while (IS_IGNORED(*(p + *idx))) (*idx)++;
+
+  return (*idx) - indent;
 }
