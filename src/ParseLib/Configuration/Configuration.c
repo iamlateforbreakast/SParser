@@ -6,7 +6,7 @@
 #include "Error.h"
 #include "Debug.h"
 
-#define DEBUG (1)
+#define DEBUG (0)
 
 #define IS_KEY(C) (((C>='A') && (C<='Z')) || ((C>='a') && (C<='z')) \
                   || ((C>='0') && (C<='9')) || (C=='_'))
@@ -70,6 +70,18 @@ PUBLIC void Configuration_delete(Configuration* this)
 
 PUBLIC void Configuration_print(Configuration* this)
 {
+  Product* p = 0;
+
+  PRINT(("\nConfiguration\n"));
+
+  List_resetIterator(this->products);
+
+  while ((p = List_getNext(this->products)) != 0)
+  {
+    Product_print(p);
+  }
+
+  List_resetIterator(this->products);
 }
 
 PUBLIC unsigned int Configuration_getSize(Configuration* this)
@@ -80,10 +92,12 @@ PUBLIC unsigned int Configuration_getSize(Configuration* this)
 PRIVATE List* Configuration_readProducts(Configuration* this, String * s)
 {
   char* p = String_getBuffer(s);
+  List * products = 0;
+  Product* product = 0;
   unsigned int idx1 = 0;
   unsigned int idx2 = 0;
 
-  while (IS_LIST(p+idx2))
+  while (IS_LIST(p+idx2) && (idx2<String_getLength(s)))
   {
     idx2 += 2;
     idx1 = idx2;
@@ -91,7 +105,13 @@ PRIVATE List* Configuration_readProducts(Configuration* this, String * s)
 
     String* productName = String_subString(s, idx1, idx2);
 
-    TRACE(("\nConfiguration: Product %s\n", String_getBuffer(productName)));
+    if (productName)
+    {
+      if (products == 0) products = List_new();
+      product = Product_new(productName);
+      List_insertHead(products, product, 1);
+    }
+
     if (!IS_COLON(p+idx2))
     {
       return 0;
@@ -101,38 +121,33 @@ PRIVATE List* Configuration_readProducts(Configuration* this, String * s)
     while (IS_IGNORED(*(p+idx2))) idx2++;
 
     String * location = Configuration_readLocation(this, s, &idx2);
-    TRACE(("Configuration: -- Location %s\n", String_getBuffer(location)));
+
+    if (location) product->location = location;
 
     while (IS_IGNORED(*(p + idx2))) idx2++;
 
     List * includes = Configuration_readIncludes(this, s, &idx2);
-    if (includes)
-    {
-      TRACE(("Configuration: -- Includes\n"));
-      List_print(includes);
-    }
+
+    if (includes) product->includes = includes;
 
     while (IS_IGNORED(*(p + idx2))) idx2++;
 
     List * uses = Configuration_readUses(this, s, &idx2);
-    if (uses)
-    {
-      TRACE(("Configuration: -- Uses\n"));
-      List_print(uses);
-    }
+
+    if (uses) product->uses = uses;
 
     while (IS_IGNORED(*(p + idx2))) idx2++;
 
     List * sources = Configuration_readSources(this, s, &idx2);
-    if (sources)
-    {
-      TRACE(("Configuration: -- Sources\n"));
-      List_print(sources);
-    }
+
+    if (sources) product->sources = sources;
+
     while (IS_IGNORED(*(p + idx2))) idx2++;
+
+    Product_print(product);
   }
 
-  return 0;
+  return products;
 }
 
 PRIVATE String * Configuration_readLocation(Configuration* this, String* s, unsigned int * idx)
@@ -224,6 +239,7 @@ PRIVATE List* Configuration_readList(Configuration* this, String* s, unsigned in
       TRACE(("Configuration: --> %s\n", String_getBuffer(item)));
       if (l == 0) l = List_new();
       List_insertHead(l, item, 1);
+      PRINT(("ITEM length %d\n", String_getLength(item)));
       Configuration_readEndOfLine(this, s, idx);
       nextIndent = Configuration_readIndent(this, s, idx);
     }
@@ -236,7 +252,7 @@ PRIVATE void Configuration_readEndOfLine(Configuration* this, String* s, unsigne
 {
   char* p = String_getBuffer(s);
 
-  while (!IS_EOL(p + *idx)) (*idx)++;
+  while (!IS_EOL(p + *idx) && (*idx<String_getLength(s))) (*idx)++;
   *idx += 2;
 }
 
