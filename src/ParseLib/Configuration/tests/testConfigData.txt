@@ -1,0 +1,16 @@
+Product1:
+  Location: location1
+  Includes: include1 include2 include3
+  Uses: Product2 Product3
+  Sources: source11 source12 source13 source14
+
+Product2:
+  Location: location2
+  Includes: include21
+  Sources: source21
+
+Product3:
+  Location: location3
+  Includes: include31 include32
+  Uses: Product2
+  Sources: source31 source32
