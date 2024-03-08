@@ -19,7 +19,12 @@
 #define IS_IGNORED(C) ((C==' ') || (C=='\n') || (C=='\r') || (C=='\t'))
 #define IS_STRING(C) (((C>='A') && (C<='Z')) || ((C>='a') && (C<='z')) \
                   || ((C>='0') && (C<='9')) || (C=='_'))
+
+#ifdef _WIN32
 #define IS_EOL(P) (Memory_ncmp(P, "\r\n", 2))
+#else
+#define IS_EOL(P) (Memory_ncmp(P, "\n", 1))
+#endif
 
 struct Configuration
 {
@@ -101,9 +106,11 @@ PRIVATE List* Configuration_readProducts(Configuration* this, String * s)
   {
     idx2 += 2;
     idx1 = idx2;
-    while (IS_KEY(*(p+idx2))) idx2++;
+    //while (IS_KEY(*(p+idx2))) idx2++;
 
-    String* productName = String_subString(s, idx1, idx2);
+    //String* productName = String_subString(s, idx1, idx2);
+
+    String * productName = Configuration_readString(this, s, &idx2);
 
     if (productName)
     {
@@ -239,7 +246,6 @@ PRIVATE List* Configuration_readList(Configuration* this, String* s, unsigned in
       TRACE(("Configuration: --> %s\n", String_getBuffer(item)));
       if (l == 0) l = List_new();
       List_insertHead(l, item, 1);
-      PRINT(("ITEM length %d\n", String_getLength(item)));
       Configuration_readEndOfLine(this, s, idx);
       nextIndent = Configuration_readIndent(this, s, idx);
     }
