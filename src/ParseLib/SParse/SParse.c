@@ -152,6 +152,12 @@ PUBLIC unsigned int SParse_parse(SParse * this, const char * extension)
     Configuration * c = Configuration_new(productList);
     if (c==0) return;
   }
+  else
+  {
+    // What does it mean?
+  }
+  // fileList = Configuration_getSourceFiles(conf, product);
+  
   /* List all files with extension in all the input directories */
   fileList = FileMgr_filterFiles(fileMgr, extension);
 
