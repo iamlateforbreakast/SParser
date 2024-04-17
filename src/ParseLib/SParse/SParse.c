@@ -150,10 +150,10 @@ PUBLIC unsigned int SParse_parse(SParse * this, const char * extension)
   if (productList)
   {
     Configuration * c = Configuration_new(productList);
-    if (c==0) return;
-  }
-  else
-  {
+
+    if (c == 0) Error_new(ERROR_FATAL, "Cannot read configuration file.\n");
+
+  // {
     // What does it mean?
   }
   // fileList = Configuration_getSourceFiles(conf, product);
