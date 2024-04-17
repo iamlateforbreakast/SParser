@@ -66,5 +66,6 @@ int main()
   step1();
   step2();
 
+  Memory_report();
   return isPassed;
 }
