@@ -6,6 +6,7 @@ SOURCES = \
 	./SParse/SParse.c \
 	./HTTPServer/HTTPServer.c \
  	./Configuration/Configuration.c \
+ 	./Configuration/Product.c \
 	./TransUnit/TransUnit.c \
 	./FileReader/FileReader.c
 
