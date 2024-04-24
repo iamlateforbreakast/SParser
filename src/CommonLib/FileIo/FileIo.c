@@ -220,12 +220,12 @@ PUBLIC List * FileIo_listDirs(FileIo * this, String * directory)
 {
   List* result = List_new();
 #ifdef _WIN32
-  WIN32_FIND_DATA FindFileData;
+  WIN32_FIND_DATAA FindFileData;
   HANDLE hFind;
   //TCHAR dir[MAX_PATH];
 
   //char * dirText = "C:\\Users\\remion_t\\source\\repos\\SParse-SP6\\UT_FileIo_01\\*";
-  hFind = FindFirstFile(_T("*"), &FindFileData);
+  hFind = FindFirstFileA("*", &FindFileData);
   if (hFind == INVALID_HANDLE_VALUE)
   {
     printf("FindFirstFile failed (%d)\n", GetLastError());
@@ -236,14 +236,14 @@ PUBLIC List * FileIo_listDirs(FileIo * this, String * directory)
       //_tprintf(_T("The first file found is %s\n"), FindFileData.cFileName);
       if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 2)
       {
-        char text[MAX_PATH];
+        //char text[MAX_PATH];
         size_t nb = 0;
-        wcstombs_s(&nb, text, 100, FindFileData.cFileName, wcslen(FindFileData.cFileName));
-        printf("=>%s\n", text);
-        String* s = String_new(text);
+        //wcstombs_s(&nb, text, 100, FindFileData.cFileName, wcslen(FindFileData.cFileName));
+        printf("=>%s\n", FindFileData.cFileName);
+        String* s = String_new(FindFileData.cFileName);
         List_insertTail(result, s, 1);
       }
-    } while (FindNextFile(hFind, &FindFileData));
+    } while (FindNextFileA(hFind, &FindFileData));
     FindClose(hFind);
   }
 #else
@@ -277,12 +277,14 @@ PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
 {
   List* result = List_new();
 #ifdef _WIN32
-  WIN32_FIND_DATA FindFileData;
+  WIN32_FIND_DATAA FindFileData;
   HANDLE hFind;
   //TCHAR dir[MAX_PATH];
 
   //char * dirText = "C:\\Users\\remion_t\\source\\repos\\SParse-SP6\\UT_FileIo_01\\*";
-  hFind = FindFirstFile(_T("*"), &FindFileData);
+  String* filter = String_copy(directory);
+  String_append(filter, "\\*");
+  hFind = FindFirstFileA(String_getBuffer(filter), &FindFileData);
   if (hFind == INVALID_HANDLE_VALUE)
   {
     printf("FindFirstFile failed (%d)\n", GetLastError());
@@ -293,16 +295,17 @@ PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
       //_tprintf(_T("The first file found is %s\n"), FindFileData.cFileName);
       if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
       {
-        char text[MAX_PATH];
+        //char text[MAX_PATH];
         size_t nb = 0;
-        wcstombs_s(&nb, text, 100, FindFileData.cFileName, wcslen(FindFileData.cFileName));
-        TRACE(("=>%s\n", text));
-        String* s = String_new(text);
+        //wcstombs_s(&nb, text, 100, FindFileData.cFileName, wcslen(FindFileData.cFileName));
+        TRACE(("=>%s\n", FindFileData.cFileName));
+        String* s = String_new(FindFileData.cFileName);
         List_insertTail(result, s, 1);
       }
-    } while (FindNextFile(hFind, &FindFileData));
+    } while (FindNextFileA(hFind, &FindFileData));
     FindClose(hFind);
   }
+  String_delete(filter);
 #else
   struct dirent *directoryEntry = 0;
   String * name = 0;
