@@ -57,7 +57,6 @@ PRIVATE FileMgr * fileMgr = 0;
 **************************************************/
 PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2);
 PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory);
-PRIVATE FileDesc * FileMgr_isManaged(FileMgr * this, String * fullName);
 PRIVATE unsigned int FileMgr_existFS(FileMgr * this, String * fullName);
 
 /**********************************************//** 
