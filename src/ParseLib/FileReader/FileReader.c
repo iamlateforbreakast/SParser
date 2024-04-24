@@ -224,7 +224,7 @@ PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
     {
       Error_new(ERROR_FATAL, "NewFileContent is null");
     }
-    List_insertHead(this->buffers, newFileContent, 1);
+    List_insertHead(this->buffers, newFileContent,0);
     this->currentBuffer = newFileContent;
     result = String_getBuffer(newFileContent);
   }
@@ -330,7 +330,7 @@ PRIVATE void FileReader_getListPreferredDir(FileReader * this)
     }
     if (state==6)
     {
-      List_insertHead(this->preferredDirs, prefDir, 1);
+      List_insertHead(this->preferredDirs, prefDir, 0);
     }
     else
     {
