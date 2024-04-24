@@ -3,7 +3,7 @@
 #include "TaskMgr.h"
 #include "Memory.h"
 #include "Debug.h"
-#include <pthread.h>
+
 
 #ifdef _WIN32
 #include <windows.h>	/* WinAPI */
@@ -30,6 +30,7 @@ int msleep(long msec) {
   return 1;
 }
 #else
+#include <pthread.h>
 #include <time.h>
 #include <errno.h>
 int msleep(long msec)
