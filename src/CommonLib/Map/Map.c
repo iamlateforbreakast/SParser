@@ -148,11 +148,14 @@ PUBLIC unsigned int Map_insert(Map * this,String * s, void * p, int isOwner)
   void * entry =0;
   MapEntry * me = 0;
  
+  if (p == 0) return 0;
    
+  if (s == 0) return 0;
   /* Check if there is an entry under s */
   if ((me = Map_findEntry(this, s))!=0)
   {
     /* Replace entry with new entry an free existing entry */
+    Error_new(ERROR_DBG, "   Map_insert : %s\n", String_getBuffer(s));
     MapEntry_setString(me, String_getRef(s));
     MapEntry_setItem(me, Object_getRef((Object*)p));
   }
@@ -288,7 +291,7 @@ PUBLIC void Map_print(Map * this)
       if (this->htable[i]!=0)
       {
         Error_new(ERROR_INFO,"Map.c: Map[%d] is used with %d elements.\n",i, List_getSize(this->htable[i]));
-        for (j=0; j<List_getSize(this->htable[i]);j++)
+        for (j=0; j<(int)List_getSize(this->htable[i]);j++)
         {
           List_resetIterator(this->htable[i]);
           n = (MapEntry*)List_getNext(this->htable[i]);
