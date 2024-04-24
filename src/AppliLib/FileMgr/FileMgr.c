@@ -66,7 +66,7 @@ PRIVATE unsigned int FileMgr_existFS(FileMgr * this, String * fullName);
   @memberof FileMgr
   @return New instance.
 **************************************************/
-PRIVATE FileMgr * FileMgr_new()
+PUBLIC FileMgr * FileMgr_new()
 {
   FileMgr * this = 0;
   FileIo * f = FileIo_new();
@@ -124,6 +124,23 @@ PUBLIC FileMgr * FileMgr_copy(FileMgr * this)
   return this;
 }
 
+PUBLIC void FileMgr_print(FileMgr* this)
+{
+  PRINT(("FileMgr: \n"));
+  PRINT(("  Root: %s\n", String_getBuffer(this->rootLocation)));
+  String * s;
+  List_resetIterator(this->directories);
+  while ((s = List_getNext(this->directories)) != 0)
+  {
+    PRINT(("  Directory: %s\n", String_getBuffer(s)));
+  }
+  FileDesc* fileDesc;
+  List_resetIterator(this->files);
+  while ((fileDesc = List_getNext(this->files)) != 0)
+  {
+    PRINT(("  File: %s\n", String_getBuffer(FileDesc_getName(fileDesc))));
+  }
+}
 /**********************************************//** 
   @brief Get a reference to the singleton instance of FileMgr.
   @public
@@ -344,7 +361,7 @@ PUBLIC List * FileMgr_filterFiles(FileMgr * this, const char * pattern)
   {
     if (String_matchWildcard(FileDesc_getName(fd), pattern))
     {
-      List_insertHead(result, fd, 1);
+      List_insertHead(result, fd, 0);
     }
   }
   
@@ -545,7 +562,7 @@ PUBLIC FileDesc * FileMgr_searchFile(FileMgr * this, String * name, List * prefe
  @param [in]     path2: String* - Path to merge
  @return: none
 **************************************************/
-PRIVATE FileDesc * FileMgr_isManaged(FileMgr * this, String * fullName)
+PUBLIC FileDesc * FileMgr_isManaged(FileMgr * this, String * fullName)
 {
   FileDesc * result = 0;
   FileDesc * fd = 0;
