@@ -59,6 +59,7 @@ int step1()
     printf("Get Wall Time = %Lf\n", get_wall_time());
     msleep(500);
   }
+  return 1;
 }
 
 int step2()
@@ -69,6 +70,7 @@ int step2()
     msleep(500);
   }
 
+  return 1;
 }
 
 void main()
