@@ -133,9 +133,9 @@ int step3()
   String* fileName = String_new(fileNameText);
   FileMgr_addDirectory(testFileMgr, ".");
   
-  int isManaged = FileMgr_isManaged(testFileMgr, fileName);
+  FileDesc * fileDesc = FileMgr_isManaged(testFileMgr, fileName);
   PRINT(("Step 3: Test 1 - Check if file is managed: "));
-  UT_ASSERT((isManaged))
+  UT_ASSERT((fileDesc))
   ObjectMgr* objMgr = ObjectMgr_getRef();
   ObjectMgr_reportUnallocated(objMgr);
   ObjectMgr_delete(objMgr);
