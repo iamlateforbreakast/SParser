@@ -12,11 +12,13 @@
 #define UT_ASSERT(cond) if ((cond)) \
                           { printf("Passed\n");} \
                           else { printf("Failed\n"); return 0;}
+
 #define FILEMGR_MAX_PATH (1024)
 
 extern FileMgr * fileMgr;
 
 PUBLIC void FileMgr_mergePath(FileMgr * this, String * path1, String * path2);
+
 typedef struct TestFileMgr
 {
   Object object;
@@ -55,6 +57,7 @@ int step1()
 #endif
   TRACE(("\n  Root location: %s\n", String_getBuffer(((TestFileMgr*)testFileMgr1)->rootLocation)));
   TRACE(("  Current location: %s\n", String_getBuffer(currentLocation)));
+  //UT_ASSERT(String_compare(((TestFileMgr*)testFileMgr1)->rootLocation, currentLocation) == 0)
   UT_ASSERT((1))
 
   /* Test 4 */
@@ -71,7 +74,7 @@ int step1()
 
   /* Test 6 */
   PRINT(("Step 1: Test 6 - Check it is possible to delete a null pointer: "));
-  FileMgr_delete(testFileMgr2);
+  FileMgr_delete(testFileMgr2); 
   UT_ASSERT((fileMgr==0))
 
   /* Test 7 */
@@ -87,7 +90,7 @@ int step1()
 
 int step2()
 {
-  ObjectMgr * objMgr = ObjectMgr_getRef();
+  ObjectMgr* objMgr = ObjectMgr_getRef();
   FileMgr * testFileMgr1 = FileMgr_getRef();
   FileIo* f = FileIo_new();
   String* mergedLocation = FileIo_getCwd(f);
@@ -102,12 +105,18 @@ int step2()
   PRINT(("Merged Path: %s\n", String_getBuffer(mergedLocation)));
   PRINT(("Step 2: Test 1 - Check merging 2 paths: "));
   UT_ASSERT((1))
-  FileMgr_addDirectory(testFileMgr1, "..");
+
+  /* Test 2 */
+#ifdef _WIN32
+  FileMgr_addDirectory(testFileMgr1, "..\\Sparse-SP6\\src\\CommonLib\\List");
+#else
+    FileMgr_addDirectory(testFileMgr1, "..");
+#endif
   PRINT(("Step 2: Test 2 - Check it is possible to add a directory: "));
   UT_ASSERT((1))
   ObjectMgr_reportUnallocated(objMgr);
 
-  /* Test 2 */
+  /* Test 3 */
   FileIo_delete(f);
   String_delete(mergedLocation);
   String_delete(testLocation);
@@ -126,6 +135,7 @@ int step3()
 {
   FileMgr * testFileMgr = FileMgr_getRef();
   String * testFileContent = 0;
+  
 #ifdef _WIN32
   const char * fileNameText = "UT_FileMgr_01.vcxproj";
 #else
@@ -134,6 +144,7 @@ int step3()
   String* fileName = String_new(fileNameText);
   FileMgr_addDirectory(testFileMgr, ".");
   
+  /* Test 1 */
   FileDesc * fileDesc = FileMgr_isManaged(testFileMgr, fileName);
   PRINT(("Step 3: Test 1 - Check if file is managed: "));
   UT_ASSERT((fileDesc))
@@ -142,16 +153,18 @@ int step3()
   ObjectMgr_delete(objMgr);
   Memory_report();
 
+  /* Test 2 */
   testFileContent = FileMgr_load(testFileMgr, fileNameText);
   PRINT(("Step 3: Test 2 - Check if file is loaded: "));
   UT_ASSERT((1))
 
+  /* Test 3 */
   FileMgr_delete(testFileMgr);
   String_delete(fileName);
   String_delete(testFileContent);
   PRINT(("Step 3: test 3 - Check all memory is freed properly: "));
+  //UT_ASSERT((Memory_getAllocRequestNb() == (Memory_getFreeRequestNb() + 1)))
   Memory_report();
-
   return 1;
 }
 
@@ -181,10 +194,13 @@ int step5()
   //PUBLIC List * FileMgr_filterFiles(FileMgr * this, const char * pattern);
   FileMgr* testFileMgr = FileMgr_getRef();
   const char pattern[] = "*.c";
+
   PRINT(("Step 5: Test 1 - Search files meeting pattern %s: ", pattern));
   List * files = FileMgr_filterFiles(testFileMgr, pattern);
+
   List_delete(files);
   FileMgr_delete(testFileMgr);
+
   return 1;
 }
 
@@ -201,5 +217,6 @@ int main()
   step3();
   step4();
   step5();
+
   return 0;
 }
