@@ -1,6 +1,8 @@
 /* Configuration.c */
 #include "Configuration.h"
 #include "Product.h"
+#include "TransUnit.h"
+#include "Grammar.h"
 #include "Object.h"
 #include "Memory.h"
 #include "Error.h"
@@ -18,7 +20,7 @@
 #define IS_SOURCES_KEY(P) (Memory_ncmp(P,"Sources:", 8))
 #define IS_IGNORED(C) ((C==' ') || (C=='\n') || (C=='\r') || (C=='\t'))
 #define IS_STRING(C) (((C>='A') && (C<='Z')) || ((C>='a') && (C<='z')) \
-                  || ((C>='0') && (C<='9')) || (C=='_'))
+                  || ((C>='0') && (C<='9')) || (C=='_') || (C=='/') || (C=='\\') || (C=='-') || (C=='.'))
 
 #ifdef _WIN32
 #define IS_EOL(P) (Memory_ncmp(P, "\r\n", 2))
@@ -94,10 +96,10 @@ PUBLIC unsigned int Configuration_getSize(Configuration* this)
   return sizeof(Configuration);
 }
 
-PUBLIC FileMgr* Configuration_getFilesForProduct(Configuration* this, Product * product)
+PUBLIC List * Configuration_getProducts(Configuration* this)
 {
-  FileMgr* fm = 0;
-
+  return this->products;
+}
   // location = Product_getLocation(product);
   // fm = FileMgr_new();
   // FileMgr_setRootLocation(fm, location);
@@ -105,8 +107,9 @@ PUBLIC FileMgr* Configuration_getFilesForProduct(Configuration* this, Product * 
   // add directoy to fm
   // for each file in source
   // add file to fm
+PUBLIC void Configuration_parseProducts(Configuration* this)
+{
 
-  return fm;
 }
 
 PRIVATE List* Configuration_readProducts(Configuration* this, String* s)
@@ -116,6 +119,7 @@ PRIVATE List* Configuration_readProducts(Configuration* this, String* s)
   Product* product = 0;
   unsigned int idx1 = 0;
   unsigned int idx2 = 0;
+  while (IS_IGNORED(*(p + idx2))) idx2++;
 
   while (IS_LIST(p + idx2) && (idx2 < String_getLength(s)))
   {
@@ -144,25 +148,25 @@ PRIVATE List* Configuration_readProducts(Configuration* this, String* s)
 
     String* location = Configuration_readLocation(this, s, &idx2);
 
-    if (location) product->location = location;
+    if (location) Product_setLocation(product, location);
 
     while (IS_IGNORED(*(p + idx2))) idx2++;
 
     List* includes = Configuration_readIncludes(this, s, &idx2);
 
-    if (includes) product->includes = includes;
+    if (includes) Product_setIncludes(product, includes);
 
     while (IS_IGNORED(*(p + idx2))) idx2++;
 
     List* uses = Configuration_readUses(this, s, &idx2);
 
-    if (uses) product->uses = uses;
+    if (uses) Product_setUses(product, uses);
 
     while (IS_IGNORED(*(p + idx2))) idx2++;
 
     List* sources = Configuration_readSources(this, s, &idx2);
 
-    if (sources) product->sources = sources;
+    if (sources) Product_setSources(product, sources);
 
     while (IS_IGNORED(*(p + idx2))) idx2++;
 
@@ -232,8 +236,8 @@ PRIVATE String* Configuration_readString(Configuration* this, String* s, unsigne
 PRIVATE List* Configuration_readList(Configuration* this, String* s, unsigned int* idx)
 {
   char* p = String_getBuffer(s);
-  unsigned int idx1 = *idx;
   List* l = 0;
+  while (*(p + *idx) == ' ') (*idx)++;
 
   if (*(p + *idx) == '[')
   {
@@ -254,7 +258,7 @@ PRIVATE List* Configuration_readList(Configuration* this, String* s, unsigned in
     Configuration_readEndOfLine(this, s, idx);
     int indent = Configuration_readIndent(this, s, idx);
     int nextIndent = indent;
-    while (IS_LIST(p + *idx) && (nextIndent == indent))
+    while (IS_LIST(p + *idx) && (nextIndent == indent) && (*idx < String_getLength(s)))
     {
       *idx += 2;
       String* item = Configuration_readString(this, s, idx);
@@ -273,8 +277,11 @@ PRIVATE void Configuration_readEndOfLine(Configuration* this, String* s, unsigne
 {
   char* p = String_getBuffer(s);
 
-  while (!IS_EOL(p + *idx) && (*idx < String_getLength(s))) (*idx)++;
-  *idx += 2;
+  //while (!IS_EOL(p + *idx) && (*idx < String_getLength(s))) (*idx)++;
+  while ((*(p + *idx) == '\n') || (*(p+*idx) == '\r'))
+  {
+    (*idx)++;
+  }
 }
 
 PRIVATE unsigned int Configuration_readIndent(Configuration* this, String* s, unsigned int* idx)
