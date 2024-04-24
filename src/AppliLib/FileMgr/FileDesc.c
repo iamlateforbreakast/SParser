@@ -78,6 +78,7 @@ PUBLIC FileDesc * FileDesc_copy(FileDesc * this)
   
   return copy;
 }
+
 PUBLIC unsigned int FileDesc_getSize(FileDesc* this)
 {
   return sizeof(FileDesc);
@@ -127,7 +128,11 @@ PRIVATE String * FileDesc_getBasename(FileDesc * this)
   
   while (p>=String_getBuffer(this->fullName) )
   {
-    if (*p=='/') 
+#ifdef _WIN32
+    if (*p=='\\')
+#else
+    if (*p=='/')
+#endif
     {
       p++;
       result = String_new(p);
@@ -152,11 +157,11 @@ PUBLIC String * FileDesc_load(FileDesc * this)
   FileIo_openFile(f, FileDesc_getFullName(this));
   if (FileIo_isOpen(f))
   {
-    FileIo_fSeekEnd(f, 0);
-    int length=FileIo_ftell(f);
-    FileIo_fSeekSet(f, 0);
-    
-    char * buffer = (char*)Memory_alloc(length+1);
+	FileIo_fSeekEnd(f, 0);
+	int length=FileIo_ftell(f);
+	FileIo_fSeekSet(f, 0);
+        
+	char * buffer = (char*)Memory_alloc(length+1);
     if (buffer)
     {
       FileIo_read(f, buffer, length);
