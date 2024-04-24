@@ -6,6 +6,8 @@
   The class Product contains the sources for a given product.
 **************************************************/
 #include "Product.h"
+#include "FileMgr.h"
+#include "String.h"
 
 /**********************************************//**
   @class Product
@@ -120,4 +122,23 @@ PUBLIC void Product_setUses(Product* this, List * l)
 PUBLIC void Product_setSources(Product* this, List * l)
 {
   this->sources = l;
+}
+PUBLIC FileMgr* Product_getSourceFiles(Product* this)
+{
+  FileMgr* fileMgr = FileMgr_new();
+  FileMgr_setRootLocation(fileMgr, String_getBuffer(this->location));
+  String* includeDir;
+  while ((includeDir = List_getNext(this->includes)) != 0)
+  {
+    PRINT(("Product: Add include: %s\n", String_getBuffer(includeDir)));
+    FileMgr_addDirectory(fileMgr, String_getBuffer(includeDir));
+  }
+  String* sourceFile = 0;
+  while ((sourceFile = List_getNext(this->sources)) != 0)
+  {
+    PRINT(("Product: Add file: %s\n", String_getBuffer(sourceFile)));
+    FileMgr_addFile(fileMgr, String_getBuffer(sourceFile));
+  }
+  FileMgr_print(fileMgr);
+  return fileMgr;
 }
