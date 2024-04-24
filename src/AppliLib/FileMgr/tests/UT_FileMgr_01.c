@@ -16,6 +16,7 @@
 
 extern FileMgr * fileMgr;
 
+PUBLIC void FileMgr_mergePath(FileMgr * this, String * path1, String * path2);
 typedef struct TestFileMgr
 {
   Object object;
