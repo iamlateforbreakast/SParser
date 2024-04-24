@@ -68,7 +68,6 @@ static const char * SParse_ignoreFiles[] =
 #endif
 
 PRIVATE unsigned int SParse_parseFile(SParse * this, FileDesc * fileDesc);
-//PRIVATE void SParse_buildPreferredDirList(SParse * this, const char * extension);
 
 /**********************************************//** 
   @brief Create a new SParse object.
@@ -104,6 +103,12 @@ PUBLIC void SParse_delete(SParse * this)
   }
 }
 
+/**********************************************//** 
+  @brief Copy a SParse object instance.
+  @public
+  @memberof SParse
+  @return Copy of instance.
+**************************************************/
 PUBLIC SParse * SParse_copy(SParse * this)
 {
   SParse * copy = 0;
@@ -111,12 +116,20 @@ PUBLIC SParse * SParse_copy(SParse * this)
   return copy;
 }
 
+/**********************************************//** 
+  @brief Print a SParse object.
+  @public
+  @memberof SParse
+**************************************************/
 PUBLIC void SParse_print(SParse * this)
 {
+
 }
+
 PUBLIC unsigned int SParse_getSize(SParse * this)
 {
   if (this == 0) return sizeof(SParse);
+
   return sizeof(SParse);
 }
 /**********************************************//** 
@@ -129,10 +142,8 @@ PUBLIC unsigned int SParse_parse(SParse * this, const char * extension)
 {
   unsigned int result = 0;
   
-  FileMgr* fileMgr  = FileMgr_getRef();
   OptionMgr* optionMgr = OptionMgr_getRef();
   FileDesc * fd = 0;
-  List * fileList = 0;
   
   String * productList = OptionMgr_getOption(optionMgr, "Product list");
   PRINT(("Product List = %s\n", String_getBuffer(productList)));
@@ -142,25 +153,24 @@ PUBLIC unsigned int SParse_parse(SParse * this, const char * extension)
 
     if (this->configuration == 0) Error_new(ERROR_FATAL, "Cannot read configuration file.\n");
 
-    //Configuration_parse(this->configuration);
+  // {
+    // What does it mean?
   }
-
-  //
   List* products = Configuration_getProducts(this->configuration);
-
+  
   Product* p;
-
   while ((p = List_getNext(products)) != 0)
   {
-    // Processing product N
-    /* List all files with extension in all the input directories */
-    fileList = FileMgr_filterFiles(fileMgr, extension);
-    while ((fd = List_getNext(fileList)) != 0)
-      SParse_parseFile(this, fd);
-    FileMgr_delete(fileMgr);
+    FileMgr * fileMgr = Product_getSourceFiles(p);
+  /* List all files with extension in all the input directories */
+    List * fileList = FileMgr_filterFiles(fileMgr, extension);
+
+  //List_forEach(fileList, (void (*)(void* , void *))&SParse_parseFile, (void*)this);
+  while ((fd = List_getNext(fileList))!=0)
+    SParse_parseFile(this, fd);
+  FileMgr_delete(fileMgr);
     List_delete(fileList);
   }
-
   OptionMgr_delete(optionMgr);
   
   return result;
@@ -173,20 +183,19 @@ PUBLIC unsigned int SParse_parse(SParse * this, const char * extension)
   @param Filename.
   @return Status of the operation.
 **************************************************/
-PRIVATE unsigned int SParse_parseFile(SParse * this, /*Grammar g, */FileDesc * fileDesc)
+PRIVATE unsigned int SParse_parseFile(SParse * this, FileDesc * fileDesc)
 {
   unsigned int error = 0;
   unsigned int i = 0;
   unsigned int nbRows = sizeof(SParse_default)/sizeof(SParseDefault);
   void * g = 0;
   /* 1) If fileName is to be ignored */
+  PRINT(("SParse: Parsing %s\n", String_getBuffer(FileDesc_getName(fileDesc))));
   for (i=0; i<nbRows; i++)
   {
-   if (String_matchWildcard(FileDesc_getName(fileDesc), SParse_default[i].extension))
+    if (String_matchWildcard(FileDesc_getName(fileDesc), SParse_default[i].extension))
     {
       FileReader * fileReader = FileReader_new(fileDesc);
-      // tu = TranslationUnit_new(fileDesc);
-      //while (s = TranslationUNit_getNextBuffer(tu)
       g = SParse_default[i].function_new(fileReader, this->sdbMgr);
       SParse_default[i].function_process(g);
       SParse_default[i].function_delete(g);
