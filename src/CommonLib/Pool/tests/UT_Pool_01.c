@@ -1,5 +1,6 @@
 #include "Types.h"
 #include "Pool.h"
+#include "Debug.h"
 
 #define DEBUG (0)
 #ifdef _WIN32
@@ -90,13 +91,13 @@ int step6()
     Pool_write(testPool, 0, testData);
     char* readData = Pool_read(testPool, 0);
     readData[sizeof(testData)] = 0;
-    printf("data read back %s\n", &readData[0]);
+    PRINT(("data read back %s\n", &readData[0]));
     return 0;
 }
 
 int step7()
 {
-    Pool_free(testPool);
+    Pool_delete(testPool);
     return 0;
 }
 
@@ -122,7 +123,7 @@ int step12()
 
 int step16()
 {
-    Pool_free(testPool);
+    Pool_delete(testPool);
     return 0;
 }
 
