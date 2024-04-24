@@ -310,7 +310,6 @@ PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
   String * optionName = 0;
   String * optionValue = 0;
   unsigned int state = 0;
-  unsigned int multiline = 0;
   
   for (p = String_getBuffer(fileContent);
        p < String_getBuffer(fileContent)+String_getLength(fileContent);
@@ -336,20 +335,20 @@ PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
         else length++;
         break;
       case 2:
-        if (*p!=' ')
+        if (*p == '{')
           {
             // Single line
           state = 3;
-          idx = p - String_getBuffer(fileContent);
-          length = 1;
+          idx = p - String_getBuffer(fileContent) + 1;
+          length = 0;
         }
         break;
       case 3:
-        if (*(p+1)=='[')
+        if (*p == '}')
         {
           state = 0;
           /* TODO: Case of windows file */
-          optionValue = String_subString(fileContent, idx, length + multiline);
+          optionValue = String_subString(fileContent, idx, length);
           PRINT(("OptionValue= %s\n", String_getBuffer(optionValue)));
           OptionMgr_setOption(optionMgr, String_getBuffer(optionName), optionValue);
           String_delete(optionName);
