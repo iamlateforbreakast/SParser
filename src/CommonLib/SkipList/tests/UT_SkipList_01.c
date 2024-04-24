@@ -185,7 +185,7 @@ int step7()
 
   for (int i = 0; i < nbWords; i++)
   {
-    SkipList_add(testList, wordKeys[i], testObjects[i]);
+    SkipList_add(testList, (Object*)wordKeys[i], (Object*)testObjects[i]);
     //printf("Adding %d\n", randomKeys[i]);
   }
 
