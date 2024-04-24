@@ -1,6 +1,7 @@
 /* UT_HTTPServer_01.c */
 
 #include "HTTPServer.h"
+#include "Memory.h"
 
 int step1()
 {
@@ -23,5 +24,6 @@ int main()
 
   step1();
 
+  Memory_report();
   return isPassed;
 }
