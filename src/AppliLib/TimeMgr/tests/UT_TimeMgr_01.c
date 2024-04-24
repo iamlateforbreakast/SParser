@@ -3,13 +3,47 @@
 #include "Map.h"
 #include "Memory.h"
 
-#include <unistd.h>
+#include <time.h>
 #include <stdio.h>
 
 #define UT_ASSERT(cond) if ((cond)) \
                           { printf("Passed\n");} \
                           else { printf("Failed\n"); return 0;}
                           
+#ifdef _WIN32
+#include <windows.h>	/* WinAPI */
+int msleep(long msec) {
+  HANDLE timer;	/* Timer handle */
+  LARGE_INTEGER li;	/* Time definition */
+  if (!(timer = CreateWaitableTimer(NULL, 1, NULL)))
+	return 0;
+  li.QuadPart = -10000LL * msec;
+  if (!SetWaitableTimer(timer, &li, 0, NULL, NULL, 0)) {
+	CloseHandle(timer);
+	return 0;
+  }
+  WaitForSingleObject(timer, 0xFFFFFFFF);
+  CloseHandle(timer);
+  return 1;
+}
+#else
+int msleep(long msec)
+{
+  struct timespec ts;
+  int res;
+  if (msec < 0)
+  {
+	errno = EINVAL;
+	return -1;
+  }
+  ts.tv_sec = msec / 1000;
+  ts.tv_nsec = (msec % 1000) * 1000000;
+  do {
+	res = nanosleep(&ts, &ts);
+  } while (res && errno == EINTR);
+  return res;
+}
+#endif
 typedef struct TestTimeMgr
 {
   Object object;
@@ -50,7 +84,7 @@ int step2()
   {
     TimeMgr_latchTime(testTimeMgr, testTimerName);
 
-    sleep(1);
+    msleep(1000);
   }
   TimeMgr_latchTime(testTimeMgr, testTimerName);  
 
