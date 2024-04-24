@@ -10,8 +10,10 @@
 
 typedef struct FileMgr FileMgr;
 
+PUBLIC FileMgr* FileMgr_new();
 PUBLIC void FileMgr_delete(FileMgr * this);
 PUBLIC FileMgr * FileMgr_copy(FileMgr * this);
+PUBLIC void FileMgr_print(FileMgr * this);
 PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName);
 PUBLIC void FileMgr_close(FileMgr* this, String* fileName);
 PUBLIC unsigned int FileMgr_setRootLocation(FileMgr* this, const char * location);
