@@ -114,8 +114,18 @@ int step6()
 {
 	FileIo* f = FileIo_new();
 	String* currentPath = FileIo_getCwd(f);
+#ifdef _WIN32
+	String_append(currentPath, "\\..\\SParse-SP6\\src\\CommonLib\\List");
+#else
+	String_append(currentPath, "/../..");
+#endif
 	PRINT(("Step 6: Test 1 - List files in current directory: "));
 	List* listOfFiles = FileIo_listFiles(f, currentPath);
+	String* name;
+	while ((name = List_getNext(listOfFiles)) != 0)
+	{
+	  PRINT(("FIle %s\n", String_getBuffer(name)));
+	}
 	UT_ASSERT((1));
 	List_delete(listOfFiles);
 	String_delete(currentPath);
