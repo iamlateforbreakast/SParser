@@ -7,7 +7,7 @@
 #include "Memory.h"
 #include "Error.h"
 #include "Object.h"
-
+#include "Debug.h"
 //#define IS_MACRO_LETTER(C) (((C=>'A') && (C<='Z')) || (C=='_'))
 #define IS_MACRO_LETTER(C) (((C>'A') && (C<'Z')) || (C=='_'))
 
@@ -159,14 +159,14 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
       // Consume include
       TransUnit_consumeInclude(this);
       start = this->currentBuffer->nbCharRead;
-      printf("#include: start = %d\n", start);
+      PRINT(("#include: start = %d\n", start));
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#define", 7))
     {
       // Consume macro definition
       TransUnit_readMacroDefinition(this);
       start = this->currentBuffer->nbCharRead;
-      printf("#define: start = %d\n", start);
+      PRINT(("#define: start = %d\n", start));
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#ifndef", 6))
     {
@@ -175,7 +175,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
       this->currentBuffer->nbCharRead += 6;
       TransUnit_checkMacro(this, 0);
       start = this->currentBuffer->nbCharRead;
-      printf("#ifndef: start = %d\n", start);
+      PRINT(("#ifndef: start = %d\n", start));
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#ifdef", 6))
     {
@@ -183,7 +183,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
       this->currentBuffer->nbCharRead += 6;
       TransUnit_checkMacro(this, 1);
       start = this->currentBuffer->nbCharRead;
-      printf("#ifdef: start = %d\n", start);
+      PRINT(("#ifdef: start = %d\n", start));
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#undef", 6))
     {
@@ -196,7 +196,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
       this->currentBuffer->currentPtr += 2;
       this->currentBuffer->nbCharRead += 2;
       start = this->currentBuffer->nbCharRead;
-      printf("#if: start = %d\n", start);
+      PRINT(("#if: start = %d\n", start));
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#else", 4))
     {
@@ -209,7 +209,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
       this->currentBuffer->currentPtr += 4;
       this->currentBuffer->nbCharRead += 4;
       start = this->currentBuffer->nbCharRead;
-      printf("#else: start = %d\n", start);
+      PRINT(("#else: start = %d\n", start));
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#endif", 5))
     {
