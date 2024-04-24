@@ -18,5 +18,5 @@ PUBLIC void Product_setLocation(Product * this, String * s);
 PUBLIC void Product_setIncludes(Product * this, List * l);
 PUBLIC void Product_setUses(Product * this, List * l);
 PUBLIC void Product_setSources(Product * this, List * l);
-PUBLIC FileMgr * Product_getFiles(Product * this);
+PUBLIC FileMgr * Product_getSourceFiles(Product * this);
 #endif /* _PRODUCT_H_ */
