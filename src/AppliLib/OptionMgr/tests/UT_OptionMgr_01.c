@@ -54,18 +54,18 @@ int step1()
 
 int step2()
 {
-  testOptionMgr* testOptionMgr1 = OptionMgr_getRef();
+  testOptionMgr* testOptionMgr1 = (testOptionMgr*)OptionMgr_getRef();
   const char dbName[] = "test.db";
   const char inputDir[] = ".";
   String * option = 0;
 
   PRINT(("Step 2: Test 1 - Check option DB Name is read correctly: "));
   option = OptionMgr_getOption((OptionMgr*)testOptionMgr1,"DB Name");
-  UT_ASSERT(Memory_cmp(String_getBuffer(option), dbName) == 0);
+  UT_ASSERT((Memory_cmp(String_getBuffer(option), dbName) == 0));
   TRACE(("  DB Name option = %s\n", String_getBuffer(option)));
 
   option = OptionMgr_getOption((OptionMgr*)testOptionMgr1, "Input Directory");
-  UT_ASSERT(Memory_cmp(String_getBuffer(option), inputDir) == 0);
+  UT_ASSERT((Memory_cmp(String_getBuffer(option), inputDir) == 0));
   TRACE(("  Input option = %s\n", String_getBuffer(option)));
 
   OptionMgr_delete((OptionMgr*)testOptionMgr1);
