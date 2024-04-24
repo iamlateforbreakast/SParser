@@ -32,7 +32,7 @@ PRIVATE Class macroDefinitionClass =
 
 PRIVATE MacroDefinition* MacroDefinition_new()
 {
-
+  return 0;
 }
 
 PRIVATE void MacroDefinition_delete(MacroDefinition* this)
