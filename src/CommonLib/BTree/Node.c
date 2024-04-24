@@ -34,7 +34,7 @@ PUBLIC Node* Node_new(unsigned short int isLeaf, unsigned int order)
 	node->nbKeyUsed = 0;
     node->keys = &node->buffer[0];
 	node->leaves = &node->buffer[order * 2 - 1];
-    node->children = &node->buffer[order * 2* 2 - 1];
+    node->children = (Node**)&node->buffer[order * 2* 2 - 1];
     TRACE(("New node:\n"));
 	TRACE(("Size - Total %d Header %d\n", size, sizeof(Node)));
 	TRACE(("Node %x Keys %x Leaves %x Children %x\n", node, node->keys, node->leaves, node->children));
@@ -56,7 +56,7 @@ PUBLIC Object* Node_search(Node* node, unsigned int order, Object* key, unsigned
 	{
 		Error_new(ERROR_FATAL,"Node_search node== 0\n");
 	}
-	if (node->isLeaf == 1)
+	else if (node->isLeaf == 1)
 	{
 		for (unsigned int i = 0; i < node->nbKeyUsed; i++)
 		{
@@ -128,7 +128,7 @@ PUBLIC void Node_insert(Node* node, unsigned int order, Object * key, Object * o
 {
 	if (node->isLeaf == 1) 
 	{
-		for (int i = 0; i < node->nbKeyUsed; i++)
+		for (int i = 0; i < (int)node->nbKeyUsed; i++)
 		{
 			if (Object_comp(key, node->keys[i])==0)
 			{
@@ -170,7 +170,7 @@ PUBLIC void Node_insert(Node* node, unsigned int order, Object * key, Object * o
 			Error_new(ERROR_NORMAL, "insert key: %d\n", key);
 			Node_print(node, order, 3);
 			Error_new(ERROR_FATAL,"Exiting\n");
-		}
+		} else
 		if (node->children[i]->nbKeyUsed < order * 2 - 1) //&& (node->nbKeyUsed < ORDER * 2 - 1))
 		{
 			Node_insert(node->children[i], order, key, object, isOwner);
