@@ -7,7 +7,7 @@
 **************************************************/
 #include "Product.h"
 #include "FileMgr.h"
-#include "String.h"
+#include "String2.h"
 
 /**********************************************//**
   @class Product
