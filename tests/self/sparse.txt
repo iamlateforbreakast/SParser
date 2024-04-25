@@ -1,2 +1,13 @@
-[Input Directory] ../../src
-[Include Path] [ *.h ./CommonLib/include ./AppliLib/include ./ParseLib/include]
+[Input Directory] {../../src}
+[Include Path] {*.h ./CommonLib/include ./AppliLib/include ./ParseLib/include}
+[Product List]
+{
+- SParser:
+    Location: ../../src
+    Includes: 
+        - ./CommonLib/include
+        - ./AppliLib/include
+        - ./ParseLib/include
+    Sources:
+        - main.c
+}
