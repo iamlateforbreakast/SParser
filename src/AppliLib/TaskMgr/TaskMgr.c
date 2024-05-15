@@ -205,7 +205,7 @@ PUBLIC unsigned int TaskMgr_getSize(TaskMgr * this)
 PRIVATE void* TaskMgr_threadBody(void* p)
 {
   TaskMgr * this = (TaskMgr*)p;
-  TaskMgr* this = (TaskMgr*)Parameter;
+  int nextTask = 0;
 
   TRACE(("Starting thread\n"));
   while (1)
@@ -285,7 +285,7 @@ PRIVATE int TaskMgr_createWorkerThreads(TaskMgr* this)
   for (int i = 0; i < this->nbThreads; ++i)
   {
 #ifndef WIN32
-    int err = pthread_create(&(this->threadHandle[i]), NULL, &TaskMgr_threadWinBody, this);
+    int err = pthread_create(&(this->threadHandle[i]), NULL, &TaskMgr_threadBody, this);
     pthread_detach(this->threadHandle[i]);
 #else
     //this->threadHandle[i] = CreateThread(
