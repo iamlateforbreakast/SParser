@@ -37,6 +37,7 @@ PUBLIC Task* Task_create(void * (*body)(void* p), int nbParams, void ** params)
   this->body = body;
   this->nbParams = nbParams;
   this->params[0] = params[0];
+  this->params[1] = params[1];
   this->isReady = 0;
   this->isRunning = 0;
   this->isCompleted = 0;
