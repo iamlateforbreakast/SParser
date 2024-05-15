@@ -30,7 +30,7 @@ PRIVATE TaskMgr * taskMgr = 0;
 #ifndef WIN32
 PRIVATE void* TaskMgr_threadBody(void* this);
 #else
-DWORD WINAPI TaskMgr_threadBody(LPVOID lpParam);
+PRIVATE VOID CALLBACK TaskMgr_threadWinBody(PTP_CALLBACK_INSTANCE Instance, PVOID Parameter, PTP_WORK Work);
 #endif
 PRIVATE void TaskMgr_waitForThread(TaskMgr* this);
 PRIVATE int TaskMgr_isWorkAvailable(TaskMgr * this);
@@ -41,18 +41,26 @@ PRIVATE int TaskMgr_createWorkerThreads(TaskMgr* this);
 **************************************************/
 struct TaskMgr
 {
+#ifndef WIN32
   Object object;
   int nbThreads;
   Task * taskId[MAX_TASKS];
   int isWorkAvailable;
-#ifndef WIN32
   pthread_t threadHandle[MAX_THREADS];
   pthread_mutex_t mutex;
   pthread_cond_t isWork;
 #else
-  HANDLE threadHandle[MAX_THREADS];
-  DWORD   dwThreadIdArray[MAX_THREADS];
+  Object object;
+  int nbThreads;
+  Task* taskId[MAX_TASKS];
+  int isWorkAvailable;
+  //HANDLE threadHandle[MAX_THREADS];
+  //DWORD   dwThreadIdArray[MAX_THREADS];
   CRITICAL_SECTION cond;
+  TP_CALLBACK_ENVIRON CallBackEnviron;
+  PTP_POOL pool;
+  PTP_CLEANUP_GROUP cleanupgroup;
+  PTP_WORK_CALLBACK workcallback;
 #endif
 };
 
@@ -75,21 +83,37 @@ Class taskMgrClass = {
   @return New taskMgr instance or NULL if failed to allocate.
 ************************************************************/
 PRIVATE TaskMgr* TaskMgr_new()
+#ifdef WIN32
 {
   TaskMgr * this = 0;
   this = (TaskMgr*)Object_new(sizeof(TaskMgr), &taskMgrClass);
+  // Check this != 0
+  InitializeThreadpoolEnvironment(&this->CallBackEnviron);
+  this->pool = CreateThreadpool(NULL);
+  // Need to check pool != NULL
+  SetThreadpoolThreadMaximum(this->pool, 1);
+  SetThreadpoolThreadMinimum(this->pool, MAX_THREADS);
+  this->cleanupgroup = CreateThreadpoolCleanupGroup();
+  SetThreadpoolCallbackPool(&this->CallBackEnviron, this->pool);
+  SetThreadpoolCallbackCleanupGroup(&this->CallBackEnviron, this->cleanupgroup, NULL);
+  this->workcallback = TaskMgr_threadWinBody;
 
-#ifndef WIN32
+  return this;
+}
+#else
+{
+  TaskMgr* this = 0;
+  this = (TaskMgr*)Object_new(sizeof(TaskMgr), &taskMgrClass);
+
   if (pthread_mutex_init(&this->mutex, NULL) != 0) { 
         printf("\n mutex init has failed\n"); 
         return 0; 
     }
   pthread_cond_init(&this->isWork, 0);
   pthread_mutex_lock(&this->mutex);
-#else
-  InitializeCriticalSection(&this->cond);
-  EnterCriticalSection(&this->cond);
-#endif
+  //InitializeCriticalSection(&this->cond);
+  //EnterCriticalSection(&this->cond);
+
 
   this->nbThreads = MAX_THREADS;
   this->isWorkAvailable = 0;
@@ -98,13 +122,12 @@ PRIVATE TaskMgr* TaskMgr_new()
 
   TaskMgr_createWorkerThreads(this);
 
-#ifndef WIN32
   pthread_mutex_unlock(&this->mutex);
-#endif
 
 
   return this;
 }
+#endif
 
 PUBLIC TaskMgr * TaskMgr_getRef()
 {
@@ -126,6 +149,11 @@ PUBLIC void TaskMgr_delete(TaskMgr* this)
 PUBLIC int TaskMgr_start(TaskMgr * this, Task * task)
 {
   int isQueued = 0;
+#ifdef WIN32
+  PTP_WORK work = NULL;
+  work = CreateThreadpoolWork(this->workcallback, (PVOID)task, &this->CallBackEnviron);
+  SubmitThreadpoolWork(work);
+#else
   // Release mutex
   for (int i = 0; i < MAX_TASKS; i++)
   {
@@ -136,7 +164,6 @@ PUBLIC int TaskMgr_start(TaskMgr * this, Task * task)
       break;
     }
   }
-#ifndef WIN32
   if (isQueued) 
   {
     this->isWorkAvailable = 1;
@@ -144,12 +171,6 @@ PUBLIC int TaskMgr_start(TaskMgr * this, Task * task)
     TRACE(("Broadcast\n"));
     pthread_mutex_unlock(&this->mutex);
     TRACE(("Main thread releases mutex\n"));
-  }
-#else
-  if (isQueued) LeaveCriticalSection(&this->cond);
-  for (int i = 0; i < this->nbThreads; ++i)
-  {
-    ResumeThread(this->threadHandle[i]);
   }
 #endif
 
@@ -182,28 +203,22 @@ PUBLIC unsigned int TaskMgr_getSize(TaskMgr * this)
 
 #ifndef WIN32
 PRIVATE void* TaskMgr_threadBody(void* p)
-#else
-DWORD WINAPI TaskMgr_threadBody(LPVOID lpParam)
-#endif
 {
-  int nextTask = -1;
-  Task* task = 0;
-  #ifndef WIN32
   TaskMgr * this = (TaskMgr*)p;
-  #else
-  TaskMgr * this = (TaskMgr*)lpParam;
-  #endif
+  TaskMgr* this = (TaskMgr*)Parameter;
+
   TRACE(("Starting thread\n"));
   while (1)
   {
-    #ifndef WIN32
+  //wait run mutex
+  //pthread_mutex_lock(&lock);
+
+  // wait clock mutex
     pthread_mutex_lock(&this->mutex);
     TRACE(("Worker took mutex\n"));
     while (!this->isWorkAvailable)
       pthread_cond_wait(&(this->isWork), &(this->mutex));
-    #else
-    EnterCriticalSection(&this->cond);
-    #endif
+
   
     TRACE(("Waking up\n"));
     // check for work
@@ -215,19 +230,13 @@ DWORD WINAPI TaskMgr_threadBody(LPVOID lpParam)
         break;
       }
     }
-#ifndef WIN32
     pthread_mutex_unlock(&this->mutex);  
-#else
-    LeaveCriticalSection(&this->cond);
-#endif
+
     TRACE(("Next task %d\n", nextTask));
     if (nextTask == -1)
     {
       // No work to do
-#ifndef WIN32
-#else
-      SuspendThread(GetCurrentThread());
-#endif
+
     }
     else
     {
@@ -240,9 +249,24 @@ DWORD WINAPI TaskMgr_threadBody(LPVOID lpParam)
   //terminate
     
   }
+//return 0;
+/*do
+  {
+      // Wait for display to be available, then lock it.
+      WaitForSingleObject(hScreenMutex, INFINITE);
 
-  return 0;
+      ReleaseMutex(hScreenMutex);
+  }
+  // Repeat while RunMutex is still taken.
+  while (WaitForSingleObject(hRunMutex, 75L) == WAIT_TIMEOUT);*/
 }
+#else
+PRIVATE VOID CALLBACK TaskMgr_threadWinBody(PTP_CALLBACK_INSTANCE Instance, PVOID Parameter, PTP_WORK Work)
+{
+  Task* this = (Task*)Parameter;
+  Task_executeBody(this);
+}
+#endif
 
 PRIVATE void TaskMgr_waitForThread(TaskMgr * this)
 {
@@ -261,16 +285,16 @@ PRIVATE int TaskMgr_createWorkerThreads(TaskMgr* this)
   for (int i = 0; i < this->nbThreads; ++i)
   {
 #ifndef WIN32
-    int err = pthread_create(&(this->threadHandle[i]), NULL, &TaskMgr_threadBody, this);
+    int err = pthread_create(&(this->threadHandle[i]), NULL, &TaskMgr_threadWinBody, this);
     pthread_detach(this->threadHandle[i]);
 #else
-    this->threadHandle[i] = CreateThread(
-      NULL,                         // default security attributes
-      0,                            // use default stack size  
-      TaskMgr_threadBody,           // thread function name
-      this,                         // argument to thread function 
-      CREATE_SUSPENDED,             // use default creation flags 
-      &this->dwThreadIdArray[i]);   // returns the thread identifier 
+    //this->threadHandle[i] = CreateThread(
+    //  NULL,                         // default security attributes
+    //  0,                            // use default stack size  
+    //  TaskMgr_threadBody,           // thread function name
+    //  this,                         // argument to thread function 
+    //  CREATE_SUSPENDED,             // use default creation flags 
+    //  &this->dwThreadIdArray[i]);   // returns the thread identifier 
 #endif
   }
   return 0;
@@ -279,7 +303,6 @@ PRIVATE int TaskMgr_isWorkAvailable(TaskMgr * this)
 {
   int nextTask = -1;
 
-  // check for work
   for (int i = 0; i < MAX_TASKS; i++)
   {
     if (Task_isReady(this->taskId[i]))
