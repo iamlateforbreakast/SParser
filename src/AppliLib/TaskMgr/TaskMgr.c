@@ -11,6 +11,7 @@
 
 #ifndef WIN32
 #include <pthread.h>
+#include <semaphore.h>
 #else
 #include <windows.h>
 #include <conio.h>
@@ -49,6 +50,8 @@ struct TaskMgr
   pthread_t threadHandle[MAX_THREADS];
   pthread_mutex_t mutex;
   pthread_cond_t isWork;
+  sem_t semEmpty;
+  sem_t semFull;
 #else
   Object object;
   int nbThreads;
@@ -96,20 +99,10 @@ PRIVATE TaskMgr* TaskMgr_new()
   this = (TaskMgr*)Object_new(sizeof(TaskMgr), &taskMgrClass);
   if (this == 0) return 0;
 
-  /* Using win32 threadpool
-  InitializeThreadpoolEnvironment(&this->CallBackEnviron);
-  this->pool = CreateThreadpool(NULL);
-  // Need to check pool != NULL
-  SetThreadpoolThreadMaximum(this->pool, 1);
-  SetThreadpoolThreadMinimum(this->pool, MAX_THREADS);
-  this->cleanupgroup = CreateThreadpoolCleanupGroup();
-  SetThreadpoolCallbackPool(&this->CallBackEnviron, this->pool);
-  SetThreadpoolCallbackCleanupGroup(&this->CallBackEnviron, this->cleanupgroup, NULL);
-  this->workcallback = TaskMgr_threadWinBody;
-  */
-
   this->isStopping = 0;
   for (int i = 0; i < MAX_TASKS; ++i) this->taskId[i] = 0;
+
+  // Create nb task empty semaphore
   this->semEmpty = CreateSemaphore(
     NULL,           // default security attributes
     MAX_TASKS,      // all slots are empty
@@ -120,6 +113,8 @@ PRIVATE TaskMgr* TaskMgr_new()
     printf("CreateSemaphore Empty error: %d\n", GetLastError());
     return 0;
   }
+
+  // Create nb task full semaphore
   this->semFull = CreateSemaphore(
     NULL,           // default security attributes
     0,              // no slot is full
@@ -131,6 +126,8 @@ PRIVATE TaskMgr* TaskMgr_new()
     CloseHandle(this->semEmpty);
     return 0;
   }
+
+  // Create Mutex protecting work queue
   this->mutex = CreateMutex(
     NULL,              // default security attributes
     FALSE,             // initially not owned
@@ -140,6 +137,8 @@ PRIVATE TaskMgr* TaskMgr_new()
     printf("CreateMutex error: %d\n", GetLastError());
     return 0;
   }
+
+  // Create all threads
   for (int i = 0; i < MAX_THREADS; i++)
   {
     this->threadHandle[i] = CreateThread(
@@ -162,15 +161,14 @@ PRIVATE TaskMgr* TaskMgr_new()
   TaskMgr* this = 0;
   this = (TaskMgr*)Object_new(sizeof(TaskMgr), &taskMgrClass);
 
+  // sem_init(&this->semFull, 0, MAX_TASKS);
+  // sem_init(&this->semEmpty, MAX_TASKS, MAX_TASKS);
   if (pthread_mutex_init(&this->mutex, NULL) != 0) { 
         printf("\n mutex init has failed\n"); 
         return 0; 
     }
   pthread_cond_init(&this->isWork, 0);
   pthread_mutex_lock(&this->mutex);
-  //InitializeCriticalSection(&this->cond);
-  //EnterCriticalSection(&this->cond);
-
 
   this->nbThreads = MAX_THREADS;
   this->isWorkAvailable = 0;
@@ -186,23 +184,41 @@ PRIVATE TaskMgr* TaskMgr_new()
 }
 #endif
 
+/**********************************************//** 
+  @brief TBD
+  @memberof TaskMgr
+  @param[in] TBD
+  @return TBD
+**************************************************/
 PUBLIC TaskMgr * TaskMgr_getRef()
 {
   if (!taskMgr) taskMgr = TaskMgr_new();
   return taskMgr;
 }
 
+/**********************************************//** 
+  @brief TBD
+  @memberof TaskMgr
+  @param[in] TBD
+  @return TBD
+**************************************************/
 PUBLIC void TaskMgr_delete(TaskMgr* this)
 {
 #ifndef WIN32
+  sem_destroy(&this->semEmpty);
+  sem_destroy(&this->semFull);
   pthread_mutex_destroy(&this->mutex);
   pthread_cond_destroy(&this->isWork);
-#else
 #endif
   Object_deallocate(&this->object);
 }
 
-
+/**********************************************//** 
+  @brief TBD
+  @memberof TaskMgr
+  @param[in] TBD
+  @return TBD
+**************************************************/
 PUBLIC int TaskMgr_start(TaskMgr * this, Task * task)
 {
   int isQueued = 0;
@@ -244,6 +260,7 @@ PUBLIC int TaskMgr_start(TaskMgr * this, Task * task)
   }
   return isQueued;
 #else
+  // sem_wait();
   // Release mutex
   for (int i = 0; i < MAX_TASKS; i++)
   {
@@ -262,6 +279,7 @@ PUBLIC int TaskMgr_start(TaskMgr * this, Task * task)
     pthread_mutex_unlock(&this->mutex);
     TRACE(("Main thread releases mutex\n"));
   }
+  //sem_post
 #endif
 
   return isQueued;
@@ -278,12 +296,23 @@ PUBLIC void TaskMgr_stop(TaskMgr * this)
 }
 
 
-
+/**********************************************//** 
+  @brief TBD
+  @memberof TaskMgr
+  @param[in] TBD
+  @return TBD
+**************************************************/
 PUBLIC void TaskMgr_print(TaskMgr * this)
 {
 
 }
 
+/**********************************************//** 
+  @brief TBD
+  @memberof TaskMgr
+  @param[in] TBD
+  @return TBD
+**************************************************/
 PUBLIC unsigned int TaskMgr_getSize(TaskMgr * this)
 {
   if (this == 0) return sizeof(TaskMgr);
@@ -291,10 +320,17 @@ PUBLIC unsigned int TaskMgr_getSize(TaskMgr * this)
   return sizeof(this);
 }
 
+/**********************************************//** 
+  @brief TBD
+  @memberof TaskMgr
+  @param[in] TBD
+  @return TBD
+**************************************************/
 #ifndef WIN32
 PRIVATE void* TaskMgr_threadBody(void* p)
 {
   TaskMgr * this = (TaskMgr*)p;
+  int nextTask;
   //TaskMgr* this = (TaskMgr*)Parameter;
 
   TRACE(("Starting thread\n"));
@@ -390,6 +426,12 @@ PRIVATE VOID WINAPI TaskMgr_threadWinBody(LPVOID Parameter)
 }
 #endif
 
+/**********************************************//** 
+  @brief TBD
+  @memberof TaskMgr
+  @param[in] TBD
+  @return TBD
+**************************************************/
 PRIVATE void TaskMgr_waitForThread(TaskMgr * this)
 {
   for (int i=0; i<this->nbThreads; ++i)
@@ -400,17 +442,30 @@ PRIVATE void TaskMgr_waitForThread(TaskMgr * this)
   } 
 }
 
+/**********************************************//** 
+  @brief TBD
+  @memberof TaskMgr
+  @param[in] TBD
+  @return TBD
+**************************************************/
 PRIVATE int TaskMgr_createWorkerThreads(TaskMgr* this)
 {
   for (int i = 0; i < this->nbThreads; ++i)
   {
 #ifndef WIN32
-    int err = pthread_create(&(this->threadHandle[i]), NULL, &TaskMgr_threadWinBody, this);
+    int err = pthread_create(&(this->threadHandle[i]), NULL, &TaskMgr_threadBody, this);
     pthread_detach(this->threadHandle[i]);
 #endif
   }
   return 0;
 }
+
+/**********************************************//** 
+  @brief TBD
+  @memberof TaskMgr
+  @param[in] TBD
+  @return TBD
+**************************************************/
 PRIVATE int TaskMgr_isWorkAvailable(TaskMgr * this)
 {
   int nextTask = -1;
