@@ -30,7 +30,7 @@ PRIVATE TaskMgr * taskMgr = 0;
 #ifndef WIN32
 PRIVATE void* TaskMgr_threadBody(void* this);
 #else
-PRIVATE VOID CALLBACK TaskMgr_threadWinBody(PTP_CALLBACK_INSTANCE Instance, PVOID Parameter, PTP_WORK Work);
+PRIVATE VOID WINAPI TaskMgr_threadWinBody(LPVOID Parameter);
 #endif
 PRIVATE void TaskMgr_waitForThread(TaskMgr* this);
 PRIVATE int TaskMgr_isWorkAvailable(TaskMgr * this);
@@ -54,13 +54,20 @@ struct TaskMgr
   int nbThreads;
   Task* taskId[MAX_TASKS];
   int isWorkAvailable;
-  //HANDLE threadHandle[MAX_THREADS];
+  HANDLE threadHandle[MAX_THREADS];
+  DWORD threadId[MAX_THREADS];
+  HANDLE semEmpty;
+  HANDLE semFull;
+  HANDLE mutex;
+  int isStopping;
   //DWORD   dwThreadIdArray[MAX_THREADS];
+  /*
   CRITICAL_SECTION cond;
   TP_CALLBACK_ENVIRON CallBackEnviron;
   PTP_POOL pool;
   PTP_CLEANUP_GROUP cleanupgroup;
   PTP_WORK_CALLBACK workcallback;
+  */
 #endif
 };
 
@@ -87,7 +94,9 @@ PRIVATE TaskMgr* TaskMgr_new()
 {
   TaskMgr * this = 0;
   this = (TaskMgr*)Object_new(sizeof(TaskMgr), &taskMgrClass);
-  // Check this != 0
+  if (this == 0) return 0;
+
+  /* Using win32 threadpool
   InitializeThreadpoolEnvironment(&this->CallBackEnviron);
   this->pool = CreateThreadpool(NULL);
   // Need to check pool != NULL
@@ -97,7 +106,55 @@ PRIVATE TaskMgr* TaskMgr_new()
   SetThreadpoolCallbackPool(&this->CallBackEnviron, this->pool);
   SetThreadpoolCallbackCleanupGroup(&this->CallBackEnviron, this->cleanupgroup, NULL);
   this->workcallback = TaskMgr_threadWinBody;
+  */
 
+  this->isStopping = 0;
+  for (int i = 0; i < MAX_TASKS; ++i) this->taskId[i] = 0;
+  this->semEmpty = CreateSemaphore(
+    NULL,           // default security attributes
+    MAX_TASKS,      // all slots are empty
+    MAX_TASKS,      // maximum count
+    NULL);          // unnamed semaphore
+  if (this->semEmpty == NULL)
+  {
+    printf("CreateSemaphore Empty error: %d\n", GetLastError());
+    return 0;
+  }
+  this->semFull = CreateSemaphore(
+    NULL,           // default security attributes
+    0,              // no slot is full
+    MAX_TASKS,      // maximum count
+    NULL);          // unnamed semaphore
+  if (this->semFull == NULL)
+  {
+    printf("CreateSemaphore Full error: %d\n", GetLastError());
+    CloseHandle(this->semEmpty);
+    return 0;
+  }
+  this->mutex = CreateMutex(
+    NULL,              // default security attributes
+    FALSE,             // initially not owned
+    NULL);             // unnamed mutex
+  if (this->mutex == NULL)
+  {
+    printf("CreateMutex error: %d\n", GetLastError());
+    return 0;
+  }
+  for (int i = 0; i < MAX_THREADS; i++)
+  {
+    this->threadHandle[i] = CreateThread(
+      NULL,                // default security attributes
+      0,                   // default stack size
+      (LPTHREAD_START_ROUTINE)TaskMgr_threadWinBody,
+      (LPVOID)this,                // no thread function arguments
+      0,                   // default creation flags
+      &this->threadId[i]); // receive thread identifier
+    if (this->threadHandle[i] == NULL)
+    {
+      printf("CreateThread error: %d\n", GetLastError());
+      return 0;
+    }
+  }
   return this;
 }
 #else
@@ -150,9 +207,42 @@ PUBLIC int TaskMgr_start(TaskMgr * this, Task * task)
 {
   int isQueued = 0;
 #ifdef WIN32
-  PTP_WORK work = NULL;
+  /* PTP_WORK work = NULL;
   work = CreateThreadpoolWork(this->workcallback, (PVOID)task, &this->CallBackEnviron);
-  SubmitThreadpoolWork(work);
+  SubmitThreadpoolWork(work);*/
+  DWORD dwWaitResult;
+  // wait(this->semEmpty);
+  dwWaitResult = WaitForSingleObject(
+    this->semEmpty,   // handle to semaphore
+    0L);
+  if (dwWaitResult == WAIT_OBJECT_0)
+  {
+    //wait(this->mutex);
+    dwWaitResult = WaitForSingleObject(
+      this->mutex,    // handle to mutex
+      INFINITE);  // no time-out interval
+    if (dwWaitResult == WAIT_OBJECT_0)
+    {
+      /* Place task in buffer */
+      for (int i = 0; i < MAX_TASKS; i++)
+      {
+        if (this->taskId[i] == 0)
+        {
+          this->taskId[i] = task;
+          isQueued = 1;
+          break;
+        }
+      }
+      // signal(this->mutex);
+      ReleaseMutex(this->mutex);
+      //signal(this->semFull);
+    }
+    if (!ReleaseSemaphore(this->semFull, 1, NULL))
+    {
+      printf("ReleaseSemaphore error: %d\n", GetLastError());
+    }
+  }
+  return isQueued;
 #else
   // Release mutex
   for (int i = 0; i < MAX_TASKS; i++)
@@ -205,7 +295,7 @@ PUBLIC unsigned int TaskMgr_getSize(TaskMgr * this)
 PRIVATE void* TaskMgr_threadBody(void* p)
 {
   TaskMgr * this = (TaskMgr*)p;
-  int nextTask = 0;
+  //TaskMgr* this = (TaskMgr*)Parameter;
 
   TRACE(("Starting thread\n"));
   while (1)
@@ -261,10 +351,42 @@ PRIVATE void* TaskMgr_threadBody(void* p)
   while (WaitForSingleObject(hRunMutex, 75L) == WAIT_TIMEOUT);*/
 }
 #else
-PRIVATE VOID CALLBACK TaskMgr_threadWinBody(PTP_CALLBACK_INSTANCE Instance, PVOID Parameter, PTP_WORK Work)
+PRIVATE VOID WINAPI TaskMgr_threadWinBody(LPVOID Parameter)
 {
-  Task* this = (Task*)Parameter;
-  Task_executeBody(this);
+  TaskMgr* this = (TaskMgr*)Parameter;
+  DWORD dwWaitResult;
+  while (1)
+  {
+    dwWaitResult = WaitForSingleObject(
+        this->semFull,   // handle to semaphore
+        INFINITE);       // zero-second time-out interval
+    if (dwWaitResult == WAIT_OBJECT_0)
+    {
+      dwWaitResult = WaitForSingleObject(this->mutex, 0L); // no time-out interval
+      if (dwWaitResult == WAIT_OBJECT_0)
+      {   
+        for (int i = 0; i < MAX_TASKS; i++)
+        {
+          if (Task_isReady(this->taskId[i]))
+          {
+            Task_setRunning(this->taskId[i]);
+            ReleaseMutex(this->mutex);
+            Task_executeBody(this->taskId[i]);
+            Task_setCompleted(this->taskId[i]);
+            break;
+          }
+        }
+      }
+      ReleaseSemaphore(
+        this->semEmpty,  // handle to semaphore
+        1,               // increase count by one
+        NULL);
+    }
+    else if (dwWaitResult == WAIT_FAILED)
+    {
+      //printf("Wait failed %d\n", GetLastError());
+    }
+  }
 }
 #endif
 
@@ -274,8 +396,6 @@ PRIVATE void TaskMgr_waitForThread(TaskMgr * this)
   {
 #ifndef WIN32
     pthread_join(this->threadHandle[i], NULL);
-#else
-    //WaitForMultipleObjects();
 #endif
   } 
 }
@@ -285,16 +405,8 @@ PRIVATE int TaskMgr_createWorkerThreads(TaskMgr* this)
   for (int i = 0; i < this->nbThreads; ++i)
   {
 #ifndef WIN32
-    int err = pthread_create(&(this->threadHandle[i]), NULL, &TaskMgr_threadBody, this);
+    int err = pthread_create(&(this->threadHandle[i]), NULL, &TaskMgr_threadWinBody, this);
     pthread_detach(this->threadHandle[i]);
-#else
-    //this->threadHandle[i] = CreateThread(
-    //  NULL,                         // default security attributes
-    //  0,                            // use default stack size  
-    //  TaskMgr_threadBody,           // thread function name
-    //  this,                         // argument to thread function 
-    //  CREATE_SUSPENDED,             // use default creation flags 
-    //  &this->dwThreadIdArray[i]);   // returns the thread identifier 
 #endif
   }
   return 0;
