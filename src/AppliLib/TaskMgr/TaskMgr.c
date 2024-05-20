@@ -104,8 +104,6 @@ PRIVATE TaskMgr* TaskMgr_new()
   this->nbThreads = MAX_THREADS;
   for (int i = 0; i < MAX_TASKS; ++i) this->taskId[i] = 0;
 
-  //pthread_cond_init(&this->isWork, 0);
-
   // Create Empty and full semaphores
   TaskMgr_initSemaphores(this);
   // Create Mutex protecting work queue
@@ -215,78 +213,58 @@ PUBLIC unsigned int TaskMgr_getSize(TaskMgr * this)
   @param[in] TBD
   @return TBD
 **************************************************/
-#ifndef WIN32
 PRIVATE void* TaskMgr_threadBody(void* p)
 {
   TaskMgr * this = (TaskMgr*)p;
-  int nextTask;
 
-  TRACE(("Starting thread\n"));
   while (1)
   {
-    //wait run mutex
     if (TaskMgr_waitNotEmpty(this))
     {
-      // pthread_mutex_lock(&this->mutex);
       TaskMgr_lock(this);
-      TRACE(("Worker took mutex\n"));  
-      // pthread_mutex_unlock(&this->mutex);
-      
-      for (int i = 0; i < MAX_TASKS; i++)
-      {
-        if (Task_isReady(this->taskId[i]))
-        {
-          Task_setRunning(this->taskId[i]);
-          TaskMgr_unlock(this);
-          Task_executeBody(this->taskId[i]);
-          Task_setCompleted(this->taskId[i]);
 
-          break;
-        }
-      }
-    }
-    //while (!this->isWorkAvailable)
-    //pthread_cond_wait(&(this->isWork), &(this->mutex));
-  }
-}
-#else
-PRIVATE VOID WINAPI TaskMgr_threadWinBody(LPVOID Parameter)
-{
-  TaskMgr* this = (TaskMgr*)Parameter;
-  DWORD dwWaitResult;
-  while (1)
-  {
-    dwWaitResult = WaitForSingleObject(
-        this->semFull,   // handle to semaphore
-        INFINITE);       // zero-second time-out interval
-    if (dwWaitResult == WAIT_OBJECT_0)
-    {
-      //dwWaitResult = WaitForSingleObject(this->mutex, 0L); // no time-out interval
-      TaskMgr_lock(this);
-      for (int i = 0; i < MAX_TASKS; i++)
+      int nextTask = TaskMgr_findAvailableTask(this);
+      TaskMgr_unlock(this);
+      
+      if (nextTask >= 0)
       {
-        if (Task_isReady(this->taskId[i]))
-        {
-          Task_setRunning(this->taskId[i]);
-          ReleaseMutex(this->mutex);
-          Task_executeBody(this->taskId[i]);
-          Task_setCompleted(this->taskId[i]);
-          break;
+        Task_executeBody(this->taskId[nextTask]);
+        TaskMgr_signalNotFull(this);
+
         }
       }
-      /*ReleaseSemaphore(
-        this->semEmpty,  // handle to semaphore
-        1,               // increase count by one
-        NULL);*/
-      TaskMgr_signalNotFull(this);
-    }
-    else if (dwWaitResult == WAIT_FAILED)
+    else
     {
       //printf("Wait failed %d\n", GetLastError());
     }
   }
 }
-#endif
+
+PRIVATE VOID WINAPI TaskMgr_threadWinBody(LPVOID Parameter)
+{
+  TaskMgr* this = (TaskMgr*)Parameter;
+
+  while (1)
+  {
+    if (TaskMgr_waitNotEmpty(this))
+    {
+      TaskMgr_lock(this);
+
+      int nextTask = TaskMgr_findAvailableTask(this);
+          ReleaseMutex(this->mutex);
+      if (nextTask>=0)
+      {
+        Task_executeBody(this->taskId[nextTask]);
+        TaskMgr_signalNotFull(this);
+        }
+      }
+    else
+    {
+      //printf("Wait failed %d\n", GetLastError());
+    }
+  }
+}
+
 
 /**********************************************//** 
   @brief TBD
