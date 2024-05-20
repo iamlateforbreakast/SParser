@@ -34,9 +34,11 @@ PRIVATE void* TaskMgr_threadBody(void* this);
 PRIVATE VOID WINAPI TaskMgr_threadWinBody(LPVOID Parameter);
 #endif
 PRIVATE void TaskMgr_waitForThread(TaskMgr* this);
-PRIVATE int TaskMgr_isWorkAvailable(TaskMgr * this);
+PRIVATE int TaskMgr_findAvailableTask(TaskMgr * this);
 PRIVATE int TaskMgr_createWorkerThreads(TaskMgr* this);
-
+PRIVATE void TaskMgr_waitNotFull(TaskMgr * this);
+PRIVATE void TaskMgr_waitNotEmpty(TaskMgr * this);
+PRIVATE void TaskMgr_signalNotFull(TaskMgr * this);
 /**********************************************//**
   @class TaskMgr
 **************************************************/
@@ -48,10 +50,11 @@ struct TaskMgr
   Task * taskId[MAX_TASKS];
   int isWorkAvailable;
   pthread_t threadHandle[MAX_THREADS];
-  pthread_mutex_t mutex;
-  pthread_cond_t isWork;
+  //pthread_cond_t isWork;
   sem_t semEmpty;
   sem_t semFull;
+  pthread_mutex_t mutex;
+  int isStopping;
 #else
   Object object;
   int nbThreads;
@@ -63,14 +66,6 @@ struct TaskMgr
   HANDLE semFull;
   HANDLE mutex;
   int isStopping;
-  //DWORD   dwThreadIdArray[MAX_THREADS];
-  /*
-  CRITICAL_SECTION cond;
-  TP_CALLBACK_ENVIRON CallBackEnviron;
-  PTP_POOL pool;
-  PTP_CLEANUP_GROUP cleanupgroup;
-  PTP_WORK_CALLBACK workcallback;
-  */
 #endif
 };
 
@@ -103,6 +98,7 @@ PRIVATE TaskMgr* TaskMgr_new()
   for (int i = 0; i < MAX_TASKS; ++i) this->taskId[i] = 0;
 
   // Create nb task empty semaphore
+  // TaskMgr_createSemaphore(TaskMgr * this, &this->semEmpty, MAX_TASK);
   this->semEmpty = CreateSemaphore(
     NULL,           // default security attributes
     MAX_TASKS,      // all slots are empty
@@ -161,14 +157,14 @@ PRIVATE TaskMgr* TaskMgr_new()
   TaskMgr* this = 0;
   this = (TaskMgr*)Object_new(sizeof(TaskMgr), &taskMgrClass);
 
-  // sem_init(&this->semFull, 0, MAX_TASKS);
-  // sem_init(&this->semEmpty, MAX_TASKS, MAX_TASKS);
+  sem_init(&this->semFull, 0, MAX_TASKS);
+  sem_init(&this->semEmpty, MAX_TASKS, MAX_TASKS);
   if (pthread_mutex_init(&this->mutex, NULL) != 0) { 
         printf("\n mutex init has failed\n"); 
         return 0; 
     }
-  pthread_cond_init(&this->isWork, 0);
-  pthread_mutex_lock(&this->mutex);
+  //pthread_cond_init(&this->isWork, 0);
+  //pthread_mutex_lock(&this->mutex);
 
   this->nbThreads = MAX_THREADS;
   this->isWorkAvailable = 0;
@@ -177,7 +173,7 @@ PRIVATE TaskMgr* TaskMgr_new()
 
   TaskMgr_createWorkerThreads(this);
 
-  pthread_mutex_unlock(&this->mutex);
+  //pthread_mutex_unlock(&this->mutex);
 
 
   return this;
@@ -208,7 +204,7 @@ PUBLIC void TaskMgr_delete(TaskMgr* this)
   sem_destroy(&this->semEmpty);
   sem_destroy(&this->semFull);
   pthread_mutex_destroy(&this->mutex);
-  pthread_cond_destroy(&this->isWork);
+  //pthread_cond_destroy(&this->isWork);
 #endif
   Object_deallocate(&this->object);
 }
@@ -222,10 +218,13 @@ PUBLIC void TaskMgr_delete(TaskMgr* this)
 PUBLIC int TaskMgr_start(TaskMgr * this, Task * task)
 {
   int isQueued = 0;
+  // TaskMgr_waitNotFull(this, &this->semEmpty, 0);
+  // TaskMgr_lock(this, &this->mutex);
+  // 
+  // TaskMgr_unlock(this, &this->mutex);
+  // TaskMgr_signalNotEmpty(this, &this->semFull, 0);
+  //
 #ifdef WIN32
-  /* PTP_WORK work = NULL;
-  work = CreateThreadpoolWork(this->workcallback, (PVOID)task, &this->CallBackEnviron);
-  SubmitThreadpoolWork(work);*/
   DWORD dwWaitResult;
   // wait(this->semEmpty);
   dwWaitResult = WaitForSingleObject(
@@ -461,12 +460,13 @@ PRIVATE int TaskMgr_createWorkerThreads(TaskMgr* this)
 }
 
 /**********************************************//** 
-  @brief TBD
+  @brief Find the next available task index in queue.
+  @private
   @memberof TaskMgr
   @param[in] TBD
-  @return TBD
+  @return -1 if queue is empty.
 **************************************************/
-PRIVATE int TaskMgr_isWorkAvailable(TaskMgr * this)
+PRIVATE int TaskMgr_findAvailableTask(TaskMgr * this)
 {
   int nextTask = -1;
 
@@ -483,3 +483,28 @@ PRIVATE int TaskMgr_isWorkAvailable(TaskMgr * this)
 
   return nextTask;
 }
+
+PRIVATE void TaskMgr_waitNotFullWin32(TaskMgr * this)
+{
+}
+
+PRIVATE void TaskMgr_waitNotFullLinux(TaskMgr * this)
+{
+}
+
+PRIVATE void TaskMgr_waitNotEmptyWin32(TaskMgr * this)
+{
+
+}
+
+PRIVATE void TaskMgr_waitNotEmptyLinux(TaskMgr * this)
+{
+
+}
+
+PRIVATE void TaskMgr_signalNotFull(TaskMgr * this)
+{
+
+}
+
+PRIVATE void TaskMgr_signalNotEmpty();
