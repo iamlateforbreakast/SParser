@@ -1,3 +1,4 @@
+
 /* UT_TaskMgr_01.c */
 #include "Task.h"
 #include "TaskMgr.h"
@@ -55,9 +56,9 @@ int msleep(long msec)
 }
 #endif
 
-pthread_t thrId;
-pthread_cond_t cond;
-pthread_mutex_t mutex;
+//pthread_t thrId;
+//pthread_cond_t cond;
+//pthread_mutex_t mutex;
 int somethingToBeDone = 0;
 
 void* taskBody(void* params)
@@ -86,7 +87,7 @@ int step1()
 	Task * f;
   };
 
-  Task * testTasks[4];
+  Task * testTasks[5];
   int params[][2] = { { 1, 50 }, { 2, 20 }, { 3, 40 }, {4, 20}, {5, 50} };
 
   for (int i=0;i<5;++i) testTasks[i] = Task_create(&taskBody, 1, (void **)&params[i]);
@@ -97,7 +98,7 @@ int step1()
 
   int evtIdx = 0;
   int isPassed = 1;
-  int clock = 0;
+  int clock = 0; // In 100 ms slices
 
 
 
@@ -107,7 +108,7 @@ int step1()
   {
 	PRINT(("Main thread clock: %d ms\n", clock * 100));
 	msleep(100);
-	while ((evtIdx<(sizeof(events)/sizeof(struct event))) && (clock<events[evtIdx].t))
+	while ((evtIdx<(sizeof(events)/sizeof(struct event))) && (clock==events[evtIdx].t))
 	{
 	  Task_start(events[evtIdx].f);
 	  evtIdx++;
@@ -124,38 +125,6 @@ int step1()
   return isPassed;
 }
 
-void * thread(void*)
-{
-  PRINT(("Thread created\n"));
-  pthread_mutex_lock(&mutex);
-  PRINT(("Thread takes mutex\n"));
-  while (!somethingToBeDone)
-    pthread_cond_wait(&cond, &mutex);
-  PRINT(("Doing stuff\n"));
-  somethingToBeDone = 0;
-  pthread_mutex_unlock(&mutex);
-}
-
-int step2()
-{
-  pthread_mutex_init(&mutex, 0);
-  pthread_cond_init(&cond,0);
-
-  pthread_mutex_lock(&mutex);
-  PRINT(("Main thread takes mutex\n"));
-  int err = pthread_create(&thrId, NULL, &thread, 0);
-  pthread_detach(thrId);
-
-  somethingToBeDone = 1;
-  pthread_cond_broadcast(&cond);
-  PRINT(("Main thread broaadcast\n"));
-  pthread_mutex_unlock(&mutex);
-  PRINT(("Main thread release mutex\n"));
-  msleep(1000);
-
-  pthread_cond_destroy(&cond);
-  pthread_mutex_destroy(&mutex);
-}
 
 int main()
 {
