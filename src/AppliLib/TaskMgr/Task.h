@@ -7,11 +7,15 @@
 typedef struct Task Task;
 
 PUBLIC Task* Task_create(void * (*body)(void* p), int nbParams, void ** params);
-PUBLIC void Task_destroy(Task* this);
-PUBLIC void Task_start(Task* this);
-PUBLIC int Task_isReady(Task* this);
-PUBLIC int Task_isRunning(Task* this);
-PUBLIC void Task_destroy(Task* this);
-PUBLIC void Task_executeBody(Task* this);
+PUBLIC void Task_destroy(Task * this);
+PUBLIC void Task_start(Task * this);
+PUBLIC int Task_isReady(Task * this);
+PUBLIC void Task_setReady(Task * this);
+PUBLIC int Task_isRunning(Task * this);
+PUBLIC void Task_setRunning(Task * this);
+PUBLIC int Task_isCompleted(Task * this);
+PUBLIC void Task_setCompleted(Task * this);
+PUBLIC void Task_destroy(Task * this);
+PUBLIC void Task_executeBody(Task * this);
 
 #endif /* _TASK_H_ */

@@ -18,8 +18,8 @@
 #include <process.h>
 #endif
 
-#define MAX_TASKS (5)
-#define MAX_THREADS (2)
+#define MAX_TASKS (10)
+#define MAX_THREADS (5)
 
 #define DEBUG (0)
 
@@ -55,7 +55,6 @@ struct TaskMgr
   Object object;
   int nbThreads;
   Task * taskId[MAX_TASKS];
-  int isWorkAvailable;
   pthread_t threadHandle[MAX_THREADS];
   //pthread_cond_t isWork;
   sem_t semEmpty;
@@ -105,15 +104,8 @@ PRIVATE TaskMgr* TaskMgr_new()
   this->nbThreads = MAX_THREADS;
   for (int i = 0; i < MAX_TASKS; ++i) this->taskId[i] = 0;
 
-#ifndef WIN32
   //pthread_cond_init(&this->isWork, 0);
-  //pthread_mutex_lock(&this->mutex);
 
-  this->isWorkAvailable = 0;
-
-  //pthread_mutex_unlock(&this->mutex);
-  }
-#endif
   // Create Empty and full semaphores
   TaskMgr_initSemaphores(this);
   // Create Mutex protecting work queue
@@ -145,10 +137,6 @@ PUBLIC TaskMgr * TaskMgr_getRef()
 **************************************************/
 PUBLIC void TaskMgr_delete(TaskMgr* this)
 {
-#ifndef WIN32
-  
-  //pthread_cond_destroy(&this->isWork);
-#endif
   TaskMgr_destroySemaphores(this);
   TaskMgr_destroyLock(this);
   Object_deallocate(&this->object);
@@ -168,16 +156,16 @@ PUBLIC int TaskMgr_start(TaskMgr * this, Task * task)
   {
     TaskMgr_lock(this);
 
-      /* Place task in buffer */
-      for (int i = 0; i < MAX_TASKS; i++)
+    /* Place task in buffer */
+    for (int i = 0; i < MAX_TASKS; i++)
+    {
+      if (this->taskId[i] == 0)
       {
-        if (this->taskId[i] == 0)
-        {
-          this->taskId[i] = task;
-          isQueued = 1;
-          break;
-        }
+        this->taskId[i] = task;
+        isQueued = 1;
+        break;
       }
+    }
 
     TaskMgr_unlock(this);
     TaskMgr_signalNotEmpty(this);
@@ -232,60 +220,34 @@ PRIVATE void* TaskMgr_threadBody(void* p)
 {
   TaskMgr * this = (TaskMgr*)p;
   int nextTask;
-  //TaskMgr* this = (TaskMgr*)Parameter;
 
   TRACE(("Starting thread\n"));
   while (1)
   {
-  //wait run mutex
-  //pthread_mutex_lock(&lock);
-
-  // wait clock mutex
-    pthread_mutex_lock(&this->mutex);
-    TRACE(("Worker took mutex\n"));
-    while (!this->isWorkAvailable)
-      pthread_cond_wait(&(this->isWork), &(this->mutex));
-
-  
-    TRACE(("Waking up\n"));
-    // check for work
-    for (int i = 0; i < MAX_TASKS; i++)
+    //wait run mutex
+    if (TaskMgr_waitNotEmpty(this))
     {
-      if (Task_isReady(this->taskId[i]))
+      // pthread_mutex_lock(&this->mutex);
+      TaskMgr_lock(this);
+      TRACE(("Worker took mutex\n"));  
+      // pthread_mutex_unlock(&this->mutex);
+      
+      for (int i = 0; i < MAX_TASKS; i++)
       {
-        nextTask = i;
-        break;
+        if (Task_isReady(this->taskId[i]))
+        {
+          Task_setRunning(this->taskId[i]);
+          TaskMgr_unlock(this);
+          Task_executeBody(this->taskId[i]);
+          Task_setCompleted(this->taskId[i]);
+
+          break;
+        }
       }
     }
-    pthread_mutex_unlock(&this->mutex);  
-
-    TRACE(("Next task %d\n", nextTask));
-    if (nextTask == -1)
-    {
-      // No work to do
-
-    }
-    else
-    {
-      // Something to do
-      Task_executeBody(this->taskId[nextTask]);
-    }
-    nextTask = -1;
-  //wait run mutex with timeout
-
-  //terminate
-    
+    //while (!this->isWorkAvailable)
+    //pthread_cond_wait(&(this->isWork), &(this->mutex));
   }
-//return 0;
-/*do
-  {
-      // Wait for display to be available, then lock it.
-      WaitForSingleObject(hScreenMutex, INFINITE);
-
-      ReleaseMutex(hScreenMutex);
-  }
-  // Repeat while RunMutex is still taken.
-  while (WaitForSingleObject(hRunMutex, 75L) == WAIT_TIMEOUT);*/
 }
 #else
 PRIVATE VOID WINAPI TaskMgr_threadWinBody(LPVOID Parameter)
@@ -301,15 +263,15 @@ PRIVATE VOID WINAPI TaskMgr_threadWinBody(LPVOID Parameter)
     {
       //dwWaitResult = WaitForSingleObject(this->mutex, 0L); // no time-out interval
       TaskMgr_lock(this);
-        for (int i = 0; i < MAX_TASKS; i++)
+      for (int i = 0; i < MAX_TASKS; i++)
+      {
+        if (Task_isReady(this->taskId[i]))
         {
-          if (Task_isReady(this->taskId[i]))
-          {
-            Task_setRunning(this->taskId[i]);
-            ReleaseMutex(this->mutex);
-            Task_executeBody(this->taskId[i]);
-            Task_setCompleted(this->taskId[i]);
-            break;
+          Task_setRunning(this->taskId[i]);
+          ReleaseMutex(this->mutex);
+          Task_executeBody(this->taskId[i]);
+          Task_setCompleted(this->taskId[i]);
+          break;
         }
       }
       /*ReleaseSemaphore(
@@ -355,9 +317,9 @@ PRIVATE int TaskMgr_createWorkerThreads(TaskMgr* this)
 #ifndef WIN32
     int err = pthread_create(&(this->threadHandle[i]), NULL, &TaskMgr_threadBody, this);
     pthread_detach(this->threadHandle[i]);
-    if (this->threadHandle[i] == NULL)
+    if (this->threadHandle[i] == 0)
     {
-      printf("CreateThread error: %d\n", GetLastError());
+      printf("CreateThread error.\n");
       return 0;
     }
 #else
@@ -392,11 +354,9 @@ PRIVATE int TaskMgr_findAvailableTask(TaskMgr * this)
     if (Task_isReady(this->taskId[i]))
     {
       nextTask = i;
-      this->isWorkAvailable = 1;
       break;
     }
   }
-  if (nextTask == -1) this->isWorkAvailable = 0;
 
   return nextTask;
 }
@@ -411,13 +371,13 @@ PRIVATE int TaskMgr_initSemaphores(TaskMgr* this)
   int isSuccessful = 1;
 #ifndef WIN32
   // Create nb task empty semaphore
-  if (sem_init(&this->semEmpty, MAX_TASKS, MAX_TASKS))
+  if (sem_init(&this->semEmpty, 0, MAX_TASKS))
   {
     printf("CreateSemaphore Empty error.\n");
     isSuccessful = 0;
   }
   // Create nb task full semaphore
-  if (sem_init(&this->semFull, 0, MAX_TASKS))
+  if (sem_init(&this->semFull, 0, 0))
   {
     printf("CreateSemaphore Full error.\n");
     isSuccessful = 0;
@@ -464,6 +424,7 @@ PRIVATE int TaskMgr_waitNotFull(TaskMgr * this)
 {
   int isSuccessful = 0;
 #ifndef WIN32
+  isSuccessful = !sem_wait(&this->semEmpty);
 #else
   DWORD dwWaitResult = WaitForSingleObject(this->semEmpty, 0L);
   isSuccessful = (dwWaitResult == WAIT_OBJECT_0);
@@ -480,6 +441,7 @@ PRIVATE int TaskMgr_waitNotEmpty(TaskMgr * this)
 {
   int isSuccessful = 0;
 #ifndef WIN32
+  isSuccessful = !sem_wait(&this->semFull);
 #else
   DWORD dwWaitResult = WaitForSingleObject(this->semFull, INFINITE);
   isSuccessful = (dwWaitResult == WAIT_OBJECT_0);
@@ -495,6 +457,7 @@ PRIVATE int TaskMgr_signalNotFull(TaskMgr * this)
 {
   int isSuccessful = 0;
 #ifndef WIN32
+  isSuccessful = !sem_post(&this->semEmpty);
 #else
   isSuccessful = !ReleaseSemaphore(this->semEmpty, 1, NULL);
 #endif
@@ -511,6 +474,7 @@ PRIVATE int TaskMgr_signalNotEmpty(TaskMgr * this)
   int isSuccessful = 0;
 
 #ifndef WIN32
+  isSuccessful = !sem_post(&this->semFull);
 #else
   isSuccessful = !ReleaseSemaphore(this->semFull, 1, NULL);
 #endif
