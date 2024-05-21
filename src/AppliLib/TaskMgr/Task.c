@@ -8,7 +8,7 @@
 /* Max number of params for body of callback */
 #define MAX_PARAMS (5)
 
-PRIVATE TaskMgr* taskMgr = 0;
+PRIVATE TaskMgr* Task_taskMgr = 0;
 
 /**********************************************//**
   @class TaskMgr
@@ -34,13 +34,12 @@ PUBLIC Task* Task_create(void * (*body)(void* p), int nbParams, void ** params)
 {
   Task* this = 0;
 
-  if (taskMgr == 0) taskMgr = TaskMgr_getRef();
+  if (Task_taskMgr == 0) Task_taskMgr = TaskMgr_getRef();
 
   this = (Task*)Memory_alloc(sizeof(Task));
   this->body = body;
   this->nbParams = nbParams;
-  this->params[0] = params[0];
-  this->params[1] = params[1];
+  for (int i = 0; i < this->nbParams; ++i) this->params[i] = params[i];
   this->isReady = 0;
   this->isRunning = 0;
   this->isCompleted = 0;
@@ -140,7 +139,7 @@ PUBLIC void Task_start(Task* this)
   this->isReady = 1;
   this->isRunning = 0;
   this->isCompleted = 0;
-  TaskMgr_start(taskMgr, this);
+  TaskMgr_start(Task_taskMgr, this);
 }
 
 /********************************************************//**
