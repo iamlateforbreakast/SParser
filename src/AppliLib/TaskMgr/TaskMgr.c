@@ -28,11 +28,6 @@ PRIVATE TaskMgr * taskMgr = 0;
 /**********************************************//**
   @private
 **************************************************/
-#ifndef WIN32
-PRIVATE void* TaskMgr_threadBody(void* this);
-#else
-PRIVATE VOID WINAPI TaskMgr_threadWinBody(LPVOID Parameter);
-#endif
 PRIVATE void TaskMgr_waitForThread(TaskMgr* this);
 PRIVATE int TaskMgr_findAvailableTask(TaskMgr * this);
 PRIVATE int TaskMgr_createWorkerThreads(TaskMgr* this);
@@ -46,6 +41,10 @@ PRIVATE int TaskMgr_waitNotFull(TaskMgr* this);
 PRIVATE int TaskMgr_waitNotEmpty(TaskMgr* this);
 PRIVATE int TaskMgr_signalNotEmpty(TaskMgr* this);
 PRIVATE int TaskMgr_signalNotFull(TaskMgr* this);
+PRIVATE void* TaskMgr_threadBody(void* this);
+#ifndef WIN32
+PRIVATE VOID WINAPI TaskMgr_threadWinBody(LPVOID Parameter);
+#endif
 /**********************************************//**
   @class TaskMgr
 **************************************************/
@@ -117,10 +116,9 @@ PRIVATE TaskMgr* TaskMgr_new()
 
 
 /**********************************************//** 
-  @brief TBD
+  @brief Get reference to singleton TaskMgr.
   @memberof TaskMgr
-  @param[in] TBD
-  @return TBD
+  @return Reference to the TaskMgr.
 **************************************************/
 PUBLIC TaskMgr * TaskMgr_getRef()
 {
@@ -172,14 +170,20 @@ PUBLIC int TaskMgr_start(TaskMgr * this, Task * task)
   return isQueued;
 }
 
+/**********************************************//**
+  @brief Request all worker threads to stop.
+  @memberof TaskMgr
+  @return 1 if successful.
+**************************************************/
 PUBLIC void TaskMgr_stop(TaskMgr * this)
 {
-  //Mutex_release(&this->runMutex);
+  this->isStopping = 1;
   while (this->nbThreads > 0)
   {
-    TaskMgr_waitForThread(this);
+    TaskMgr_signalNotEmpty(this);
     this->nbThreads--;
   }
+  TaskMgr_waitForThread(this);
 }
 
 
@@ -221,14 +225,15 @@ PRIVATE void* TaskMgr_threadBody(void* p)
   {
     if (TaskMgr_waitNotEmpty(this))
     {
+      if (this->isStopping) return 0; // Terminate the worker thread
       TaskMgr_lock(this);
-
       int nextTask = TaskMgr_findAvailableTask(this);
       TaskMgr_unlock(this);
       
       if (nextTask >= 0)
       {
         Task_executeBody(this->taskId[nextTask]);
+        this->taskId[nextTask] = 0;
         TaskMgr_signalNotFull(this);
 
         }
@@ -242,29 +247,8 @@ PRIVATE void* TaskMgr_threadBody(void* p)
 
 PRIVATE VOID WINAPI TaskMgr_threadWinBody(LPVOID Parameter)
 {
-  TaskMgr* this = (TaskMgr*)Parameter;
-
-  while (1)
-  {
-    if (TaskMgr_waitNotEmpty(this))
-    {
-      TaskMgr_lock(this);
-
-      int nextTask = TaskMgr_findAvailableTask(this);
-          ReleaseMutex(this->mutex);
-      if (nextTask>=0)
-      {
-        Task_executeBody(this->taskId[nextTask]);
-        TaskMgr_signalNotFull(this);
-        }
-      }
-    else
-    {
-      //printf("Wait failed %d\n", GetLastError());
-    }
-  }
+  TaskMgr_threadBody((void*)Parameter);
 }
-
 
 /**********************************************//** 
   @brief TBD
@@ -274,12 +258,14 @@ PRIVATE VOID WINAPI TaskMgr_threadWinBody(LPVOID Parameter)
 **************************************************/
 PRIVATE void TaskMgr_waitForThread(TaskMgr * this)
 {
+#ifndef WIN32
   for (int i=0; i<this->nbThreads; ++i)
   {
-#ifndef WIN32
     pthread_join(this->threadHandle[i], NULL);
+  }
+#else
+  WaitForMultipleObjects(MAX_THREADS, this->threadHandle, TRUE, INFINITE);
 #endif
-  } 
 }
 
 /**********************************************//** 
@@ -289,7 +275,8 @@ PRIVATE void TaskMgr_waitForThread(TaskMgr * this)
 **************************************************/
 PRIVATE int TaskMgr_createWorkerThreads(TaskMgr* this)
 {
-  int result = 0;
+  int isSuccessful = 1;
+
   for (int i = 0; i < this->nbThreads; ++i)
   {
 #ifndef WIN32
