@@ -1,11 +1,11 @@
 /* SQLite_test.c */
 #include "sqlite3.h"
 #include "Object.h"
+#include "Debug.h"
 
 typedef enum
 {
-  PROPERTY_object = 1,
-  PROPERTY_content,
+  PROPERTY_content=1,
   PROPERTY_isOwner,
   PROPERTY_size,
   NB_PROPERTIES
@@ -13,7 +13,7 @@ typedef enum
 
 typedef struct MyObject MyObject;
 typedef struct DataAccess DataAccess;
-typedef void* (*Allocate)();
+typedef void* (*Allocate)(void *);
 typedef void (*Deallocate)(Object*);
 typedef void (*Setter)(Object*, MyObjectProperty p, void*);
 typedef void* (*Getter)(Object*, MyObjectProperty p);
@@ -72,7 +72,7 @@ MyObject* MyObject_new(DataAccess * data)
   MyObject* this = (MyObject*)Object_new(sizeof(MyObject), &myObjectClass);;
   
   this->data = data;
-  this->data->alloc();
+  this->data->alloc(data->info);
   //data->set(OBJECT, PROPERTY_object);
   //data->addProperty(OBJECT, PROPERTY_content);
 
@@ -97,11 +97,17 @@ int MyObject_getSize(MyObject* this)
 void * SQLite_alloc(void * info)
 {
   char* sqlCreate;
-  //int result;
-  //char* err_msg;
-  sqlite3* db = (sqlite3*)((struct SQLite_info*)info)->db;
+  int result;
+  char* err_msg=0;
+  sqlite3* db = (sqlite3*)(((struct SQLite_info*)info)->db);
 
-  sqlCreate = "INSERT INTO MyObjects VALUES(0,0,0);";
+  sqlCreate = "INSERT INTO MyObject VALUES(NULL,0,0,0);";
+  result = sqlite3_exec(db, sqlCreate, 0, 0, &err_msg);
+  if (result != SQLITE_OK) 
+  {
+    PRINT(("SQL Error: %s\n", err_msg));
+    //sqlite3_free(err_msg);
+  }
   ((struct SQLite_info*)info)->id = (int)sqlite3_last_insert_rowid(db);
 
   return 0;
@@ -116,7 +122,7 @@ void SQLite_dealloc(MyObject * object)
   sqlite3* db = (sqlite3*)((struct SQLite_info*)((MyObject*)object)->data->info)->db;
   int id = ((struct SQLite_info*)((MyObject*)object)->data->info)->id;
 
-  sqlDelete = "DELETE FROM MyObjects VALUES(0,0,0) WHERE Id=?;";
+  sqlDelete = "DELETE FROM MyObject WHERE Id=?;";
   sqlite3_prepare_v2(db, sqlDelete, -1, &stmt, NULL);
   sqlite3_bind_int(stmt, 1, id);
   sqlite3_step(stmt);
@@ -126,24 +132,37 @@ void SQLite_dealloc(MyObject * object)
 
 void SQLite_setProperty(Object* object, MyObjectProperty p, void * value)
 {
-  // data.set
-  // "INSERT INTO Friends(Name) VALUES ('Tom');"
   char* sqlInsert;
   int result;
   char* err_msg;
+  sqlite3_stmt* stmt;
   sqlite3* db = (sqlite3*)((struct SQLite_info *)((MyObject*)object)->data->info)->db;
+  int id = ((struct SQLite_info*)((MyObject*)object)->data->info)->id;
+
   switch (p) {
     case PROPERTY_content:
-      sqlInsert = "INSERT INTO MyObjects(content) VALUES (5);";
-      result = sqlite3_exec(db, sqlInsert, 0, 0, &err_msg);
+      sqlInsert = "UPDATE MyObject SET content = ? WHERE id = ?;";
+      sqlite3_prepare_v2(db, sqlInsert, -1, &stmt, NULL);
+      sqlite3_bind_int(stmt, 1, (int)value);
+      sqlite3_bind_int(stmt, 2, id);
+      sqlite3_step(stmt);
+      sqlite3_finalize(stmt);
       break;
     case PROPERTY_isOwner:
-      sqlInsert = "INSERT INTO MyObjects(isOwner) VALUES (1);";
-      result = sqlite3_exec(db, sqlInsert, 0, 0, &err_msg);
+      sqlInsert = "UPDATE MyObject SET isOwner = ? WHERE Id = ?;";
+      sqlite3_prepare_v2(db, sqlInsert, -1, &stmt, NULL);
+      sqlite3_bind_int(stmt, 1, (int)value);
+      sqlite3_bind_int(stmt, 2, id);
+      sqlite3_step(stmt);
+      sqlite3_finalize(stmt);
       break;
     case PROPERTY_size:
-      sqlInsert = "INSERT INTO MyObjects(size) VALUES (10);";
-      result = sqlite3_exec(db, sqlInsert, 0, 0, &err_msg);
+      sqlInsert = "UPDATE MyObject SET size = ? WHERE Id = ?;";
+      sqlite3_prepare_v2(db, sqlInsert, -1, &stmt, NULL);
+      sqlite3_bind_int(stmt, 1, (int)value);
+      sqlite3_bind_int(stmt, 2, id);
+      sqlite3_step(stmt);
+      sqlite3_finalize(stmt);
       break;
     default:
       break;
@@ -153,38 +172,44 @@ void SQLite_setProperty(Object* object, MyObjectProperty p, void * value)
 void* SQLite_getProperty(Object* object, MyObjectProperty p)
 {
   char* sqlQuery;
-  //int result;
+  int result;
   //char* err_msg;
   sqlite3_stmt* stmt;
   sqlite3* db = (sqlite3*)((struct SQLite_info*)((MyObject*)object)->data->info)->db;
+  int id = ((struct SQLite_info*)((MyObject*)object)->data->info)->id;
   switch (p) {
     case PROPERTY_content:
-      sqlQuery = "SELECT * FROM MyObjects WHERE id=?";
+      sqlQuery = "SELECT content FROM MyObject WHERE id=?";
       sqlite3_prepare_v2(db, sqlQuery, -1, &stmt, NULL);
-      sqlite3_bind_int(stmt, 1, 3);
+      sqlite3_bind_int(stmt, 1, id);
 
-      while (sqlite3_step(stmt) != SQLITE_DONE) {
-        int i;
-
-        for (i = 0; i < 3; i++)
-        {
-          switch (sqlite3_column_type(stmt, i))
-          {
-          case (SQLITE3_TEXT):
-            printf("%s, ", sqlite3_column_text(stmt, i));
-            break;
-          case (SQLITE_INTEGER):
-            printf("%d, ", sqlite3_column_int(stmt, i));
-            break;
-          case (SQLITE_FLOAT):
-            printf("%g, ", sqlite3_column_double(stmt, i));
-            break;
-          default:
-            break;
-          }
-        }
-      }
+      sqlite3_step(stmt);
+      result = sqlite3_column_int(stmt, 0);
       sqlite3_finalize(stmt);
+      return result;
+      break;
+    case PROPERTY_isOwner:
+      sqlQuery = "SELECT isOwner FROM MyObject WHERE id=?";
+      sqlite3_prepare_v2(db, sqlQuery, -1, &stmt, NULL);
+      sqlite3_bind_int(stmt, 1, id);
+
+      sqlite3_step(stmt);
+      result = sqlite3_column_int(stmt, 0);
+      sqlite3_finalize(stmt);
+      return result;
+      break;
+    case PROPERTY_size:
+      sqlQuery = "SELECT size FROM MyObject WHERE id=?";
+      sqlite3_prepare_v2(db, sqlQuery, -1, &stmt, NULL);
+      sqlite3_bind_int(stmt, 1, id);
+
+      sqlite3_step(stmt);
+      result = sqlite3_column_int(stmt, 0);
+      sqlite3_finalize(stmt);
+      return result;
+      break;
+    default:
+      break;
   }
   return 0;
 }
@@ -203,7 +228,7 @@ void Mem_setProperty(Object * object, MyObjectProperty p, int value)
   }
 }
 
-MyObject * MyObject_alloc()
+MyObject * MyObject_alloc(void* info)
 {
   MyObject * this = (MyObject*)Object_new(sizeof(MyObject), &myObjectClass);
 
@@ -292,6 +317,12 @@ int step2()
   MyObject* testMyObject = 0;
 
   testMyObject = MyObject_new(&data);
+
+  SQLite_setProperty(&testMyObject->object, PROPERTY_isOwner, 1);
+
+  int isOwner = (int)SQLite_getProperty(&testMyObject->object, PROPERTY_isOwner);
+
+  PRINT(("IsOwner = %d\n", isOwner));
 
   //MyObject_delete(testMyObject);
 
