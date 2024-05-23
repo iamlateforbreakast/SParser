@@ -2,6 +2,56 @@
 [Include Path] {*.h ./CommonLib/include ./AppliLib/include ./ParseLib/include}
 [Product List]
 {
+- CommonLib:
+    Location: ./CommonLib
+    Includes: [include]
+    Sources:
+      - BTree/BTree.c
+      - Debug/Debug.c
+      - Error/Error.c
+      - FileIo/FileIo.c
+      - List/List.c
+      - Allocator/Malloc.c
+      - Map/Map.c
+      - Object/Object.c
+      - Object/ObjectMgr.c
+      - SkipList/SkipList.c
+      - String2/String2.c
+      - Times/Times.c
+
+- AppliLib:
+    Location: ./AppliLib
+	Includes: [include]
+	Uses: [CommonLib]
+	Sources:
+      - FileMgr/FileDesc.c
+      - FileMgr/FileMgr.c
+      - OptionMgr/OptionMgr.c
+      - SdbMgr/SdbMgr.c
+      - SdbMgr/SdbRequest.c
+      - TimeMgr/TimeMgr.c
+      - TimeMgr/Timer.c
+
+- ParseLib:
+    Location: ./ParseLib
+    Includes: [include]
+    Uses: [CommonLib, AppliLib]
+    Sources:
+      - Configuration/Configuration.c
+      - Configuration/Product.c
+      - FileReader/FileReader.c
+      - Grammar2/Grammar2.c
+      - HTTPServer/HTTPServer.c
+      - SParse/Sparse.c
+      - TransUnit/TransUnit.c
+
+- UT_List_01:
+    Location: ./CommonLib/List
+    Includes: [../../include]
+    Sources:
+	  - List.c
+      - ./tests/UT_List_01.c
+
 - SParser:
     Location: ../../src
     Includes: 
