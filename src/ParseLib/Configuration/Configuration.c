@@ -1,4 +1,9 @@
-/* Configuration.c */
+/**********************************************//**
+  @file Configuration.c
+  @brief This file contains the implementation for the class Configuration
+  The class Configuration lists all the SW products to parse
+  including the path to the source files, any dependency.
+**************************************************/
 #include "Configuration.h"
 #include "Product.h"
 #include "TransUnit.h"
@@ -28,6 +33,9 @@
 #define IS_EOL(P) (Memory_ncmp(P, "\n", 1))
 #endif
 
+/**********************************************//**
+  @class Configuration
+**************************************************/
 struct Configuration
 {
   Object object;
@@ -57,6 +65,12 @@ PRIVATE List* Configuration_readList(Configuration* this, String* s, unsigned in
 PRIVATE void Configuration_readEndOfLine(Configuration* this, String* s, unsigned int* idx);
 PRIVATE unsigned int Configuration_readIndent(Configuration* this, String* s, unsigned int* idx);
 
+/**********************************************//**
+  @brief Create an instance of configuration class from th input string.
+  @public
+  @memberof Configuration
+  @return Status.
+**************************************************/
 PUBLIC Configuration* Configuration_new(String* input)
 {
   Configuration* c = (Configuration*)Object_new(sizeof(Configuration), &configurationClass);
@@ -68,6 +82,11 @@ PUBLIC Configuration* Configuration_new(String* input)
   return c;
 }
 
+/**********************************************//**
+  @brief Destroy an instance of configuration class.
+  @public
+  @memberof Configuration
+**************************************************/
 PUBLIC void Configuration_delete(Configuration* this)
 {
   List_delete(this->products);
@@ -75,6 +94,11 @@ PUBLIC void Configuration_delete(Configuration* this)
   Object_deallocate(&this->object);
 }
 
+/**********************************************//**
+  @brief Print an instance of configuration class.
+  @public
+  @memberof Configuration
+**************************************************/
 PUBLIC void Configuration_print(Configuration* this)
 {
   Product* p = 0;
@@ -91,27 +115,41 @@ PUBLIC void Configuration_print(Configuration* this)
   List_resetIterator(this->products);
 }
 
+/**********************************************//**
+  @brief Destroy an instance of configuration class.
+  @public
+  @memberof Configuration
+**************************************************/
 PUBLIC unsigned int Configuration_getSize(Configuration* this)
 {
   return sizeof(Configuration);
 }
 
+/**********************************************//**
+  @brief TBD
+  @public
+  @memberof Configuration
+**************************************************/
 PUBLIC List * Configuration_getProducts(Configuration* this)
 {
   return this->products;
 }
-  // location = Product_getLocation(product);
-  // fm = FileMgr_new();
-  // FileMgr_setRootLocation(fm, location);
-  // for each directory in include
-  // add directoy to fm
-  // for each file in source
-  // add file to fm
+
+/**********************************************//**
+  @brief TBD
+  @public
+  @memberof Configuration
+**************************************************/
 PUBLIC void Configuration_parseProducts(Configuration* this)
 {
 
 }
 
+/**********************************************//**
+  @brief TBD
+  @private
+  @memberof Configuration
+**************************************************/
 PRIVATE List* Configuration_readProducts(Configuration* this, String* s)
 {
   char* p = String_getBuffer(s);
@@ -176,6 +214,11 @@ PRIVATE List* Configuration_readProducts(Configuration* this, String* s)
   return products;
 }
 
+/**********************************************//**
+  @brief TBD
+  @private
+  @memberof Configuration
+**************************************************/
 PRIVATE String* Configuration_readLocation(Configuration* this, String* s, unsigned int* idx)
 {
   char* p = String_getBuffer(s);
@@ -187,6 +230,11 @@ PRIVATE String* Configuration_readLocation(Configuration* this, String* s, unsig
   return Configuration_readString(this, s, idx);
 }
 
+/**********************************************//**
+  @brief TBD
+  @private
+  @memberof Configuration
+**************************************************/
 PRIVATE List* Configuration_readIncludes(Configuration* this, String* s, unsigned int* idx)
 {
   char* p = String_getBuffer(s);
@@ -198,6 +246,11 @@ PRIVATE List* Configuration_readIncludes(Configuration* this, String* s, unsigne
   return Configuration_readList(this, s, idx);
 }
 
+/**********************************************//**
+  @brief TBD
+  @private
+  @memberof Configuration
+**************************************************/
 PRIVATE List* Configuration_readUses(Configuration* this, String* s, unsigned int* idx)
 {
   char* p = String_getBuffer(s);
@@ -209,6 +262,11 @@ PRIVATE List* Configuration_readUses(Configuration* this, String* s, unsigned in
   return Configuration_readList(this, s, idx);
 }
 
+/**********************************************//**
+  @brief TBD
+  @private
+  @memberof Configuration
+**************************************************/
 PRIVATE List* Configuration_readSources(Configuration* this, String* s, unsigned int* idx)
 {
   char* p = String_getBuffer(s);
@@ -220,6 +278,11 @@ PRIVATE List* Configuration_readSources(Configuration* this, String* s, unsigned
   return Configuration_readList(this, s, idx);
 }
 
+/**********************************************//**
+  @brief TBD
+  @private
+  @memberof Configuration
+**************************************************/
 PRIVATE String* Configuration_readString(Configuration* this, String* s, unsigned int* idx)
 {
   char* p = String_getBuffer(s);
@@ -233,6 +296,11 @@ PRIVATE String* Configuration_readString(Configuration* this, String* s, unsigne
   return String_subString(s, idx1, *idx - idx1);;
 }
 
+/**********************************************//**
+  @brief TBD
+  @private
+  @memberof Configuration
+**************************************************/
 PRIVATE List* Configuration_readList(Configuration* this, String* s, unsigned int* idx)
 {
   char* p = String_getBuffer(s);
@@ -273,6 +341,11 @@ PRIVATE List* Configuration_readList(Configuration* this, String* s, unsigned in
   return l;
 }
 
+/**********************************************//**
+  @brief TBD
+  @private
+  @memberof Configuration
+**************************************************/
 PRIVATE void Configuration_readEndOfLine(Configuration* this, String* s, unsigned int* idx)
 {
   char* p = String_getBuffer(s);
@@ -284,6 +357,11 @@ PRIVATE void Configuration_readEndOfLine(Configuration* this, String* s, unsigne
   }
 }
 
+/**********************************************//**
+  @brief TBD
+  @private
+  @memberof Configuration
+**************************************************/
 PRIVATE unsigned int Configuration_readIndent(Configuration* this, String* s, unsigned int* idx)
 {
   char* p = String_getBuffer(s);
