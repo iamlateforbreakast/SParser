@@ -126,7 +126,7 @@ PRIVATE void start_application(String * inputDir, String * dbName)
   totalExecutionTime = String_new("Total Execution Time");
     
   FileMgr_setRootLocation(fileMgr, String_getBuffer(inputDir));
-  FileMgr_addDirectory(fileMgr, ".");
+  //FileMgr_addDirectory(fileMgr, ".");
   
   TimeMgr_latchTime(timeMgr, totalExecutionTime);
   
