@@ -13,8 +13,10 @@
 #include "Object.h"
 #include "String2.h"
 #include "Memory.h"
+#include "Debug.h"
 #include "Error.h"
 
+#define DEBUG (0)
 #define HTABLE_SIZE (50)
 
 /**********************************************//**
@@ -155,7 +157,7 @@ PUBLIC unsigned int Map_insert(Map * this,String * s, void * p, int isOwner)
   if ((me = Map_findEntry(this, s))!=0)
   {
     /* Replace entry with new entry an free existing entry */
-    Error_new(ERROR_DBG, "   Map_insert : %s\n", String_getBuffer(s));
+    TRACE(("   Map_insert : %s\n", String_getBuffer(s)));
     MapEntry_setString(me, String_getRef(s));
     MapEntry_setItem(me, Object_getRef((Object*)p));
   }
