@@ -5,32 +5,20 @@
       - source11
       - source12
       - source13
- 
+
 - Product2:
     Location: location2
-      Includes: include21
-      Uses: Product1
-      Sources:
-        - source21
-        - source22
+    Includes: [include21]
+    Uses: [Product1]
+    Sources:
+      - source21
+      - source22
 
 - Product3:
     Location: location3
-    Includes: include31
+    Includes: [include31]
     Uses:
       - Product1
       - Product2
     Sources:
       - source31
-
-- UT_Configuration_01:
-    Location: src/ParseLib/Configuration/tests/
-    Includes: [src/CommonLib/include, src/AppliLib/include]
-    Uses: [Common, AppliLib]
-    Sources:
-        - UT_Configuration_01.c
-
-- Common:
-    Location: src/CommonLib/
-    Sources:
-        - Object/Object.c
