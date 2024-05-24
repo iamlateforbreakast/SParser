@@ -145,22 +145,23 @@ PUBLIC unsigned int SParse_parse(SParse * this, const char * extension)
   OptionMgr* optionMgr = OptionMgr_getRef();
   FileDesc * fd = 0;
   
-  String * productList = OptionMgr_getOption(optionMgr, "Product list");
-  PRINT(("Product List = %s\n", String_getBuffer(productList)));
-  if (productList)
-  {
+  String * productList = OptionMgr_getOption(optionMgr, "Product List");
+  //PRINT(("Product List = %s\n", String_getBuffer(productList)));
+
     this->configuration = Configuration_new(productList);
 
     if (this->configuration == 0) Error_new(ERROR_FATAL, "Cannot read configuration file.\n");
 
   // {
     // What does it mean?
-  }
   List* products = Configuration_getProducts(this->configuration);
   
   Product* p;
   while ((p = List_getNext(products)) != 0)
   {
+    PRINT(("-------------------------------------------------------\n"));
+    PRINT(("SParse: Processing product %s\n", String_getBuffer(Product_getName(p))));
+    PRINT(("-------------------------------------------------------\n"));
     FileMgr * fileMgr = Product_getSourceFiles(p);
   /* List all files with extension in all the input directories */
     List * fileList = FileMgr_filterFiles(fileMgr, extension);
