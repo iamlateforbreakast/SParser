@@ -7,7 +7,7 @@
 **************************************************/
 #include "Product.h"
 #include "FileMgr.h"
-#include "String.h"
+#include "String2.h"
 #include "Debug.h"
 #define DEBUG (0)
 
