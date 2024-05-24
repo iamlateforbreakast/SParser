@@ -275,7 +275,7 @@ return result;
 
 PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
 {
-  List* result = List_new();
+  List* result = 0;
 #ifdef _WIN32
   WIN32_FIND_DATAA FindFileData;
   HANDLE hFind;
@@ -291,6 +291,7 @@ PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
   }
   else
   {        
+    result = List_new();
     do {
       //_tprintf(_T("The first file found is %s\n"), FindFileData.cFileName);
       if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
