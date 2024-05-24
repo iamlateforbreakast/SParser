@@ -228,7 +228,7 @@ PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryN
   
   /* Merge directory name with current path to have the full path of the directory*/
   FileMgr_mergePath(this, fullPathDirectory, addedDirectory);
-  Error_new(ERROR_INFO, "Added directory with absolute path: %s\n", String_getBuffer(fullPathDirectory));
+  TRACE(("Added directory with absolute path: %s\n", String_getBuffer(fullPathDirectory)));
   /* TODO: Check if merged path exist on filesystem */
   
   /* add directory to this->directories */
@@ -237,10 +237,10 @@ PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryN
   /* For each directory */
   /* List_forEach(this->directories, FileMgr_listFiles, this); */
   fullPathDirectory = List_getNext(this->directories);
-  PRINT(("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory)));
+  TRACE(("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory)));
   while (fullPathDirectory!=0)
   {
-    PRINT(("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory)));
+    TRACE(("Full directoryPath: %s\n", String_getBuffer(fullPathDirectory)));
     FileMgr_listFiles(this, fullPathDirectory);
     fullPathDirectory = List_getNext(this->directories);
   }
@@ -383,7 +383,9 @@ PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory)
     FileMgr_mergePath(this, fullFileName, fileName);
     FileDesc_setFullName(fileDesc, fullFileName);
     List_insertTail(this->files, (void*)fileDesc, 1);
+#if DEBUG
     Error_new(ERROR_INFO,"List files: %s\n", String_getBuffer(fullFileName));
+#endif
     //String_delete(name);
   }
   while ((dirName = List_getNext(dirs))!=0)
@@ -391,7 +393,9 @@ PRIVATE void FileMgr_listFiles(FileMgr * this, String * directory)
     String * fullDirPath = String_copy(directory);
     FileMgr_mergePath(this, fullDirPath, dirName);
     List_insertHead(this->directories, (void*)fullDirPath, 1);
+#if DEBUG
     Error_new(ERROR_INFO,"Add directory: %s\n", String_getBuffer(fullDirPath));
+#endif
   }
   FileIo_delete(f);
   List_delete(fileList);
@@ -415,8 +419,8 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   String* result = String_new(0);
   // TODO: CHeck initial condition of validity length > 0
   
-  Error_new(ERROR_INFO, "mergePath: path1 %s\n", String_getBuffer(path1));
-  Error_new(ERROR_INFO, "mergePath: path2 %s\n", String_getBuffer(path2));
+  TRACE(("mergePath: path1 %s\n", String_getBuffer(path1)));
+  TRACE((ERROR_INFO, "mergePath: path2 %s\n", String_getBuffer(path2)));
 
   /* TODO: check if path2 is absolute path in which case copy and return */
   
@@ -451,7 +455,7 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   //String_append(result, String_getBuffer(s));
 
   s = (String*)List_removeTail(tokenPath1);
-  PRINT(("Concatenate %s\n", String_getBuffer(s)));
+  TRACE(("Concatenate %s\n", String_getBuffer(s)));
   //while ((s = List_getNext(tokenPath1)) != 0)
   while (s!=0)
   {
@@ -464,10 +468,12 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
 
   if (String_getLength(result)>1024) 
   {
+#if DEBUG
     Error_new(ERROR_INFO, "String length = %d\n", String_getLength(result));
     Error_new(ERROR_INFO, "Str length = %d\n", Memory_len(String_getBuffer(result)));
+#endif
   }
-  Error_new(ERROR_INFO,"Merged path: %s\n", String_getBuffer(result));
+  TRACE(("Merged path: %s\n", String_getBuffer(result)));
   String_stealBuffer(path1, result);
   String_delete(result);
   List_delete(tokenPath1);
@@ -574,7 +580,7 @@ PUBLIC FileDesc * FileMgr_isManaged(FileMgr * this, String * fullName)
     {
       isFound ++;
       result = fd;
-      Error_new(ERROR_DBG,"Matched %s\n", String_getBuffer(FileDesc_getFullName(fd)));
+      //Error_new(ERROR_DBG,"Matched %s\n", String_getBuffer(FileDesc_getFullName(fd)));
     }
   }
   
