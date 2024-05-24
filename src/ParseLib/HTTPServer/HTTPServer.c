@@ -1,10 +1,17 @@
-/* HTTPServer.c */
+/**********************************************//**
+  @file HTTPServer.c
+
+  @brief A HTTP Server class.
+  This class provides server function to create, start
+  HTML pages.
+**************************************************/
 
 #include "HTTPServer.h"
 #include "Object.h"
 #include "Memory.h"
 #include "Debug.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 
 #ifndef WIN32
@@ -156,28 +163,31 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
 
     Memory_set(requestBuffer, 0, REQUEST_BUFFER_SIZE);
     // accept client connection
-    if ((*client_fd = accept(this->fd, 
+    if ((client_fd) && ((*client_fd = accept(this->fd, 
                            (struct sockaddr *)&client_addr, 
-                            &client_addr_len)) < 0) {
+                            &client_addr_len)) < 0)) {
             PRINT(("accept failed"));
             break;
         }
     PRINT(("Received connection\n"));
 
-    int msg_len = recv(*client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
+    int msg_len = 0;
 
-    
+    if ((client_fd) && (requestBuffer))
+    {
+      msg_len = recv(*client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
     PRINT(("Bytes Received: %d\n%s\n", msg_len, requestBuffer));
 
-    sscanf(requestBuffer,"%s %s %s\nHost: %s\nUser-Agent: %s\n", 
-           method, path, version, host, userAgent);
+      sscanf_s(requestBuffer, "%s %s %s\nHost: %s\nUser-Agent: %s\n",
+        method, sizeof(method), path, sizeof(path), version, sizeof(version), host, sizeof(host), userAgent, sizeof(userAgent));
+    }
     //sscanf(requestBuffer, "Host: %s\n", host);
     PRINT(("Method: %s\n", method));
     PRINT(("Path: %s\n", path));
     PRINT(("Version: %s\n", version));
     PRINT(("Host: %s\n", host));
     PRINT(("User-Agent: %s\n", userAgent));
-    msg_len = send(*client_fd, response, sizeof(response), 0);
+    if (client_fd) msg_len = send(*client_fd, response, sizeof(response), 0);
     if (msg_len == 0) {
       PRINT(("Client closed connection\n"));
 #ifndef WIN32
