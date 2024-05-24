@@ -59,7 +59,6 @@ int msleep(long msec)
 //pthread_t thrId;
 //pthread_cond_t cond;
 //pthread_mutex_t mutex;
-int somethingToBeDone = 0;
 
 void* taskBody(void* params)
 {
@@ -90,7 +89,7 @@ int step1()
   Task * testTasks[5];
   int params[][2] = { { 1, 50 }, { 2, 20 }, { 3, 40 }, {4, 20}, {5, 50} };
 
-  for (int i=0;i<5;++i) testTasks[i] = Task_create(&taskBody, 1, (void **)&params[i]);
+  for (int i=0;i<5;++i) testTasks[i] = Task_create(&taskBody, 2, (void **)&params[i]);
 
   struct event events[] = {
 	{10, testTasks[0]}, {50, testTasks[1]}, {60, testTasks[2]}, {60, testTasks[3]}, {80, testTasks[4]}
@@ -100,7 +99,7 @@ int step1()
   int isPassed = 1;
   int clock = 0; // In 100 ms slices
 
-
+  TaskMgr* taskMgr = TaskMgr_getRef();
 
   //Task_start(testTask1);
 
@@ -118,7 +117,6 @@ int step1()
 
   for (int i=0;i<5;++i) Task_destroy(testTasks[i]);
 
-  TaskMgr * taskMgr =  TaskMgr_getRef();
 
   TaskMgr_delete(taskMgr);
 
