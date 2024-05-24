@@ -23,6 +23,7 @@
 #else
 #include <unistd.h>
 #include <dirent.h>
+#include <sys/stat.h>
 #endif
 
 #define DEBUG (0)
@@ -218,7 +219,7 @@ PUBLIC void FileIo_createDir(FileIo* this, String * fullDirName)
 
 PUBLIC List * FileIo_listDirs(FileIo * this, String * directory)
 {
-  List* result = List_new();
+  List* result = 0;
 #ifdef _WIN32
   WIN32_FIND_DATAA FindFileData;
   HANDLE hFind;
@@ -253,6 +254,7 @@ PUBLIC List * FileIo_listDirs(FileIo * this, String * directory)
   printf("%s\n",String_getBuffer(directory));
   if (dirHandle!=0)
   {
+    result = List_new();
     while ((directoryEntry = readdir(dirHandle)) != NULL) 
     {
       if (directoryEntry->d_type == DT_DIR)
@@ -314,9 +316,13 @@ PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
   printf("%s\n",String_getBuffer(directory));
   if (dirHandle!=0)
   {
+    result = List_new();
     while ((directoryEntry = readdir(dirHandle)) != NULL) 
     {
-      if (directoryEntry->d_type == DT_REG)
+      //struct stat buf;
+      //stat(directoryEntry->d_name, &buf);
+      //printf("Item %s %d\n", directoryEntry->d_name, S_ISREG(buf.st_mode));
+      if ((directoryEntry->d_type == DT_REG) || (directoryEntry->d_type == DT_LNK))
       {
         //fileDesc = FileDesc_new();
         //fullName = String_copy(directory);

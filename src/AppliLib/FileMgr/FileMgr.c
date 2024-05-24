@@ -420,7 +420,7 @@ PRIVATE void FileMgr_mergePath(FileMgr* this, String* path1, String* path2)
   // TODO: CHeck initial condition of validity length > 0
   
   TRACE(("mergePath: path1 %s\n", String_getBuffer(path1)));
-  TRACE((ERROR_INFO, "mergePath: path2 %s\n", String_getBuffer(path2)));
+  TRACE(("mergePath: path2 %s\n", String_getBuffer(path2)));
 
   /* TODO: check if path2 is absolute path in which case copy and return */
   
