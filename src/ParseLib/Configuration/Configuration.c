@@ -23,9 +23,10 @@
 #define IS_INCLUDES_KEY(P) (Memory_ncmp(P,"Includes:", 9))
 #define IS_USES_KEY(P) (Memory_ncmp(P,"Uses:", 5))
 #define IS_SOURCES_KEY(P) (Memory_ncmp(P,"Sources:", 8))
-#define IS_IGNORED(C) ((C==' ') || (C=='\n') || (C=='\r') || (C=='\t'))
+#define IS_IGNORED(C) ((C==' ') || (C=='\n') || (C=='\r'))
 #define IS_STRING(C) (((C>='A') && (C<='Z')) || ((C>='a') && (C<='z')) \
                   || ((C>='0') && (C<='9')) || (C=='_') || (C=='/') || (C=='\\') || (C=='-') || (C=='.'))
+#define IS_FORBIDDEN(C) (C=='\t') 
 
 #ifdef _WIN32
 #define IS_EOL(P) (Memory_ncmp(P, "\r\n", 2))
@@ -73,6 +74,7 @@ PRIVATE unsigned int Configuration_readIndent(Configuration* this, String* s, un
 **************************************************/
 PUBLIC Configuration* Configuration_new(String* input)
 {
+  if (input == 0) return 0;
   Configuration* c = (Configuration*)Object_new(sizeof(Configuration), &configurationClass);
 
   if (c == 0) return 0;
@@ -168,6 +170,7 @@ PRIVATE List* Configuration_readProducts(Configuration* this, String* s)
     //String* productName = String_subString(s, idx1, idx2);
 
     String* productName = Configuration_readString(this, s, &idx2);
+    TRACE(("Configuration: Processing product %s\n", String_getBuffer(productName)));
 
     if (productName)
     {
@@ -185,24 +188,28 @@ PRIVATE List* Configuration_readProducts(Configuration* this, String* s)
     while (IS_IGNORED(*(p + idx2))) idx2++;
 
     String* location = Configuration_readLocation(this, s, &idx2);
+    TRACE(("Configuration: Processing location %s\n", String_getBuffer(location)));
 
     if (location) Product_setLocation(product, location);
 
     while (IS_IGNORED(*(p + idx2))) idx2++;
 
     List* includes = Configuration_readIncludes(this, s, &idx2);
+    TRACE(("Configuration: Processing includes.\n"));
 
     if (includes) Product_setIncludes(product, includes);
 
     while (IS_IGNORED(*(p + idx2))) idx2++;
 
     List* uses = Configuration_readUses(this, s, &idx2);
+    TRACE(("Configuration: Processing uses.\n"));
 
     if (uses) Product_setUses(product, uses);
 
     while (IS_IGNORED(*(p + idx2))) idx2++;
 
     List* sources = Configuration_readSources(this, s, &idx2);
+    TRACE(("Configuration: Processing sources.\n"));
 
     if (sources) Product_setSources(product, sources);
 
@@ -317,6 +324,7 @@ PRIVATE List* Configuration_readList(Configuration* this, String* s, unsigned in
       TRACE(("Configuration: --> %s\n", String_getBuffer(item)));
       List_insertHead(l, item, 1);
       if (*(p + *idx) == ',') (*idx)++;
+      while (*(p + *idx) == ' ') (*idx)++;
     }
     (*idx)++;
   }
