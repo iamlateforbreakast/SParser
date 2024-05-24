@@ -7,7 +7,9 @@
 **************************************************/
 #include "Product.h"
 #include "FileMgr.h"
-#include "String2.h"
+#include "String.h"
+#include "Debug.h"
+#define DEBUG (0)
 
 /**********************************************//**
   @class Product
@@ -104,11 +106,19 @@ PUBLIC unsigned int Product_getSize(Product* this)
   return sizeof(Product);
 }
 
+PUBLIC String* Product_getName(Product* this)
+{
+  return this->name;
+}
 PUBLIC void Product_setLocation(Product* this, String* s)
 {
   this->location = s;
 }
 
+PUBLIC String* Product_getLocation(Product* this)
+{
+  return this->location;
+}
 PUBLIC void Product_setIncludes(Product* this, List * l)
 {
   this->includes = l;
@@ -127,16 +137,17 @@ PUBLIC FileMgr* Product_getSourceFiles(Product* this)
 {
   FileMgr* fileMgr = FileMgr_new();
   FileMgr_setRootLocation(fileMgr, String_getBuffer(this->location));
+  TRACE(("Product: Create FileMgr at root location %s\n", String_getBuffer(this->location)));
   String* includeDir;
   while ((includeDir = List_getNext(this->includes)) != 0)
   {
-    PRINT(("Product: Add include: %s\n", String_getBuffer(includeDir)));
+    TRACE(("Product: Add include: %s\n", String_getBuffer(includeDir)));
     FileMgr_addDirectory(fileMgr, String_getBuffer(includeDir));
   }
   String* sourceFile = 0;
   while ((sourceFile = List_getNext(this->sources)) != 0)
   {
-    PRINT(("Product: Add file: %s\n", String_getBuffer(sourceFile)));
+    TRACE(("Product: Add file: %s\n", String_getBuffer(sourceFile)));
     FileMgr_addFile(fileMgr, String_getBuffer(sourceFile));
   }
   FileMgr_print(fileMgr);
