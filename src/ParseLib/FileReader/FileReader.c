@@ -49,6 +49,7 @@ struct FileReader
   Object object;
   List * buffers;
   FileDesc * fileDesc;
+  FileMgr * fileMgr;
   String * currentBuffer;
   List * preferredDirs;
 };
@@ -76,15 +77,17 @@ PRIVATE void FileReader_printListPreferredDir(FileReader * this);
   @memberof FileReader
   @return Created FileReader object.
 **************************************************/
-PUBLIC FileReader * FileReader_new(FileDesc * fileDesc)
+PUBLIC FileReader * FileReader_new(FileDesc * fileDesc, FileMgr * fileMgr)
 {
   FileReader * this = 0;
-  FileMgr * fileMgr = FileMgr_getRef();
+  //FileMgr * fileMgr = FileMgr_getRef();
+  
   String * newFileContent = 0;
   char * fileName = String_getBuffer(FileDesc_getName(fileDesc));
 
   this = (FileReader*)Object_new(sizeof(FileReader), &fileReaderClass);
   
+  this->fileMgr = fileMgr;
   this->buffers = List_new();
   this->preferredDirs = List_new();
   
@@ -182,7 +185,7 @@ PUBLIC String * FileReader_getName(FileReader * this)
 **************************************************/
 PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
 {
-  FileMgr * fileMgr = FileMgr_getRef();
+  FileMgr * fileMgr = this->fileMgr;
   // Not freed
   List * dirList = 0;
   FileDesc * fileDesc = 0;
@@ -191,6 +194,7 @@ PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
   struct IncludeInfo * dirInfo = 0;
   char * result = 0;
   
+#if 0
   if (Memory_ncmp(String_getBuffer(fileName), "SdbRequest.h", 12))
   {
      Error_new(ERROR_DBG, "FileREader_addFile: Reached SdbRequest.h\n");
@@ -214,9 +218,9 @@ PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
  
   /* In all cases make sure the current dir. is in the search path */
   List_insertTail(dirList, String_new("."), 0);
-  
-  fileDesc = FileMgr_searchFile(fileMgr, fileName, dirList);
-  
+#endif
+  //fileDesc = FileMgr_searchFile(fileMgr, fileName, dirList);
+  fileDesc = FileMgr_isManaged(fileMgr, fileName);
   if (fileDesc != 0)
   {
     newFileContent = FileDesc_load(fileDesc);

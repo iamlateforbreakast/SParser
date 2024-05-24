@@ -67,7 +67,7 @@ static const char * SParse_ignoreFiles[] =
 {"test1.c"};
 #endif
 
-PRIVATE unsigned int SParse_parseFile(SParse * this, FileDesc * fileDesc);
+PRIVATE unsigned int SParse_parseFile(SParse * this, FileDesc * fileDesc, FileMgr * fileMgr);
 
 /**********************************************//** 
   @brief Create a new SParse object.
@@ -163,13 +163,13 @@ PUBLIC unsigned int SParse_parse(SParse * this, const char * extension)
     PRINT(("SParse: Processing product %s\n", String_getBuffer(Product_getName(p))));
     PRINT(("-------------------------------------------------------\n"));
     FileMgr * fileMgr = Product_getSourceFiles(p);
-  /* List all files with extension in all the input directories */
+    /* List all files with extension in all the input directories */
     List * fileList = FileMgr_filterFiles(fileMgr, extension);
 
-  //List_forEach(fileList, (void (*)(void* , void *))&SParse_parseFile, (void*)this);
-  while ((fd = List_getNext(fileList))!=0)
-    SParse_parseFile(this, fd);
-  FileMgr_delete(fileMgr);
+    //List_forEach(fileList, (void (*)(void* , void *))&SParse_parseFile, (void*)this);
+    while ((fd = List_getNext(fileList))!=0)
+      SParse_parseFile(this, fd, fileMgr);
+    FileMgr_delete(fileMgr);
     List_delete(fileList);
   }
   OptionMgr_delete(optionMgr);
@@ -184,7 +184,7 @@ PUBLIC unsigned int SParse_parse(SParse * this, const char * extension)
   @param Filename.
   @return Status of the operation.
 **************************************************/
-PRIVATE unsigned int SParse_parseFile(SParse * this, FileDesc * fileDesc)
+PRIVATE unsigned int SParse_parseFile(SParse * this, FileDesc * fileDesc, FileMgr * fileMgr)
 {
   unsigned int error = 0;
   unsigned int i = 0;
@@ -196,7 +196,7 @@ PRIVATE unsigned int SParse_parseFile(SParse * this, FileDesc * fileDesc)
   {
     if (String_matchWildcard(FileDesc_getName(fileDesc), SParse_default[i].extension))
     {
-      FileReader * fileReader = FileReader_new(fileDesc);
+      FileReader * fileReader = FileReader_new(fileDesc, fileMgr);
       g = SParse_default[i].function_new(fileReader, this->sdbMgr);
       SParse_default[i].function_process(g);
       SParse_default[i].function_delete(g);

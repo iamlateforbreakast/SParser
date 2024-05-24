@@ -5,10 +5,11 @@
 
 #include "Types.h"
 #include "String2.h"
+#include "FileMgr.h"
 
 typedef struct FileReader FileReader;
 
-PUBLIC FileReader * FileReader_new();
+PUBLIC FileReader * FileReader_new(FileDesc * file, FileMgr * fileMgr);
 PUBLIC void FileReader_delete(FileReader * this);
 PUBLIC FileReader * FileReader_copy(FileReader * this);
 PUBLIC void FileReader_print(FileReader * this);
