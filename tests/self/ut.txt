@@ -1,0 +1,28 @@
+[Input Directory] {../../src}
+[Include Path] {*.h ./CommonLib/include ./AppliLib/include ./ParseLib/include}
+[Product List]
+{
+- CommonLib:
+    Location: ../../src/CommonLib
+    Includes: [include]
+    Sources:
+      - BTree/BTree.c
+      - Debug/Debug.c
+      - Error/Error.c
+      - FileIo/FileIo.c
+      - List/List.c
+      - Allocator/Malloc.c
+      - Map/Map.c
+      - Object/Object.c
+      - Object/ObjectMgr.c
+      - SkipList/SkipList.c
+      - String2/String2.c
+      - Times/Times.c
+
+- UT_List_01:
+    Location: CommonLib/List
+    Includes: [../../include]
+    Sources:
+      - List.c
+      - tests/UT_List_01.c
+}
