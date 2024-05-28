@@ -114,6 +114,11 @@ PUBLIC void TransUnit_delete(TransUnit* this)
   Object_deallocate(&this->object);
 }
 
+/**********************************************//**
+  @brief Print an instance of a TransUnit object.
+  @public
+  @memberof TransUnit
+**************************************************/
 PUBLIC void TransUnit_print(TransUnit* this)
 {
 
@@ -126,11 +131,21 @@ PUBLIC unsigned int TransUnit_getSize(TransUnit* this)
   return sizeof(TransUnit);
 }
 
+/**********************************************//**
+  @brief Return the name of the file associated with the instance.
+  @public
+  @memberof TransUnit
+**************************************************/
 PUBLIC char* TransUnit_getName(TransUnit* this)
 {
   return String_getBuffer(FileDesc_getName(this->file));
 }
 
+/**********************************************//**
+  @brief TBD
+  @public
+  @memberof TransUnit
+**************************************************/
 PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
 {
   char* ptr = this->currentBuffer->currentPtr;  //String_getBuffer(this->currentBuffer);
@@ -241,6 +256,11 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
   return newString;
 }
 
+/**********************************************//**
+  @brief TBC
+  @private
+  @memberof TransUnit
+**************************************************/
 PRIVATE void TransUnit_consumeLineComment(TransUnit* this)
 {
   const char* eol = "\n";
@@ -257,6 +277,11 @@ PRIVATE void TransUnit_consumeLineComment(TransUnit* this)
   String_print(lineComment);
 }
 
+/**********************************************//**
+  @brief TBC
+  @private
+  @memberof TransUnit
+**************************************************/
 PRIVATE void TransUnit_consumeMultilineComment(TransUnit* this)
 {
   String* multiLineComment = 0;
@@ -273,6 +298,11 @@ PRIVATE void TransUnit_consumeMultilineComment(TransUnit* this)
   String_print(multiLineComment);
 }
 
+/**********************************************//**
+  @brief TBC
+  @private
+  @memberof TransUnit
+**************************************************/
 PRIVATE void TransUnit_consumeInclude(TransUnit* this)
 {
   String* include = 0;
@@ -301,8 +331,31 @@ PRIVATE void TransUnit_consumeInclude(TransUnit* this)
 
   include = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
   String_print(include);
+#if 0
+  fileDesc = FileMgr_isManaged(fileMgr, fileName);
+  if (fileDesc != 0)
+  {
+    newFileContent = FileDesc_load(fileDesc);
+    if (newFileContent==0)
+    {
+      Error_new(ERROR_FATAL, "NewFileContent is null");
+    }
+    List_insertHead(this->buffers, newFileContent,0);
+    this->currentBuffer = newFileContent;
+    result = String_getBuffer(newFileContent);
+  }
+  else
+  {
+    /* Error case: Can not find the include file */
+  }
+#endif
 }
 
+/**********************************************//**
+  @brief TBC
+  @private
+  @memberof TransUnit
+**************************************************/
 PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
 {
 
@@ -364,6 +417,11 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
   Map_insert(this->macros, macroName, macroDefinition, 1);
 }
 
+/**********************************************//**
+  @brief TBC
+  @private
+  @memberof TransUnit
+**************************************************/
 PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue)
 {
   /* Consume spaces */

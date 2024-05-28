@@ -67,9 +67,11 @@ PRIVATE Class fileReaderClass =
   .f_size = (Sizer)&FileReader_getSize
 };
 
+#if 0
 PRIVATE void FileReader_getListPreferredDir(FileReader * this);
 PRIVATE void FileReader_deleteListPreferredDir(FileReader * this);
 PRIVATE void FileReader_printListPreferredDir(FileReader * this);
+#endif
 
 /**********************************************//** 
   @brief Create a new FileReader object.
@@ -95,7 +97,7 @@ PUBLIC FileReader * FileReader_new(FileDesc * fileDesc, FileMgr * fileMgr)
   Error_new(ERROR_INFO, "FileReader_new: Processing file %s\n", fileName);
   
   /* Build list of all directories to be used to lookup additional files (include) */
-  FileReader_getListPreferredDir(this);
+  //FileReader_getListPreferredDir(this);
   
   /* associate buffer containing the file to the fileRead */
   newFileContent = FileDesc_load(this->fileDesc);
@@ -117,7 +119,7 @@ PUBLIC void FileReader_delete(FileReader * this)
   if (this!=0)
   {
     List_delete(this->buffers);
-    FileReader_deleteListPreferredDir(this);
+    //FileReader_deleteListPreferredDir(this);
     List_delete(this->preferredDirs); //PROBLEM
     Object_deallocate(&this->object);
   }
@@ -138,11 +140,23 @@ PUBLIC FileReader * FileReader_copy(FileReader * this)
   return copy;
 }
 
+/**********************************************//** 
+  @brief Print an instance of a FileReader object.
+  @public
+  @memberof FileReader
+**************************************************/
 PUBLIC void FileReader_print(FileReader * this)
 {
 
 }
 
+/**********************************************//** 
+  @brief Return the size in bytes of an instance 
+  of a FileReader object.
+  @public
+  @memberof FileReader
+  @return Size in bytes
+**************************************************/
 PUBLIC unsigned int FileReader_getSize(FileReader * this)
 {
   if (this == 0) return sizeof(FileReader);
@@ -243,6 +257,7 @@ PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
   return result;
 }
 
+#if 0
 PRIVATE void FileReader_getListPreferredDir(FileReader * this)
 {
   OptionMgr * optionMgr = OptionMgr_getRef();
@@ -383,3 +398,4 @@ PRIVATE void FileReader_deleteListPreferredDir(FileReader * this)
     dirInfo = List_removeHead(this->preferredDirs);
   }
 }
+#endif

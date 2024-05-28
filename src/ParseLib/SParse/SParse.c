@@ -197,7 +197,9 @@ PRIVATE unsigned int SParse_parseFile(SParse * this, FileDesc * fileDesc, FileMg
     if (String_matchWildcard(FileDesc_getName(fileDesc), SParse_default[i].extension))
     {
       FileReader * fileReader = FileReader_new(fileDesc, fileMgr);
+      //TransUnit * tu = TransUnit_new(fileDesc, fileMgr);
       g = SParse_default[i].function_new(fileReader, this->sdbMgr);
+      // g = SParse_default[i].function_new(fileReader, this->sdbMgr);
       SParse_default[i].function_process(g);
       SParse_default[i].function_delete(g);
       FileReader_delete(fileReader);

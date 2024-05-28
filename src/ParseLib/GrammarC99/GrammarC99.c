@@ -73,6 +73,11 @@ PUBLIC Grammar* GrammarC99_new(FileDesc * fileDesc)
   return (Grammar*)this;
 }
 
+/**********************************************//**
+  @brief TBC
+  @public
+  @memberof GrammarC99
+**************************************************/
 PUBLIC void GrammarC99_delete(Grammar * this)
 {
   GrammarC99* thisC99 = (GrammarC99*)this;
@@ -93,15 +98,31 @@ PUBLIC void GrammarC99_delete(Grammar * this)
   }
 }
 
+/**********************************************//**
+  @brief TBC
+  @public
+  @memberof GrammarC99
+**************************************************/
 PUBLIC void GrammarC99_print(Grammar * this)
 {
 
 }
 
+/**********************************************//**
+  @brief TBC
+  @public
+  @memberof GrammarC99
+**************************************************/
 PUBLIC unsigned int GrammarC99_getSize(Grammar * this)
 {
   return sizeof(GrammarC99);
 }
+
+/**********************************************//**
+  @brief TBC
+  @public
+  @memberof GrammarC99
+**************************************************/
 PUBLIC void GrammarC99_process(GrammarC99* this)
 {
   /* TODO: Store translation unit information */

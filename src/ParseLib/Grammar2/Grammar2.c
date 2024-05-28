@@ -9,6 +9,7 @@
 #include "Class.h"
 #include "Object.h"
 #include "FileReader.h"
+#include "TransUnit.h"
 #include "SdbRequest.h"
 #include "Error.h"
 #include "Debug.h"
@@ -74,6 +75,7 @@ struct Grammar2
   void * scanner;
   SdbMgr * sdbMgr;
   FileReader * reader;
+  TransUnit * unit;
   char * buffer;
   //char * node_text;
   int node_text_position;
@@ -189,6 +191,7 @@ PUBLIC void Grammar2_process(Grammar2 * this)
     
   SdbRequest_execute(insertTransUnit, unitId, String_getBuffer(FileReader_getName(this->reader)));
   
+  // while( TransUnit_getNextBuffer())
   Grammar2_scan_string(FileReader_getBuffer(this->reader), this->scanner);
   //if (Memory_ncmp(String_getBuffer(FileReader_getName(this->reader)),"Timer.c",7))
   //{
