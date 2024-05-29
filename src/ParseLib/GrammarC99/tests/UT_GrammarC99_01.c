@@ -27,7 +27,7 @@ int step1()
   FileDesc* c_file = FileMgr_addFile(fileMgr, "test.c");
 
   PRINT(("Step 1: Test 1 - Create an instance of class GrammarC99: "));
-  testC99 = (GrammarC99*)GrammarC99_new(c_file);
+  testC99 = (GrammarC99*)GrammarC99_new(c_file, fileMgr);
   UT_ASSERT((((Object*)testC99)->marker == 0x0B5EC7));
 
   PRINT(("Step 1: Test 2 - Delete an instance of class GrammarC99: "));
@@ -50,7 +50,7 @@ int step2()
   int isPassed = 1;
   FileMgr* fileMgr = FileMgr_getRef();
   FileDesc* c_file = FileMgr_addFile(fileMgr, "test.c");
-  GrammarC99* testC99 = (GrammarC99*)GrammarC99_new(c_file);
+  GrammarC99* testC99 = (GrammarC99*)GrammarC99_new(c_file, fileMgr);
 
   GrammarC99_process(testC99);
 
@@ -59,6 +59,7 @@ int step2()
 
   return isPassed;
 }
+
 int main()
 {
   int isPassed = 1;

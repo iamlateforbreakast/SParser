@@ -26,6 +26,7 @@ struct TransUnit
 {
   Object object;
   FileDesc* file;
+  FileMgr * fm;
   List* buffers;
   Map* macros;
   struct Buffer* currentBuffer;
@@ -58,7 +59,7 @@ PRIVATE void TransUnit_pushNewBuffer(TransUnit* this, String* content);
   @memberof TransUnit
   @return Created TransUnit instance.
 **************************************************/
-PUBLIC TransUnit* TransUnit_new(FileDesc* file)
+PUBLIC TransUnit* TransUnit_new(FileDesc* file, FileMgr * fileMgr)
 {
   TransUnit* this = 0;
   String* newFileContent = 0;

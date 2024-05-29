@@ -16,6 +16,7 @@ struct GrammarC99
 {
   Grammar grammar;
   TransUnit* transUnit;
+  FileMgr * fm;
   void * scanner;
   //SdbMgr * sdbMgr;
   //FileReader * reader;
@@ -45,7 +46,7 @@ PRIVATE Class grammarC99Class =
   @memberof GrammarC99
   @return New instance.
 **************************************************/
-PUBLIC Grammar* GrammarC99_new(FileDesc * fileDesc)
+PUBLIC Grammar* GrammarC99_new(FileDesc * fileDesc, FileMgr * fm)
 {
   GrammarC99 * this = 0;
   this = (GrammarC99*)Object_new(sizeof(GrammarC99), &grammarC99Class);
@@ -54,6 +55,7 @@ PUBLIC Grammar* GrammarC99_new(FileDesc * fileDesc)
 
   GrammarC99lex_init(&this->scanner);
   this->transUnit = TransUnit_new(fileDesc);
+  this->fm = fm;
   //this->reader = fr;
   //this->sdbMgr = sdbMgr;
   
