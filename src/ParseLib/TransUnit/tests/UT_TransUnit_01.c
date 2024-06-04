@@ -16,16 +16,17 @@ int step1()
 {
   int isPassed = 1;
   TransUnit* testTransUnit = 0;
-  FileMgr * fileMgr = FileMgr_getRef();
+  FileMgr * fileMgr = FileMgr_new();
   ObjectMgr* objectMgr = ObjectMgr_getRef();
   FileDesc * c_file = FileMgr_addFile(fileMgr, "test.c");
 
   PRINT(("Step 1: Test 1 - Create an instance of class TransUnit: "));
-  testTransUnit = TransUnit_new(c_file);
+  testTransUnit = TransUnit_new(c_file, fileMgr);
   UT_ASSERT((testTransUnit != 0));
 
   PRINT(("Step 1: Test 2 - Delete an instance of class TransUnit: "));
   TransUnit_delete(testTransUnit);
+  UT_ASSERT((1));
 
   FileMgr_delete(fileMgr);
 
@@ -43,24 +44,30 @@ int step2()
 {
   int isPassed = 1;
 
-  FileMgr* fileMgr = FileMgr_getRef();
+  FileMgr* fileMgr = FileMgr_new();
   ObjectMgr* objectMgr = ObjectMgr_getRef();
-  FileDesc* c_file = FileMgr_addFile(fileMgr, "test.c");
-  FileDesc* h_file = FileMgr_addFile(fileMgr, "test.h");
-  TransUnit* testTransUnit = TransUnit_new(c_file);
+  //FileDesc* c_file = FileMgr_addFile(fileMgr, "test.c");
+  //FileDesc* h_file = FileMgr_addFile(fileMgr, "test.h");
+  FileDesc* c_file = FileMgr_addFile(fileMgr, "BTree.c");
+  FileDesc* h_file1 = FileMgr_addFile(fileMgr, "BTree.h");
+  FileDesc* h_file2 = FileMgr_addFile(fileMgr, "Node.h");
+  FileDesc* h_file3 = FileMgr_addFile(fileMgr, "Memory.h");
+  TransUnit* testTransUnit = TransUnit_new(c_file, fileMgr);
 
   PRINT(("Step 2: Test 1 - Read a buffer from TrasnUnit instance: "));
+  for (int i = 0; i < 3; ++i)
+  {
   String* buffer = TransUnit_getNextBuffer(testTransUnit);
-  String_print(buffer);
-
+    PRINT(("Output buffer: %s\n", String_getBuffer(buffer)));
+    String_delete(buffer);
+  }
   
   //PRINT(("Step 1: Test 2 - Delete an instance of class TransUnit: "));
-  String_delete(buffer);
   TransUnit_delete(testTransUnit);
 
   FileMgr_delete(fileMgr);
 
-  PRINT(("Step 2: Test 1 - Check all memory is freed: "));
+  PRINT(("Step 2: Test 2 - Check all memory is freed: "));
   UT_ASSERT((ObjectMgr_report(objectMgr) == 1));
   TRACE(("Nb objects left allocated: %d\n", ObjectMgr_report(objectMgr)));
 
