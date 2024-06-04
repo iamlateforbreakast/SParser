@@ -7,7 +7,7 @@
 
 typedef struct TransUnit TransUnit;
 
-PUBLIC TransUnit * TransUnit_new(FileDesc * file);
+PUBLIC TransUnit * TransUnit_new(FileDesc * file, FileMgr * fileMgr);
 PUBLIC void TransUnit_delete(TransUnit * this);
 PUBLIC void TransUnit_print(TransUnit* this);
 PUBLIC unsigned int TransUnit_getSize(TransUnit* this);
