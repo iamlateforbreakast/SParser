@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 
-#define DEBUG (1)
+#define DEBUG (0)
 #define UT_ASSERT(cond) if ((cond)) \
                           { printf("Passed\n");} \
                           else { printf("Failed\n"); return 0;}
@@ -46,18 +46,68 @@ int step2()
 
   FileMgr* fileMgr = FileMgr_new();
   ObjectMgr* objectMgr = ObjectMgr_getRef();
+
+  FileDesc* c_file = FileMgr_addFile(fileMgr, "test_ifndef.c");
+  TransUnit* testTransUnit = TransUnit_new(c_file, fileMgr);
+
+  PRINT(("Step 2: Test 1 - Read a buffer from TrasnUnit instance: "));
+
+  String* resultBuffer[2];
+  String* expected[2];
+  expected[0] = String_newByRef("\nvoid disable()\n{\n}\n");
+  expected[1] = String_newByRef("\nvoid main()\n{\n}\n");
+
+  resultBuffer[0] = TransUnit_getNextBuffer(testTransUnit);
+  
+  isPassed = isPassed  && (String_compare(resultBuffer[0], expected[0]) == 0);
+
+  TRACE(("UT_TransUnit_01: Output buffer= %s\n", String_getBuffer(resultBuffer[0])));
+
+  resultBuffer[1] = TransUnit_getNextBuffer(testTransUnit);
+  TRACE(("UT_TransUnit_01: Output buffer= %s\n", String_getBuffer(resultBuffer[1])));
+
+  isPassed = isPassed && (String_compare(resultBuffer[1], expected[1]) == 0);
+  UT_ASSERT(isPassed);
+
+  String_delete(resultBuffer[0]);
+  String_delete(resultBuffer[1]);
+  String_delete(expected[0]);
+  String_delete(expected[1]);
+
+  TransUnit_delete(testTransUnit);
+
+  FileMgr_delete(fileMgr);
+
+  PRINT(("Step 2: Test 2 - Check all memory is freed: "));
+  UT_ASSERT((ObjectMgr_report(objectMgr) == 1));
+  TRACE(("Nb objects left allocated: %d\n", ObjectMgr_report(objectMgr)));
+
+  ObjectMgr_reportUnallocated(objectMgr);
+  ObjectMgr_delete(objectMgr);
+
+  return isPassed;
+}
+
+int step3()
+{
+  int isPassed = 1;
+
+  FileMgr* fileMgr = FileMgr_new();
+  ObjectMgr* objectMgr = ObjectMgr_getRef();
   //FileDesc* c_file = FileMgr_addFile(fileMgr, "test.c");
   //FileDesc* h_file = FileMgr_addFile(fileMgr, "test.h");
+
   FileDesc* c_file = FileMgr_addFile(fileMgr, "BTree.c");
   FileDesc* h_file1 = FileMgr_addFile(fileMgr, "BTree.h");
   FileDesc* h_file2 = FileMgr_addFile(fileMgr, "Node.h");
   FileDesc* h_file3 = FileMgr_addFile(fileMgr, "Memory.h");
   TransUnit* testTransUnit = TransUnit_new(c_file, fileMgr);
 
-  PRINT(("Step 2: Test 1 - Read a buffer from TrasnUnit instance: "));
+  PRINT(("Step 3: Test 1 - Read a buffer from TrasnUnit instance: "));
+
   for (int i = 0; i < 3; ++i)
   {
-  String* buffer = TransUnit_getNextBuffer(testTransUnit);
+    String* buffer = TransUnit_getNextBuffer(testTransUnit);
     PRINT(("Output buffer: %s\n", String_getBuffer(buffer)));
     String_delete(buffer);
   }
@@ -67,7 +117,7 @@ int step2()
 
   FileMgr_delete(fileMgr);
 
-  PRINT(("Step 2: Test 2 - Check all memory is freed: "));
+  PRINT(("Step 3: Test 2 - Check all memory is freed: "));
   UT_ASSERT((ObjectMgr_report(objectMgr) == 1));
   TRACE(("Nb objects left allocated: %d\n", ObjectMgr_report(objectMgr)));
 
