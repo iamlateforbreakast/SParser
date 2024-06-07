@@ -191,23 +191,22 @@ PRIVATE unsigned int SParse_parseFile(SParse * this, FileDesc * fileDesc, FileMg
   unsigned int i = 0;
   unsigned int nbRows = sizeof(SParse_default)/sizeof(SParseDefault);
   void * g = 0;
-  /* 1) If fileName is to be ignored */
+  String* buffer = 0;
+
   PRINT(("SParse: Parsing %s\n", String_getBuffer(FileDesc_getName(fileDesc))));
   for (i=0; i<nbRows; i++)
   {
     if (String_matchWildcard(FileDesc_getName(fileDesc), SParse_default[i].extension))
     {
-      FileReader * fileReader = FileReader_new(fileDesc, fileMgr);
       TransUnit * tu = TransUnit_new(fileDesc, fileMgr);
-      g = SParse_default[i].function_new(fileReader, this->sdbMgr);
-      // g = SParse_default[i].function_new(fileReader, this->sdbMgr);
-      while (Transunit_getNextBuffer(tu))
+      while ((buffer = TransUnit_getNextBuffer(tu))!=0)
       {
-        SParse_default[i].function_process(g);
+        //g = SParse_default[i].function_new();
+        //Ast * ast = SParse_default[i].function_process(buffer);
       }
       SParse_default[i].function_delete(g);
-      FileReader_delete(fileReader);
-      // TransUnit-delete(tu);
+
+      TransUnit_delete(tu);
     }
   }
 
