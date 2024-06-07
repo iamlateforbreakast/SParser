@@ -1,4 +1,10 @@
-/* TransUnit.c */
+/**********************************************//**
+  @file TransUnit.c
+  @brief This file implements a class that extract C code.
+  It removes the comments, 
+  expands the macros, 
+  parses the include files
+**************************************************/
 #include "TransUnit.h"
 #include "MacroDefinition.h"
 #include "List.h"
@@ -8,11 +14,13 @@
 #include "Error.h"
 #include "Object.h"
 #include "Debug.h"
-//#define IS_MACRO_LETTER(C) (((C=>'A') && (C<='Z')) || (C=='_'))
-#define IS_MACRO_LETTER(C) (((C>'A') && (C<'Z')) || (C=='_'))
+
+#define DEBUG (0)
+#define IS_MACRO_LETTER(C) ((((C)>='A') && ((C)<='Z')) || ((C)=='_'))
 
 struct Buffer
 {
+  // String * fileName;
   String* string;
   char* currentPtr;
   char* startPtr;
@@ -51,7 +59,8 @@ PRIVATE void TransUnit_consumeMultilineComment(TransUnit* this);
 PRIVATE void TransUnit_consumeInclude(TransUnit* this);
 PRIVATE void TransUnit_readMacroDefinition(TransUnit* this);
 PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue);
-PRIVATE void TransUnit_pushNewBuffer(TransUnit* this, String* content);
+PRIVATE int TransUnit_pushNewBuffer(TransUnit* this, String* content);
+PRIVATE int TransUnit_popBuffer(TransUnit* this);
 
 /**********************************************//**
   @brief Create a new TransUnit object.
@@ -106,7 +115,7 @@ PUBLIC void TransUnit_delete(TransUnit* this)
   struct Buffer* buffer = 0;
   while ((buffer = List_removeTail(this->buffers)) != 0)
   {
-    //String_delete(buffer->string);
+    String_delete(buffer->string);
     buffer->startPtr = 0;
     buffer->currentPtr = 0;
     Memory_free(buffer, sizeof(struct Buffer));
@@ -160,11 +169,13 @@ PUBLIC char* TransUnit_getName(TransUnit* this)
 PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
 {
   char* ptr = this->currentBuffer->currentPtr;  //String_getBuffer(this->currentBuffer);
-  int isReadyToEmit = 0;
+  int isFinished = 0;
   int isReadingContent = 0;
   int start = this->currentBuffer->nbCharRead;
 
-  while ((!isReadyToEmit) && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
+  while (!isFinished)
+  {
+    while ((this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
   {
     if (Memory_ncmp(this->currentBuffer->currentPtr, "//", 2))
     {
@@ -200,48 +211,74 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
       // Consume include
       TransUnit_consumeInclude(this);
       start = this->currentBuffer->nbCharRead;
-      PRINT(("#include: start = %d\n", start));
+        TRACE(("#include: start = %d\n", start));
+        //isReadyToEmit = 1;
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#define", 7))
     {
+        if (isReadingContent)
+        {
+          String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
+          return newString;
+        }
       // Consume macro definition
       TransUnit_readMacroDefinition(this);
       start = this->currentBuffer->nbCharRead;
-      PRINT(("#define: start = %d\n", start));
+        TRACE(("#define: start = %d\n", start));
     }
-    else if (Memory_ncmp(this->currentBuffer->currentPtr, "#ifndef", 6))
+      else if (Memory_ncmp(this->currentBuffer->currentPtr, "#ifndef", 7))
     {
+        if (isReadingContent)
+        {
+          String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
+          return newString;
+        }
       // Evaluate condition
-      this->currentBuffer->currentPtr += 6;
-      this->currentBuffer->nbCharRead += 6;
+        this->currentBuffer->currentPtr += 7;
+        this->currentBuffer->nbCharRead += 7;
       // Check macro is not defined
       TransUnit_checkMacro(this, 0);
       start = this->currentBuffer->nbCharRead;
-      PRINT(("#ifndef: start = %d\n", start));
+        TRACE(("#ifndef: start = %d\n", start));
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#ifdef", 6))
     {
+        if (isReadingContent)
+        {
+          String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
+          return newString;
+        }
       this->currentBuffer->currentPtr += 6;
       this->currentBuffer->nbCharRead += 6;
       // Check macro is defined
       TransUnit_checkMacro(this, 1);
       start = this->currentBuffer->nbCharRead;
-      PRINT(("#ifdef: start = %d\n", start));
+        TRACE(("#ifdef: start = %d\n", start));
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#undef", 6))
     {
+        if (isReadingContent)
+        {
+          String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
+          return newString;
+        }
       this->currentBuffer->currentPtr += 6;
       this->currentBuffer->nbCharRead += 6;
       start = this->currentBuffer->nbCharRead;
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#if", 2))
     {
+        if (isReadingContent)
+        {
+          String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
+          return newString;
+        }
       this->currentBuffer->currentPtr += 2;
       this->currentBuffer->nbCharRead += 2;
       start = this->currentBuffer->nbCharRead;
-      PRINT(("#if: start = %d\n", start));
+        TRACE(("#if: start = %d\n", start));
     }
-    else if (Memory_ncmp(this->currentBuffer->currentPtr, "#else", 4))
+      /*else if (Memory_ncmp(this->currentBuffer->currentPtr, "#else", 4))
     {
       if (isReadingContent)
       {
@@ -256,12 +293,22 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#endif", 5))
     {
+        if (isReadingContent)
+        {
+          String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
+          return newString;
+        }
       this->currentBuffer->currentPtr += 5;
       this->currentBuffer->nbCharRead += 5;
       start = this->currentBuffer->nbCharRead;
-    }
+      }*/
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#error", 5))
     {
+        if (isReadingContent)
+        {
+          String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
+          return newString;
+        }
       this->currentBuffer->currentPtr += 5;
       this->currentBuffer->nbCharRead += 5;
       start = this->currentBuffer->nbCharRead;
@@ -287,11 +334,15 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
       isReadingContent = 1;
     }
   }
-  // New String
-  String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead++);
-
-
+    TRACE(("TransUnit_getNextBuffer: start=%d nbCharRead=%d\n", start, this->currentBuffer->nbCharRead));
+    String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
+    TRACE(("TransUnit_getNextBuffer: %s\n", String_getBuffer(newString)));
+    TransUnit_popBuffer(this);
   return newString;
+  }
+  TRACE(("TransUnit_getNextBuffer: Run out of string\n"));
+  //String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
+  return 0;
 }
 
 /**********************************************//**
@@ -302,7 +353,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
 PRIVATE void TransUnit_consumeLineComment(TransUnit* this)
 {
   const char* eol = "\n";
-  String* lineComment = 0;
+  
   int start = this->currentBuffer->nbCharRead;
 
   while (!Memory_ncmp(this->currentBuffer->currentPtr, "\n", 1) && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
@@ -310,9 +361,12 @@ PRIVATE void TransUnit_consumeLineComment(TransUnit* this)
     this->currentBuffer->currentPtr++;
     this->currentBuffer->nbCharRead++;
   }
-  //this->nbCharRead = this->nbCharRead;
+#if DEBUG
+  String* lineComment = 0;
   lineComment = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
-  //String_print(lineComment);
+  String_print(lineComment);
+  String_delete(linComment);
+#endif
 }
 
 /**********************************************//**
@@ -322,7 +376,6 @@ PRIVATE void TransUnit_consumeLineComment(TransUnit* this)
 **************************************************/
 PRIVATE void TransUnit_consumeMultilineComment(TransUnit* this)
 {
-  String* multiLineComment = 0;
   int start = this->currentBuffer->nbCharRead;
 
   while (!Memory_ncmp(this->currentBuffer->currentPtr, "*/", 2) && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
@@ -332,8 +385,12 @@ PRIVATE void TransUnit_consumeMultilineComment(TransUnit* this)
   }
   this->currentBuffer->currentPtr += 2;
   this->currentBuffer->nbCharRead += 2;
+#if DEBUG
+  String* multiLineComment = 0;
   multiLineComment = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
-  //String_print(multiLineComment);
+  String_print(multiLineComment);
+  String_delete(multiLineComment);
+#endif
 }
 
 /**********************************************//**
@@ -452,7 +509,7 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
 }
 
 /**********************************************//**
-  @brief TBC.
+  @brief Check if a macro is defined.
   @private
   @memberof TransUnit
 **************************************************/
@@ -472,23 +529,61 @@ PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue)
     this->currentBuffer->nbCharRead++;
   }
   String * macroName = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
-  //if (Map_get(this->macros, macroName) && (checkForTrue))
-  // while (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string))
+  TRACE(("TransUnit_checkMacro: read macro name %s\n", String_getBuffer(macroName)));
+  MacroDefinition* macro = 0;
+  start = this->currentBuffer->nbCharRead;
+  int nestingLevel = 0;
+  int isLookingForEndif = 0;
+  /* Check if macro is defined or not defined */
+  int firstBlockActive = (Map_find(this->macros, macroName, &macro) == checkForTrue);
+  int isFinished = 0;
+  int startBlock = this->currentBuffer->nbCharRead;
+  int endBlock = -1;
+  String_delete(macroName);
+  while ((!isFinished) && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
   {
-    //if Memory_ncmp(this->currentBuffer->currentPtr, "#endif", 1) generate new buffer
-    //if 
+    if (Memory_ncmp(this->currentBuffer->currentPtr, "#ifndef", 7))
+    {
+      nestingLevel++;
+    } 
+    else if (Memory_ncmp(this->currentBuffer->currentPtr, "#endif", 6))
+    {
+      if (nestingLevel == 0)
+      {
+        //String* buffer = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
+        isFinished = 1;
+        this->currentBuffer->currentPtr += 6;
+        this->currentBuffer->nbCharRead += 6;
+      }
+      else nestingLevel--;
+    }
+    else if (Memory_ncmp(this->currentBuffer->currentPtr, "#else", 5))
+    {
+      if (nestingLevel == 0)
+      {
+        endBlock = this->currentBuffer->nbCharRead;
+        this->currentBuffer->currentPtr += 5;
+        this->currentBuffer->nbCharRead += 5;
+      }
+    }
+    else
+    {
     this->currentBuffer->currentPtr++;
     this->currentBuffer->nbCharRead++;
+    }
   }
-  //  read next code block
-  //  make new buffer from code block
+
+  String* buffer = String_subString(this->currentBuffer->string, startBlock, endBlock - startBlock);
+  TransUnit_pushNewBuffer(this, buffer);
+
+  TRACE(("TransUnit_checkMacro: BUffer extracted %s\n", String_getBuffer(buffer)));
 }
 /**********************************************//**
   @brief TBC.
   @private
   @memberof TransUnit
 **************************************************/
-PRIVATE void TransUnit_pushNewBuffer(TransUnit* this, String * content)
+PRIVATE int TransUnit_pushNewBuffer(TransUnit* this, String * content)
 {
   struct Buffer* buffer = Memory_alloc(sizeof(struct Buffer));
   buffer->string = content;
@@ -497,6 +592,28 @@ PRIVATE void TransUnit_pushNewBuffer(TransUnit* this, String * content)
   buffer->nbCharRead = 0;
   List_insertHead(this->buffers, buffer, 0);
   this->currentBuffer = buffer;
+  TRACE(("TransuNit_pushNewBuffer: Buffer %d\n", List_getNbNodes(this->buffers)));
+  return 0;
+}
+/**********************************************//**
+  @brief Unstack a buffer to parse.
+  @private
+  @memberof TransUnit
+  @return 0 if no buffer left, 1 if still at least a buffer.
+**************************************************/
+PRIVATE int TransUnit_popBuffer(TransUnit* this)
+{
+  if (List_getNbNodes(this->buffers) == 0) return 0;
+  struct Buffer* buffer = (struct Buffer*)List_removeHead(this->buffers);
+  String_delete(buffer->string);
+  buffer->startPtr = 0;
+  buffer->currentPtr = 0;
+  buffer->nbCharRead = 0;
+  Memory_free(buffer, sizeof(struct Buffer));
+  buffer = (struct Buffer*)List_getHead(this->buffers);
+  this->currentBuffer  = buffer;
+  TRACE(("TransUnit_popBuffer: Buffer %d\n", List_getNbNodes(this->buffers)));
+  return 1;
 }
 /* Consume macro param */
 /*if (c == '(')
