@@ -92,14 +92,14 @@ PUBLIC FileMgr * FileMgr_new()
 **************************************************/
 PUBLIC void FileMgr_delete(FileMgr * this)
 {
-  if (fileMgr!=0)
+  if (this!=0)
   {
-    if (fileMgr->object.refCount==1)
+    if (this->object.refCount==1)
     {
-      List_delete(fileMgr->files);
-      List_delete(fileMgr->directories);
-      String_delete(fileMgr->rootLocation);
-      Object_deallocate(&fileMgr->object);
+      List_delete(this->files);
+      List_delete(this->directories);
+      String_delete(this->rootLocation);
+      Object_deallocate(&this->object);
       fileMgr = 0;
       this = 0;
     }
