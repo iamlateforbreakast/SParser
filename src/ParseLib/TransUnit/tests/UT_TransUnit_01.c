@@ -34,7 +34,7 @@ int step1()
   UT_ASSERT((ObjectMgr_report(objectMgr) == 1));
   TRACE(("Nb objects left allocated: %d\n", ObjectMgr_report(objectMgr)));
 
-  ObjectMgr_reportUnallocated(objectMgr);
+  //ObjectMgr_reportUnallocated(objectMgr);
   ObjectMgr_delete(objectMgr);
 
   return isPassed; 
@@ -82,7 +82,7 @@ int step2()
   UT_ASSERT((ObjectMgr_report(objectMgr) == 1));
   TRACE(("Nb objects left allocated: %d\n", ObjectMgr_report(objectMgr)));
 
-  ObjectMgr_reportUnallocated(objectMgr);
+  //ObjectMgr_reportUnallocated(objectMgr);
   ObjectMgr_delete(objectMgr);
 
   return isPassed;
@@ -133,6 +133,7 @@ int main()
   
   step1();
   step2();
+  //step3();
 
   Memory_report();
 

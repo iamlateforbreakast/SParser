@@ -7,6 +7,7 @@
 **************************************************/
 #include "TransUnit.h"
 #include "MacroDefinition.h"
+#include "Buffer.h"
 #include "List.h"
 #include "Map.h"
 #include "String2.h"
@@ -17,15 +18,6 @@
 
 #define DEBUG (0)
 #define IS_MACRO_LETTER(C) ((((C)>='A') && ((C)<='Z')) || ((C)=='_'))
-
-struct Buffer
-{
-  // String * fileName;
-  String* string;
-  char* currentPtr;
-  char* startPtr;
-  int nbCharRead;
-};
 
 /**********************************************//**
   @class TransUnit
@@ -88,11 +80,8 @@ PUBLIC TransUnit* TransUnit_new(FileDesc* file, FileMgr * fileMgr)
   this->buffers = List_new();
 
   /* Create new buffer */
-  struct Buffer* buffer = Memory_alloc(sizeof(struct Buffer));
-  buffer->string = FileDesc_load(file);
-  buffer->startPtr = String_getBuffer(buffer->string);
-  buffer->currentPtr = buffer->startPtr;
-  buffer->nbCharRead = 0;
+  String * content = FileDesc_load(file);
+  Buffer* buffer = Buffer_new(content);
 
   List_insertHead(this->buffers, buffer, 0);
   this->currentBuffer = buffer;
@@ -112,13 +101,10 @@ PUBLIC void TransUnit_delete(TransUnit* this)
   if (this == 0) return;
 
   /* De-allocate the specific members */
-  struct Buffer* buffer = 0;
-  while ((buffer = List_removeTail(this->buffers)) != 0)
+  Buffer* buffer = 0;
+  while ((buffer = (Buffer*)List_removeTail(this->buffers)) != 0)
   {
-    String_delete(buffer->string);
-    buffer->startPtr = 0;
-    buffer->currentPtr = 0;
-    Memory_free(buffer, sizeof(struct Buffer));
+    Buffer_delete(buffer);
   }
   List_delete(this->buffers);
   Map_delete(this->macros);
@@ -585,11 +571,7 @@ PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue)
 **************************************************/
 PRIVATE int TransUnit_pushNewBuffer(TransUnit* this, String * content)
 {
-  struct Buffer* buffer = Memory_alloc(sizeof(struct Buffer));
-  buffer->string = content;
-  buffer->startPtr = String_getBuffer(buffer->string);
-  buffer->currentPtr = buffer->startPtr;
-  buffer->nbCharRead = 0;
+  Buffer* buffer = Buffer_new(content);
   List_insertHead(this->buffers, buffer, 0);
   this->currentBuffer = buffer;
   TRACE(("TransuNit_pushNewBuffer: Buffer %d\n", List_getNbNodes(this->buffers)));
@@ -604,13 +586,9 @@ PRIVATE int TransUnit_pushNewBuffer(TransUnit* this, String * content)
 PRIVATE int TransUnit_popBuffer(TransUnit* this)
 {
   if (List_getNbNodes(this->buffers) == 0) return 0;
-  struct Buffer* buffer = (struct Buffer*)List_removeHead(this->buffers);
-  String_delete(buffer->string);
-  buffer->startPtr = 0;
-  buffer->currentPtr = 0;
-  buffer->nbCharRead = 0;
-  Memory_free(buffer, sizeof(struct Buffer));
-  buffer = (struct Buffer*)List_getHead(this->buffers);
+  Buffer* buffer = (Buffer*)List_removeHead(this->buffers);
+  Buffer_delete(buffer);
+  buffer = (Buffer*)List_getHead(this->buffers);
   this->currentBuffer  = buffer;
   TRACE(("TransUnit_popBuffer: Buffer %d\n", List_getNbNodes(this->buffers)));
   return 1;
