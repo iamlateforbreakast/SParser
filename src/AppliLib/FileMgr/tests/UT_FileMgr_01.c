@@ -94,7 +94,7 @@ int step2()
 #ifdef _WIN32
    FileMgr_addDirectory(testFileMgr, "..\\Sparse-SP6\\src\\CommonLib\\List");
 #else
-    FileMgr_addDirectory(testFileMgr1, "..");
+    FileMgr_addDirectory(testFileMgr, "..");
 #endif
   PRINT(("Step 2: Test 2 - Check it is possible to add a directory: "));
   UT_ASSERT((1))
@@ -124,7 +124,7 @@ int step3()
 #ifdef _WIN32
   const char * fileNameText = "UT_FileMgr_01.vcxproj";
 #else
-  const char * fileNameText = "main.c";
+  const char * fileNameText = "UT_FileMgr_01.c";
 #endif
   String* fileName = String_new(fileNameText);
   FileMgr_addDirectory(testFileMgr, ".");
