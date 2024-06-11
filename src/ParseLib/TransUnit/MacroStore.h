@@ -5,21 +5,18 @@
 #include "Types.h"
 #include "Class.h"
 #include "Object.h"
+#include "String2.h"
 #include "Memory.h"
 #include "MacroDefinition.h"
+#include "Debug.h"
 
-#define MAX_CHILDREN (27)
+#define MAX_CHILDREN (28)
 
 typedef struct MacroStore MacroStore;
 
-PRIVATE MacroStore * MacroStore_new();
-PRIVATE void MacroStore_delete(MacroStore * this);
-PRIVATE void MacroStore_print(MacroStore * this);
-PRIVATE unsigned int MacroStore_getSize(MacroStore * this);
-PRIVATE int MacroStore_insertName(MacroStore* this, String* name, MacroDefinition* body);
-PRIVATE int MacroStore_removeName(MacroStore* this, String* name);
-PRIVATE enum MacroEvalName MacroStore_evalName(MacroStore* this, char* ptr, int length);
-PRIVATE char convert[255];
+
+PRIVATE char convert[256];
+PRIVATE char convertBack[MAX_CHILDREN];
 
 enum MacroEvalName
 {
@@ -31,6 +28,7 @@ enum MacroEvalName
 struct MacroStoreNode
 {
   int isLeaf;
+  MacroDefinition * def;
   void * children[MAX_CHILDREN];
 };
 
@@ -39,6 +37,15 @@ struct MacroStore
   Object object;
   struct MacroStoreNode * root;
 };
+
+PRIVATE MacroStore * MacroStore_new();
+PRIVATE void MacroStore_delete(MacroStore * this);
+PRIVATE void MacroStore_print(MacroStore * this);
+PRIVATE unsigned int MacroStore_getSize(MacroStore * this);
+PRIVATE int MacroStore_insertName(MacroStore* this, String* name, MacroDefinition* body);
+PRIVATE int MacroStore_removeName(MacroStore* this, String* name);
+PRIVATE enum MacroEvalName MacroStore_evalName(MacroStore* this, char* ptr, int length);
+PRIVATE void MacroStore_printChildrenNode(MacroStore* this, struct MacroStoreNode* node, char * name);
 
 PRIVATE Class macroStoreClass =
 {
@@ -50,24 +57,38 @@ PRIVATE Class macroStoreClass =
   .f_size = (Sizer)&MacroStore_getSize
 };
 
+
+
 PRIVATE MacroStore* MacroStore_new()
 {
   MacroStore * this = (MacroStore*)Object_new(sizeof(MacroStore), &macroStoreClass);
 
-  this->root = (struct MacroStoreNode * )Memory_alloc(sizeof(struct MacroStore));
+  this->root = (struct MacroStoreNode * )Memory_alloc(sizeof(struct MacroStoreNode));
 
   for (int i = 0; i < MAX_CHILDREN; i++)
   {
     this->root->children[i] = 0;
     this->root->isLeaf = 1;
+    this->root->def = 0;
   }
 
-  for (char c = 0; c < 255; c++)
+  for (int c = 0; c < 255; c++)
   {
-    if ((c >= 'A') && (c <= 'Z')) convert[c] = c - 'A' + 2;
-    else if (c == '_') convert[c] = 1;
+    if ((c >= 'A') && (c <= 'Z')) 
+    {
+      convert[c] = c - 'A' + 2;
+      convertBack[c - 'A' + 2] = c;
+    }
+    else if (c == '_') 
+    {
+      convert[c] = 1;
+      convertBack[1] = c;
+    }
     else
+    {
       convert[c] = 0;
+      convertBack[0] = 0;
+    }
   }
   return this;
 }
@@ -84,11 +105,22 @@ PRIVATE void MacroStore_delete(MacroStore* this)
 PRIVATE void MacroStore_print(MacroStore* this)
 {
   struct MacroStoreNode* currentNode = this->root;
-
+  char * name = Memory_alloc(256); // MAX Macro name length
   for (int i = 0; i < MAX_CHILDREN; i++)
   {
-    if (!currentNode->isLeaf) MacroStoree_printChildrenNode(this, currentNode->children[i]);
+    if (currentNode->children[i])
+    {
+      *name = convertBack[i];
+      if (!currentNode->isLeaf) 
+        MacroStore_printChildrenNode(this, currentNode->children[i], name);
+      else
+      {
+        *(name+1) = 0;
+        PRINT(("%s\n", name));
+      }
+    }
   }
+  Memory_free(name, 256);
 }
 
 PRIVATE unsigned int MacroStore_getSize(MacroStore* this)
@@ -106,16 +138,22 @@ PRIVATE int MacroStore_insertName(MacroStore* this, String * name, MacroDefiniti
   for (int i = 0; i < length; i++)
   {
     c = convert[buffer[i]];
-    if (currentNode->children[c]) currentNode = currentNode->children[c];
+    if (currentNode->isLeaf)
+    {
+      currentNode->isLeaf = 0;
+      currentNode->children[c] = Memory_alloc(sizeof(struct MacroStoreNode));
+      currentNode = currentNode->children[c];
+    }
+    else if (currentNode->children[c])
+      currentNode = currentNode->children[c];
     else
     {
-      currentNode->children[c] = Memory_alloc(sizeof(struct MacroStoreNode*));
+      currentNode->children[c] = Memory_alloc(sizeof(struct MacroStoreNode));
       currentNode = currentNode->children[c];
-      currentNode->isLeaf = 0;
     }
   }
   currentNode->isLeaf = 1;
-  currentNode->children[c] = body;
+  currentNode->def = body;
 
   return 0;
 }
@@ -143,14 +181,13 @@ PRIVATE enum MacroEvalName MacroStore_evalName(MacroStore* this, char* buffer, i
   {
     c = convert[buffer[i]];
     if (currentNode->children[c]) currentNode = currentNode->children[c];
-    else
 
   }
 
   return E_NOT_MACRO;
 }
 
-PRIVATE MacroStore_printChildrenNode(MacroStore* this, struct MacroStoreNode* node)
+PRIVATE void MacroStore_printChildrenNode(MacroStore* this, struct MacroStoreNode* node, char * name)
 {
   if (node == 0) return;
 
