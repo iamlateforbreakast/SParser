@@ -7,6 +7,7 @@
 **************************************************/
 #include "TransUnit.h"
 #include "MacroDefinition.h"
+#include "MacroStore.h"
 #include "Buffer.h"
 #include "List.h"
 #include "Map.h"
@@ -29,6 +30,7 @@ struct TransUnit
   FileMgr * fm;
   List* buffers;
   Map* macros;
+  MacroStore* store;
   struct Buffer* currentBuffer;
   int nbCharRead;
 };
@@ -317,6 +319,9 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
     {
       this->currentBuffer->currentPtr++;
       this->currentBuffer->nbCharRead++;
+        /* MacroStore_checkName(this->currentBuffer->currentMacroPtr, length)
+        if 1 length ++
+        if 0 currentMacroPtr = currentPtr, length = 1*/
       isReadingContent = 1;
     }
   }
@@ -490,7 +495,7 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
   String * macroBody = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
   String_print(macroBody);
 
-  MacroDefinition* macroDefinition = MacroDefinition_new();
+  MacroDefinition* macroDefinition = MacroDefinition_new(macroBody);
   Map_insert(this->macros, macroName, macroDefinition, 1);
 }
 
