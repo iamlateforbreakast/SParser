@@ -89,7 +89,7 @@ PUBLIC TransUnit* TransUnit_new(FileDesc* file, FileMgr * fileMgr)
   this->currentBuffer = buffer;
   this->nbCharRead = 0;
   this->macros = Map_new();
-
+  this->store = MacroStore_new();
   return this;
 }
 
@@ -110,6 +110,7 @@ PUBLIC void TransUnit_delete(TransUnit* this)
   }
   List_delete(this->buffers);
   Map_delete(this->macros);
+  MacroStore_delete(this->store);
   /* De-allocate the base object */
   Object_deallocate(&this->object);
 }
@@ -495,8 +496,10 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
   String * macroBody = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
   String_print(macroBody);
 
-  MacroDefinition* macroDefinition = MacroDefinition_new(macroBody);
-  Map_insert(this->macros, macroName, macroDefinition, 1);
+  MacroDefinition* macroDefinition = MacroDefinition_new(0, macroBody);
+  //Map_insert(this->macros, macroName, macroDefinition, 1);
+  MacroStore_insertName(this->store, macroName, macroDefinition);
+  String_delete(macroName);
 }
 
 /**********************************************//**
@@ -526,7 +529,8 @@ PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue)
   int nestingLevel = 0;
   int isLookingForEndif = 0;
   /* Check if macro is defined or not defined */
-  int firstBlockActive = (Map_find(this->macros, macroName, &macro) == checkForTrue);
+  //int firstBlockActive = (Map_find(this->macros, macroName, &macro) == checkForTrue);
+  int firstBlockActive = (MacroStore_isDefName(this->store, macroName) == checkForTrue);
   int isFinished = 0;
   int startBlock = this->currentBuffer->nbCharRead;
   int endBlock = -1;
@@ -542,7 +546,15 @@ PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue)
       if (nestingLevel == 0)
       {
         //String* buffer = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
+        if (firstBlockActive)
+        {
         isFinished = 1;
+        }
+        else
+        {
+          isFinished = 1;
+          endBlock = this->currentBuffer->nbCharRead;
+        }
         this->currentBuffer->currentPtr += 6;
         this->currentBuffer->nbCharRead += 6;
       }
@@ -552,7 +564,15 @@ PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue)
     {
       if (nestingLevel == 0)
       {
+        if (firstBlockActive)
+        {
         endBlock = this->currentBuffer->nbCharRead;
+        }
+        else
+        {
+          startBlock = this->currentBuffer->nbCharRead + 5;
+          endBlock = -1;
+        }
         this->currentBuffer->currentPtr += 5;
         this->currentBuffer->nbCharRead += 5;
       }
