@@ -45,7 +45,7 @@ PRIVATE unsigned int MacroStore_getSize(MacroStore * this);
 PRIVATE int MacroStore_insertName(MacroStore* this, String* name, MacroDefinition* body);
 PRIVATE int MacroStore_removeName(MacroStore* this, String* name);
 PRIVATE enum MacroEvalName MacroStore_evalName(MacroStore* this, char* ptr, int length);
-PRIVATE void MacroStore_printChildrenNode(MacroStore* this, struct MacroStoreNode* node, char * name);
+PRIVATE void MacroStore_printChildrenNode(MacroStore* this, struct MacroStoreNode* node, char * name, int l);
 
 PRIVATE Class macroStoreClass =
 {
@@ -106,18 +106,19 @@ PRIVATE void MacroStore_print(MacroStore* this)
 {
   struct MacroStoreNode* currentNode = this->root;
   char * name = Memory_alloc(256); // MAX Macro name length
+  int l = 0;
   for (int i = 0; i < MAX_CHILDREN; i++)
   {
     if (currentNode->children[i])
     {
-      *name = convertBack[i];
+      name[l] = convertBack[i];
       if (!currentNode->isLeaf) 
-        MacroStore_printChildrenNode(this, currentNode->children[i], name);
+        MacroStore_printChildrenNode(this, currentNode->children[i], name, l + 1);
       else
       {
-        *(name+1) = 0;
-        PRINT(("%s\n", name));
+        name[l] = 0;
       }
+      //PRINT(("%s\n", name));
     }
   }
   Memory_free(name, 256);
@@ -187,13 +188,28 @@ PRIVATE enum MacroEvalName MacroStore_evalName(MacroStore* this, char* buffer, i
   return E_NOT_MACRO;
 }
 
-PRIVATE void MacroStore_printChildrenNode(MacroStore* this, struct MacroStoreNode* node, char * name)
+PRIVATE void MacroStore_printChildrenNode(MacroStore* this, struct MacroStoreNode* node, char * name, int l)
 {
   if (node == 0) return;
 
-  for (int i = 0; i < MAX_CHILDREN; i++)
+  if (node->isLeaf)
   {
-
+    name[l] = 0;
+    PRINT(("%s\n", name));
+    return;
+  }
+  else
+  {
+    if (node->def)
+    {
+      name[l] = 0;
+      PRINT(("%s\n", name));
+    }
+    for (int i = 0; i < MAX_CHILDREN; i++)
+    {
+      name[l] = convertBack[i];
+      if (node->children[i]) MacroStore_printChildrenNode(this, node->children[i], name, l + 1);
+    }
   }
 }
 #endif /* _MACROSTORE_H_ */

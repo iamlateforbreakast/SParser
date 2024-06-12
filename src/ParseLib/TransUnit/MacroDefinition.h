@@ -32,12 +32,22 @@ PRIVATE Class macroDefinitionClass =
 
 PRIVATE MacroDefinition* MacroDefinition_new()
 {
-  return 0;
+  MacroDefinition * this;
+
+  this = (MacroDefinition*)Object_new(sizeof(MacroDefinition), &macroDefinitionClass);
+
+  if (this==0) return 0;
+
+  return this;
 }
 
 PRIVATE void MacroDefinition_delete(MacroDefinition* this)
 {
+  if (this == 0) return;
+  /* De-allocate the specific members */
 
+  /* De-allocate the base object */
+  Object_deallocate(&this->object);
 }
 
 PRIVATE void MacroDefinition_print(MacroDefinition* this)
