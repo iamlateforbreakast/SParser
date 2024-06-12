@@ -1,10 +1,11 @@
 // test_ifdef.c 
+#define TEST 0
 #ifdef TEST
-void enabled()
+void enable()
 {
 }
 #else
-void disabled()
+void disable()
 {
 }
 #endif
