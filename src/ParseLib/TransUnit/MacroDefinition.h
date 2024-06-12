@@ -8,7 +8,7 @@
 
 typedef struct MacroDefinition MacroDefinition;
 
-PRIVATE MacroDefinition * MacroDefinition_new();
+PRIVATE MacroDefinition * MacroDefinition_new(List * parameters, String * body);
 PRIVATE void MacroDefinition_delete(MacroDefinition * this);
 PRIVATE void MacroDefinition_print(MacroDefinition * this);
 PRIVATE unsigned int MacroDefinition_getSize(MacroDefinition * this);
@@ -30,13 +30,13 @@ PRIVATE Class macroDefinitionClass =
   .f_size = (Sizer)&MacroDefinition_getSize
 };
 
-PRIVATE MacroDefinition* MacroDefinition_new()
+PRIVATE MacroDefinition* MacroDefinition_new(List * parameters, String * body)
 {
-  MacroDefinition * this;
 
-  this = (MacroDefinition*)Object_new(sizeof(MacroDefinition), &macroDefinitionClass);
+  MacroDefinition * this = (MacroDefinition*)Object_new(sizeof(MacroDefinition), &macroDefinitionClass);
 
-  if (this==0) return 0;
+  this->parameters = parameters;
+  this->body = body;
 
   return this;
 }
@@ -45,6 +45,8 @@ PRIVATE void MacroDefinition_delete(MacroDefinition* this)
 {
   if (this == 0) return;
   /* De-allocate the specific members */
+  List_delete(this->parameters);
+  String_delete(this->body);
 
   /* De-allocate the base object */
   Object_deallocate(&this->object);
