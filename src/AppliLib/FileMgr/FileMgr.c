@@ -100,12 +100,12 @@ PUBLIC void FileMgr_delete(FileMgr * this)
       List_delete(this->directories);
       String_delete(this->rootLocation);
       Object_deallocate(&this->object);
-      fileMgr = 0;
+      //fileMgr = 0;
       this = 0;
     }
-    else if (fileMgr->object.refCount>1)
+    else if (this->object.refCount>1)
     {
-      fileMgr->object.refCount--;
+      this->object.refCount--;
     }
   }
 }
@@ -573,6 +573,7 @@ PUBLIC FileDesc * FileMgr_isManaged(FileMgr * this, String * fullName)
   FileDesc * fd = 0;
   unsigned int isFound = 0;
   
+  if (this == 0) return 0;
   /* Find file in list */
   while ((fd = List_getNext(this->files))!=0)
   {
