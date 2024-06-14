@@ -33,6 +33,9 @@ struct TransUnit
   MacroStore* store;
   struct Buffer* currentBuffer;
   int nbCharRead;
+  char * outputBuffer;
+  int outputBufferSize;
+  int nbCharWritten;
 };
 
 /**********************************************//**
@@ -88,8 +91,11 @@ PUBLIC TransUnit* TransUnit_new(FileDesc* file, FileMgr * fileMgr)
   List_insertHead(this->buffers, buffer, 0);
   this->currentBuffer = buffer;
   this->nbCharRead = 0;
-  this->macros = Map_new();
   this->store = MacroStore_new();
+  this->outputBufferSize = 8000;
+  this->outputBuffer = Memory_alloc(this->outputBufferSize);
+  this->nbCharWritten = 0;
+
   return this;
 }
 
@@ -111,6 +117,8 @@ PUBLIC void TransUnit_delete(TransUnit* this)
   List_delete(this->buffers);
   Map_delete(this->macros);
   MacroStore_delete(this->store);
+  Memory_free(this->outputBuffer, this->outputBufferSize);
+
   /* De-allocate the base object */
   Object_deallocate(&this->object);
 }
@@ -161,6 +169,10 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
   int isFinished = 0;
   int isReadingContent = 0;
   int start = this->currentBuffer->nbCharRead;
+
+  /* Reset output buffer */
+  Memory_set(this->outputBuffer, 0, this->outputBufferSize);
+  this->nbCharWritten = 0;
 
   while (!isFinished)
   {
