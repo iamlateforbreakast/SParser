@@ -330,8 +330,10 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
     }
     else
     {
+      this->outputBuffer[this->nbCharWritten] = *(this->currentBuffer->currentPtr);
       this->currentBuffer->currentPtr++;
       this->currentBuffer->nbCharRead++;
+      this->nbCharWritten++;
         /* MacroStore_checkName(this->currentBuffer->currentMacroPtr, length)
         if 1 length ++
         if 0 currentMacroPtr = currentPtr, length = 1*/
@@ -341,8 +343,9 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
     TRACE(("TransUnit_getNextBuffer: start=%d nbCharRead=%d\n", start, this->currentBuffer->nbCharRead));
     String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
     TRACE(("TransUnit_getNextBuffer: %s\n", String_getBuffer(newString)));
-    TransUnit_popBuffer(this);
-  return newString;
+    int a = TransUnit_popBuffer(this);
+    if (!a) PRINT(("Lastbuffer\n"));
+    return newString;
   }
   TRACE(("TransUnit_getNextBuffer: Run out of string\n"));
   //String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
@@ -546,6 +549,7 @@ PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue)
   int isFinished = 0;
   int startBlock = this->currentBuffer->nbCharRead;
   int endBlock = -1;
+  int copyChar = 1;
   String_delete(macroName);
   while ((!isFinished) && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
   {
@@ -566,6 +570,7 @@ PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue)
         {
           isFinished = 1;
           endBlock = this->currentBuffer->nbCharRead;
+          copyChar = 0;
         }
         this->currentBuffer->currentPtr += 6;
         this->currentBuffer->nbCharRead += 6;
@@ -578,12 +583,14 @@ PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue)
       {
         if (firstBlockActive)
         {
-        endBlock = this->currentBuffer->nbCharRead;
+          endBlock = this->currentBuffer->nbCharRead;
+          copyChar = 0;
         }
         else
         {
           startBlock = this->currentBuffer->nbCharRead + 5;
           endBlock = -1;
+          copyChar = 1;
         }
         this->currentBuffer->currentPtr += 5;
         this->currentBuffer->nbCharRead += 5;
@@ -591,15 +598,21 @@ PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue)
     }
     else
     {
-    this->currentBuffer->currentPtr++;
-    this->currentBuffer->nbCharRead++;
+      this->currentBuffer->currentPtr++;
+      this->currentBuffer->nbCharRead++;
+      if (copyChar)
+      {
+        this->outputBuffer[this->nbCharWritten] = *(this->currentBuffer->currentPtr);
+        this->nbCharWritten++;
+      }
     }
   }
 
   String* buffer = String_subString(this->currentBuffer->string, startBlock, endBlock - startBlock);
   TransUnit_pushNewBuffer(this, buffer);
 
-  TRACE(("TransUnit_checkMacro: BUffer extracted %s\n", String_getBuffer(buffer)));
+  //TRACE(("TransUnit_checkMacro: BUffer extracted %s\n", String_getBuffer(buffer)));
+  PRINT(("TransUnit_checkMacro: outbuffer %s\n", this->outputBuffer));
 }
 /**********************************************//**
   @brief TBC.
