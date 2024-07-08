@@ -18,7 +18,8 @@
 #include "Debug.h"
 
 #define DEBUG (0)
-#define IS_MACRO_LETTER(C) ((((C)>='A') && ((C)<='Z')) || ((C)=='_'))
+#define IS_MACRO_LETTER(C) ((((C)>='A') && ((C)<='Z')) || (((C)>='a') && ((C)<='z')) || ((C)=='_'))
+#define OUTPUT_BUFFER_SIZE (8000)
 
 /**********************************************//**
   @class TransUnit
@@ -29,7 +30,6 @@ struct TransUnit
   FileDesc* file;
   FileMgr * fm;
   List* buffers;
-  Map* macros;
   MacroStore* store;
   struct Buffer* currentBuffer;
   int nbCharRead;
@@ -58,6 +58,7 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this);
 PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue);
 PRIVATE int TransUnit_pushNewBuffer(TransUnit* this, String* content);
 PRIVATE int TransUnit_popBuffer(TransUnit* this);
+PRIVATE int TransUnit_expandMacro(TransUnit* this);
 
 /**********************************************//**
   @brief Create a new TransUnit object.
@@ -92,7 +93,7 @@ PUBLIC TransUnit* TransUnit_new(FileDesc* file, FileMgr * fileMgr)
   this->currentBuffer = buffer;
   this->nbCharRead = 0;
   this->store = MacroStore_new();
-  this->outputBufferSize = 8000;
+  this->outputBufferSize = OUTPUT_BUFFER_SIZE;
   this->outputBuffer = Memory_alloc(this->outputBufferSize);
   this->nbCharWritten = 0;
 
@@ -115,7 +116,6 @@ PUBLIC void TransUnit_delete(TransUnit* this)
     Buffer_delete(buffer);
   }
   List_delete(this->buffers);
-  Map_delete(this->macros);
   MacroStore_delete(this->store);
   Memory_free(this->outputBuffer, this->outputBufferSize);
 
@@ -330,6 +330,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
     }
     else
     {
+        TransUnit_expandMacro(this);
       this->outputBuffer[this->nbCharWritten] = *(this->currentBuffer->currentPtr);
       this->currentBuffer->currentPtr++;
       this->currentBuffer->nbCharRead++;
@@ -642,6 +643,14 @@ PRIVATE int TransUnit_popBuffer(TransUnit* this)
   this->currentBuffer  = buffer;
   TRACE(("TransUnit_popBuffer: Buffer %d\n", List_getNbNodes(this->buffers)));
   return 1;
+}
+PRIVATE int TransUnit_expandMacro(TransUnit* this)
+{
+  String * inStr = String_newByRef(this->currentBuffer->currentPtr);
+  String * outStr;
+  outStr = MacroStore_expandMacro(this->store, inStr);
+  if (outStr) TransUnit_pushNewBuffer(this, outStr);
+  return 0;
 }
 /* Consume macro param */
 /*if (c == '(')
