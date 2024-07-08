@@ -48,6 +48,7 @@ PRIVATE int MacroStore_removeName(MacroStore* this, String* name);
 PRIVATE enum MacroEvalName MacroStore_evalName(MacroStore* this, char* ptr, int length);
 PRIVATE void MacroStore_printChildrenNodes(MacroStore* this, struct MacroStoreNode* node, char* name, int l);
 PRIVATE void MacroStore_deleteChildrenNodes(MacroStore* this, struct MacroStoreNode* node);
+PRIVATE String * MacroStore_expandMacro(MacroStore * this, String * inStr);
 
 PRIVATE Class macroStoreClass =
 {
@@ -228,7 +229,7 @@ PRIVATE enum MacroEvalName MacroStore_evalName(MacroStore* this, char* buffer, i
   }
   if (currentNode->def != 0) return E_DEFINED_MACRO;
 
-  return E_NOT_MACRO;
+  return E_POSSIBLE_MACRO;
 }
 
 PRIVATE void MacroStore_printChildrenNodes(MacroStore* this, struct MacroStoreNode* node, char* name, int l)
@@ -269,5 +270,19 @@ PRIVATE void MacroStore_deleteChildrenNodes(MacroStore* this, struct MacroStoreN
       node->children[i] = 0;
     }
   }
+}
+PRIVATE String* MacroStore_expandMacro(MacroStore* this, String* inStr)
+{
+  int length = 1;
+  enum MacroEvalName status;
+  status = MacroStore_evalName(this, String_getBuffer(inStr), length);
+  if (status == E_NOT_MACRO) return 0;
+  while ((status == E_POSSIBLE_MACRO) && (length<String_getLength(inStr)))
+  {
+    length++;
+    status = MacroStore_evalName(this, String_getBuffer(inStr), length);
+  }
+  if (status == E_POSSIBLE_MACRO) return 0;
+  return 0;
 }
 #endif /* _MACROSTORE_H_ */
