@@ -1,3 +1,4 @@
+/* MyAllocator.c */
 #include "MyAllocator.h"
 #include "Malloc.h"
 #include "Types.h"
@@ -9,7 +10,8 @@ struct MyAllocator
 {
   Allocator allocator;
   unsigned int size;
-  void * memory;
+  void * memory_start;
+  void * memory_end;
   void * pointer;
 };
 
@@ -25,15 +27,16 @@ MyAllocator * MyAllocator_new(unsigned int size)
   myAllocator->allocator.report = (ReportFunction)MyAllocator_report;
   myAllocator->allocator.nbAllocatedObjects = 0;
   myAllocator->size = size;
-  myAllocator->memory = Malloc_allocate((Allocator*)Malloc_getRef(), myAllocator->size);
-  myAllocator->pointer = myAllocator->memory;
+  myAllocator->memory_start = Malloc_allocate((Allocator*)Malloc_getRef(), myAllocator->size);
+  myAllocator->memory_end = (void*)((char*)myAllocator->memory_start + ((size / MEM_ALIGN) + 1) * MEM_ALIGN);
+  myAllocator->pointer = myAllocator->memory_start;
 
   return myAllocator;
 }
 
 void MyAllocator_delete(MyAllocator * this)
 {
-  Malloc_deallocate((Allocator*)Malloc_getRef(), (char*)this->memory);
+  Malloc_deallocate((Allocator*)Malloc_getRef(), (char*)this->memory_start);
   Malloc_deallocate((Allocator*)Malloc_getRef(), (char*)this);
 }
 
@@ -44,12 +47,14 @@ void MyAllocator_reset(Allocator * this)
 
 void * MyAllocator_allocate(Allocator * this, unsigned int size)
 {
-  if ((((MyAllocator*)this)->pointer+size)<(((MyAllocator*)this)->memory + ((MyAllocator*)this)->size))
+  void* updated_ptr = (char*)((MyAllocator*)this)->pointer + ((size / MEM_ALIGN) + 1)*MEM_ALIGN;
+
+  //TRACE(("MyAllocator size %d \n", size));
+  if (updated_ptr < ((MyAllocator*)this)->memory_end)
   {
-    void * allocatedPtr = ((MyAllocator*)this)->pointer;
-    ((MyAllocator*)this)->pointer += ((size / MEM_ALIGN) + 1)*MEM_ALIGN;
+    ((MyAllocator*)this)->pointer = updated_ptr;
     this->nbAllocatedObjects++;
-    return allocatedPtr;
+    return ((MyAllocator*)this)->pointer;
   }
   else
   {
