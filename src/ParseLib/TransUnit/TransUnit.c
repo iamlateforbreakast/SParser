@@ -35,7 +35,7 @@ struct TransUnit
   FileMgr* fm;
   List* buffers;
   MacroStore* store;
-  struct Buffer* currentBuffer;
+  Buffer* currentBuffer;
   int nbCharRead;
   char* outputBuffer;
   int outputBufferSize;
@@ -221,7 +221,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
         // Consume include
         TransUnit_consumeInclude(this);
         start = this->currentBuffer->nbCharRead;
-        TRACE(("#include: start = %d\n", start));
+        //TRACE(("#include: start = %d\n", start));
         //isReadyToEmit = 1;
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "#define", 7))
@@ -235,7 +235,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
         // Consume macro definition
         TransUnit_readMacroDefinition(this);
         start = this->currentBuffer->nbCharRead;
-        TRACE(("#define: start = %d\n", start));
+        //TRACE(("#define: start = %d\n", start));
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "#ifndef", 7))
       {
@@ -266,7 +266,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
         // Check macro is defined
         TransUnit_checkMacro(this, 1);
         start = this->currentBuffer->nbCharRead;
-        TRACE(("#ifdef: start = %d\n", start));
+        //TRACE(("#ifdef: start = %d\n", start));
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "#undef", 6))
       {
@@ -340,7 +340,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
     //TRACE(("TransUnit_getNextBuffer: start=%d nbCharRead=%d\n", start, this->currentBuffer->nbCharRead));
     //String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
     //TRACE(("TransUnit_getNextBuffer: %s\n", String_getBuffer(newString)));
-    int a = TransUnit_popBuffer(this);
+        int a = TransUnit_popBuffer(this);
     if (!a)
     {
       PRINT(("Lastbuffer\n"));
@@ -440,6 +440,8 @@ PRIVATE void TransUnit_consumeInclude(TransUnit* this)
 
   /* Load the new buffer using the file manager */
   FileDesc* fileDesc = FileMgr_isManaged(this->fm, fileName);
+  String_delete(fileName);
+
   if (fileDesc != 0)
   {
     String* buffer = FileDesc_load(fileDesc);
@@ -543,7 +545,7 @@ PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue)
   }
  
   String* macroName = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
-  TRACE(("TransUnit_checkMacro: read macro name %s\n", String_getBuffer(macroName)));
+  //TRACE(("TransUnit_checkMacro: read macro name %s\n", String_getBuffer(macroName)));
   MacroDefinition* macro = 0;
   start = this->currentBuffer->nbCharRead;
   int nestingLevel = 0;
@@ -571,9 +573,15 @@ PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue)
       if (nestingLevel == 0)
       {
         //String* buffer = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
+        if (endBlock == -1) // There is no #else
+        {
+          isFinished = 1;
+          endBlock = this->currentBuffer->nbCharRead;
+        }
         if (firstBlockActive)
         {
           isFinished = 1;
+          //endBlock = this->currentBuffer->nbCharRead;
         }
         else
         {
@@ -627,6 +635,11 @@ PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue)
     }
   }
 
+  if (endBlock == -1)
+  {
+    PRINT(("End block is -1 ====================================================\n"));
+    PRINT(("%s\n================================================================\n", String_getBuffer(this->currentBuffer->string)));
+  }
   String* buffer = String_subString(this->currentBuffer->string, startBlock, endBlock - startBlock);
   TransUnit_pushNewBuffer(this, buffer);
 
@@ -659,6 +672,8 @@ PRIVATE int TransUnit_pushNewBuffer(TransUnit* this, String* content)
 **************************************************/
 PRIVATE int TransUnit_popBuffer(TransUnit* this)
 {
+  TRACE(("TransUnit_popBuffer: Buffer %d\n", List_getNbNodes(this->buffers)));
+
   if (List_getNbNodes(this->buffers) == 0) return 0;
 
   Buffer* buffer = (Buffer*)List_removeHead(this->buffers);
@@ -667,16 +682,14 @@ PRIVATE int TransUnit_popBuffer(TransUnit* this)
   buffer = (Buffer*)List_getHead(this->buffers);
   this->currentBuffer = buffer;
 
-  TRACE(("TransUnit_popBuffer: Buffer %d\n", List_getNbNodes(this->buffers)));
-
   return List_getNbNodes(this->buffers);
 }
 
 PRIVATE int TransUnit_expandMacro(TransUnit* this)
 {
+#if 0
   String * inStr = String_newByRef(this->currentBuffer->currentPtr);
 
-#if 0
   outStr = MacroStore_expandMacro(this->store, inStr);
   if (outStr) TransUnit_pushNewBuffer(this, outStr);
 #endif
