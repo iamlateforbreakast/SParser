@@ -19,7 +19,7 @@
 #include "Object.h"
 #include "Debug.h"
 
-#define DEBUG (1)
+#define DEBUG (0)
 
 #define IS_MACRO_LETTER(C) ((((C)>='A') && ((C)<='Z')) || (((C)>='a') && ((C)<='z')) || ((C)=='_'))
 /* Size of the output buffer in bytes */
@@ -81,6 +81,7 @@ PUBLIC TransUnit* TransUnit_new(FileDesc* file, FileMgr* fileMgr)
     return 0;
   }
 
+  PRINT(("TransUnit_new: Processing %s\n", String_getBuffer(FileDesc_getFullName(file))));
   this = (TransUnit*)Object_new(sizeof(TransUnit), &transUnitClass);
 
   if (this == 0) return 0;
@@ -186,112 +187,51 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
     {
       if (Memory_ncmp(this->currentBuffer->currentPtr, "//", 2))
       {
-        if (isReadingContent)
-        {
-          // To remove: String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
-
-          // To remove: return newString;
-        }
-        // Consume until the end of line
-        // Comment is discarded
         TransUnit_consumeLineComment(this);
         start = this->currentBuffer->nbCharRead;
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "/*", 2))
       {
-        if (isReadingContent)
-        {
-          // To remove: String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
-
-          // To remove: return newString;
-        }
-        // Consume until */
-        // Comment is discarded
         TransUnit_consumeMultilineComment(this);
         start = this->currentBuffer->nbCharRead;
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "#include", 8))
       {
-        if (isReadingContent)
-        {
-          // To remove: String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
-
-          // To remove: return newString;
-        }
-        // Consume include
         TransUnit_consumeInclude(this);
         start = this->currentBuffer->nbCharRead;
-        //TRACE(("#include: start = %d\n", start));
-        //isReadyToEmit = 1;
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "#define", 7))
       {
-        if (isReadingContent)
-        {
-          // To remove: String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
-
-          // To remove: return newString;
-        }
-        // Consume macro definition
         TransUnit_readMacroDefinition(this);
         start = this->currentBuffer->nbCharRead;
-        //TRACE(("#define: start = %d\n", start));
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "#ifndef", 7))
       {
-        if (isReadingContent)
-        {
-          // To remove: String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
-
-          // To remove: return newString;
-        }
-        // Evaluate condition
         this->currentBuffer->currentPtr += 7;
         this->currentBuffer->nbCharRead += 7;
         // Check macro is not defined
         TransUnit_checkMacro(this, 0);
         start = this->currentBuffer->nbCharRead;
-        TRACE(("#ifndef: start = %d\n", start));
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "#ifdef", 6))
       {
-        if (isReadingContent)
-        {
-          // To remove: String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
-
-          // To remove: return newString;
-        }
         this->currentBuffer->currentPtr += 6;
         this->currentBuffer->nbCharRead += 6;
         // Check macro is defined
         TransUnit_checkMacro(this, 1);
         start = this->currentBuffer->nbCharRead;
-        //TRACE(("#ifdef: start = %d\n", start));
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "#undef", 6))
       {
-        if (isReadingContent)
-        {
-          // To remove: String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
-
-          // To remove: return newString;
-        }
         this->currentBuffer->currentPtr += 6;
         this->currentBuffer->nbCharRead += 6;
         start = this->currentBuffer->nbCharRead;
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "#if", 2))
       {
-        if (isReadingContent)
-        {
-          // To remove: String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
-
-          // To remove: return newString;
-        }
         this->currentBuffer->currentPtr += 2;
         this->currentBuffer->nbCharRead += 2;
         start = this->currentBuffer->nbCharRead;
-        TRACE(("#if: start = %d\n", start));
       }
       /*else if (Memory_ncmp(this->currentBuffer->currentPtr, "#else", 4))
       {
@@ -303,12 +243,6 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
       }*/
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "#error", 5))
       {
-        if (isReadingContent)
-        {
-          // To remove: String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
-
-          // To remove: return newString;
-        }
         this->currentBuffer->currentPtr += 5;
         this->currentBuffer->nbCharRead += 5;
         start = this->currentBuffer->nbCharRead;
@@ -334,23 +268,17 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
         this->currentBuffer->currentPtr++;
         this->currentBuffer->nbCharRead++;
         this->nbCharWritten++; // Need to check max value
-        isReadingContent = 1;
       }
     }
-    //TRACE(("TransUnit_getNextBuffer: start=%d nbCharRead=%d\n", start, this->currentBuffer->nbCharRead));
-    //String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
-    //TRACE(("TransUnit_getNextBuffer: %s\n", String_getBuffer(newString)));
-        int a = TransUnit_popBuffer(this);
+    int a = TransUnit_popBuffer(this);
     if (!a)
     {
       PRINT(("Lastbuffer\n"));
       return 0;
     }
-    //return newString;
   }
 
   TRACE(("TransUnit_getNextBuffer: Run out of string\n"));
-  //String* newString = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
 
   return 0;
 }
@@ -452,7 +380,7 @@ PRIVATE void TransUnit_consumeInclude(TransUnit* this)
   {
     Error_new(ERROR_FATAL, "TransUnit_consumeInclude: file not found %s.\n", String_getBuffer(fileName));
   }
-}
+} 
 
 /**********************************************//**
   @brief TBC.
@@ -484,7 +412,7 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
 
 
   String* macroName = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
-  String_print(macroName);
+  //String_print(macroName);
 
   /* Consume parameters if any */
   if (*this->currentBuffer->currentPtr == '(')
@@ -514,7 +442,7 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
     this->currentBuffer->nbCharRead++;
   }
   String* macroBody = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
-  String_print(macroBody);
+  //String_print(macroBody);
 
   MacroDefinition* macroDefinition = MacroDefinition_new(0, macroBody);
   //Map_insert(this->macros, macroName, macroDefinition, 1);
@@ -555,10 +483,11 @@ PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue)
   //int firstBlockActive = (Map_find(this->macros, macroName, &macro) == checkForTrue);
   int firstBlockActive = (MacroStore_isDefName(this->store, macroName) == checkForTrue);
   int isFinished = 0;
-  int startBlock = this->currentBuffer->nbCharRead;
+  int startBlock = -1;  
   int endBlock = -1;
-  int copyChar = 1;
   String_delete(macroName);
+
+  if (firstBlockActive) startBlock = this->currentBuffer->nbCharRead;
 
   while ((!isFinished) && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
   {
@@ -572,32 +501,28 @@ PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue)
     {
       if (nestingLevel == 0)
       {
-        //String* buffer = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
-        if (endBlock == -1) // There is no #else
-        {
-          isFinished = 1;
-          endBlock = this->currentBuffer->nbCharRead;
-        }
         if (firstBlockActive)
         {
-          isFinished = 1;
-          //endBlock = this->currentBuffer->nbCharRead;
+          if (endBlock == -1) // There is no #else
+          {
+            endBlock = this->currentBuffer->nbCharRead;
+          }
         }
         else
         {
-          isFinished = 1;
-          endBlock = this->currentBuffer->nbCharRead;
-          copyChar = 0;
+          if (startBlock != -1) // There was an else
+          {
+            endBlock = this->currentBuffer->nbCharRead;
+          }
         }
-        this->currentBuffer->currentPtr += 6;
-        this->currentBuffer->nbCharRead += 6;
+        isFinished = 1;
       }
       else
       {
         nestingLevel--;
-        this->currentBuffer->currentPtr += 6;
-        this->currentBuffer->nbCharRead += 6;
       }
+      this->currentBuffer->currentPtr += 6;
+      this->currentBuffer->nbCharRead += 6;
     }
     else if (Memory_ncmp(this->currentBuffer->currentPtr, "#else", 5))
     {
@@ -606,45 +531,31 @@ PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue)
         if (firstBlockActive)
         {
           endBlock = this->currentBuffer->nbCharRead;
-          copyChar = 0;
         }
         else
         {
           startBlock = this->currentBuffer->nbCharRead + 5;
           endBlock = -1;
-          copyChar = 1;
         }
-        this->currentBuffer->currentPtr += 5;
-        this->currentBuffer->nbCharRead += 5;
+
       }
-      else
-      {
-        this->currentBuffer->currentPtr += 5;
-        this->currentBuffer->nbCharRead += 5;
-      }
+      this->currentBuffer->currentPtr += 5;
+      this->currentBuffer->nbCharRead += 5;
     }
     else
     {
       this->currentBuffer->currentPtr++;
       this->currentBuffer->nbCharRead++;
-      if (copyChar)
-      {
-        //this->outputBuffer[this->nbCharWritten] = *(this->currentBuffer->currentPtr);
-        //this->nbCharWritten++;
-      }
     }
   }
 
-  if (endBlock == -1)
+  if (endBlock != -1) // Need to stack a buffer
   {
-    PRINT(("End block is -1 ====================================================\n"));
-    PRINT(("%s\n================================================================\n", String_getBuffer(this->currentBuffer->string)));
+    String* buffer = String_subString(this->currentBuffer->string, startBlock, endBlock - startBlock);
+    TransUnit_pushNewBuffer(this, buffer);
   }
-  String* buffer = String_subString(this->currentBuffer->string, startBlock, endBlock - startBlock);
-  TransUnit_pushNewBuffer(this, buffer);
-
   //TRACE(("TransUnit_checkMacro: BUffer extracted %s\n", String_getBuffer(buffer)));
-  PRINT(("TransUnit_checkMacro: outbuffer %s\n", this->outputBuffer));
+  //PRINT(("TransUnit_checkMacro: outbuffer %s\n", this->outputBuffer));
 }
 
 /**********************************************//**
@@ -659,7 +570,7 @@ PRIVATE int TransUnit_pushNewBuffer(TransUnit* this, String* content)
   List_insertHead(this->buffers, buffer, 0);
   this->currentBuffer = buffer;
 
-  TRACE(("TransuNit_pushNewBuffer: Buffer %d\n", List_getNbNodes(this->buffers)));
+  PRINT(("TransuNit_pushNewBuffer: Buffer %d\n", List_getNbNodes(this->buffers)));
 
   return 0;
 }
@@ -672,7 +583,7 @@ PRIVATE int TransUnit_pushNewBuffer(TransUnit* this, String* content)
 **************************************************/
 PRIVATE int TransUnit_popBuffer(TransUnit* this)
 {
-  TRACE(("TransUnit_popBuffer: Buffer %d\n", List_getNbNodes(this->buffers)));
+  PRINT(("TransUnit_popBuffer: Buffer %d\n", List_getNbNodes(this->buffers)));
 
   if (List_getNbNodes(this->buffers) == 0) return 0;
 
