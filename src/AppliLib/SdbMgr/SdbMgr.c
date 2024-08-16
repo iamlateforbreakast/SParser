@@ -135,7 +135,7 @@ PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement, List * r
   int step = 0;
   //void **rows = 0;
   unsigned int count = 0;
-  int i;
+  unsigned int i;
   String * temp = 0;
   
   Error_new(ERROR_DBG, "SdbMgr: %s\n", statement);
@@ -153,7 +153,7 @@ PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement, List * r
       {
         //printf("SdbMgr: Query performed\n");
         temp = String_new((char *)sqlite3_column_text(res, i));
-        List_insertHead(result, temp, 0);
+        List_insertHead(result, temp, 1);
       }
     step = sqlite3_step(res);
     nbResults++;
