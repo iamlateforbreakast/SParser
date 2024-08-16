@@ -23,7 +23,7 @@
 
 #define IS_MACRO_LETTER(C) ((((C)>='A') && ((C)<='Z')) || (((C)>='a') && ((C)<='z')) || ((C)=='_'))
 /* Size of the output buffer in bytes */
-#define OUTPUT_BUFFER_SIZE (10000)
+#define OUTPUT_BUFFER_SIZE (20000)
 
 /**********************************************//**
   @class TransUnit
@@ -268,12 +268,14 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
         this->currentBuffer->currentPtr++;
         this->currentBuffer->nbCharRead++;
         this->nbCharWritten++; // Need to check max value
+        if (this->nbCharWritten >= OUTPUT_BUFFER_SIZE) Error_new(ERROR_FATAL, "Output BUffer is overflowing.\n");
       }
     }
     int a = TransUnit_popBuffer(this);
     if (!a)
     {
       PRINT(("Lastbuffer\n"));
+      PRINT(("Total number of chr written: %d\n", this->nbCharWritten));
       return 0;
     }
   }
@@ -345,7 +347,8 @@ PRIVATE void TransUnit_consumeInclude(TransUnit* this)
   this->currentBuffer->currentPtr += 8;
   this->currentBuffer->nbCharRead += 8;
 
-  while (!Memory_ncmp(this->currentBuffer->currentPtr, "\"", 1) && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
+  while ((*this->currentBuffer->currentPtr != '\"') &&
+         (*this->currentBuffer->currentPtr != '<') && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
   {
     this->currentBuffer->currentPtr++;
     this->currentBuffer->nbCharRead++;
@@ -354,7 +357,8 @@ PRIVATE void TransUnit_consumeInclude(TransUnit* this)
 
   this->currentBuffer->currentPtr++;
   this->currentBuffer->nbCharRead++;
-  while (!Memory_ncmp(this->currentBuffer->currentPtr, "\"", 1) && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
+  while ((*this->currentBuffer->currentPtr != '\"') &&
+         (*this->currentBuffer->currentPtr != '>') && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
   {
     this->currentBuffer->currentPtr++;
     this->currentBuffer->nbCharRead++;
@@ -368,7 +372,6 @@ PRIVATE void TransUnit_consumeInclude(TransUnit* this)
 
   /* Load the new buffer using the file manager */
   FileDesc* fileDesc = FileMgr_isManaged(this->fm, fileName);
-  String_delete(fileName);
 
   if (fileDesc != 0)
   {
@@ -378,8 +381,9 @@ PRIVATE void TransUnit_consumeInclude(TransUnit* this)
   }
   else
   {
-    Error_new(ERROR_FATAL, "TransUnit_consumeInclude: file not found %s.\n", String_getBuffer(fileName));
+    Error_new(ERROR_NORMAL, "TransUnit_consumeInclude: file not found %s.\n", String_getBuffer(fileName));
   }
+  String_delete(fileName);
 } 
 
 /**********************************************//**
@@ -570,7 +574,7 @@ PRIVATE int TransUnit_pushNewBuffer(TransUnit* this, String* content)
   List_insertHead(this->buffers, buffer, 0);
   this->currentBuffer = buffer;
 
-  PRINT(("TransuNit_pushNewBuffer: Buffer %d\n", List_getNbNodes(this->buffers)));
+  TRACE(("TransuNit_pushNewBuffer: Buffer %d\n", List_getNbNodes(this->buffers)));
 
   return 0;
 }
@@ -583,7 +587,7 @@ PRIVATE int TransUnit_pushNewBuffer(TransUnit* this, String* content)
 **************************************************/
 PRIVATE int TransUnit_popBuffer(TransUnit* this)
 {
-  PRINT(("TransUnit_popBuffer: Buffer %d\n", List_getNbNodes(this->buffers)));
+  TRACE(("TransUnit_popBuffer: Buffer %d\n", List_getNbNodes(this->buffers)));
 
   if (List_getNbNodes(this->buffers) == 0) return 0;
 
