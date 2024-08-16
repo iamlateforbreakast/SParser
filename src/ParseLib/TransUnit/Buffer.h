@@ -5,6 +5,7 @@
 #include "Types.h"
 #include "Class.h"
 #include "Object.h"
+#include "Debug.h"
 
 typedef struct Buffer Buffer;
 
