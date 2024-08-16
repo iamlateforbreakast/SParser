@@ -158,7 +158,8 @@ PUBLIC unsigned int SParse_parse(SParse * this, const char * extension)
   List* products = Configuration_getProducts(this->configuration);
   
   Product* p;
-  while ((p = List_getNext(products)) != 0)
+  int nbProductParsed = 0;
+  while (((p = List_getNext(products)) != 0) && (nbProductParsed<1))
   {
     PRINT(("-------------------------------------------------------\n"));
     PRINT(("SParse: Processing product %s\n", String_getBuffer(Product_getName(p))));
@@ -166,12 +167,16 @@ PUBLIC unsigned int SParse_parse(SParse * this, const char * extension)
     FileMgr * fileMgr = Product_getSourceFiles(p);
     /* List all files with extension in all the input directories */
     List * fileList = FileMgr_filterFiles(fileMgr, extension);
-
+    int nbFileParsed = 0;
     //List_forEach(fileList, (void (*)(void* , void *))&SParse_parseFile, (void*)this);
-    while ((fd = List_getNext(fileList))!=0)
+    while (((fd = List_getNext(fileList)) != 0) && (nbFileParsed < 5))
+    {
       SParse_parseFile(this, fd, fileMgr);
+      nbFileParsed++;
+    }
     FileMgr_delete(fileMgr);
     List_delete(fileList);
+    nbProductParsed++;
   }
   OptionMgr_delete(optionMgr);
   
@@ -193,17 +198,19 @@ PRIVATE unsigned int SParse_parseFile(SParse * this, FileDesc * fileDesc, FileMg
   void * g = 0;
   String* buffer = 0;
 
-  PRINT(("SParse: Parsing %s\n", String_getBuffer(FileDesc_getName(fileDesc))));
   for (i=0; i<nbRows; i++)
   {
     if (String_matchWildcard(FileDesc_getName(fileDesc), SParse_default[i].extension))
     {
       TransUnit * tu = TransUnit_new(fileDesc, fileMgr);
+      buffer = TransUnit_getNextBuffer(tu);
+#if 0
       while ((buffer = TransUnit_getNextBuffer(tu))!=0)
       {
         //g = SParse_default[i].function_new();
         //Ast * ast = SParse_default[i].function_process(buffer);
       }
+#endif
       SParse_default[i].function_delete(g);
 
       TransUnit_delete(tu);
