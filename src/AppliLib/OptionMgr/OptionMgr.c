@@ -192,7 +192,7 @@ PUBLIC void OptionMgr_setOption(OptionMgr * this, const char * optionName, Strin
 PUBLIC unsigned int OptionMgr_readFromFile(OptionMgr * this)
 {
   unsigned int result = 0;
-  FileMgr * fileMgr = FileMgr_getRef();
+  FileMgr * fileMgr = FileMgr_new();
   String * fileName = 0;
   String * fileContent = 0;
   String * path1 = 0;

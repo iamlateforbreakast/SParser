@@ -1,267 +1,230 @@
-/**********************************************//**
-  @file BTree.c
-     
-  @brief This file contains the implementation of the class BTree.
-				        
-  The class BTree implements the BTree operations:
-  - init
-  - add
-  - remove
-****************************************************/
+/* UT_BTree */
 #include "BTree.h"
-#include "Node.h"
+#include "String2.h"
+#include "TestObject.h"
+#include "ObjectMgr.h"
 #include "Memory.h"
 #include "Debug.h"
+#include <stdio.h>
 
-/**********************************************//**
-  @class BTree
-**************************************************/
-struct BTree
+#include "Words1000.h"
+
+#define DEBUG (0)
+#ifdef _WIN32
+#define UT_ASSERT(cond) if ((cond)) \
+                          { printf("Passed\n");} \
+                          else { printf("Failed\n"); return 0;}
+#else
+#define UT_ASSERT(cond) if ((cond)) \
+                          { printf("\x1b[32mPassed\x1b[0m\n");} \
+                          else { printf("\x1b[31mFailed\x1b[0m\n"); return 0;}
+#endif
+
+#define ORDER (10)
+
+List * keys;
+TestObject ** testObjects;
+TestObject ** removedObjects;
+int nbTokens = 0;
+
+int init_keys()
 {
-	Object object;
-	Node* root;
-	unsigned int order;
-	unsigned int depth;
-	unsigned short int nbObjects;
-	unsigned int nodeSize;
-};
+  String * fullText = String_newByRef(words1000);
+  String * key = 0;
 
-/**********************************************//**
-  @private Class Description
-**************************************************/
-PRIVATE Class btreeClass =
-{
-  .f_new = 0,
-  .f_delete = (Destructor)&BTree_delete,
-  .f_copy = (Copy_Operator)&BTree_copy,
-  .f_comp = (Comp_Operator)&BTree_comp,
-  .f_print = (Printer)&BTree_print,
-  .f_size = (Sizer)&BTree_getSize
-};
+  keys = String_splitToken(fullText, " ");
+  nbTokens = List_getNbNodes(keys);
 
-/*********************************************************************************
-* @brief BTree_new
-* input: number of total beamweight ranges to store in tree
-* output: A fully allocated beamweihgt tree
-*********************************************************************************/
-PUBLIC BTree * BTree_new(unsigned int order)
-{
-  BTree* tree;
+  testObjects = (TestObject**)Memory_alloc(nbTokens * sizeof(TestObject*));
+  removedObjects = (TestObject**)Memory_alloc(nbTokens * sizeof(TestObject*));
 
-  //tree = (BTree*)Memory_alloc(sizeof(BTree));
-  tree = (BTree*)Object_new(sizeof(BTree),&btreeClass);
-    
-  if (tree == 0) return 0;
+  for (int i = 0; i < nbTokens; i++)
+  {
+	key = (String*)List_getNext(keys);
+    testObjects[i] = TestObject_new();
+  }
 
-  tree->root = 0;
-  tree->order = order;
-  tree->depth = 0;
-  tree->nbObjects = 0;
+  String_delete(fullText);
 
-  return tree;
+  return 1;
 }
 
-/*********************************************************************************
-* @brief BTree_delete
-* input: None
-* output: None
-*********************************************************************************/
-PUBLIC void BTree_delete(BTree* this)
+int delete_keys()
 {
-  if (this!=0)
+  for (int i = 0; i < nbTokens; i++)
   {
-    Node_free(this->root, this->order);
+    TestObject_delete(testObjects[i]);
+  }
+  List_delete(keys);
+  Memory_free(testObjects,sizeof(testObjects));
+  Memory_free(removedObjects, sizeof(removedObjects));
+  
+  return 1;
+}
+
+int step1()
+{
+  int isPassed = 1;
+  TestObject * removedObject = 0;
+  String * key = (String*)List_getHead(keys);
+
+  BTree* testTree;
+  List_resetIterator(keys);
+
+  PRINT(("Step 1: Test 1 - Create an instance of class BTree: "));
+  testTree = BTree_new(ORDER);
+  UT_ASSERT((1));
+
+  PRINT(("Step 1: Test 2 - Insert one object: "));
+  BTree_add(testTree, (Object*)key, (Object*)testObjects[0], 0);
+  UT_ASSERT((1));
+
+  PRINT(("Step 1: test 3 - Check the number of nodes: "));
+  unsigned int nbNodes = BTree_getNbNodes(testTree);
+  UT_ASSERT((nbNodes == 1));
+  PRINT(("Step 1: Test 3 - Remove the object: "));
+  removedObject = (TestObject*)BTree_remove(testTree, (Object*)key);
+  UT_ASSERT((1));
 	
-    //Memory_free(this, sizeof(BTree));
-	/* De-allocate the base object */
-    Object_deallocate(&this->object);
-  }
+  PRINT(("Step 1: Test 4 - Delete BTree: "));
+  //String_delete(key);
+  BTree_delete(testTree);
+  UT_ASSERT((1));
+
+  return isPassed;
 }
 
-/*********************************************************************************
-* @brief BTree_copy
-* input: None
-* output: Copy of the instance
-*********************************************************************************/
-PUBLIC BTree * BTree_copy(BTree * this)
+int step2()
 {
-  return 0;
-}
+  int isPassed = 1;
 
-/*********************************************************************************
-* @brief BTree_comp
-* input: None
-* output: 0 if equal
-*********************************************************************************/
-PUBLIC int BTree_comp(BTree * this, BTree * compared)
-{
-	return 0;
-}
+  BTree* testTree;
+  String * key = 0;
 
-/*********************************************************************************
-* @brief BTree_add
-* input: key
-* input: a beamweight range to store in the tree
-* output: A fully allocated beamweihgt tree
-*********************************************************************************/
-PUBLIC void BTree_add(BTree* tree, Object * key, Object * object, int isOwner)
-{
-	if (tree->root == 0)
-	{
-		Node* newLeaf = Node_new(1, tree->order);
-		newLeaf->nbKeyUsed = 1;
-		newLeaf->leaves[0] = object;
-		newLeaf->keys[0] = key;
-		tree->depth = 1;
-		tree->root = newLeaf;
-		tree->nbObjects=1;
-		return;
-	}
-	if (tree->root->nbKeyUsed == tree->order * 2 - 1)
-	{ 
-		PRINT(("Splitting root\n"));
-		Node* newRoot = Node_new(0, tree->order);
-		newRoot->children[0] = tree->root;
-		Node* childForInsertion = Node_splitNode(newRoot, tree->order, tree->root, key);
-		Node_insert(childForInsertion, tree->order, key, object, isOwner);
-		tree->root = newRoot;
-		tree->depth++;
-		tree->nbObjects++;
-		return;
-	}
-	/* Root is not empty and not full */
-  	Node_insert(tree->root, tree->order, key, object, isOwner);
-	tree->nbObjects++;
-}
+  int n = ORDER * 2; /*ORDER * 2;*/
 
-/*********************************************************************************
-* @brief BTree_get
-* input: key
-* output: A reference to a beamWeightRange
-*********************************************************************************/
-PUBLIC Object * BTree_get(BTree* tree, Object * key)
-{
-	Object * object = 0;
+  List_resetIterator(keys);
 
-	object = Node_search(tree->root, tree->order, key, 0);
+  PRINT(("Step 2: Test 1 - Create an instance of class BTree: "));
+  testTree = BTree_new(ORDER);
+  UT_ASSERT((1));
 
-	return object;
-}
-
-/*********************************************************************************
-* @brief BTree_remove
-* input: key
-* input: a beamweight range to store in the tree
-* output: A fully allocated beamweihgt tree
-*********************************************************************************/
-PUBLIC Object * BTree_remove(BTree* tree, Object * key)
-{
-	Object * object = 0;
-	Node* root = tree->root;
-
-  	if (root->nbKeyUsed == 0) return 0;
-
-	if (root->isLeaf)
-	{
-		for (unsigned int i = 0; i < root->nbKeyUsed; i++)
-		{
-			if (Object_comp(key, root->keys[i])==0)
-			{
-				object = root->leaves[i];
-				for (unsigned int j = i; j < root->nbKeyUsed; j++)
-				{
-					root->keys[j] = root->keys[j + 1];
-				}
-				for (unsigned int j = 0; j <= root->nbKeyUsed; j++)
-				{
-					root->children[j] = root->children[j + 1];
-					root->leaves[j] = root->leaves[j + 1];
-				}
-				root->nbKeyUsed--;
-				tree->nbObjects--;
-			}
-		}
-		return object;
-	}
-	else
-	{
-		object = Node_remove(root, tree->order, key, 0);
-		// Check the resulting tree so that there is at least 1 Key used at root level
-		if (tree->root->nbKeyUsed < 1)
-		{
-			PRINT(("Tree should collapse\n"));
-			Node * newRoot = root->children[0];
-			tree->root->isLeaf = 1; /* Hack to avoid recursion when freeing */
-			Node_free(tree->root, tree->order);
-			tree->root = newRoot;
-			tree->depth--;
-		}
-		// Check something was actually removed
-		if (object != 0)
-		{
-			tree->nbObjects--;
-		}
-		else
-		{
-			PRINT(("Key %d removed returned 0\n", key));
-		}
-		return object;
-	}
-	return object;
-}
-
-/*********************************************************************************
-* @brief BTree_print
-* input: None
-* output: None
-*********************************************************************************/
-PUBLIC void BTree_print(BTree* tree)
-{
-  if (tree == 0) return;
-  PRINT(("Tree:\n"));
-  PRINT((" Nb items: %d\n", tree->nbObjects));
-  PRINT((" Depth: %d\n", tree->depth));
-
-  if (tree->depth > 0)
+  PRINT(("Step 2: Test 2 - Insert %d object: ", n));
+  for (int i=0; i< n; i++)
   {
-    PRINT(("Root 0-0:\n"));
-    Node_print(tree->root, tree->order, tree->depth - 1);
+	key = List_getNext(keys);
+	//Object_print((Object*)key);
+    BTree_add(testTree, (Object*)key, (Object*)testObjects[i], 0);
   }
+  UT_ASSERT((1));
+
+  //BTree_print(testTree);
+
+  List_resetIterator(keys);
+  PRINT(("Step 2: test 3 - Remove %d objects: ", n));
+  for (int i=0; i< n - 1; i++)
+  {
+	key = List_getNext(keys);
+	removedObjects[i] = (TestObject*)BTree_remove(testTree, (Object*)key);
+  }
+
+  //BTree_print(testTree);
+  
+  PRINT(("Step 2: Test 4 - Delete BTree: "));
+  //String_delete(key);
+  BTree_delete(testTree);
+  UT_ASSERT((1));
+
+  return isPassed;
 }
 
-/*********************************************************************************
-* @brief BTree_newFromFile
-* @public
-* @memberof BTree
-* @return Instance of BTree
-*********************************************************************************/
-PUBLIC BTree * BTree_newFromFile(char * fileName)
+int step3()
 {
-  BTree* tree = 0;
+  int isPassed = 1;
 
-  return tree;
+  BTree* testTree;
+  String * key = 0;
+
+  int n = ORDER * 10; /*ORDER * 20;*/
+
+  List_resetIterator(keys);
+
+  PRINT(("Step 3: Test 1 - Create an instance of class BTree: "));
+  testTree = BTree_new(ORDER);
+  UT_ASSERT((1));
+
+  PRINT(("Step 3: Test 2 - Insert %d object: ", n));
+  for (int i=0; i< n; i++)
+  {
+	key = List_getNext(keys);
+	Object_print((Object*)key);
+    BTree_add(testTree, (Object*)key, (Object*)testObjects[i], 0);
+  }
+  UT_ASSERT((1));
+
+  //BTree_print(testTree);
+
+  List_resetIterator(keys);
+  PRINT(("Step 3: test 3 - Remove %d objects: ", n));
+  for (int i=0; i< n; i++)
+  {
+	key = List_getNext(keys);
+	//PRINT(("Remove %d ", i));
+	//Object_print(key);
+	removedObjects[i] = (TestObject*)BTree_remove(testTree, (Object*)key);
+	//BTree_print(testTree);
+
+  }
+
+  
+  PRINT(("Step 3: Test 4 - Delete BTree: "));
+  //String_delete(key);
+  BTree_delete(testTree);
+  UT_ASSERT((1));
+
+  return isPassed;
 }
 
-/*********************************************************************************
-* @brief BTree_getSize
-* @public
-* @memberof BTree
-* @return Size of instance
-*********************************************************************************/
-PUBLIC unsigned int BTree_getSize(BTree * this)
+int main(void)
 {
-  if (this==0) return sizeof(BTree);
+  ObjectMgr* objMgr = ObjectMgr_getRef();
 
-  return sizeof(BTree); 
-}
+  init_keys();
 
-/*********************************************************************************
-* @brief BTree_getNbNodes
-* @public
-* @memberof BTree
-* @return Size of instance
-*********************************************************************************/
-PUBLIC unsigned int BTree_getNbNodes(BTree* this)
-{
-  return Node_getNbNodes(this->root);
+  step1();
+  step2();
+  step3();
+  delete_keys();
+
+  ObjectMgr_report(objMgr);
+  ObjectMgr_reportUnallocated(objMgr);
+  Memory_report();
+
+  //printf("Btree size of pool in   bytes: %d\n", BTree_reportSizeInBytes(testTree));
+  //printf("Btree size of pool in Kibytes: %d\n", BTree_reportSizeInBytes(testTree) / 1024);
+  //printf("Btree size of pool in Mibytes: %d\n", BTree_reportSizeInBytes(testTree) / (1024 * 1024));
+  //BTree_print(testTree);
+	
+  //double cpu_time1 = get_cpu_time();
+  //double wall_time1 = get_wall_time();
+	
+  //printf("Insert CPU time %f\n", cpu_time1 - cpu_time0);
+  //printf("Insert Wall time %f\n", wall_time1 - wall_time0);
+
+  //cpu_time0 = get_cpu_time();
+  //wall_time0 = get_wall_time();
+
+  //for (int i = 0; i< NB_ITEMS; i++)
+  //{
+    //BTree_get(testTree, keys[i], &pTestItem);
+    //printf("test item = %x %x\n", pTestItem, &items[i]);
+  //}
+
+  //cpu_time1 = get_cpu_time();
+  //wall_time1 = get_wall_time();
+
+  //printf("Search CPU time %f\n", cpu_time1 - cpu_time0);
+  //printf("Search Wall time %f\n", wall_time1 - wall_time0);
+
+  return 0;
 }

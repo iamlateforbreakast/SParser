@@ -17,7 +17,7 @@ int step1()
 {
   int isPassed = 1;
   Configuration* testConfiguration = 0;
-  FileMgr * fileMgr = FileMgr_getRef();
+  FileMgr * fileMgr = FileMgr_new();
   ObjectMgr* objectMgr = ObjectMgr_getRef();
   FileDesc * dataFile = FileMgr_addFile(fileMgr, "testConfigData.txt");
 
