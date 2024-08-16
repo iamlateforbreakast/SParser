@@ -363,7 +363,7 @@ PUBLIC void FileMgr_write(FileMgr* this, const char* fileName, String* content)
   if (fd)
   {
     FileIo_openFile(f, FileDesc_getFullName(fd));
-    FileIo_write(f, String_getBuffer(content), (int)String_getLength);
+    FileIo_write(f, String_getBuffer(content), (int)String_getLength(content));
   }
   FileIo_delete(f);
   String_delete(name);

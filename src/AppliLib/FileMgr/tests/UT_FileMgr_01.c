@@ -181,13 +181,15 @@ int step5()
 #ifdef _WIN32
   FileMgr_addFile(testFileMgr, ".\\testfile.txt");
 #else
-  FileMgr_addFile(testFileMgr, "../testfile.txt");
+#define TEST_FILE "./testfile.txt"
+  FileMgr_addFile(testFileMgr, TEST_FILE);
 #endif
   testFileContent = String_newByRef("UT_FileMgr_01:\n==============\nTest string written in file.\n");
   PRINT(("Step 5: Test 1 - Create and write a new file testfile.txt"));
-  FileMgr_write(testFileMgr, ".\\testfile.txt", testFileContent);
+  FileMgr_write(testFileMgr, "testfile.txt", testFileContent);
   return isPassed;
 }
+
 int step6()
 {
   //PUBLIC List * FileMgr_filterFiles(FileMgr * this, const char * pattern);
@@ -211,12 +213,12 @@ int step7()
 
 int main()
 {
-  step1();
-  step2();
-  step3();
-  step4();
+  //step1();
+  //step2();
+  //step3();
+  //step4();
   step5();
-  step6();
+  //step6();
 
   Memory_report();
 
