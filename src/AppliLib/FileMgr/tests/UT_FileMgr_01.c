@@ -175,11 +175,26 @@ int step4()
 
 int step5()
 {
+  int isPassed = 1;
+  FileMgr* testFileMgr = FileMgr_new();
+  String* testFileContent = 0;
+#ifdef _WIN32
+  FileMgr_addFile(testFileMgr, ".\\testfile.txt");
+#else
+  FileMgr_addFile(testFileMgr, "../testfile.txt");
+#endif
+  testFileContent = String_newByRef("UT_FileMgr_01:\n==============\nTest string written in file.\n");
+  PRINT(("Step 5: Test 1 - Create and write a new file testfile.txt"));
+  FileMgr_write(testFileMgr, ".\\testfile.txt", testFileContent);
+  return isPassed;
+}
+int step6()
+{
   //PUBLIC List * FileMgr_filterFiles(FileMgr * this, const char * pattern);
   FileMgr* testFileMgr = FileMgr_new();
   const char pattern[] = "*.c";
 
-  PRINT(("Step 5: Test 1 - Search files meeting pattern %s: ", pattern));
+  PRINT(("Step 6: Test 1 - Search files meeting pattern %s: ", pattern));
   List * files = FileMgr_filterFiles(testFileMgr, pattern);
 
   List_delete(files);
@@ -188,7 +203,7 @@ int step5()
   return 1;
 }
 
-int step6()
+int step7()
 {
   //PUBLIC String * FileMgr_searchFile(FileMgr * this, String * name, List * preferredDir);
   return 1;
@@ -201,6 +216,7 @@ int main()
   step3();
   step4();
   step5();
+  step6();
 
   Memory_report();
 

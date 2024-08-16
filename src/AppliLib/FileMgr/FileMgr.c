@@ -269,17 +269,20 @@ PUBLIC FileDesc * FileMgr_addFile(FileMgr * this, const char * fileName)
   /* Check file is not already managed */
   if (!FileMgr_isManaged(this, fullName))
   {
+    fileDesc = FileDesc_new();
+    FileDesc_setFullName(fileDesc, fullName);
     /* Check file exists on filesystem */
     if (FileMgr_existFS(this, fullName))
     {
       /* If exists add to the list of files */
-      fileDesc = FileDesc_new();
-      FileDesc_setFullName(fileDesc, fullName);
       List_insertHead(this->files, (void*)fileDesc, 1);
     }
     else
     {
-      String_delete(fullName);
+      FileIo* f = FileIo_new();
+      FileIo_createFile(f, fullName);
+      List_insertHead(this->files, (void*)fileDesc, 1);
+      FileIo_delete(f);
     }
   }
   else
@@ -343,6 +346,27 @@ PUBLIC String* FileMgr_load(FileMgr* this, const char * fileName)
   String_delete(name);
   
   return result;
+}
+
+/**********************************************//**
+  @brief Write a string into a file.
+  @public
+  @memberof FileMgr
+  @return None
+**************************************************/
+PUBLIC void FileMgr_write(FileMgr* this, const char* fileName, String* content)
+{
+  FileIo* f = FileIo_new();
+  String* name = String_new(fileName);
+  FileDesc* fd = 0;
+  fd = FileMgr_isManaged(this, name);
+  if (fd)
+  {
+    FileIo_openFile(f, FileDesc_getFullName(fd));
+    FileIo_write(f, String_getBuffer(content), (int)String_getLength);
+  }
+  FileIo_delete(f);
+  String_delete(name);
 }
 
 /**********************************************//** 
