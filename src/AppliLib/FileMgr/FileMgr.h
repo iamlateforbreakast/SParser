@@ -23,6 +23,7 @@ PUBLIC FileMgr* FileMgr_getRef();
 PUBLIC unsigned int FileMgr_getSize(FileMgr * this);
 PUBLIC unsigned int FileMgr_addDirectory(FileMgr * this, const char * directoryName);
 PUBLIC FileDesc * FileMgr_addFile(FileMgr * this, const char * fileName);
+PUBLIC FileDesc* FileMgr_createFile(FileMgr* this, const char* fileName);
 PUBLIC List * FileMgr_filterFiles(FileMgr * this, const char * pattern);
 PUBLIC FileDesc * FileMgr_searchFile(FileMgr * this, String * name, List * preferredDir);
 PUBLIC FileDesc* FileMgr_isManaged(FileMgr* this, String* fullName);
