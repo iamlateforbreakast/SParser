@@ -269,20 +269,15 @@ PUBLIC FileDesc * FileMgr_addFile(FileMgr * this, const char * fileName)
   /* Check file is not already managed */
   if (!FileMgr_isManaged(this, fullName))
   {
-    fileDesc = FileDesc_new();
-    FileDesc_setFullName(fileDesc, fullName);
+    
+    PRINT(("FileMgr_addFile: Checking %s\n", String_getBuffer(fullName)));
     /* Check file exists on filesystem */
     if (FileMgr_existFS(this, fullName))
     {
+      fileDesc = FileDesc_new();
+      FileDesc_setFullName(fileDesc, fullName);
       /* If exists add to the list of files */
       List_insertHead(this->files, (void*)fileDesc, 1);
-    }
-    else
-    {
-      FileIo* f = FileIo_new();
-      FileIo_createFile(f, fullName);
-      List_insertHead(this->files, (void*)fileDesc, 1);
-      FileIo_delete(f);
     }
   }
   else
@@ -292,6 +287,23 @@ PUBLIC FileDesc * FileMgr_addFile(FileMgr * this, const char * fileName)
   
   String_delete(addedFile);
   
+  return fileDesc;
+}
+PUBLIC FileDesc* FileMgr_createFile(FileMgr* this, const char* fileName)
+{
+  FileDesc* fileDesc = 0;
+  String* fullName = String_copy(this->rootLocation);
+  String* addedFile = String_new(fileName);
+  FileMgr_mergePath(this, fullName, addedFile);
+  if (!FileMgr_isManaged(this, fullName))
+  {
+    fileDesc = FileDesc_new();
+    FileDesc_setFullName(fileDesc, fullName);
+    FileIo* f = FileIo_new();
+    FileIo_createFile(f, fullName);
+    List_insertHead(this->files, (void*)fileDesc, 1);
+    FileIo_delete(f);
+  }
   return fileDesc;
 }
 
