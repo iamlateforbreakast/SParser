@@ -179,7 +179,7 @@ int step5()
   FileMgr* testFileMgr = FileMgr_new();
   String* testFileContent = 0;
 #ifdef _WIN32
-  FileMgr_addFile(testFileMgr, ".\\testfile.txt");
+  FileMgr_createFile(testFileMgr, ".\\testfile.txt");
 #else
 #define TEST_FILE "./testfile.txt"
   FileMgr_addFile(testFileMgr, TEST_FILE);
