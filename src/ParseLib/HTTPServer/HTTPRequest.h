@@ -1,10 +1,6 @@
-/**********************************************//**
-  @file HTTPServer.c
-  
-  @brief A HTTP Server class.
-    This class provides server function to create, start
-	  HTML pages.
-**************************************************/
+/* HTTPRequest.h */
+#ifndef _HTTPREQUEST_H_
+#define _HTTPREQUEST_H_
 
 #include "Object.h"
 #include "Types.h"
@@ -39,6 +35,9 @@ struct HTTPRequest
   Object object;
   enum Method method;
   String * path;
+  int majorVersion;
+  int minorVersion;
+  int isValid;
 };
 
 /**********************************************//**
@@ -61,7 +60,7 @@ PRIVATE Class httpRequestClass =
   @param[in] none
   @return New instance of class HTTPRequest.
 **************************************************/
-PRIVATE HTTPRequest * HTTPRequest_new(String* s)
+PRIVATE HTTPRequest * HTTPRequest_new(char * buffer)
 {
   HTTPRequest* this = 0;
 
@@ -92,17 +91,46 @@ PRIVATE HTTPRequest * HTTPRequest_copy(HTTPRequest * this)
   return 0;
 }
 
+/**********************************************//**
+  @brief Compare 2 instances of the class HTTPRequest.
+  @public
+  @memberof HTTPRequest
+  @return 0 if different, 1 if equal.
+**************************************************/
 PRIVATE int HTTPRequest_compare(HTTPRequest * this, HTTPRequest * compared)
 {
   return 0;
 }
 
+/**********************************************//**
+  @brief Print an instance of the class HTTPRequest.
+  @public
+  @memberof HTTPRequest
+**************************************************/
 PRIVATE void HTTPRequest_print(HTTPRequest * this)
 {
 
 }
 
+/**********************************************//**
+  @brief Get the size of an HTTPRequest. If parameter is 0
+  return the size of the class.
+  @public
+  @memberof HTTPRequest
+  @return Number of items.
+**************************************************/
 PRIVATE unsigned int HTTPRequest_getSize(HTTPRequest * this)
 {
   return sizeof(HTTPRequest);
 }
+
+PRIVATE void HTTPRequest_parseBuffer(HTTPRequest* this, char* buffer)
+{
+  /* Read method*/
+
+  /* Read path */
+
+  /* Read version */
+
+}
+#endif /* _HTTPREQUEST_H_ */
