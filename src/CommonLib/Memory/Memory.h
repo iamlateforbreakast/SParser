@@ -5,6 +5,14 @@
 
 #include "Types.h"
 
+#ifdef _WIN32
+#define MEMORY_ISVALID(p) (*(long int*)p!=0xCDCDCDCD)
+#elif _WIN64
+#define MEMORY_ISVALID(p) (p!=0xCDCDCDCD)
+#else
+#define MEMORY_ISVALID(p) (p!=0)
+#endif
+
 PUBLIC void* Memory_alloc(unsigned int nbBytes);
 PUBLIC void * Memory_realloc(void * pointer, unsigned int prevSizeBytes, unsigned int newSizeBytes);
 PUBLIC void Memory_free(void* pointer, unsigned int nbBytes);
