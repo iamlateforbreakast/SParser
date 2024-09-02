@@ -6,6 +6,7 @@
 #include "Types.h"
 #include "Class.h"
 #include "String2.h"
+#include "Map.h"
 #include "Memory.h"
 #include "Debug.h"
 
@@ -14,19 +15,28 @@
 
 typedef struct HTTPRequest HTTPRequest;
 
-PRIVATE HTTPRequest * HTTPRequest_new(String * s);
+PRIVATE HTTPRequest * HTTPRequest_new(char * buffer);
 PRIVATE void HTTPRequest_delete(HTTPRequest * this);
 PRIVATE HTTPRequest * HTTPRequest_copy(HTTPRequest * this);
 PRIVATE int HTTPRequest_compare(HTTPRequest* this, HTTPRequest* compared);
 PRIVATE void HTTPRequest_print(HTTPRequest * this);
 PRIVATE unsigned int HTTPRequest_getSize(HTTPRequest* this);
+PRIVATE String* HTTPRequest_getPath(HTTPRequest* this);
+PRIVATE enum Method HTTPRequest_getMethod(HTTPRequest* this);
+PRIVATE int HTTPRequest_isValid(HTTPRequest* this);
+PRIVATE int HTTPRequest_parseBuffer(HTTPRequest* this, char* buffer);
 
 enum Method 
 {
-  METHOD_GET,
-  METHOD_POST
+  METHOD_GET=0,
+  METHOD_POST,
+  METHOD_PUT,
+  METHOD_PATCH,
+  METHOD_DELETE,
+  METHOD_INVALID
 };
 
+static char* methods_text[] = { "GET", "POST", "PUT", "PATCH", "DELETE" };
 /**********************************************//**
   @class HTTPRequest
 **************************************************/
@@ -37,6 +47,7 @@ struct HTTPRequest
   String * path;
   int majorVersion;
   int minorVersion;
+  Map* headers;
   int isValid;
 };
 
@@ -68,6 +79,13 @@ PRIVATE HTTPRequest * HTTPRequest_new(char * buffer)
 
   if (this == 0) return 0;
 
+  this->method = METHOD_INVALID;
+  this->path = 0;
+  this->majorVersion = 0;
+  this->minorVersion = 0;
+  this->headers = Map_new();
+  this->isValid = HTTPRequest_parseBuffer(this, buffer);
+
   return this;
 }
 
@@ -78,6 +96,10 @@ PRIVATE HTTPRequest * HTTPRequest_new(char * buffer)
 **************************************************/
 PRIVATE void HTTPRequest_delete(HTTPRequest * this)
 {
+  if (!Object_isValid((Object*)this)) return;
+
+  String_delete(this->path);
+  Map_delete(this->headers);
 }
 
 /**********************************************//**
@@ -109,7 +131,13 @@ PRIVATE int HTTPRequest_compare(HTTPRequest * this, HTTPRequest * compared)
 **************************************************/
 PRIVATE void HTTPRequest_print(HTTPRequest * this)
 {
-
+  if (this->method == METHOD_INVALID) PRINT(("Method: INVALID\n"));
+  if (this->method == METHOD_GET) PRINT(("Method: GET\n"));
+  if (this->method == METHOD_POST) PRINT(("Method: POST\n"));
+  PRINT(("Path: %s\n", String_getBuffer(this->path)));
+  PRINT(("Version: %d.%d\n", this->majorVersion, this->minorVersion));
+  //PRINT(("Host: %s\n", host));
+  //PRINT(("User-Agent: %s\n", userAgent)); 
 }
 
 /**********************************************//**
@@ -124,13 +152,60 @@ PRIVATE unsigned int HTTPRequest_getSize(HTTPRequest * this)
   return sizeof(HTTPRequest);
 }
 
-PRIVATE void HTTPRequest_parseBuffer(HTTPRequest* this, char* buffer)
+PRIVATE String * HTTPRequest_getPath(HTTPRequest* this)
 {
+  return this->path;
+}
+
+PRIVATE enum Method HTTPRequest_getMethod(HTTPRequest* this)
+{
+  return this->method;
+}
+
+PRIVATE int HTTPRequest_isValid(HTTPRequest* this)
+{
+  return this->isValid;
+}
+
+PRIVATE int HTTPRequest_parseBuffer(HTTPRequest* this, char* buffer)
+{
+  int isValid = 0;
+  char * path_start = buffer;
+  int path_length = 0;
+
   /* Read method*/
+  for (enum Method i = METHOD_GET; i < METHOD_INVALID; i++)
+  {
+    if (Memory_ncmp(buffer, methods_text[i], sizeof(methods_text[i]) - 1))
+    {
+      this->method = i;
+      path_start = buffer + sizeof(methods_text[i]);
+      isValid = 1;
+      break;
+    }
+  }
 
   /* Read path */
+  while ((path_length < sizeof(buffer)) && (*(path_start + path_length) != ' '))
+  {
+    path_length++;
+  }
+  
+  char* path_buffer = Memory_alloc(path_length + 1);
+  Memory_copy(path_buffer, path_start, path_length + 1);
+  path_buffer[path_length + 1] = 0;
+
+  this->path = String_new(path_buffer);
+  char * version_start = path_start + path_length + 1;
 
   /* Read version */
+  if (Memory_ncmp(version_start, "HTTP/1.1", sizeof("HTTP/1.1") - 1))
+  {
+    this->majorVersion = 1;
+    this->minorVersion = 1;
+    isValid = isValid && 1;
+  }
 
+  return isValid;
 }
 #endif /* _HTTPREQUEST_H_ */
