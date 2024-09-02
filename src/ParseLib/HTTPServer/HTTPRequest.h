@@ -195,7 +195,7 @@ PRIVATE int HTTPRequest_parseBuffer(HTTPRequest* this, char* buffer)
   Memory_copy(path_buffer, path_start, path_length + 1);
   path_buffer[path_length + 1] = 0;
 
-  this->path = String_new(path_buffer);
+  this->path = String_newByRef(path_buffer);
   char * version_start = path_start + path_length + 1;
 
   /* Read version */
