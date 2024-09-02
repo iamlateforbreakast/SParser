@@ -196,3 +196,14 @@ PUBLIC void Object_deRef(Object * this)
   else
     Error_new(ERROR_NORMAL, "Attempt to de-reference an object not referenced.\n");
 }
+
+/**********************************************//**
+  @brief Check the pointed object is allocated.
+  @public
+  @memberof Object
+  @return 1 if valid, 0 otherwise
+**************************************************/
+PUBLIC int Object_isValid(Object* this)
+{
+  return ((MEMORY_ISVALID(this) && (this->marker == OBJECT_MARKER)));
+}
