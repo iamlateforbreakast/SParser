@@ -7,6 +7,7 @@
 **************************************************/
 
 #include "HTTPServer.h"
+#include "HTTPResponse.h"
 #include "Object.h"
 #include "Memory.h"
 #include "Debug.h"
@@ -155,11 +156,6 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
     int client_addr_len = sizeof(client_addr);
     int *client_fd = malloc(sizeof(int));
     char *requestBuffer = (char*)malloc(REQUEST_BUFFER_SIZE);
-    char * path = malloc(1024);
-    char * method = malloc(10);
-    char * version = malloc(10);
-    char * host = malloc(256);
-    char * userAgent = malloc(256);
 
     Memory_set(requestBuffer, 0, REQUEST_BUFFER_SIZE);
     // accept client connection
@@ -175,18 +171,15 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
 
     if ((client_fd) && (requestBuffer))
     {
+      /* request = HTTPRequest_read(); */
       msg_len = recv(*client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
     PRINT(("Bytes Received: %d\n%s\n", msg_len, requestBuffer));
 
       sscanf_s(requestBuffer, "%s %s %s\nHost: %s\nUser-Agent: %s\n",
         method, sizeof(method), path, sizeof(path), version, sizeof(version), host, sizeof(host), userAgent, sizeof(userAgent));
     }
-    //sscanf(requestBuffer, "Host: %s\n", host);
-    PRINT(("Method: %s\n", method));
-    PRINT(("Path: %s\n", path));
-    PRINT(("Version: %s\n", version));
-    PRINT(("Host: %s\n", host));
-    PRINT(("User-Agent: %s\n", userAgent));
+    /* response = HTTPResponse_new();
+       HTTPResponse_send(response, *client_fd); */
     if (client_fd) msg_len = send(*client_fd, response, sizeof(response), 0);
     if (msg_len == 0) {
       PRINT(("Client closed connection\n"));
@@ -210,11 +203,6 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
       }*/
     free(requestBuffer);
     free(client_fd);
-    free(path);
-    free(version);
-    free(method);
-    free(host);
-    free(userAgent);
 #ifndef WIN32
     close(this->fd);
 #else
