@@ -11,6 +11,7 @@
 #include "ObjectMgr.h"
 #include "ObjectStore.h"
 #include "Allocator.h"
+#include "Memory.h"
 #include "Error.h"
 
 /**********************************************//**
@@ -18,6 +19,7 @@
 **************************************************/
 PRIVATE ObjectMgr * Object_objMgrPtr = 0;
 PRIVATE ObjectStore * Object_objectStore = 0;
+#define OBJECT_MARKER (0x0B5EC7)
 
 /**********************************************//** 
   @brief Create an instance of the class Object.
@@ -36,7 +38,7 @@ PUBLIC Object * Object_new(unsigned int size, Class * class)
   }
   this = ObjectMgr_allocate(Object_objMgrPtr, size);
   this->class = class;
-  this->marker = 0x0B5EC7;
+  this->marker = OBJECT_MARKER;
   if (this->class!=0)
   {
     this->delete = class->f_delete;
@@ -72,7 +74,7 @@ PUBLIC Object* Object_newFromAllocator(Class* class, Allocator * allocator)
   this = ObjectStore_createObject(Object_objectStore, class, allocator);
   if (this != 0)
   {
-    this->marker = 0x0B5EC7;
+    this->marker = OBJECT_MARKER;
     this->class = class;
     if (this->class != 0)
     {
@@ -106,7 +108,7 @@ PUBLIC void Object_delete(Object * this)
 **************************************************/
 PUBLIC void Object_deallocate(Object* this)
 {
-  if (this->marker != 0x0B5EC7)
+  if (this->marker != OBJECT_MARKER)
   {
     Error_new(ERROR_DBG, "Object_de-allocate uses a invalid object\n");
     return;
