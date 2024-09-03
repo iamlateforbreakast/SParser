@@ -163,7 +163,7 @@ PUBLIC void FileIo_openFile(FileIo * this, String * fullFileName)
 PUBLIC void FileIo_createFile(FileIo* this, String* fullFileName)
 {
 #ifdef _WIN32
-    errno_t err = fopen_s(&this->f, "test.file" /*String_getBuffer(fullFileName)*/, "wb");
+    errno_t err = fopen_s(&this->f, String_getBuffer(fullFileName), "wb");
     TRACE(("Errno: %d\n", err));
 #else
     this->f = fopen(String_getBuffer(fullFileName), "wb");
