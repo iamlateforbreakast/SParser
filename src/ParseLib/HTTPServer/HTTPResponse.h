@@ -2,7 +2,7 @@
 #ifndef _HTTPRESPONSE_H_
 #define _HTTPRESPONSE_H_
 
-struct HTTPResponse HTTPResponse;
+typedef struct HTTPResponse HTTPResponse;
 
 PUBLIC HTTPResponse * HTTPResponse_new();
 PUBLIC void HTTPResponse_delete(HTTPResponse * this);

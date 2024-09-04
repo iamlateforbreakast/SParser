@@ -175,8 +175,8 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
       msg_len = recv(*client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
     PRINT(("Bytes Received: %d\n%s\n", msg_len, requestBuffer));
 
-      sscanf_s(requestBuffer, "%s %s %s\nHost: %s\nUser-Agent: %s\n",
-        method, sizeof(method), path, sizeof(path), version, sizeof(version), host, sizeof(host), userAgent, sizeof(userAgent));
+      //sscanf_s(requestBuffer, "%s %s %s\nHost: %s\nUser-Agent: %s\n",
+      //  method, sizeof(method), path, sizeof(path), version, sizeof(version), host, sizeof(host), userAgent, sizeof(userAgent));
     }
     /* response = HTTPResponse_new();
        HTTPResponse_send(response, *client_fd); */
