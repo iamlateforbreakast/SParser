@@ -1,22 +1,22 @@
 /**********************************************//**
   @file HTTPServer.c
-
+  
   @brief A HTTP Server class.
-  This class provides server function to create, start
-  HTML pages.
+    This class provides server function to create, start
+	  HTML pages.
 **************************************************/
 
 #include "HTTPServer.h"
 #include "HTTPRequest.h"
 #include "HTTPResponse.h"
 #include "TaskMgr.h"
+#include "Task.h"
 #include "Object.h"
 #include "Memory.h"
 #include "Debug.h"
 
 #include <stdio.h>
 #include <stdlib.h>
-
 #ifndef WIN32
 #include <sys/socket.h>
 #include <netinet/ip.h>
@@ -27,6 +27,9 @@
 
 #define REQUEST_BUFFER_SIZE (4096)
 #define RESPONSE_BUFFER_SIZE (4096)
+
+PRIVATE void* HTTPServer_listenTaskBody(void* params);
+
 /**********************************************//**
   @class HTTPServer
 **************************************************/
@@ -42,6 +45,7 @@ struct HTTPServer
   SOCKET fd;
 #endif
 };
+
 struct ConnectionParam
 {
   int* client_fd;
@@ -70,7 +74,9 @@ Class httpServerClass =
 PUBLIC HTTPServer* HTTPServer_new()
 {
   HTTPServer* this = 0;
+
   int sockOptions = 1;
+
   this = (HTTPServer*)Object_new(sizeof(HTTPServer), &httpServerClass);
 
   if (this == 0) return 0;
@@ -83,7 +89,6 @@ PUBLIC HTTPServer* HTTPServer_new()
 #endif
 
   this->port = 8080;
-
   if ((this->fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
     PRINT(("socket failed\n"));
     exit(1);
@@ -109,7 +114,6 @@ PUBLIC HTTPServer* HTTPServer_new()
     PRINT(("bind failed"));
     exit(1);
   }
-
   return this;
 }
 
@@ -146,7 +150,7 @@ PUBLIC unsigned int HTTPServer_getSize(HTTPServer* this)
 PUBLIC void HTTPServer_start(HTTPServer* this)
 {
   char response_body[] = "<doctype !html><html><head><title>Hello World</title></head>"
-      "<body><h1>Hello world!</h1></body></html>\r\n";
+                         "<body><h1>Hello world!</h1></body></html>\r\n";
 
   HTTPResponse* response = HTTPResponse_new();
   HTTPResponse_setVersion(response, 1, 1);
@@ -154,80 +158,85 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
   HTTPResponse_setReason(response, REASON_OK);
   HTTPResponse_addHeader(response, "Content - Type", "text/html; charset=UTF-8");
   HTTPResponse_setBody(response, response_body);
+
   // listen for connections
   if (listen(this->fd, 10) < 0) {
     PRINT(("listen failed\n"));
     exit(1);
   }
 
-    struct sockaddr_in client_addr;
-    int client_addr_len = sizeof(client_addr);
-    int *client_fd = malloc(sizeof(int));
-    char *requestBuffer = (char*)malloc(REQUEST_BUFFER_SIZE);
+  struct sockaddr_in client_addr;
+  int client_addr_len = sizeof(client_addr);
+  int *client_fd = malloc(sizeof(int));
+  char *requestBuffer = (char*)malloc(REQUEST_BUFFER_SIZE);
 
-    Memory_set(requestBuffer, 0, REQUEST_BUFFER_SIZE);
+  Memory_set(requestBuffer, 0, REQUEST_BUFFER_SIZE);
 
-    if ((client_fd) && ((*client_fd = accept(this->fd, 
-                           (struct sockaddr *)&client_addr, 
-                            &client_addr_len)) < 0)) {
-            PRINT(("accept failed"));
+  if ((client_fd) && ((*client_fd = accept(this->fd, 
+                          (struct sockaddr *)&client_addr, 
+                          &client_addr_len)) < 0)) {
+          PRINT(("accept failed"));
           exit(1);
-        }
-    PRINT(("Received connection\n"));
+      }
+  PRINT(("Received connection\n"));
 
-    int msg_len = 0;
+  int msg_len = 0;
   TaskMgr* taskMgr = TaskMgr_getRef();
-  Task * connectionListen = Task_create(&HTTPServer_listenTaskBody, 2, (void**)&params[i]);
+  struct ConnectionParam* params;
+  Task * connectionListen = Task_create(&HTTPServer_listenTaskBody, 2, (void*)&params);
   TaskMgr_start(taskMgr, connectionListen);
-#ifdef 0
+#if 0
   /* request = Connection_waitForHttpRequest*/
-    if ((client_fd) && (requestBuffer))
-    {
-      msg_len = recv(*client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
+  if ((client_fd) && (requestBuffer))
+  {
+    msg_len = recv(*client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
     //PRINT(("Bytes Received: %d\n%s\n", msg_len, requestBuffer));
 
     HTTPRequest* request = HTTPRequest_new(requestBuffer);
     HTTPRequest_print(request);
 
     HTTPRequest_delete(request);
-    }
+  }
     
   /* HTTPResponse_send(*client_fd); */
-    if (client_fd) msg_len = send(*client_fd, response, sizeof(response), 0);
-    if (msg_len == 0) {
-      PRINT(("Client closed connection\n"));
-#ifndef WIN32
-      close(this->fd);
-#else
-      closesocket(this->fd);
-#endif
-    }
-
-
-    free(requestBuffer);
-    free(client_fd);
+  if (client_fd) msg_len = send(*client_fd, response, sizeof(response), 0);
+  if (msg_len == 0) {
+    PRINT(("Client closed connection\n"));
 #ifndef WIN32
     close(this->fd);
 #else
     closesocket(this->fd);
 #endif
+  }
+  free(requestBuffer);
+  free(client_fd);
+#ifndef WIN32
+  close(this->fd);
+#else
+  closesocket(this->fd);
+#endif
 #endif
   TaskMgr_delete(taskMgr);
-    exit(1);
+
+  exit(1);
 }
+
 //void* taskBody(void* params)
-void* HTTPServer_listenTaskBody(void* params)
+PRIVATE void* HTTPServer_listenTaskBody(void* params)
 {
   int msg_len = 0;
   int* client_fd = ((struct ConnectionParam*)params)->client_fd;
   char* requestBuffer = (char*)malloc(REQUEST_BUFFER_SIZE);
+
   /* request = Connection_waitForHttpRequest*/
   if ((client_fd) && (requestBuffer))
   {
     msg_len = recv(*client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
     //PRINT(("Bytes Received: %d\n%s\n", msg_len, requestBuffer));
+
     HTTPRequest* request = HTTPRequest_new(requestBuffer);
     HTTPRequest_print(request);
+
     HTTPRequest_delete(request);
   }
 }
