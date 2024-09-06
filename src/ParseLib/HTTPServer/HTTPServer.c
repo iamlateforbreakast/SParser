@@ -7,7 +7,9 @@
 **************************************************/
 
 #include "HTTPServer.h"
+#include "HTTPRequest.h"
 #include "HTTPResponse.h"
+#include "TaskMgr.h"
 #include "Object.h"
 #include "Memory.h"
 #include "Debug.h"
@@ -39,6 +41,10 @@ struct HTTPServer
   WSADATA wsa;
   SOCKET fd;
 #endif
+};
+struct ConnectionParam
+{
+  int* client_fd;
 };
 
 /**********************************************//**
@@ -87,7 +93,7 @@ PUBLIC HTTPServer* HTTPServer_new()
 #else
   if (setsockopt(this->fd, SOL_SOCKET, SO_REUSEADDR, (char*)&sockOptions, sizeof(int)) < 0) {
 #endif
-    PRINT(("setsocopt failed\n"));
+    PRINT(("setsockopt failed\n"));
     exit(1);
   }
   // config socket
@@ -139,47 +145,54 @@ PUBLIC unsigned int HTTPServer_getSize(HTTPServer* this)
 
 PUBLIC void HTTPServer_start(HTTPServer* this)
 {
-  char response[] = "HTTP/1.1 200 OK\r\n"
-      "Content-Type: text/html; charset=UTF-8\r\n\r\n"
-      "<doctype !html><html><head><title>Hello World</title></head>"
+  char response_body[] = "<doctype !html><html><head><title>Hello World</title></head>"
       "<body><h1>Hello world!</h1></body></html>\r\n";
 
+  HTTPResponse* response = HTTPResponse_new();
+  HTTPResponse_setVersion(response, 1, 1);
+  HTTPResponse_setStatusCode(response, 200);
+  HTTPResponse_setReason(response, REASON_OK);
+  HTTPResponse_addHeader(response, "Content - Type", "text/html; charset=UTF-8");
+  HTTPResponse_setBody(response, response_body);
   // listen for connections
   if (listen(this->fd, 10) < 0) {
     PRINT(("listen failed\n"));
     exit(1);
   }
 
-  while (1) {
-    // client info
     struct sockaddr_in client_addr;
     int client_addr_len = sizeof(client_addr);
     int *client_fd = malloc(sizeof(int));
     char *requestBuffer = (char*)malloc(REQUEST_BUFFER_SIZE);
 
     Memory_set(requestBuffer, 0, REQUEST_BUFFER_SIZE);
-    // accept client connection
+
     if ((client_fd) && ((*client_fd = accept(this->fd, 
                            (struct sockaddr *)&client_addr, 
                             &client_addr_len)) < 0)) {
             PRINT(("accept failed"));
-            break;
+          exit(1);
         }
     PRINT(("Received connection\n"));
 
     int msg_len = 0;
-
+  TaskMgr* taskMgr = TaskMgr_getRef();
+  Task * connectionListen = Task_create(&HTTPServer_listenTaskBody, 2, (void**)&params[i]);
+  TaskMgr_start(taskMgr, connectionListen);
+#ifdef 0
+  /* request = Connection_waitForHttpRequest*/
     if ((client_fd) && (requestBuffer))
     {
-      /* request = HTTPRequest_read(); */
       msg_len = recv(*client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
-    PRINT(("Bytes Received: %d\n%s\n", msg_len, requestBuffer));
+    //PRINT(("Bytes Received: %d\n%s\n", msg_len, requestBuffer));
 
-      //sscanf_s(requestBuffer, "%s %s %s\nHost: %s\nUser-Agent: %s\n",
-      //  method, sizeof(method), path, sizeof(path), version, sizeof(version), host, sizeof(host), userAgent, sizeof(userAgent));
+    HTTPRequest* request = HTTPRequest_new(requestBuffer);
+    HTTPRequest_print(request);
+
+    HTTPRequest_delete(request);
     }
-    /* response = HTTPResponse_new();
-       HTTPResponse_send(response, *client_fd); */
+    
+  /* HTTPResponse_send(*client_fd); */
     if (client_fd) msg_len = send(*client_fd, response, sizeof(response), 0);
     if (msg_len == 0) {
       PRINT(("Client closed connection\n"));
@@ -190,17 +203,7 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
 #endif
     }
 
-    /*if (msg_len == -1) {
-      fprintf(stderr, "recv() failed with error %d\n", -1); //WSAGetLastError());
-      //WSACleanup();
-      return -1;
-    }
 
-      if (msg_len == 0) {
-        printf("Client closed connection\n");
-        close(this->fd);
-        return -1;
-      }*/
     free(requestBuffer);
     free(client_fd);
 #ifndef WIN32
@@ -208,6 +211,23 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
 #else
     closesocket(this->fd);
 #endif
+#endif
+  TaskMgr_delete(taskMgr);
     exit(1);
+}
+//void* taskBody(void* params)
+void* HTTPServer_listenTaskBody(void* params)
+{
+  int msg_len = 0;
+  int* client_fd = ((struct ConnectionParam*)params)->client_fd;
+  char* requestBuffer = (char*)malloc(REQUEST_BUFFER_SIZE);
+  /* request = Connection_waitForHttpRequest*/
+  if ((client_fd) && (requestBuffer))
+  {
+    msg_len = recv(*client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
+    //PRINT(("Bytes Received: %d\n%s\n", msg_len, requestBuffer));
+    HTTPRequest* request = HTTPRequest_new(requestBuffer);
+    HTTPRequest_print(request);
+    HTTPRequest_delete(request);
   }
 }
