@@ -48,6 +48,7 @@ struct HTTPRequest
   int majorVersion;
   int minorVersion;
   Map* headers;
+  String * body;
   int isValid;
 };
 
@@ -66,7 +67,7 @@ PRIVATE Class httpRequestClass =
 
 /**********************************************//**
   @brief Create a new instance of the class HTTPRequest.
-  @public
+  @private
   @memberof HTTPServer
   @param[in] none
   @return New instance of class HTTPRequest.
@@ -84,6 +85,7 @@ PRIVATE HTTPRequest * HTTPRequest_new(char * buffer)
   this->majorVersion = 0;
   this->minorVersion = 0;
   this->headers = Map_new();
+  this->body = 0;
   this->isValid = HTTPRequest_parseBuffer(this, buffer);
 
   return this;
@@ -91,7 +93,7 @@ PRIVATE HTTPRequest * HTTPRequest_new(char * buffer)
 
 /**********************************************//**
   @brief Delete an instance of the class HTTPRequest.
-  @public
+  @private
   @memberof HTTPRequest
 **************************************************/
 PRIVATE void HTTPRequest_delete(HTTPRequest * this)
@@ -104,7 +106,7 @@ PRIVATE void HTTPRequest_delete(HTTPRequest * this)
 
 /**********************************************//**
   @brief Copy an instance of the class HTTPRequest.
-  @public
+  @private
   @memberof HTTPRequest
   @return Copy of the instance
 **************************************************/
@@ -186,7 +188,7 @@ PRIVATE int HTTPRequest_parseBuffer(HTTPRequest* this, char* buffer)
   }
 
   /* Read path */
-  while ((path_length < sizeof(buffer)) && (*(path_start + path_length) != ' '))
+  while ((path_length < (int)Memory_len(buffer)) && (*(path_start + path_length) != ' '))
   {
     path_length++;
   }
