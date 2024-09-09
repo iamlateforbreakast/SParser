@@ -67,7 +67,7 @@ PRIVATE Class httpRequestClass =
 
 /**********************************************//**
   @brief Create a new instance of the class HTTPRequest.
-  @private
+  @public
   @memberof HTTPServer
   @param[in] none
   @return New instance of class HTTPRequest.
@@ -93,7 +93,7 @@ PRIVATE HTTPRequest * HTTPRequest_new(char * buffer)
 
 /**********************************************//**
   @brief Delete an instance of the class HTTPRequest.
-  @private
+  @public
   @memberof HTTPRequest
 **************************************************/
 PRIVATE void HTTPRequest_delete(HTTPRequest * this)
@@ -106,7 +106,7 @@ PRIVATE void HTTPRequest_delete(HTTPRequest * this)
 
 /**********************************************//**
   @brief Copy an instance of the class HTTPRequest.
-  @private
+  @public
   @memberof HTTPRequest
   @return Copy of the instance
 **************************************************/
