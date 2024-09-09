@@ -12,7 +12,8 @@ SOURCES = \
 	./TimeMgr/Timer.c \
 	./SdbMgr/SdbMgr.c \
 	./SdbMgr/SdbRequest.c \
-	./TaskMgr/TaskMgr.c
+	./TaskMgr/TaskMgr.c \
+	./TaskMgr/Task.c
 
 HEADERS = $(SOURCES:.c=.h)
 
