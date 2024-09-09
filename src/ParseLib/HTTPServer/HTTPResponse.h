@@ -27,6 +27,7 @@ PRIVATE void HTTPResponse_setStatusCode(HTTPResponse* this, int code);
 PRIVATE void HTTPResponse_setReason(HTTPResponse* this, enum Reason);
 PRIVATE void HTTPResponse_addHeader(HTTPResponse* this, char* key, char* value);
 PRIVATE void HTTPResponse_setBody(HTTPResponse* this, char* body);
+PRIVATE int HTTPResponse_generate(HTTPResponse* this, char* buffer, int size);
 
 /**********************************************//**
   @class HTTPResponse
@@ -67,6 +68,17 @@ PRIVATE HTTPResponse* HTTPResponse_new()
 {
   HTTPResponse* this = 0;
 
+  this = (HTTPResponse*)Object_new(sizeof(HTTPResponse), &httpResponseClass);
+
+  if (this == 0) return 0;
+
+  this->statusCode = REASON_INVALID;
+  this->majorVersion = 0;
+  this->minorVersion = 0;
+  this->headers = Map_new();
+  this->body = 0;
+  this->isValid = 0;
+
   return this;
 }
 
@@ -77,7 +89,10 @@ PRIVATE HTTPResponse* HTTPResponse_new()
 **************************************************/
 PRIVATE void HTTPResponse_delete(HTTPResponse* this)
 {
+  if (!Object_isValid((Object*)this)) return;
 
+  String_delete(this->body);
+  Map_delete(this->headers);
 }
 
 /**********************************************//**
@@ -122,5 +137,43 @@ PRIVATE void HTTPResponse_print(HTTPResponse* this)
 PRIVATE unsigned int HTTPResponse_getSize(HTTPResponse* this)
 {
   return sizeof(HTTPResponse);
+}
+
+PRIVATE void HTTPResponse_setReason(HTTPResponse* this, enum Reason reason)
+{
+  this-> reason = REASON_OK;
+}
+
+PRIVATE void HTTPResponse_setStatusCode(HTTPResponse* this, int statusCode)
+{
+  this->statusCode = statusCode;
+}
+
+PRIVATE void HTTPResponse_setVersion(HTTPResponse* this, int majorVersion, int minorVersion)
+{
+  this->majorVersion = majorVersion;
+  this->minorVersion = minorVersion;
+}
+
+PRIVATE void HTTPResponse_addHeader(HTTPResponse* this, char* key, char* value)
+{
+
+}
+
+PRIVATE void HTTPResponse_setBody(HTTPResponse* this, char* body)
+{
+   this->body = String_newByRef(body);
+}
+
+PRIVATE int HTTPResponse_generate(HTTPResponse* this, char * buffer, int size)
+{
+  char test_response[] = "HTTP/1.1 200 OK\r\n"
+    "Content-Type: text/html; charset=UTF-8\r\n\r\n"
+    "<doctype !html><html><head><title>Hello World</title></head>"
+    "<body><h1>Hello world!</h1></body></html>\r\n";
+
+  int nbCharToWrite = sprintf_s(buffer, size,"HTTP/%d.%d %d OK\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n%s", this->majorVersion, this->minorVersion, this->statusCode, String_getBuffer(this->body));
+
+  return nbCharToWrite;
 }
 #endif /* _HTTPRESPONSE_H_ */
