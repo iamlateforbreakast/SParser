@@ -42,7 +42,7 @@ PRIVATE int TaskMgr_waitNotEmpty(TaskMgr* this);
 PRIVATE int TaskMgr_signalNotEmpty(TaskMgr* this);
 PRIVATE int TaskMgr_signalNotFull(TaskMgr* this);
 PRIVATE void* TaskMgr_threadBody(void* this);
-#ifndef WIN32
+#ifdef WIN32
 PRIVATE VOID WINAPI TaskMgr_threadWinBody(LPVOID Parameter);
 #endif
 /**********************************************//**
@@ -245,10 +245,12 @@ PRIVATE void* TaskMgr_threadBody(void* p)
   }
 }
 
+#ifdef WIN32
 PRIVATE VOID WINAPI TaskMgr_threadWinBody(LPVOID Parameter)
 {
   TaskMgr_threadBody((void*)Parameter);
 }
+#endif
 
 /**********************************************//** 
   @brief TBD

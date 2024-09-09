@@ -7,6 +7,7 @@
 #include "Class.h"
 #include "String2.h"
 #include "Map.h"
+#include <stdio.h>
 
 typedef struct HTTPResponse HTTPResponse;
 
@@ -172,7 +173,7 @@ PRIVATE int HTTPResponse_generate(HTTPResponse* this, char * buffer, int size)
     "<doctype !html><html><head><title>Hello World</title></head>"
     "<body><h1>Hello world!</h1></body></html>\r\n";
 
-  int nbCharToWrite = sprintf_s(buffer, size,"HTTP/%d.%d %d OK\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n%s", this->majorVersion, this->minorVersion, this->statusCode, String_getBuffer(this->body));
+  int nbCharToWrite = snprintf(buffer, size,"HTTP/%d.%d %d OK\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n%s", this->majorVersion, this->minorVersion, this->statusCode, String_getBuffer(this->body));
 
   return nbCharToWrite;
 }
