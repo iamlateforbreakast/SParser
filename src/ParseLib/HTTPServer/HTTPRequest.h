@@ -78,7 +78,7 @@ PRIVATE HTTPRequest * HTTPRequest_new(char * buffer)
 
   this = (HTTPRequest*)Object_new(sizeof(HTTPRequest), &httpRequestClass);
 
-  if (this == 0) return 0;
+  if (OBJECT_IS_INVALID(this)) return 0;
 
   this->method = METHOD_INVALID;
   this->path = 0;
