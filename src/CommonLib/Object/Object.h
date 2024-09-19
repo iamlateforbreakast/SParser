@@ -7,6 +7,9 @@
 #include "Class.h"
 #include "Allocator.h"
 
+#define OBJECT_IS_INVALID(X) (!Object_isValid((Object*)X))
+#define OBJECT_IS_VALID(X) (Object_isValid((Object*)X))
+
 typedef struct Object Object;
 
 struct Object
