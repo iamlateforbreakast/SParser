@@ -178,10 +178,10 @@ PRIVATE int HTTPRequest_parseBuffer(HTTPRequest* this, char* buffer)
   /* Read method*/
   for (enum Method i = METHOD_GET; i < METHOD_INVALID; i++)
   {
-    if (Memory_ncmp(buffer, methods_text[i], sizeof(methods_text[i]) - 1))
+    if (Memory_ncmp(buffer, methods_text[i], strlen(methods_text[i]) - 1))
     {
       this->method = i;
-      path_start = buffer + sizeof(methods_text[i]);
+      path_start = buffer + strlen(methods_text[i]) + 1;
       isValid = 1;
       break;
     }
