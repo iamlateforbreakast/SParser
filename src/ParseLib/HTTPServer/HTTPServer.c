@@ -112,7 +112,7 @@ PUBLIC HTTPServer* HTTPServer_new()
   int sockOptions = 1;
   this = (HTTPServer*)Object_new(sizeof(HTTPServer), &httpServerClass);
 
-  if (this == 0) return 0;
+  if (OBJECT_IS_INVALID(this)) return 0;
 
 #ifdef WIN32   
   if (WSAStartup(MAKEWORD(2, 2), &this->wsa) != 0) {
@@ -154,6 +154,7 @@ PUBLIC HTTPServer* HTTPServer_new()
 
 PUBLIC void HTTPServer_delete(HTTPServer* this)
 {
+  if (OBJECT_IS_VALID(this)) return;
 #ifndef WIN32
   close(this->fd);
 #else
@@ -247,6 +248,7 @@ PRIVATE void* HTTPServer_listenTaskBody(void* params)
     HTTPRequest_print(request);
     HTTPRequest_delete(request);
 
+    PRINT(("Requested path %s\n", String_getBuffer(HTTPRequest_getPath(request))));
     HTTPResponse* response = HTTPResponse_new();
     HTTPResponse_setVersion(response, 1, 1);
     HTTPResponse_setStatusCode(response, 200);
@@ -271,39 +273,3 @@ PRIVATE void* HTTPServer_listenTaskBody(void* params)
   }
   return 0;
 }
-#if 0
-if ((client_fd) && (requestBuffer))
-{
-  msg_len = recv(*client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
-  HTTPRequest* request = HTTPRequest_new(requestBuffer);
-  HTTPRequest_print(request);
-  HTTPRequest_delete(request);
-}
-/* HTTPResponse_send(*client_fd); */
-    if (client_fd) msg_len = send(*client_fd, response, sizeof(response), 0);
-    if (msg_len == 0) {
-      PRINT(("Client closed connection\n"));
-#ifndef WIN32
-      close(this->fd);
-#else
-      closesocket(this->fd);
-#endif
-    }
-
-    /*if (msg_len == -1) {
-      fprintf(stderr, "recv() failed with error %d\n", -1); //WSAGetLastError());
-      //WSACleanup();
-      return -1;
-    }
-
-      if (msg_len == 0) {
-        printf("Client closed connection\n");
-        close(this->fd);
-        return -1;
-      }*/
-#ifndef WIN32
-    close(this->fd);
-#else
-    closesocket(this->fd);
-#endif
-#endif
