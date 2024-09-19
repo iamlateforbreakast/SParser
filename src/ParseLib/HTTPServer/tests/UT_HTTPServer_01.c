@@ -1,6 +1,7 @@
 /* UT_HTTPServer_01.c */
 
 #include "HTTPServer.h"
+#include "ObjectMgr.h"
 #include "Memory.h"
 
 int step1()
@@ -15,6 +16,9 @@ int step1()
 
     HTTPServer_delete(httpServer);
 
+  ObjectMgr* objectMgr = ObjectMgr_getRef();
+  ObjectMgr_reportUnallocated(objectMgr);
+  ObjectMgr_delete(objectMgr);
     return isPassed;
 }
 
