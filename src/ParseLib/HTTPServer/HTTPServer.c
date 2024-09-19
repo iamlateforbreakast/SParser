@@ -65,7 +65,9 @@ int msleep(long msec)
 #endif
 #define REQUEST_BUFFER_SIZE (4096)
 #define RESPONSE_BUFFER_SIZE (4096)
+
 PRIVATE void* HTTPServer_listenTaskBody(void* params);
+
 /**********************************************//**
   @class HTTPServer
 **************************************************/
@@ -233,7 +235,7 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
 #endif
 }
 PRIVATE void* HTTPServer_listenTaskBody(void* params)
-{
+{ 
   int msg_len = 0;
   int* client_fd = ((struct ConnectionParam*)params)->client_fd;
   char* requestBuffer = (char*)malloc(REQUEST_BUFFER_SIZE);
@@ -249,6 +251,10 @@ PRIVATE void* HTTPServer_listenTaskBody(void* params)
     HTTPRequest_delete(request);
 
     PRINT(("Requested path %s\n", String_getBuffer(HTTPRequest_getPath(request))));
+    if (String_matchWildcard(HTTPRequest_getPath(request),"/index.html"))
+    {
+      PRINT(("Load index.html\n"));
+    }
     HTTPResponse* response = HTTPResponse_new();
     HTTPResponse_setVersion(response, 1, 1);
     HTTPResponse_setStatusCode(response, 200);
