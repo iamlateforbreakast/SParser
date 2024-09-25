@@ -10,6 +10,7 @@
 #include "HTTPRequest.h"
 #include "HTTPResponse.h"
 #include "TaskMgr.h"
+#include "FileMgr.h"
 #include "Task.h"
 #include "Object.h"
 #include "Memory.h"
@@ -28,18 +29,25 @@
 
 #ifdef _WIN32
 #include <windows.h>	/* WinAPI */
+/* Windows sleep in 100ns units */
 int msleep(long msec) {
+  /* Declarations */
   HANDLE timer;	/* Timer handle */
   LARGE_INTEGER li;	/* Time definition */
+  /* Create timer */
   if (!(timer = CreateWaitableTimer(NULL, 1, NULL)))
     return 0;
+  /* Set timer properties */
   li.QuadPart = -10000LL * msec;
   if (!SetWaitableTimer(timer, &li, 0, NULL, NULL, 0)) {
     CloseHandle(timer);
     return 0;
   }
+  /* Start & wait for timer */
   WaitForSingleObject(timer, 0xFFFFFFFF);
+  /* Clean resources */
   CloseHandle(timer);
+  /* Slept without problems */
   return 1;
 }
 #else
@@ -154,6 +162,12 @@ PUBLIC HTTPServer* HTTPServer_new()
   return this;
 }
 
+/**********************************************//**
+  @brief Delete an instance of the class HTTPServer.
+  @public
+  @memberof HTTPServer
+  @param[in] none
+**************************************************/
 PUBLIC void HTTPServer_delete(HTTPServer* this)
 {
   if (OBJECT_IS_VALID(this)) return;
@@ -165,6 +179,12 @@ PUBLIC void HTTPServer_delete(HTTPServer* this)
 #endif
 }
 
+/**********************************************//**
+  @brief Copy an instance of the class HTTPServer.
+  @private
+  @memberof HTTPServer
+  @return Copy of the instance
+**************************************************/
 PUBLIC HTTPServer* HTTPServer_copy(HTTPServer* this)
 {
   return 0;
@@ -175,16 +195,33 @@ PUBLIC int HTTPServer_compare(HTTPServer* this, HTTPServer* compared)
   return 0;
 }
 
+/**********************************************//**
+  @brief Print an instance of the class HTTPResponse.
+  @public
+  @memberof HTTPServer
+**************************************************/
 PUBLIC void HTTPServer_print(HTTPServer* this)
 {
 
 }
 
+/**********************************************//**
+  @brief Get the size of an HTTPServer. If parameter is 0
+  return the size of the class.
+  @public
+  @memberof HTTPServer
+  @return Number of items.
+**************************************************/
 PUBLIC unsigned int HTTPServer_getSize(HTTPServer* this)
 {
   return sizeof(HTTPServer);
 }
 
+/**********************************************//**
+  @brief Starts an instance of an HTTPServer.
+  @public
+  @memberof HTTPServer
+**************************************************/
 PUBLIC void HTTPServer_start(HTTPServer* this)
 {
 
@@ -216,11 +253,11 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
   params[0].client_fd = client_fd;
   Task * connectionListen = Task_create(&HTTPServer_listenTaskBody, 1, (void**)&params);
   Task_start(connectionListen);
-  int t = 0;
-  while (t<50)
+  int timer = 0;
+  while (timer<50)
   {
     msleep(100);
-    t++;
+    timer++;
   }
 
   TaskMgr_stop(taskMgr);
@@ -234,36 +271,77 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
   closesocket(this->fd);
 #endif
 }
+/**********************************************//**
+  @brief Starts thread listening to a socket and 
+  answering a HTTP request.
+  @public
+  @memberof HTTPServer
+**************************************************/
 PRIVATE void* HTTPServer_listenTaskBody(void* params)
 { 
   int msg_len = 0;
   int* client_fd = ((struct ConnectionParam*)params)->client_fd;
   char* requestBuffer = (char*)malloc(REQUEST_BUFFER_SIZE);
   PRINT(("Listen body starts\n Client FD:%d\n", client_fd));
+  /* request = Connection_waitForHttpRequest*/
     if ((client_fd) && (requestBuffer))
     {
-      /* request = HTTPRequest_read(); */
-      msg_len = recv(*client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
-    //PRINT(("Bytes Received: %d\n%s\n", msg_len, requestBuffer));
+    FileMgr* fm = FileMgr_new();
+    String* errorMessage = String_newByRef("<doctype !html><html><head><title>Error</title></head>"
+        "<body><h1>Hello world!</h1></body></html>\r\n");
+    int nbRequestProcessed = 0;
 
+    while ((msg_len = recv(*client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0))>0)
+    {
+      //msg_len = recv(*client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
     HTTPRequest* request = HTTPRequest_new(requestBuffer);
     HTTPRequest_print(request);
-    HTTPRequest_delete(request);
+      String* content = errorMessage;
+      HTTPResponse* response = HTTPResponse_new();
 
     PRINT(("Requested path %s\n", String_getBuffer(HTTPRequest_getPath(request))));
     if (String_matchWildcard(HTTPRequest_getPath(request),"/index.html"))
     {
       PRINT(("Load index.html\n"));
+        FileDesc* fd = FileMgr_addFile(fm, "index.html");
+        if (fd)
+        {
+          content = FileMgr_load(fm, "index.html");
+          HTTPResponse_setVersion(response, 1, 1);
+          HTTPResponse_setStatusCode(response, 200);
+          HTTPResponse_setReason(response, REASON_OK);
+          HTTPResponse_addHeader(response, "Content - Type", "text/html; charset=UTF-8");
+          HTTPResponse_setBody(response, String_getBuffer(content));
     }
-    HTTPResponse* response = HTTPResponse_new();
+      } else if (String_matchWildcard(HTTPRequest_getPath(request), "/hello.css"))
+      {
+        PRINT(("Load hello.cs\n"));
+        FileDesc* fd = FileMgr_addFile(fm, "hello.css");
+        if (fd)
+        {
+          content = FileMgr_load(fm, "hello.css");
+          HTTPResponse_setVersion(response, 1, 1);
+          HTTPResponse_setStatusCode(response, 200);
+          HTTPResponse_setReason(response, REASON_OK);
+          HTTPResponse_addHeader(response, "Content - Type", "text/css; charset=UTF-8");
+          HTTPResponse_setBody(response, String_getBuffer(content));
+        }
+      } else if (String_matchWildcard(HTTPRequest_getPath(request), "/hello.js"))
+      {
+        PRINT(("Load hello.js\n"));
+        FileDesc* fd = FileMgr_addFile(fm, "hello.js");
+        if (fd)
+        {
+          content = FileMgr_load(fm, "hello.js");
     HTTPResponse_setVersion(response, 1, 1);
     HTTPResponse_setStatusCode(response, 200);
     HTTPResponse_setReason(response, REASON_OK);
-    HTTPResponse_addHeader(response, "Content - Type", "text/html; charset=UTF-8");
-    char response_body[] = "<doctype !html><html><head><title>A Message: Hello World</title></head>"
-      "<body><h1>Hello world!</h1></body></html>\r\n";
-    HTTPResponse_setBody(response, response_body);
+          HTTPResponse_addHeader(response, "Content - Type", "text/javascript; charset=UTF-8");
+          HTTPResponse_setBody(response, String_getBuffer(content));
+        }
+      }
 
+      HTTPRequest_delete(request);
     char* responseBuffer = (char*)malloc(RESPONSE_BUFFER_SIZE);
     Memory_set(responseBuffer, 0, RESPONSE_BUFFER_SIZE);
     int nbCharToWrite = HTTPResponse_generate(response, responseBuffer, RESPONSE_BUFFER_SIZE - 1);
@@ -276,6 +354,11 @@ PRIVATE void* HTTPServer_listenTaskBody(void* params)
     }
     free(responseBuffer);
     HTTPResponse_delete(response);
+      //nbRequestProcessed++;
+    }
+    PRINT(("Client disconnected\n"));
+    FileMgr_delete(fm);
+    String_delete(errorMessage);
   }
   return 0;
 }
