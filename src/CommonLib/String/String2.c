@@ -425,9 +425,11 @@ PUBLIC unsigned int String_matchWildcard(String * this, const char * wildcard)
       possibleMatch++;
     }
     //printf("Possible match=%d\n", possibleMatch);
+    // Check if we have exhausted the input string  
+    if ((f_idx > this->length) && (w_idx < wlen)) isMatch = 0;
   }
   // Still some char in fileName not matched by filter
-  if (f_idx < this->length) isMatch = 0;
+  if (f_idx < this->length - 1) isMatch = 0;
   
   return isMatch;
 }

@@ -67,7 +67,7 @@ PRIVATE Class httpRequestClass =
 
 /**********************************************//**
   @brief Create a new instance of the class HTTPRequest.
-  @public
+  @private
   @memberof HTTPServer
   @param[in] none
   @return New instance of class HTTPRequest.
@@ -93,12 +93,12 @@ PRIVATE HTTPRequest * HTTPRequest_new(char * buffer)
 
 /**********************************************//**
   @brief Delete an instance of the class HTTPRequest.
-  @public
+  @private
   @memberof HTTPRequest
 **************************************************/
 PRIVATE void HTTPRequest_delete(HTTPRequest * this)
 {
-  if (!Object_isValid((Object*)this)) return;
+  if (OBJECT_IS_INVALID(this)) return;
 
   String_delete(this->path);
   Map_delete(this->headers);
@@ -106,7 +106,7 @@ PRIVATE void HTTPRequest_delete(HTTPRequest * this)
 
 /**********************************************//**
   @brief Copy an instance of the class HTTPRequest.
-  @public
+  @private
   @memberof HTTPRequest
   @return Copy of the instance
 **************************************************/
@@ -178,10 +178,10 @@ PRIVATE int HTTPRequest_parseBuffer(HTTPRequest* this, char* buffer)
   /* Read method*/
   for (enum Method i = METHOD_GET; i < METHOD_INVALID; i++)
   {
-    if (Memory_ncmp(buffer, methods_text[i], strlen(methods_text[i]) - 1))
+    if (Memory_ncmp(buffer, methods_text[i], Memory_len(methods_text[i]) - 1))
     {
       this->method = i;
-      path_start = buffer + strlen(methods_text[i]) + 1;
+      path_start = buffer + Memory_len(methods_text[i]) + 1;
       isValid = 1;
       break;
     }
@@ -201,7 +201,7 @@ PRIVATE int HTTPRequest_parseBuffer(HTTPRequest* this, char* buffer)
   char * version_start = path_start + path_length + 1;
 
   /* Read version */
-  if (Memory_ncmp(version_start, "HTTP/1.1", sizeof("HTTP/1.1") - 1))
+  if (Memory_ncmp(version_start, "HTTP/1.1", Memory_len("HTTP/1.1") - 1))
   {
     this->majorVersion = 1;
     this->minorVersion = 1;

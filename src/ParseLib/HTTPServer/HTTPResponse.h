@@ -173,8 +173,11 @@ PRIVATE int HTTPResponse_generate(HTTPResponse* this, char * buffer, int size)
     "<doctype !html><html><head><title>Hello World</title></head>"
     "<body><h1>Hello world!</h1></body></html>\r\n";
 
+#ifndef WIN32
   int nbCharToWrite = snprintf(buffer, size,"HTTP/%d.%d %d OK\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n%s", this->majorVersion, this->minorVersion, this->statusCode, String_getBuffer(this->body));
-
+#else
+   int nbCharToWrite = sprintf_s(buffer, size,"HTTP/%d.%d %d OK\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n%s\r\n\r\n", this->majorVersion, this->minorVersion, this->statusCode, String_getBuffer(this->body));
+#endif
   return nbCharToWrite;
 }
 #endif /* _HTTPRESPONSE_H_ */
