@@ -93,7 +93,11 @@ struct HTTPServer
 };
 struct ConnectionParam
 {
+#ifndef WIN32
   int* client_fd;
+#else
+  SOCKET client_fd;
+#endif
 };
 
 /**********************************************//**
@@ -238,21 +242,25 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
     char *requestBuffer = (char*)malloc(REQUEST_BUFFER_SIZE);
 
     Memory_set(requestBuffer, 0, REQUEST_BUFFER_SIZE);
-    // accept client connection
-    if ((client_fd) && ((*client_fd = accept(this->fd, 
+
+  TaskMgr* taskMgr = TaskMgr_getRef();
+  while (1)
+  {
+    if ((client_fd = accept(this->fd,
                            (struct sockaddr *)&client_addr, 
-                            &client_addr_len)) < 0)) {
+      &client_addr_len)) < 0) {
             PRINT(("accept failed"));
           exit(1);
         }
     PRINT(("Received connection\n"));
 
     int msg_len = 0;
-  TaskMgr* taskMgr = TaskMgr_getRef();
-  struct ConnectionParam params[1];
-  params[0].client_fd = client_fd;
-  Task * connectionListen = Task_create(&HTTPServer_listenTaskBody, 1, (void**)&params);
+    
+    void * params[5];
+    params[0] = &client_fd;
+    Task* connectionListen = Task_create(&HTTPServer_listenTaskBody, 1, params);
   Task_start(connectionListen);
+  }
   int timer = 0;
   while (timer<50)
   {
@@ -261,7 +269,7 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
   }
 
   TaskMgr_stop(taskMgr);
-  Task_destroy(connectionListen);
+  //Task_destroy(connectionListen);
   TaskMgr_delete(taskMgr);
   free(requestBuffer);
   free(client_fd);
@@ -280,7 +288,11 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
 PRIVATE void* HTTPServer_listenTaskBody(void* params)
 { 
   int msg_len = 0;
+#ifndef WIN32
   int* client_fd = ((struct ConnectionParam*)params)->client_fd;
+#else
+  SOCKET client_fd = ((struct ConnectionParam**)params)[0]->client_fd;
+#endif
   char* requestBuffer = (char*)malloc(REQUEST_BUFFER_SIZE);
   PRINT(("Listen body starts\n Client FD:%d\n", client_fd));
   /* request = Connection_waitForHttpRequest*/
@@ -288,10 +300,12 @@ PRIVATE void* HTTPServer_listenTaskBody(void* params)
     {
     FileMgr* fm = FileMgr_new();
     String* errorMessage = String_newByRef("<doctype !html><html><head><title>Error</title></head>"
-        "<body><h1>Hello world!</h1></body></html>\r\n");
+        "<body><h1>Error!</h1></body></html>\r\n");
     int nbRequestProcessed = 0;
 
-    while ((msg_len = recv(*client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0))>0)
+    int msg_len = recv(client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
+    int isClosed = 0;
+    while (!isClosed)
     {
       //msg_len = recv(*client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
     HTTPRequest* request = HTTPRequest_new(requestBuffer);
@@ -340,6 +354,14 @@ PRIVATE void* HTTPServer_listenTaskBody(void* params)
           HTTPResponse_setBody(response, String_getBuffer(content));
         }
       }
+      else
+      {
+        HTTPResponse_setVersion(response, 1, 1);
+        HTTPResponse_setStatusCode(response, 200);
+        HTTPResponse_setReason(response, REASON_OK);
+        HTTPResponse_addHeader(response, "Content - Type", "text/html; charset=UTF-8");
+        HTTPResponse_setBody(response, String_getBuffer(errorMessage));
+      }
 
       HTTPRequest_delete(request);
     char* responseBuffer = (char*)malloc(RESPONSE_BUFFER_SIZE);
@@ -354,9 +376,12 @@ PRIVATE void* HTTPServer_listenTaskBody(void* params)
     }
     free(responseBuffer);
     HTTPResponse_delete(response);
+      //msg_len = recv(client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
+      isClosed = 1;
       //nbRequestProcessed++;
     }
     PRINT(("Client disconnected\n"));
+    closesocket(client_fd);
     FileMgr_delete(fm);
     String_delete(errorMessage);
   }
