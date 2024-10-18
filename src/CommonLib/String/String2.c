@@ -195,7 +195,10 @@ PUBLIC int String_compare(String * this, String * compared)
 /**********************************************//** 
   @brief TBD
   @public
+  @param[in] index of first character to select
+  @param[in] length of the sub string to extract
   @memberof String
+  @return Extracted sub string.
 **************************************************/
 PUBLIC String * String_subString(String * this, unsigned int idx, unsigned int length)
 {
@@ -225,6 +228,7 @@ PUBLIC String * String_subString(String * this, unsigned int idx, unsigned int l
   @brief TBD
   @public
   @memberof String
+  @return Integer read from string.
 **************************************************/
 PUBLIC int String_toInt(String* this)
 {
@@ -236,9 +240,10 @@ PUBLIC int String_toInt(String* this)
 }
 
 /**********************************************//**
-  @brief TBD
+  @brief Get length of string in characters
   @public
   @memberof String
+  @return length of string
 **************************************************/
 PUBLIC unsigned int String_getLength(String * this)
 {
@@ -250,9 +255,10 @@ PUBLIC unsigned int String_getLength(String * this)
 }
 
 /**********************************************//**
-  @brief TBD
+  @brief Get the char buffer of a string
   @public
   @memberof String
+  @return pointer to char buffer
 **************************************************/
 PUBLIC char * String_getBuffer(String * this)
 {
@@ -339,6 +345,7 @@ PUBLIC unsigned int String_prepend(String * this, const char * prefix)
 
  This function add the prefix at the back of a String object
 
+ @memberof String
  @param [in]     postfix: const char * - prefix
  @return: unsigned int: 0 successfull
 **************************************************/
@@ -365,7 +372,8 @@ PUBLIC unsigned int String_append(String* this, const char* postfix)
  
  This function matches a String with a wildcard
  pattern
- 
+
+ @memberof String
  @param [in]     filter: String* - wildcard filter
  @return: unsigned int: 0 no match, 1 match
 **************************************************/
@@ -439,6 +447,7 @@ PUBLIC unsigned int String_matchWildcard(String * this, const char * wildcard)
 
  This function splits a string 
 
+ @memberof String
  @param [in]     separator: const char *: separator
  @return: unsigned int: 0 no match, 1 match
 **************************************************/
@@ -472,6 +481,7 @@ PUBLIC List* String_splitToken(String* this, const char* separator)
 
  This function move the buffer from string s
 
+ @memberof String
  @param [in]     s String to steal from
 **************************************************/
 PUBLIC void String_stealBuffer(String* this, String* s)
@@ -484,7 +494,9 @@ PUBLIC void String_stealBuffer(String* this, String* s)
 
 /**************************************************
  @brief String_getSize
-
+ @public
+ @memberof String
+ @return Size of an instance of String
 **************************************************/
 PUBLIC unsigned int String_getSize(String* this)
 {
