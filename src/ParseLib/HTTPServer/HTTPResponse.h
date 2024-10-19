@@ -90,7 +90,7 @@ PRIVATE HTTPResponse* HTTPResponse_new()
 **************************************************/
 PRIVATE void HTTPResponse_delete(HTTPResponse* this)
 {
-  if (OBJECT_ISINVALID(this)) return;
+  if (OBJECT_IS_INVALID(this)) return;
 
   String_delete(this->body);
   Map_delete(this->headers);
