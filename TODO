@@ -2,7 +2,7 @@
 
 [-] Move all objects to new new/delete scheme
 
-[-] Cleanup warnings in UT
+[D] Cleanup warnings in UT
 
 [-] Memory: Use Malloc allocator
 

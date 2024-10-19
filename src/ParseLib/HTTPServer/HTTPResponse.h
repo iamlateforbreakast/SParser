@@ -90,10 +90,12 @@ PRIVATE HTTPResponse* HTTPResponse_new()
 **************************************************/
 PRIVATE void HTTPResponse_delete(HTTPResponse* this)
 {
-  if (!Object_isValid((Object*)this)) return;
+  if (OBJECT_ISINVALID(this)) return;
 
   String_delete(this->body);
   Map_delete(this->headers);
+  
+  Object_delete((Object*)this);
 }
 
 /**********************************************//**
@@ -133,46 +135,77 @@ PRIVATE void HTTPResponse_print(HTTPResponse* this)
   return the size of the class.
   @public
   @memberof HTTPServer
-  @return Number of items.
+  @return Size of an instance of HTTPResponse
 **************************************************/
 PRIVATE unsigned int HTTPResponse_getSize(HTTPResponse* this)
 {
   return sizeof(HTTPResponse);
 }
 
+/**********************************************//**
+  @brief TBD
+  @private
+  @memberof HTTPServer
+  @return TBD
+**************************************************/
 PRIVATE void HTTPResponse_setReason(HTTPResponse* this, enum Reason reason)
 {
   this-> reason = REASON_OK;
 }
 
+/**********************************************//**
+  @brief TBD
+  @private
+  @memberof HTTPServer
+  @return TBD
+**************************************************/
 PRIVATE void HTTPResponse_setStatusCode(HTTPResponse* this, int statusCode)
 {
   this->statusCode = statusCode;
 }
 
+/**********************************************//**
+  @brief TBD
+  @private
+  @memberof HTTPServer
+  @return TBD
+**************************************************/
 PRIVATE void HTTPResponse_setVersion(HTTPResponse* this, int majorVersion, int minorVersion)
 {
   this->majorVersion = majorVersion;
   this->minorVersion = minorVersion;
 }
 
+/**********************************************//**
+  @brief TBD
+  @private
+  @memberof HTTPServer
+  @return TBD
+**************************************************/
 PRIVATE void HTTPResponse_addHeader(HTTPResponse* this, char* key, char* value)
 {
 
 }
 
+/**********************************************//**
+  @brief TBD
+  @private
+  @memberof HTTPServer
+  @return TBD
+**************************************************/
 PRIVATE void HTTPResponse_setBody(HTTPResponse* this, char* body)
 {
    this->body = String_newByRef(body);
 }
 
+/**********************************************//**
+  @brief TBD
+  @private
+  @memberof HTTPServer
+  @return TBD
+**************************************************/
 PRIVATE int HTTPResponse_generate(HTTPResponse* this, char * buffer, int size)
 {
-  char test_response[] = "HTTP/1.1 200 OK\r\n"
-    "Content-Type: text/html; charset=UTF-8\r\n\r\n"
-    "<doctype !html><html><head><title>Hello World</title></head>"
-    "<body><h1>Hello world!</h1></body></html>\r\n";
-
 #ifndef WIN32
   int nbCharToWrite = snprintf(buffer, size,"HTTP/%d.%d %d OK\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n%s", this->majorVersion, this->minorVersion, this->statusCode, String_getBuffer(this->body));
 #else
