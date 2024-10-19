@@ -95,7 +95,7 @@ PRIVATE void HTTPResponse_delete(HTTPResponse* this)
   String_delete(this->body);
   Map_delete(this->headers);
   
-  Object_delete((Object*)this);
+  Object_deallocate(&this->object);
 }
 
 /**********************************************//**

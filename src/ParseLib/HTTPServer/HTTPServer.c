@@ -181,6 +181,7 @@ PUBLIC void HTTPServer_delete(HTTPServer* this)
   closesocket(this->fd);
   WSACleanup();
 #endif
+  Object_deallocate(&this->object);
 }
 
 /**********************************************//**
@@ -246,7 +247,7 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
   TaskMgr* taskMgr = TaskMgr_getRef();
   while (1)
   {
-    if ((client_fd = accept(this->fd,
+    if ((*client_fd = accept(this->fd,
                            (struct sockaddr *)&client_addr, 
       &client_addr_len)) < 0) {
             PRINT(("accept failed"));
@@ -289,7 +290,7 @@ PRIVATE void* HTTPServer_listenTaskBody(void* params)
 { 
   int msg_len = 0;
 #ifndef WIN32
-  int* client_fd = ((struct ConnectionParam*)params)->client_fd;
+  int* client_fd = ((struct ConnectionParam**)params)[0]->client_fd;
 #else
   SOCKET client_fd = ((struct ConnectionParam**)params)[0]->client_fd;
 #endif
@@ -303,7 +304,7 @@ PRIVATE void* HTTPServer_listenTaskBody(void* params)
         "<body><h1>Error!</h1></body></html>\r\n");
     int nbRequestProcessed = 0;
 
-    int msg_len = recv(client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
+    int msg_len = recv(*client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
     int isClosed = 0;
     while (!isClosed)
     {
@@ -381,7 +382,11 @@ PRIVATE void* HTTPServer_listenTaskBody(void* params)
       //nbRequestProcessed++;
     }
     PRINT(("Client disconnected\n"));
+    #ifndef WIN32
+    close(*client_fd);
+    #else
     closesocket(client_fd);
+    #endif
     FileMgr_delete(fm);
     String_delete(errorMessage);
   }
