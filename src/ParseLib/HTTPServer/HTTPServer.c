@@ -245,14 +245,16 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
     Memory_set(requestBuffer, 0, REQUEST_BUFFER_SIZE);
 
   TaskMgr* taskMgr = TaskMgr_getRef();
-  while (1)
+  int nbRequests = 0;
+  while (nbRequests<5)
   {
     if ((*client_fd = accept(this->fd,
                            (struct sockaddr *)&client_addr, 
-      &client_addr_len)) < 0) {
-            PRINT(("accept failed"));
-          exit(1);
-        }
+                           &client_addr_len)) < 0) 
+    {
+      PRINT(("accept failed"));
+      exit(1);
+    }
     PRINT(("Received connection\n"));
 
     int msg_len = 0;
@@ -260,7 +262,8 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
     void * params[5];
     params[0] = &client_fd;
     Task* connectionListen = Task_create(&HTTPServer_listenTaskBody, 1, params);
-  Task_start(connectionListen);
+    Task_start(connectionListen);
+    nbRequests++;
   }
   int timer = 0;
   while (timer<50)
@@ -295,24 +298,25 @@ PRIVATE void* HTTPServer_listenTaskBody(void* params)
   SOCKET client_fd = ((struct ConnectionParam**)params)[0]->client_fd;
 #endif
   char* requestBuffer = (char*)malloc(REQUEST_BUFFER_SIZE);
+  Memory_set(requestBuffer, 0, REQUEST_BUFFER_SIZE);
+
   PRINT(("Listen body starts\n Client FD:%d\n", client_fd));
   /* request = Connection_waitForHttpRequest*/
-    if ((client_fd) && (requestBuffer))
-    {
+  if ((client_fd) && (requestBuffer))
+  {
     FileMgr* fm = FileMgr_new();
     String* errorMessage = String_newByRef("<doctype !html><html><head><title>Error</title></head>"
         "<body><h1>Error!</h1></body></html>\r\n");
     int nbRequestProcessed = 0;
 
     int msg_len = recv(*client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
-    int isClosed = 0;
-    while (!isClosed)
-    {
-      //msg_len = recv(*client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
+    
+    if (msg_len<0) PRINT(("Error Receiving from socket\n"));
+
     HTTPRequest* request = HTTPRequest_new(requestBuffer);
     HTTPRequest_print(request);
-      String* content = errorMessage;
-      HTTPResponse* response = HTTPResponse_new();
+    String* content = errorMessage;
+    HTTPResponse* response = HTTPResponse_new();
 
     PRINT(("Requested path %s\n", String_getBuffer(HTTPRequest_getPath(request))));
     if (String_matchWildcard(HTTPRequest_getPath(request),"/index.html"))
@@ -348,10 +352,23 @@ PRIVATE void* HTTPServer_listenTaskBody(void* params)
         if (fd)
         {
           content = FileMgr_load(fm, "hello.js");
-    HTTPResponse_setVersion(response, 1, 1);
-    HTTPResponse_setStatusCode(response, 200);
-    HTTPResponse_setReason(response, REASON_OK);
+          HTTPResponse_setVersion(response, 1, 1);
+          HTTPResponse_setStatusCode(response, 200);
+          HTTPResponse_setReason(response, REASON_OK);
           HTTPResponse_addHeader(response, "Content - Type", "text/javascript; charset=UTF-8");
+          HTTPResponse_setBody(response, String_getBuffer(content));
+        }
+      } else if (String_matchWildcard(HTTPRequest_getPath(request), "/favicon.ico"))
+      {
+        PRINT(("Load fvicon.ico\n"));
+        FileDesc* fd = FileMgr_addFile(fm, "favicon.png");
+        if (fd)
+        {
+          content = FileMgr_load(fm, "favicon.png");
+          HTTPResponse_setVersion(response, 1, 1);
+          HTTPResponse_setStatusCode(response, 200);
+          HTTPResponse_setReason(response, REASON_OK);
+          HTTPResponse_addHeader(response, "Content - Type", "image/png; charset=UTF-8");
           HTTPResponse_setBody(response, String_getBuffer(content));
         }
       }
@@ -371,17 +388,14 @@ PRIVATE void* HTTPServer_listenTaskBody(void* params)
     if ((client_fd) && (responseBuffer))
     {
        msg_len = send(*client_fd, responseBuffer, nbCharToWrite, 0);
-      if (msg_len == 0) {
+      if (msg_len == 0) 
+      {
         PRINT(("Client closed connection\n"));
       }
     }
     free(responseBuffer);
     HTTPResponse_delete(response);
-      //msg_len = recv(client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
-      isClosed = 1;
-      //nbRequestProcessed++;
-    }
-    PRINT(("Client disconnected\n"));
+    PRINT(("Request completed.\n"));
     #ifndef WIN32
     close(*client_fd);
     #else
