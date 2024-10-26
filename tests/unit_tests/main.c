@@ -1,3 +1,4 @@
+extern int run_UT_List_01();
 
 typedef struct TestDefinition TestDefinition;
 
@@ -14,9 +15,9 @@ TestDefinition tests[] =
 
 int main()
 {
-  int nbTests = 10;
+  int nbTests = sizeof(tests)/sizeof(TestDefinition);
   
   for (int i = 0; i++; i<nbTests)
-    {
-    }
+  {
+  }
 }
