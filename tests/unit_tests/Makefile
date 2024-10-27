@@ -15,7 +15,7 @@ TESTS = \
 all: run_ut_tests
 
 run_ut_tests: main.c $(TESTS)
-	gcc $(CFLAGS) main.c $(TESTS) $(LDFLAGS) -o run_UT_tests
+	gcc $(CFLAGS) main.c TestObject.c $(TESTS) $(LDFLAGS) -o run_UT_tests
 
 clean:
 	rm -rf *.o
