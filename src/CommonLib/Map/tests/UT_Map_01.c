@@ -20,13 +20,14 @@
                           else { printf("\x1b[31mFailed\x1b[0m\n"); return 0;}
 #endif
 
-#include "Words1000.h"
+extern char words1000[];
+
 
 List * keys;
 TestObject ** testObjects;
 int nbTokens = 0;
 
-int init_keys()
+int UT_Map_01_init_keys()
 {
   String * fullText = String_newByRef(words1000);
 
@@ -45,31 +46,33 @@ int init_keys()
   return 1;
 }
 
-int delete_keys()
+int UT_Map_01_delete_keys(int isOwner)
 {
-  for (int i = 0; i < nbTokens; i++)
+  if (isOwner)
   {
-    TestObject_delete(testObjects[i]);
+    for (int i = 0; i < nbTokens; i++)
+    {
+      TestObject_delete(testObjects[i]);
+    }
   }
   List_delete(keys);
-  Memory_free(testObjects,sizeof(testObjects));
+  Memory_free(testObjects, sizeof(testObjects));
 
   return 1;
 }
 
-int step1()
+int UT_Map_01_step1()
 {
-  Map * testMap = 0;
+  Map* testMap = 0;
   String * key = 0;
 
-  PRINT(("Step 1: Test 1 - Create an instance of class Map: "));
+    PRINT(("Step 1: Test 1 - Create an instance of class Map: "));
 
   testMap = Map_new();
 
   UT_ASSERT((testMap!=0));
 
   PRINT(("Step 1: Test 2 - Insert an object: "));
-
   key = (String*)List_getNext(keys);
   Map_insert(testMap, key, testObjects[0], 0);
 
@@ -80,18 +83,17 @@ int step1()
 
   UT_ASSERT((1));
 
-  //Memory_report();
+  Memory_report();
 
   return 0;
 }
 
-int step2()
+int UT_Map_01_step2()
 {
   Map * testMap = Map_new();
   String * key = 0;
   
   PRINT(("Step 2: Test 1 - Insert %d object: ", nbTokens));
-
   List_resetIterator(keys);
   for (int i = 0; i < nbTokens; i++)
   {
@@ -101,15 +103,14 @@ int step2()
   }
   
   UT_ASSERT((1));
-
   Map_delete(testMap);
 
-  //Memory_report();
+  Memory_report();
 
   return 0;
 }
 
-int step3()
+int UT_Map_01_step3()
 {
   Map* testMap = Map_new();
 
@@ -117,11 +118,9 @@ int step3()
   String * item = 0;
   
   PRINT(("Step 3: Test 1 - Insert %d object: ", nbTokens));
-
   Map_find(testMap, s, (void**)&item);
  
   TRACE(("Value : %s\n", String_getBuffer(item)));
-
   UT_ASSERT((item==0));
 
   String_delete(s);
@@ -131,7 +130,7 @@ int step3()
   return 0;
 }
 
-int step4()
+int UT_Map_01_step4()
 {
   Map* testMap = Map_new();
 
@@ -145,21 +144,22 @@ int step4()
   printf("New value : %s\n",
           String_getBuffer(newItem));
   
-  //String_delete(s);
-  //String_delete(item);
+  String_delete(s);
+  String_delete(item);
 
   Map_delete(testMap);
 
   return 0;
 }
 
-int step5()
+int UT_Map_01_step5()
 {
   int i = 0;
   String * s = 0;
   String * c = 0;
   List * l = 0;
   Map* testMap = Map_new();
+
 
   const char * testNames[] =
   {
@@ -171,7 +171,7 @@ int step5()
     "yellow", "red", "red", "yellow", "orange", "green", "black"
   };
 
-  for (i=0; i<sizeof(testNames)/sizeof(const char *); i++)
+  for (i=0; i< sizeof(testNames)/sizeof(const char *) ; i++)
   {
     s = String_newByRef(testNames[i]);
     c = String_newByRef(testColor[i]);
@@ -180,34 +180,35 @@ int step5()
     //String_delete(c);
   }
 
+
   l = Map_getAll(testMap);
-  List_delete(l);
-  
+
+     List_delete(l);
+
   Map_delete(testMap);
 
   return 0;
 }
 
-int step6()
+int UT_Map_01_step6()
 {
   
   return 0;
 }
 
-int main()
+int run_UT_Map_01()
 {
   ObjectMgr* objMgr = ObjectMgr_getRef();
+  UT_Map_01_init_keys();
 
-  init_keys();
+  UT_Map_01_step1();
+  UT_Map_01_step2();
+  UT_Map_01_step3();
+  UT_Map_01_step4();
+  UT_Map_01_step5();
+  UT_Map_01_step6();
 
-  step1();
-  step2();
-  step3();
-  step4();
-  step5();
-  step6();
-
-  delete_keys();
+  UT_Map_01_delete_keys(1);
 
   ObjectMgr_report(objMgr);
   ObjectMgr_reportUnallocated(objMgr);
