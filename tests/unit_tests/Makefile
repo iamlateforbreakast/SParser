@@ -11,13 +11,18 @@ TESTS = \
 	../../src/CommonLib/List/tests/UT_List_01.c \
 	../../src/CommonLib/String/tests/UT_String_01.c
 
+STUBS = \
+	TestObject.c \
+	MyAllocator.c \
+	Words1000.c
+
 .c.o:
 	gcc $(CFLAGS) $< -o $@
 
 all: run_ut_tests
 
 run_ut_tests: main.c $(TESTS)
-	gcc $(CFLAGS) main.c TestObject.c $(TESTS) $(LDFLAGS) -o run_UT_tests
+	gcc $(CFLAGS) main.c TestObject.c $(TESTS) $(STUBS) $(LDFLAGS) -o run_UT_tests
 
 clean:
 	rm -rf *.o
