@@ -1,6 +1,8 @@
-CFLAGS = -ggdb3 -Wall -I../../src/AppliLib/include \
-         -I../../src/ParseLib/include \
-         -I../../src/CommonLib/include
+CFLAGS = -ggdb3 -Wall \
+	-I../../src/AppliLib/include \
+        -I../../src/ParseLib/include \
+	-I../../src/CommonLib/include \
+	-I.
 
 LDFLAGS =  -L../../src/CommonLib \
            -L../../src/AppliLib \
