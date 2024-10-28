@@ -307,7 +307,7 @@ PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
   struct dirent *directoryEntry = 0;
   String * name = 0;
   DIR * dirHandle = opendir(String_getBuffer(directory));
-  printf("%s\n",String_getBuffer(directory));
+  PRINT(("%s\n",String_getBuffer(directory)));
   if (dirHandle!=0)
   {
     result = List_new();
@@ -321,7 +321,7 @@ PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
         //fileDesc = FileDesc_new();
         //fullName = String_copy(directory);
         name = String_new(directoryEntry->d_name);
-        printf("%s\n",String_getBuffer(name));
+        PRINT(("%s\n",String_getBuffer(name)));
         //FileMgr_mergePath(this, fullName, name);
         //FileDesc_setFullName(fileDesc, fullName);
         List_insertHead(result, (void*)name, 1);
