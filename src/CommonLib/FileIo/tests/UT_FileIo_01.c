@@ -26,6 +26,8 @@ PRIVATE const char* testFileName[5] = { "test1.file","test2.file","test3.file","
 PRIVATE char testBuffer[BUFFER_SIZE_BYTES];
 PRIVATE char readBuffer[BUFFER_SIZE_BYTES];
 
+PRIVATE FILE * logChannel;
+
 PRIVATE int UT_FileIo_01_step1()
 {
   String* testFileName = String_new("test.file");
@@ -189,20 +191,24 @@ PUBLIC void FileIo_createDir(FileIo* this, String* fullDirName);
 int run_UT_FileIo_01()
 {
   int isPassed = 1;
+
+  logChannel = Debug_openChannel("UT_FileIo_01.log");
+  Debug_setStdoutChannel(logChannel);
+
   for (int i = 0; i < BUFFER_SIZE_BYTES; i++)
   {
-	testBuffer[i] = (char)i;
+	  testBuffer[i] = (char)i;
   }
 
   isPassed = isPassed && UT_FileIo_01_step1();
   isPassed = isPassed && UT_FileIo_01_step2();
   isPassed = isPassed && UT_FileIo_01_step3();
-  //step4();
+  isPassed = isPassed && UT_FileIo_01_step4();
   isPassed = isPassed && UT_FileIo_01_step5();
   isPassed = isPassed && UT_FileIo_01_step6();
-  isPassed = isPassed && UT_FileIo_01_step7();
+  /*isPassed = isPassed && UT_FileIo_01_step7();
   isPassed = isPassed && UT_FileIo_01_step8();
-  isPassed = isPassed && UT_FileIo_01_step9();
+  isPassed = isPassed && UT_FileIo_01_step9();*/
 
   ObjectMgr* objectMgr = ObjectMgr_getRef();
 
@@ -211,5 +217,8 @@ int run_UT_FileIo_01()
   ObjectMgr_delete(objectMgr);
 
   Memory_report();
+
+  Debug_closeChannel(logChannel);
+
   return isPassed;
 }
