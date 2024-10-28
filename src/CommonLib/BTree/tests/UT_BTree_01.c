@@ -5,6 +5,7 @@
 #include "ObjectMgr.h"
 #include "Memory.h"
 #include "Debug.h"
+
 #include <stdio.h>
 
 #define DEBUG (0)
@@ -21,7 +22,6 @@
 #define ORDER (10)
 
 extern char words1000[];
-
 PRIVATE List * keys;
 PRIVATE TestObject ** testObjects;
 PRIVATE TestObject ** removedObjects;
@@ -82,9 +82,7 @@ PRIVATE int UT_BTree_01_step1()
 
   PRINT(("Step 1: test 3 - Check the number of nodes: "));
   unsigned int nbNodes = BTree_getNbNodes(testTree);
-  //PRINT(("  Nb nodes = %d\n", nbNodes));
   UT_ASSERT((nbNodes == 1));
-
   PRINT(("Step 1: Test 3 - Remove the object: "));
   removedObject = (TestObject*)BTree_remove(testTree, (Object*)key);
   UT_ASSERT((1));
@@ -176,6 +174,7 @@ PRIVATE int UT_BTree_01_step3()
 	//Object_print(key);
 	removedObjects[i] = (TestObject*)BTree_remove(testTree, (Object*)key);
 	//BTree_print(testTree);
+
   }
 
   
@@ -190,10 +189,8 @@ PRIVATE int UT_BTree_01_step3()
 PUBLIC int run_UT_BTree_01(void)
 {
   int isPassed = 1;
-
   channelLog = Debug_openChannel("UT_List_01.log");
   Debug_setStdoutChannel(channelLog);
-
   ObjectMgr* objMgr = ObjectMgr_getRef();
 
   UT_BTree_01_init_keys();
@@ -201,14 +198,38 @@ PUBLIC int run_UT_BTree_01(void)
   isPassed = isPassed && UT_BTree_01_step1();
   isPassed = isPassed && UT_BTree_01_step2();
   isPassed = isPassed && UT_BTree_01_step3();
-  
+  //step2();
   UT_BTree_01_delete_keys();
 
   ObjectMgr_report(objMgr);
   ObjectMgr_reportUnallocated(objMgr);
   Memory_report();
 
+  //printf("Btree size of pool in   bytes: %d\n", BTree_reportSizeInBytes(testTree));
+  //printf("Btree size of pool in Kibytes: %d\n", BTree_reportSizeInBytes(testTree) / 1024);
+  //printf("Btree size of pool in Mibytes: %d\n", BTree_reportSizeInBytes(testTree) / (1024 * 1024));
+  //BTree_print(testTree);
+	
+  //double cpu_time1 = get_cpu_time();
+  //double wall_time1 = get_wall_time();
+	
+  //printf("Insert CPU time %f\n", cpu_time1 - cpu_time0);
+  //printf("Insert Wall time %f\n", wall_time1 - wall_time0);
   Debug_closeChannel(channelLog);
+  //cpu_time0 = get_cpu_time();
+  //wall_time0 = get_wall_time();
+
+  //for (int i = 0; i< NB_ITEMS; i++)
+  //{
+    //BTree_get(testTree, keys[i], &pTestItem);
+    //printf("test item = %x %x\n", pTestItem, &items[i]);
+  //}
+
+  //cpu_time1 = get_cpu_time();
+  //wall_time1 = get_wall_time();
+
+  //printf("Search CPU time %f\n", cpu_time1 - cpu_time0);
+  //printf("Search Wall time %f\n", wall_time1 - wall_time0);
 
   return isPassed;
 }
