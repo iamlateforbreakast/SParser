@@ -5,17 +5,17 @@
 #define DEBUG (0)
 #ifdef _WIN32
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("Passed\n");} \
-                          else { printf("Failed\n"); return 0;}
+                          { PRINT(("Passed\n"));} \
+                          else { PRINT(()"Failed\n")); return 0;}
 #else
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("\x1b[32mPassed\x1b[0m\n");} \
-                          else { printf("\x1b[31mFailed\x1b[0m\n"); return 0;}
+                          { PRINT(("\x1b[32mPassed\x1b[0m\n"));} \
+                          else { PRINT(()"\x1b[31mFailed\x1b[0m\n")); return 0;}
 #endif
                           
 unsigned int nbMessages = 1;
 
-unsigned int step1()
+PRIVATE int UT_Error_01_step1()
 {
    Error_new(ERROR_DBG, "Message %d: This is a Debug message\n", nbMessages);
 
@@ -27,19 +27,19 @@ unsigned int step1()
    return 0;
 }
 
-unsigned int step2()
+PRIVATE int UT_Error_01_step2()
 {
    nbMessages++;   
    Error_new(ERROR_FATAL, "Messages %d: This is a Fatal message\n", nbMessages);
    return 0;
 }
 
-unsigned int main()
+PUBLIC int run_UT_Error_01()
 {
-   unsigned int result = 0;
+   unsigned int isPassed = 1;
 
-   result |= step1();
-   result |= step2();
+   isPassed = isPassed && UT_Error_01_step1();
+   isPassed = isPassed && UT_Error_01_step2();
 
-   return result;
+   return isPassed;
 }
