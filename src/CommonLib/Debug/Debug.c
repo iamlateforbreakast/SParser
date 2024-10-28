@@ -10,31 +10,46 @@
 
 #include <stdio.h>
 
-FILE * open_channel(const char * name)
+FILE * Debug_channelStdOut = 0;
+FILE * Debug_channelStdErr = 0;
+FILE * Debug_channelLog = 0;
+
+FILE * Debug_openChannel(const char * name)
 {
-  FILE * channel;
+#ifndef WIN32
+  Debug_channelLog = fopen(name, "wb+");
+#else
+  fopen_s(&Debug_channelLog, name,"wb+");
+#endif
+  if (!Debug_channelLog) Debug_channelLog = stdout;
 
-  channel = fopen(name,"wb+");
-
-  if (!channel) channel = stdout;
-
-  return channel;
+  return Debug_channelLog;
 }
 
-void close_channel(FILE * channel)
+void Debug_setStdoutChannel(FILE * channel)
 {
-  fclose(channel);
+  Debug_channelStdOut = channel;
 }
 
-void dbg_printf(const char *fmt, ...)
+void Debug_setStderrChannel(FILE * channel)
+{
+  Debug_channelStdErr = channel;
+}
+
+void Debug_closeChannel(FILE * channel)
+{
+  fclose(Debug_channelLog);
+}
+
+void Debug_dbgPrintf(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    vfprintf(stdout, fmt, args);
+    vfprintf(Debug_channelStdOut, fmt, args);
     va_end(args);
 }
 
-void dbg_fprintf(FILE * channel, const char *fmt, ...)
+void Debug_dbgFprintf(FILE * channel, const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
