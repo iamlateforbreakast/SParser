@@ -189,8 +189,9 @@ PRIVATE int UT_BTree_01_step3()
 PUBLIC int run_UT_BTree_01(void)
 {
   int isPassed = 1;
-  channelLog = Debug_openChannel("UT_List_01.log");
+  channelLog = Debug_openChannel("UT_BTree_01.log");
   Debug_setStdoutChannel(channelLog);
+
   ObjectMgr* objMgr = ObjectMgr_getRef();
 
   UT_BTree_01_init_keys();
@@ -198,7 +199,7 @@ PUBLIC int run_UT_BTree_01(void)
   isPassed = isPassed && UT_BTree_01_step1();
   isPassed = isPassed && UT_BTree_01_step2();
   isPassed = isPassed && UT_BTree_01_step3();
-  //step2();
+  
   UT_BTree_01_delete_keys();
 
   ObjectMgr_report(objMgr);
