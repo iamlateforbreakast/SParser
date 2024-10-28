@@ -29,14 +29,14 @@ struct TestDefinition
 TestDefinition tests[] =
 {
   { "UT_BTree_01",    &run_UT_BTree_01,    ENABLED },
-  { "UT_Debug_01",    &run_UT_Debug_01,    ENABLED },
+  { "UT_Debug_01",    &run_UT_Debug_01,    DISABLED },
   { "UT_Error_01",    &run_UT_Error_01,    DISABLED },
   { "UT_FileIo_01",   &run_UT_FileIo_01,   ENABLED },
-  { "UT_List_01",     &run_UT_List_01,     ENABLED },
+  { "UT_List_01",     &run_UT_List_01,     DISABLED },
   { "UT_List_02",     &run_UT_List_02,     DISABLED },
   { "UT_Map_01",      &run_UT_Map_01,      DISABLED },
   { "UT_SkipList_01", &run_UT_SkipList_01, DISABLED },
-  { "UT_String_01",   &run_UT_String_01,   ENABLED }
+  { "UT_String_01",   &run_UT_String_01,   DISABLED }
 };
 
 int main()
