@@ -15,7 +15,7 @@
                           { printf("\x1b[32mPassed\x1b[0m\n");} \
                           else { printf("\x1b[31mFailed\x1b[0m\n"); return 0;}
 #endif
-int step1()
+PRIVATE int UT_String_01_step1()
 {
   int isPassed = 1;
   String * testString = 0;
@@ -38,7 +38,7 @@ int step1()
   return isPassed;
 }
 
-int step2()
+PRIVATE int UT_String_01_step2()
 {
   int isPassed = 1;
   String * testString = 0;
@@ -65,7 +65,7 @@ int step2()
   return isPassed;
 }
 
-int step3()
+PRIVATE int UT_String_01_step3()
 {
   int isPassed = 1;
   String * testString = String_new("test.c");
@@ -89,7 +89,7 @@ int step3()
 }
 
 
-int step4()
+PRIVATE int UT_String_01_step4()
 {
   int isPassed = 1;
   String * testString = 0;
@@ -128,7 +128,7 @@ int step4()
   return isPassed;
 }
 
-int step5()
+PRIVATE int UT_String_01_step5()
 {
   int isPassed = 1;
     String* testString = String_new("TestString");
@@ -155,7 +155,7 @@ int step5()
   return isPassed;
 }
 
-int step6()
+PRIVATE int UT_String_01_step6()
 {
   int isPassed = 1;
   String * testString = String_new("TestString");
@@ -167,17 +167,21 @@ int step6()
   String_delete(testString);
   return isPassed;
 }
-int main()
+
+PUBLIC int run_UT_String_01()
 {
-  //step1();
-  //step2();
-  //step3();
-  step4();
-  //step5();
-  //step6();
+  int isPassed = 1;
+  
+  isPassed = isPassed && UT_String_01_step1();
+  isPassed = isPassed && UT_String_01_step2();
+  isPassed = isPassed && UT_String_01_step3();
+  isPassed = isPassed && UT_String_01_step4();
+  isPassed = isPassed && UT_String_01_step5();
+  isPassed = isPassed && UT_String_01_step6();
 
   ObjectMgr* objMgr = ObjectMgr_getRef();;
   ObjectMgr_reportUnallocated(objMgr);
   Memory_report();
-  return 0;
+
+  return isPassed;
 }

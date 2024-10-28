@@ -21,11 +21,11 @@
                           else { printf("\x1b[31mFailed\x1b[0m\n"); return 0;}
 #endif
 
-TestObject* items[MAX_OBJECT_NB * 2];
+PRIVATE TestObject* items[MAX_OBJECT_NB * 2];
 
-FILE * logChannel;
+PRIVATE FILE * logChannel;
 
-int init_testobjects()
+PRIVATE int UT_List_01_init_testobjects()
 {
   for (int i = 0; i < MAX_OBJECT_NB * 2; i++)
   {
@@ -35,7 +35,7 @@ int init_testobjects()
   return 1;
 }
 
-int delete_testobjects()
+PRIVATE int UT_List_01_delete_testobjects()
 {
   for (int i = 0; i < MAX_OBJECT_NB * 2; i++)
   {
@@ -45,7 +45,7 @@ int delete_testobjects()
   return 1;
 }
 
-int step1()
+PRIVATE int UT_List_01_step1()
 {
   List* testList = 0;
 
@@ -89,7 +89,7 @@ int step1()
   return 0;
 } 
 
-int step2()
+PRIVATE int UT_List_01_step2()
 {
   List * testList1 = 0;
   List * testList2 = 0;
@@ -185,23 +185,24 @@ int step2()
 
 int run_UT_List_01()
 {
-  logChannel = open_channel("UT_List_01.log");
+  int isPassed = 1;
+  logChannel = Debug_openChannel("UT_List_01.log");
 
-  init_testobjects();
+  UT_List_01_init_testobjects();
 
-  step1();
+  isPassed = isPassed && UT_List_01_step1();
 
-  init_testobjects();
+  UT_List_01_init_testobjects();
 
-  step2();
+  isPassed = isPassed && UT_List_01_step2();
 
-  delete_testobjects();
+  UT_List_01_delete_testobjects();
 
   ObjectMgr* objMgr = ObjectMgr_getRef();;
   ObjectMgr_reportUnallocated(objMgr);
   Memory_report();
 
-  close_channel(logChannel);
+  Debug_closeChannel(logChannel);
 
-  return 0;
+  return isPassed;
 }
