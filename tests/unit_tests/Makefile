@@ -7,7 +7,9 @@ LDFLAGS =  -L../../src/CommonLib \
            -L../../src/ParseLib -lParse -lAppli -lCommon -lsqlite3
 
 TESTS = \
-	../../src/CommonLib/List/tests/UT_List_01.c
+	../../src/CommonLib/BTree/tests/UT_BTree_01.c \
+	../../src/CommonLib/List/tests/UT_List_01.c \
+	../../src/CommonLib/String/tests/UT_String_01.c
 
 .c.o:
 	gcc $(CFLAGS) $< -o $@
