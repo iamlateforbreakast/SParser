@@ -153,9 +153,9 @@ PUBLIC unsigned int Memory_len(const void * pointer)
 **************************************************/
 PUBLIC void Memory_report()
 {
-  Error_new(ERROR_INFO, "Memory Usage Report:\n"
+  PRINT(("Memory Usage Report:\n"
                                         "Number of memory allocation Requests: %d\n"
-                                        "Number of memory de-allocation Requests: %d\n", Memory_allocRequestId, Memory_freeRequestId);
+         "Number of memory de-allocation Requests: %d\n", Memory_allocRequestId, Memory_freeRequestId));
 }
 
 /**********************************************//** 
