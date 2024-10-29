@@ -1,6 +1,6 @@
 all: UT_HTTPServer_01
 
-UT_HTTPServer_01: UT_HTTPServer_01.c ../HTTPServer.c ../HTTPServer.h
+UT_HTTPServer_01: UT_HTTPServer_01.c ../HTTPServer.c ../HTTPServer.h ../HTTPRequest.h ../HTTPResponse.h
 	gcc -g UT_HTTPServer_01.c ../HTTPServer.c \
 	../../../AppliLib/libAppli.a \
 	../../../CommonLib/libCommon.a \

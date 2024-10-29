@@ -6,27 +6,29 @@
 #include "Memory.h"
 #include "Debug.h"
 
-#include "Words1000.h"
+#include <stdio.h>
 
 #define DEBUG (0)
 #ifdef _WIN32
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("Passed\n");} \
-                          else { printf("Failed\n"); return 0;}
+                          { PRINT(("Passed\n"));} \
+                          else { PRINT(("Failed\n")); return 0;}
 #else
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("\x1b[32mPassed\x1b[0m\n");} \
-                          else { printf("\x1b[31mFailed\x1b[0m\n"); return 0;}
+                          { PRINT(("\x1b[32mPassed\x1b[0m\n"));} \
+                          else { PRINT(("\x1b[31mFailed\x1b[0m\n")); return 0;}
 #endif
 
-#define ORDER (5)
+#define ORDER (10)
 
-List * keys;
-TestObject ** testObjects;
-TestObject ** removedObjects;
-int nbTokens = 0;
+extern char words1000[];
+PRIVATE List * keys;
+PRIVATE TestObject ** testObjects;
+PRIVATE TestObject ** removedObjects;
+PRIVATE int nbTokens = 0;
+PRIVATE FILE* channelLog = 0;
 
-int init_keys()
+PRIVATE int UT_BTree_01_init_keys()
 {
   String * fullText = String_newByRef(words1000);
   String * key = 0;
@@ -48,7 +50,7 @@ int init_keys()
   return 1;
 }
 
-int delete_keys()
+PRIVATE int UT_BTree_01_delete_keys()
 {
   for (int i = 0; i < nbTokens; i++)
   {
@@ -61,7 +63,7 @@ int delete_keys()
   return 1;
 }
 
-int step1()
+PRIVATE int UT_BTree_01_step1()
 {
   int isPassed = 1;
   TestObject * removedObject = 0;
@@ -78,6 +80,9 @@ int step1()
   BTree_add(testTree, (Object*)key, (Object*)testObjects[0], 0);
   UT_ASSERT((1));
 
+  PRINT(("Step 1: test 3 - Check the number of nodes: "));
+  unsigned int nbNodes = BTree_getNbNodes(testTree);
+  UT_ASSERT((nbNodes == 1));
   PRINT(("Step 1: Test 3 - Remove the object: "));
   removedObject = (TestObject*)BTree_remove(testTree, (Object*)key);
   UT_ASSERT((1));
@@ -90,7 +95,7 @@ int step1()
   return isPassed;
 }
 
-int step2()
+PRIVATE int UT_BTree_01_step2()
 {
   int isPassed = 1;
 
@@ -109,7 +114,7 @@ int step2()
   for (int i=0; i< n; i++)
   {
 	key = List_getNext(keys);
-	Object_print((Object*)key);
+	//Object_print((Object*)key);
     BTree_add(testTree, (Object*)key, (Object*)testObjects[i], 0);
   }
   UT_ASSERT((1));
@@ -127,21 +132,21 @@ int step2()
   //BTree_print(testTree);
   
   PRINT(("Step 2: Test 4 - Delete BTree: "));
-  String_delete(key);
+  //String_delete(key);
   BTree_delete(testTree);
   UT_ASSERT((1));
 
   return isPassed;
 }
 
-int step3()
+PRIVATE int UT_BTree_01_step3()
 {
   int isPassed = 1;
 
   BTree* testTree;
   String * key = 0;
 
-  int n = ORDER * 10; /*ORDER * 2;*/
+  int n = ORDER * 10; /*ORDER * 20;*/
 
   List_resetIterator(keys);
 
@@ -156,7 +161,6 @@ int step3()
 	Object_print((Object*)key);
     BTree_add(testTree, (Object*)key, (Object*)testObjects[i], 0);
   }
-  PRINT(("  Number of node used %d\n", BTree_getNbNodes(testTree)));
   UT_ASSERT((1));
 
   //BTree_print(testTree);
@@ -165,33 +169,38 @@ int step3()
   PRINT(("Step 3: test 3 - Remove %d objects: ", n));
   for (int i=0; i< n; i++)
   {
-    key = List_getNext(keys);
-    //PRINT(("Remove %d ", i));
-    //Object_print(key);
-    removedObjects[i] = (TestObject*)BTree_remove(testTree, (Object*)key);
-    //BTree_print(testTree);
+	key = List_getNext(keys);
+	//PRINT(("Remove %d ", i));
+	//Object_print(key);
+	removedObjects[i] = (TestObject*)BTree_remove(testTree, (Object*)key);
+	//BTree_print(testTree);
+
   }
 
   
   PRINT(("Step 3: Test 4 - Delete BTree: "));
-  String_delete(key);
+  //String_delete(key);
   BTree_delete(testTree);
   UT_ASSERT((1));
 
   return isPassed;
 }
 
-int main(void)
+PUBLIC int run_UT_BTree_01(void)
 {
+  int isPassed = 1;
+  channelLog = Debug_openChannel("UT_BTree_01.log");
+  Debug_setStdoutChannel(channelLog);
+
   ObjectMgr* objMgr = ObjectMgr_getRef();
 
-  init_keys();
+  UT_BTree_01_init_keys();
 
-  step1();
-  step2();
-  step3();
-
-  delete_keys();
+  isPassed = isPassed && UT_BTree_01_step1();
+  isPassed = isPassed && UT_BTree_01_step2();
+  isPassed = isPassed && UT_BTree_01_step3();
+  
+  UT_BTree_01_delete_keys();
 
   ObjectMgr_report(objMgr);
   ObjectMgr_reportUnallocated(objMgr);
@@ -207,7 +216,7 @@ int main(void)
 	
   //printf("Insert CPU time %f\n", cpu_time1 - cpu_time0);
   //printf("Insert Wall time %f\n", wall_time1 - wall_time0);
-
+  Debug_closeChannel(channelLog);
   //cpu_time0 = get_cpu_time();
   //wall_time0 = get_wall_time();
 
@@ -223,5 +232,5 @@ int main(void)
   //printf("Search CPU time %f\n", cpu_time1 - cpu_time0);
   //printf("Search Wall time %f\n", wall_time1 - wall_time0);
 
-  return 0;
+  return isPassed;
 }

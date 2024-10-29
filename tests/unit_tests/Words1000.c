@@ -1,7 +1,4 @@
-/* Words1000.h */
-
-#ifndef _WORDS1000_H_
-#define _WORDS1000_H_
+/* Words1000.c */
 
 char words1000[] = "hang holistic oceanic development decorous fence question songs chase relation adamant guitar writer ruthless "
 "harass unnatural invite bite aloof numberless answer yam carriage apparatus graceful wonderful demonic gruesome "
@@ -61,6 +58,3 @@ char words1000[] = "hang holistic oceanic development decorous fence question so
 "understood freezing milky long accidental attach hot discreet ready house string maddening loutish spurious door birthday gabby "
 "mute step spotless scrape explain used carpenter heavy argument bump paste feigned coherent driving stroke separate tenuous "
 "letters analyze unarmed bawdy different absurd six hurt shame fast pour church vague real whole";
-
-
-#endif /* _WORDS1000_H_ */

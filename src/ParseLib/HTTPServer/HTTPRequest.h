@@ -102,6 +102,8 @@ PRIVATE void HTTPRequest_delete(HTTPRequest * this)
 
   String_delete(this->path);
   Map_delete(this->headers);
+
+  Object_deallocate(&this->object);
 }
 
 /**********************************************//**

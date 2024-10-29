@@ -10,23 +10,25 @@
 #define DEBUG (0)
 #ifdef _WIN32
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("Passed\n");} \
-                          else { printf("Failed\n"); return 0;}
+                          { PRINT(("Passed\n"));} \
+                          else { PRINT(("Failed\n")); return 0;}
 #else
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("\x1b[32mPassed\x1b[0m\n");} \
-                          else { printf("\x1b[31mFailed\x1b[0m\n"); return 0;}
+                          { PRINT(("\x1b[32mPassed\x1b[0m\n"));} \
+                          else { PRINT(("\x1b[31mFailed\x1b[0m\n")); return 0;}
 #endif
 
 #define BUFFER_SIZE_BYTES (1000)
 
-FileIo* f = 0;
-FileIo* d = 0;
-const char* testFileName[5] = { "test1.file","test2.file","test3.file","test4.file","test5.file" };
-char testBuffer[BUFFER_SIZE_BYTES];
-char readBuffer[BUFFER_SIZE_BYTES];
+PRIVATE FileIo* f = 0;
+PRIVATE FileIo* d = 0;
+PRIVATE const char* testFileName[5] = { "test1.file","test2.file","test3.file","test4.file","test5.file" };
+PRIVATE char testBuffer[BUFFER_SIZE_BYTES];
+PRIVATE char readBuffer[BUFFER_SIZE_BYTES];
 
-int step1()
+PRIVATE FILE * logChannel;
+
+PRIVATE int UT_FileIo_01_step1()
 {
   String* testFileName = String_new("test.file");
 
@@ -42,7 +44,7 @@ int step1()
   return 1;
 }
 
-int step2()
+PRIVATE int UT_FileIo_01_step2()
 {
   String* testFileName = String_new("test.file");
 	
@@ -63,7 +65,7 @@ int step2()
   return 1;
 }
 
-int step3()
+PRIVATE int UT_FileIo_01_step3()
 {
   int isOK = 1;
   String* testFileName = String_new("test.file");
@@ -88,7 +90,7 @@ int step3()
   return 1;
 }
 
-int step4()
+PRIVATE int UT_FileIo_01_step4()
 {
   String* testFileName = String_new("test.file");
 
@@ -103,14 +105,14 @@ int step4()
   return 1;
 }
 
-int step5()
+PRIVATE int UT_FileIo_01_step5()
 {
 	//d = FileIo_newDir("testDir");
 
 	return 1;
 }
 
-int step6()
+PRIVATE int UT_FileIo_01_step6()
 {
 	FileIo* f = FileIo_new();
 	String* currentPath = FileIo_getCwd(f);
@@ -134,7 +136,7 @@ int step6()
 	return 1;
 }
 
-int step7()
+PRIVATE int UT_FileIo_01_step7()
 {
 	FileIo * f =FileIo_new();
 
@@ -153,7 +155,7 @@ int step7()
 	return 1;
 }
 
-int step8()
+PRIVATE int UT_FileIo_01_step8()
 {
   FileIo* f = FileIo_new();
   String* currentPath = FileIo_getCwd(f);
@@ -165,7 +167,7 @@ int step8()
   return 1;
 }
 
-int step9()
+PRIVATE int UT_FileIo_01_step9()
 {
   String* testFileName = String_new("test.file");
 
@@ -186,22 +188,27 @@ PUBLIC void FileIo_openDir(FileIo* this, String* fullFileName);
 PUBLIC void FileIo_createDir(FileIo* this, String* fullDirName);
 */
 
-void main()
+int run_UT_FileIo_01()
 {
+  int isPassed = 1;
+
+  logChannel = Debug_openChannel("UT_FileIo_01.log");
+  Debug_setStdoutChannel(logChannel);
+
   for (int i = 0; i < BUFFER_SIZE_BYTES; i++)
   {
-	testBuffer[i] = (char)i;
+	  testBuffer[i] = (char)i;
   }
 
-  step1();
-  step2();
-  step3();
-  //step4();
-  step5();
-  step6();
-  step7();
-  step8();
-  step9();
+  isPassed = isPassed && UT_FileIo_01_step1();
+  isPassed = isPassed && UT_FileIo_01_step2();
+  isPassed = isPassed && UT_FileIo_01_step3();
+  isPassed = isPassed && UT_FileIo_01_step4();
+  isPassed = isPassed && UT_FileIo_01_step5();
+  isPassed = isPassed && UT_FileIo_01_step6();
+  /*isPassed = isPassed && UT_FileIo_01_step7();
+  isPassed = isPassed && UT_FileIo_01_step8();
+  isPassed = isPassed && UT_FileIo_01_step9();*/
 
   ObjectMgr* objectMgr = ObjectMgr_getRef();
 
@@ -210,4 +217,8 @@ void main()
   ObjectMgr_delete(objectMgr);
 
   Memory_report();
+
+  Debug_closeChannel(logChannel);
+
+  return isPassed;
 }

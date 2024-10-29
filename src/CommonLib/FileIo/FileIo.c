@@ -1,6 +1,5 @@
 /**********************************************//**
   @file FileIo.c
-
   @brief A FileIo class.
   This class provides a status and operation for 
   various File I/O operations.
@@ -37,7 +36,6 @@ struct FileIo
   FILE* f;
   int status;
 };
-
 /**********************************************//**
   @private Class Description
 **************************************************/
@@ -50,7 +48,6 @@ PRIVATE Class fileIoClass =
   .f_print = (Printer)&FileIo_print,
   .f_size = (Sizer)&FileIo_getSize
 };
-
 /********************************************************//**
   @brief Create a new instance of the class FileIo.
   @public
@@ -60,7 +57,6 @@ PRIVATE Class fileIoClass =
 PUBLIC FileIo * FileIo_new()
 {
   FileIo* this = (FileIo*)Object_new(sizeof(FileIo), &fileIoClass);
-
   if (this)
   {
     this->status = UNKNOWN;
@@ -224,7 +220,6 @@ PUBLIC List * FileIo_listDirs(FileIo * this, String * directory)
   WIN32_FIND_DATAA FindFileData;
   HANDLE hFind;
   //TCHAR dir[MAX_PATH];
-
   //char * dirText = "C:\\Users\\remion_t\\source\\repos\\SParse-SP6\\UT_FileIo_01\\*";
   hFind = FindFirstFileA("*", &FindFileData);
   if (hFind == INVALID_HANDLE_VALUE)
@@ -282,7 +277,6 @@ PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
   WIN32_FIND_DATAA FindFileData;
   HANDLE hFind;
   //TCHAR dir[MAX_PATH];
-
   //char * dirText = "C:\\Users\\remion_t\\source\\repos\\SParse-SP6\\UT_FileIo_01\\*";
   String* filter = String_copy(directory);
   String_append(filter, "\\*");
@@ -313,7 +307,7 @@ PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
   struct dirent *directoryEntry = 0;
   String * name = 0;
   DIR * dirHandle = opendir(String_getBuffer(directory));
-  printf("%s\n",String_getBuffer(directory));
+  PRINT(("%s\n",String_getBuffer(directory)));
   if (dirHandle!=0)
   {
     result = List_new();
@@ -327,7 +321,7 @@ PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
         //fileDesc = FileDesc_new();
         //fullName = String_copy(directory);
         name = String_new(directoryEntry->d_name);
-        printf("%s\n",String_getBuffer(name));
+        PRINT(("%s\n",String_getBuffer(name)));
         //FileMgr_mergePath(this, fullName, name);
         //FileDesc_setFullName(fileDesc, fullName);
         List_insertHead(result, (void*)name, 1);
@@ -374,8 +368,10 @@ PUBLIC String * FileIo_getCwd(FileIo * this)
     Error_new(ERROR_FATAL, "FileIo: Cannot obtain the root location");
   }
 #else
-  char * workingDirectory = get_current_dir_name();
-
+  //char * workingDirectory = get_current_dir_name();
+  char workingDirectory[256];
+  getcwd(workingDirectory, 256);
+  PRINT(("Working directory %s\n", workingDirectory));
 #endif
   return String_new(workingDirectory);
 }

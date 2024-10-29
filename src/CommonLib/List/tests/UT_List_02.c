@@ -13,12 +13,12 @@
 #define DEBUG (0)
 #ifdef _WIN32
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("Passed\n");} \
-                          else { printf("Failed\n"); return 0;}
+                          { PRINT(("Passed\n"));} \
+                          else { PRINT(("Failed\n")); return 0;}
 #else
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("\x1b[32mPassed\x1b[0m\n");} \
-                          else { printf("\x1b[31mFailed\x1b[0m\n"); return 0;}
+                          { PRINT(("\x1b[32mPassed\x1b[0m\n"));} \
+                          else { PRINT(("\x1b[31mFailed\x1b[0m\n")); return 0;}
 #endif
 
 ObjectStore* objectStore = 0;
@@ -47,7 +47,7 @@ int delete_testobjects()
   return 1;
 }
 
-int step1()
+PRIVATE int UT_List_02_step1()
 {
   List* testList = 0;
 
@@ -88,7 +88,7 @@ int step1()
   return 0;
 }
 
-int step2()
+PRIVATE int UT_List_02_step2()
 {
   List* testList = 0;
 
@@ -128,23 +128,25 @@ int step2()
   return 0;
 }
 
-int step3()
+PRIVATE int UT_List_02_step3()
 {
   return 0;
 }
 
-int main()
+PUBLIC int run_UT_List_02()
 {
+  int isPassed = 1;
+
   objectStore = ObjectStore_getRef();
   testAlloc = (MyAllocator*)MyAllocator_new(5000);
   allocInfo = ObjectStore_createAllocator(objectStore, (Allocator*)testAlloc);
 
-  step1();
-  step2();
-  step3();
+  isPassed = isPassed && UT_List_02_step1();
+  isPassed = isPassed && UT_List_02_step2();
+  isPassed = isPassed && UT_List_02_step3();
 
   ObjectStore_deleteAllocator(objectStore, allocInfo);
   ObjectStore_delete(objectStore);
 
-  return 0;
+  return isPassed;
 }

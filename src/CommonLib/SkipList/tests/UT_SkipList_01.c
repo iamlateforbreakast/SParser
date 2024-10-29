@@ -13,28 +13,29 @@
 #include "Times.h"
 #include "List.h"
 #include "String2.h"
-#include "Words1000.h"
 
 #define DEBUG (0)
 #ifdef _WIN32
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("Passed\n");} \
-                          else { printf("Failed\n"); return 0;}
+                          { PRINT(("Passed\n"));} \
+                          else { PRINT(("Failed\n")); return 0;}
 #else
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("\x1b[32mPassed\x1b[0m\n");} \
-                          else { printf("\x1b[31mFailed\x1b[0m\n"); return 0;}
+                          { PRINT(("\x1b[32mPassed\x1b[0m\n"));} \
+                          else { PRINT(("\x1b[31mFailed\x1b[0m\n")); return 0;}
 #endif
 
 #define NB_OBJECTS (10000)
 
 SkipList* testList;
+extern char words1000[];
 
-int nbWords;
-String** wordKeys;
-TestObject** testObjects;
+PRIVATE int nbWords;
+PRIVATE String** wordKeys;
+PRIVATE TestObject** testObjects;
+PRIVATE FILE* channelLog = 0;
 
-int init_keys()
+int UT_SkipList_01_init_keys()
 {
   String* allWords = String_new(words1000);
   List* tokens = 0;
@@ -57,7 +58,7 @@ int init_keys()
   return 1;
 }
 
-int delete_keys()
+int UT_SkipList_01_delete_keys()
 {
   for (int i = 0; i < nbWords; i++)
   {
@@ -70,7 +71,7 @@ int delete_keys()
   return 1;
 }
 
-int step1()
+int UT_SkipList_01_step1()
 {
   int isPassed = 1;
 
@@ -101,7 +102,7 @@ int step1()
   return isPassed;
 }
 
-int step2()
+int UT_SkipList_01_step2()
 {
   int isPassed = 1;
   int aFewItems = 10;
@@ -120,7 +121,7 @@ int step2()
   return isPassed;
 }
 
-int step3()
+int UT_SkipList_01_step3()
 {
   int isPassed = 1;
 
@@ -130,7 +131,7 @@ int step3()
   return isPassed;
 }
 
-int step4()
+int UT_SkipList_01_step4()
 {
   void* itemPtr = 0;
   int isPassed = 1;
@@ -150,7 +151,7 @@ int step4()
   return isPassed;
 }
 
-int step5()
+int UT_SkipList_01_step5()
 {
   int isPassed = 1;
   void * itemPtr = 0;
@@ -164,7 +165,7 @@ int step5()
   return isPassed;
 }
 
-int step6()
+int UT_SkipList_01_step6()
 {
   int isPassed = 1;
 
@@ -176,7 +177,7 @@ int step6()
   return isPassed;
 }
 
-int step7()
+int UT_SkipList_01_step7()
 {
   SkipList * testList = SkipList_new();
 
@@ -200,19 +201,26 @@ int step7()
   return 1;
 }
 
-int main()
+int run_UT_SkipList_01()
 {
-  init_keys();
+  int isPassed = 1;
 
-  step1();
-  step2();
-  step3();
-  step4();
-  step5();
-  step6();
-  step7();
+  channelLog = Debug_openChannel("UT_List_01.log");
+  Debug_setStdoutChannel(channelLog);
 
-  delete_keys();
+  UT_SkipList_01_init_keys();
+
+  isPassed = isPassed && UT_SkipList_01_step1();
+  isPassed = isPassed && UT_SkipList_01_step2();
+  isPassed = isPassed && UT_SkipList_01_step3();
+  isPassed = isPassed && UT_SkipList_01_step4();
+  isPassed = isPassed && UT_SkipList_01_step5();
+  isPassed = isPassed && UT_SkipList_01_step6();
+  isPassed = isPassed && UT_SkipList_01_step7();
+
+  UT_SkipList_01_delete_keys();
 
   Memory_report();
+  Debug_closeChannel(channelLog);
+  return isPassed;
 }

@@ -1,8 +1,9 @@
 /* UT_Debug_01.c */
 
+#include "Types.h"
 #include "Debug.h"
 
-unsigned int step1()
+PRIVATE unsigned int UT_Debug_01_step1()
 {
    #define DEBUG (1)
    TRACE(("DEBUG Flag was set to 1\n"));
@@ -10,22 +11,22 @@ unsigned int step1()
    #define DEBUG (0)
    TRACE(("DEBUG Flag was undefined\n"));
    
-   return 0;
+   return 1;
 }
 
-unsigned int step2()
+PRIVATE unsigned int UT_Debug_01_step2()
 {
    PRINT(("Print Statement\n"));
 
-   return 0;
+   return 1;
 }
 
-unsigned int main()
+PUBLIC int run_UT_Debug_01()
 {
-   unsigned int result = 0;
+   int isPassed = 1;
 
-   result |= step1();
-   result |= step2();
+   isPassed = isPassed && UT_Debug_01_step1();
+   isPassed = isPassed && UT_Debug_01_step2();
 
-   return result;
+   return isPassed;
 }
