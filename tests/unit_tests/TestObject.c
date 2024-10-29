@@ -85,7 +85,7 @@ PUBLIC TestObject* TestObject_copy(TestObject * this)
 
 PUBLIC void TestObject_print(TestObject* this)
 {
-  PRINT2((stdout, "  ~ Object: %d\n", this->object.uniqId));
+  PRINT(("  ~ Object: %d\n", this->object.uniqId));
 }
 
 PUBLIC unsigned int TestObject_getSize(TestObject* this)
