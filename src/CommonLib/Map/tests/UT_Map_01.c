@@ -26,6 +26,7 @@ extern char words1000[];
 List * keys;
 TestObject ** testObjects;
 int nbTokens = 0;
+PRIVATE FILE* logChannel = 0;
 
 int UT_Map_01_init_keys()
 {
@@ -198,6 +199,9 @@ int UT_Map_01_step6()
 
 int run_UT_Map_01()
 {
+  int isPassed = 1;
+  logChannel = Debug_openChannel("UT_Map_01.log");
+  Debug_setStdoutChannel(logChannel);
   ObjectMgr* objMgr = ObjectMgr_getRef();
   UT_Map_01_init_keys();
 
@@ -214,5 +218,7 @@ int run_UT_Map_01()
   ObjectMgr_reportUnallocated(objMgr);
   Memory_report();
 
-  return 0;
+  Debug_closeChannel(logChannel);
+  
+  return isPassed;
 }

@@ -27,7 +27,7 @@ AllocInfo* allocInfo = 0;
 
 TestObject * items[MAX_OBJECT_NB];
 TestObject * removed[MAX_OBJECT_NB];
-
+FILE* channelLog = 0;
 int init_testobjects()
 {
   for (int i = 0; i < MAX_OBJECT_NB; i++)
@@ -76,14 +76,14 @@ PRIVATE int UT_List_02_step1()
   }
   UT_ASSERT((1));
   
-  printf("Nb objects left allocated in custom allocator: %d\n", MyAllocator_report((Allocator*)testAlloc));
+  PRINT(("Nb objects left allocated in custom allocator: %d\n", MyAllocator_report((Allocator*)testAlloc)));
   PRINT(("Step 1: test 4 - Delete List from allocator: "));
   List_delete(testList);
   UT_ASSERT((1));
   
   PRINT(("Step 1: Test 5 - Check all memory is freed: "));
   UT_ASSERT((MyAllocator_report((Allocator*)testAlloc) != 1));
-  printf("Nb objects left allocated in custom allocator: %d\n", MyAllocator_report((Allocator*)testAlloc));
+  PRINT(("Nb objects left allocated in custom allocator: %d\n", MyAllocator_report((Allocator*)testAlloc)));
 
   return 0;
 }
@@ -137,6 +137,8 @@ PUBLIC int run_UT_List_02()
 {
   int isPassed = 1;
 
+  channelLog = Debug_openChannel("UT_List_01.log");
+  Debug_setStdoutChannel(channelLog);
   objectStore = ObjectStore_getRef();
   testAlloc = (MyAllocator*)MyAllocator_new(5000);
   allocInfo = ObjectStore_createAllocator(objectStore, (Allocator*)testAlloc);
@@ -148,5 +150,6 @@ PUBLIC int run_UT_List_02()
   ObjectStore_deleteAllocator(objectStore, allocInfo);
   ObjectStore_delete(objectStore);
 
+  Debug_closeChannel(channelLog);
   return isPassed;
 }
