@@ -128,6 +128,7 @@ PUBLIC HTTPServer* HTTPServer_new()
 
   if (OBJECT_IS_INVALID(this)) return 0;
 
+  /* Socket_init() */
 #ifdef WIN32   
   if (WSAStartup(MAKEWORD(2, 2), &this->wsa) != 0) {
     PRINT(("\nError: Windows socket subsytsem could not be initialized. Error Code: %d. Exiting..\n", WSAGetLastError()));
@@ -137,6 +138,7 @@ PUBLIC HTTPServer* HTTPServer_new()
 
   this->port = 8080;
 
+  /* Socket_create */
   if ((this->fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
     PRINT(("socket failed\n"));
     exit(1);
@@ -155,6 +157,7 @@ PUBLIC HTTPServer* HTTPServer_new()
   this->server_addr.sin_port = htons(this->port);
 
   // bind socket to port
+  /* Socket_bind */
   if (bind(this->fd,
     (struct sockaddr*)&this->server_addr,
     sizeof(this->server_addr)) < 0)
@@ -236,13 +239,13 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
     exit(1);
   }
 
-    // client info
-    struct sockaddr_in client_addr;
-    int client_addr_len = sizeof(client_addr);
-    int *client_fd = malloc(sizeof(int));
-    char *requestBuffer = (char*)malloc(REQUEST_BUFFER_SIZE);
+  // client info
+  struct sockaddr_in client_addr;
+  int client_addr_len = sizeof(client_addr);
+  int *client_fd = malloc(sizeof(int));
+  char *requestBuffer = (char*)malloc(REQUEST_BUFFER_SIZE);
 
-    Memory_set(requestBuffer, 0, REQUEST_BUFFER_SIZE);
+  Memory_set(requestBuffer, 0, REQUEST_BUFFER_SIZE);
 
   TaskMgr* taskMgr = TaskMgr_getRef();
   int nbRequests = 0;
@@ -283,6 +286,7 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
   closesocket(this->fd);
 #endif
 }
+
 /**********************************************//**
   @brief Starts thread listening to a socket and 
   answering a HTTP request.
