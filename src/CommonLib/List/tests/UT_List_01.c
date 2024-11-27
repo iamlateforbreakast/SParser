@@ -186,6 +186,7 @@ PRIVATE int UT_List_01_step2()
 int run_UT_List_01()
 {
   int isPassed = 1;
+  
   logChannel = Debug_openChannel("UT_List_01.log");
 
   UT_List_01_init_testobjects();
