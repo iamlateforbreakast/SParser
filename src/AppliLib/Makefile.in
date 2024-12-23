@@ -13,7 +13,8 @@ SOURCES = \
 	./SdbMgr/SdbMgr.c \
 	./SdbMgr/SdbRequest.c \
 	./TaskMgr/TaskMgr.c \
-	./TaskMgr/Task.c
+	./TaskMgr/Task.c \
+	./XmlReader/XmlReader.c
 
 HEADERS = $(SOURCES:.c=.h)
 
