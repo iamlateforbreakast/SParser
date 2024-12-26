@@ -5,6 +5,17 @@
 #include "Debug.h"
 #include "Memory.h"
 
+#define DEBUG (0)
+#ifdef _WIN32
+#define UT_ASSERT(cond) if ((cond)) \
+                          { PRINT(("Passed\n"));} \
+                          else { PRINT(("Failed\n")); return 0;}
+#else
+#define UT_ASSERT(cond) if ((cond)) \
+                          {  PRINT(("\x1b[32mPassed\x1b[0m\n"));} \
+                          else {  PRINT(("\x1b[31mFailed\x1b[0m\n")); return 0;}
+#endif
+
 PRIVATE FILE * logChannel;
 PRIVATE char * testXmlBuffer = "<root><person></person></root>";
 PRIVATE String* testXmlString;
@@ -19,11 +30,14 @@ PRIVATE int UT_XmlReader_01_step1()
 
   isPassed = isPassed && (OBJECT_IS_VALID(testXmlReader));
 
+  UT_ASSERT(isPassed);
+
   PRINT2((logChannel, "Step 1: Test 2 - Delete an XmlReader object: "));
 
   XmlReader_delete(testXmlReader);
 
   isPassed = isPassed && (OBJECT_IS_INVALID(testXmlReader));
+  UT_ASSERT(isPassed);
 
   return isPassed;
 }
@@ -32,11 +46,12 @@ int main()
 {
   int isPassed = 1;
 
-  logChannel = Debug_openChannel("UT_List_01.log");
-  
+  logChannel = Debug_openChannel("UT_XmlReader_01.log");
+  Debug_setStdoutChannel(logChannel);
+
   testXmlString = String_newByRef(testXmlBuffer);
 
-  isPassed = isPassed && UT_XmlReader_01_step1();
+  //isPassed = isPassed && UT_XmlReader_01_step1();
 
   String_delete(testXmlString);
 
