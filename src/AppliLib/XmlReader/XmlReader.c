@@ -5,6 +5,9 @@
 struct XmlReader
 {
   Object object;
+  char * buffer;
+  char * readPtr;
+  int length;
 };
 
 /**********************************************//**
@@ -28,10 +31,16 @@ Class xmlReaderClass =
 **************************************************/
 XmlReader* XmlReader_new(String* string)
 {
-  XmlReader* this;
+  XmlReader* this = 0;
 
   this = (XmlReader*)Object_new(sizeof(XmlReader),&xmlReaderClass);
 
+  if (OBJECT_IS_INVALID(this)) return 0;
+  
+  this->buffer = String_getBuffer(string);
+  this->readPtr = this->buffer;
+  this->length = String_getLength(string);
+  
   return this;
 }
 
@@ -42,7 +51,7 @@ XmlReader* XmlReader_new(String* string)
 **************************************************/
 void XmlReader_delete(XmlReader* this)
 {
-  if (this!=0)
+  if (OBJECT_IS_VALID(this))
   {
     /* De-allocate the base object */
       Object_deallocate(&this->object);
@@ -67,4 +76,17 @@ void XmlReader_print(XmlReader* this)
 unsigned int XmlReader_getSize(XmlReader* this)
 {
   return sizeof(XmlReader);
+}
+
+XmlNode XmlReader_read(XmlReader * this)
+{
+  int nbCharRead = 0;
+
+  while ((nbCharRead<this->length) && (*(this->readPtr)!='<'))
+  {
+    this->readPtr++;
+    nbCharRead++;
+  }
+
+  return XMLNONE;
 }

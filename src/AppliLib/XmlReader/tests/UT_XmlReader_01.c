@@ -42,6 +42,13 @@ PRIVATE int UT_XmlReader_01_step1()
   return isPassed;
 }
 
+PRIVATE int UT_XmlReader_01_step2()
+{
+  int isPassed = 1;
+
+  return isPassed;
+}
+
 int main()
 {
   int isPassed = 1;
@@ -51,7 +58,8 @@ int main()
 
   testXmlString = String_newByRef(testXmlBuffer);
 
-  //isPassed = isPassed && UT_XmlReader_01_step1();
+  isPassed = isPassed && UT_XmlReader_01_step1();
+  isPassed = isPassed && UT_XmlReader_01_step2();
 
   String_delete(testXmlString);
 
