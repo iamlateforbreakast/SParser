@@ -29,7 +29,7 @@ Class xmlReaderClass =
   @memberof XmlReader
   @return New instance.
 **************************************************/
-XmlReader* XmlReader_new(String* string)
+PUBLIC XmlReader* XmlReader_new(String* string)
 {
   XmlReader* this = 0;
 
@@ -49,7 +49,7 @@ XmlReader* XmlReader_new(String* string)
   @public
   @memberof XmlReader
 **************************************************/
-void XmlReader_delete(XmlReader* this)
+PUBLIC void XmlReader_delete(XmlReader* this)
 {
   if (OBJECT_IS_VALID(this))
   {
@@ -58,27 +58,33 @@ void XmlReader_delete(XmlReader* this)
   }
 }
 
-XmlReader* XmlReader_copy(XmlReader* this)
+/**********************************************//** 
+  @brief Copy an instance of the class XmlReader.
+  @public
+  @memberof XmlReader
+  @return Copy of instance
+**************************************************/
+PUBLIC XmlReader* XmlReader_copy(XmlReader* this)
 {
 
 }
 
-int XmlReader_compare(XmlReader* this, XmlReader* compared)
+PUBLIC int XmlReader_compare(XmlReader* this, XmlReader* compared)
 {
   return 0;
 }
 
-void XmlReader_print(XmlReader* this)
+PUBLIC void XmlReader_print(XmlReader* this)
 {
 
 }
 
-unsigned int XmlReader_getSize(XmlReader* this)
+PUBLIC unsigned int XmlReader_getSize(XmlReader* this)
 {
   return sizeof(XmlReader);
 }
 
-XmlNode XmlReader_read(XmlReader * this)
+PUBLIC XmlNode XmlReader_read(XmlReader * this)
 {
   int nbCharRead = 0;
 
@@ -89,4 +95,12 @@ XmlNode XmlReader_read(XmlReader * this)
   }
 
   return XMLNONE;
+}
+
+PRIVATE int XmlReader_readComment(XmlReader* this)
+{
+}
+
+PRIVATE int XmlReader_readElement(XmlReader* this)
+{
 }
