@@ -17,7 +17,10 @@
 #endif
 
 PRIVATE FILE * logChannel;
-PRIVATE char * testXmlBuffer = "<root><person></person></root>";
+PRIVATE char * testXmlBuffer = "<?xml version='1.0'?>"
+                               "<!-- This file represents a test -->"
+                               "<root><person></person></root>";
+
 PRIVATE String* testXmlString;
 
 PRIVATE int UT_XmlReader_01_step1()
@@ -45,6 +48,18 @@ PRIVATE int UT_XmlReader_01_step1()
 PRIVATE int UT_XmlReader_01_step2()
 {
   int isPassed = 1;
+
+  XmlReader * testXmlReader = XmlReader_new(testXmlString);
+
+  PRINT2((logChannel, "Step 2: Test 1 - Read XML version: "));
+
+  XmlNode node = XmlReader_read(testXmlReader);
+
+  PRINT2((logChannel, "Step 2: Test 2 - Read XML comment: "));
+
+  node = XmlReader_read(testXmlReader);
+
+  XmlReader_delete(testXmlReader);
 
   return isPassed;
 }
