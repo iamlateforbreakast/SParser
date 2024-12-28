@@ -164,6 +164,18 @@ PUBLIC int XmlReader_readVersion(XmlReader* this)
 {
   this->nbCharRead += 4;
   this->readPtr += 4;
+
+  while (this->nbCharRead<this->length)
+  {
+    if (Memory_ncmp(this->readPtr, "?>", 2))
+    {
+      this->nbCharRead += 2;
+      this->readPtr += 2;
+      return 1;
+    }
+    this->nbCharRead += 1;
+    this->readPtr += 1;
+  }
 }
 
 PUBLIC int XmlReader_readComment(XmlReader* this)
