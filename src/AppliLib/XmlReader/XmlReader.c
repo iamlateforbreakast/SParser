@@ -204,7 +204,19 @@ PUBLIC int XmlReader_readEndElement(XmlReader* this)
 
 PUBLIC int XmlReader_readElement(XmlReader* this)
 {
-
+  this->nbCharRead += 1;
+  this->readPtr += 1;
+  while (this->nbCharRead<this->length)
+  {
+    if (IS_ELEMENT_LETTER(*this->readPtr))
+    {
+      this->nbCharRead++;
+      this->readPtr++;
+    }
+    else
+      return 1;
+  }
+  return 0;
 }
 
 PUBLIC int XmlReader_readAttribute(XmlReader* this)
