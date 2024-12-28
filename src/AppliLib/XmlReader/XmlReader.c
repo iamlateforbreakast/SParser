@@ -1,14 +1,21 @@
 /* XmlReader.c */
 #include "XmlReader.h"
 #include "Object.h"
+#include "Memory.h"
 
 struct XmlReader
 {
   Object object;
   char * buffer;
   char * readPtr;
+  int nbCharRead;
   int length;
 };
+
+PUBLIC int XmlReader_readVersion(XmlReader* this);
+PUBLIC int XmlReader_readComment(XmlReader* this);
+PUBLIC int XmlReader_readEndElement(XmlReader* this);
+PUBLIC int XmlReader_readElement(XmlReader* this);
 
 /**********************************************//**
   @private Class Description
@@ -29,7 +36,7 @@ Class xmlReaderClass =
   @memberof XmlReader
   @return New instance.
 **************************************************/
-PUBLIC XmlReader* XmlReader_new(String* string)
+XmlReader* XmlReader_new(String* string)
 {
   XmlReader* this = 0;
 
@@ -40,7 +47,8 @@ PUBLIC XmlReader* XmlReader_new(String* string)
   this->buffer = String_getBuffer(string);
   this->readPtr = this->buffer;
   this->length = String_getLength(string);
-  
+  this->nbCharRead = 0;
+
   return this;
 }
 
@@ -49,13 +57,13 @@ PUBLIC XmlReader* XmlReader_new(String* string)
   @public
   @memberof XmlReader
 **************************************************/
-PUBLIC void XmlReader_delete(XmlReader* this)
+void XmlReader_delete(XmlReader* this)
 {
-  if (OBJECT_IS_VALID(this))
-  {
-    /* De-allocate the base object */
-      Object_deallocate(&this->object);
-  }
+  if (OBJECT_IS_INVALID(this)) return;
+
+  /* De-allocate the base object */
+  Object_deallocate(&this->object);
+  
 }
 
 /**********************************************//** 
@@ -64,43 +72,101 @@ PUBLIC void XmlReader_delete(XmlReader* this)
   @memberof XmlReader
   @return Copy of instance
 **************************************************/
-PUBLIC XmlReader* XmlReader_copy(XmlReader* this)
+XmlReader* XmlReader_copy(XmlReader* this)
 {
 
 }
 
-PUBLIC int XmlReader_compare(XmlReader* this, XmlReader* compared)
+/**********************************************//** 
+  @brief Compare an instance of the class XmlReader.
+  @public
+  @memberof XmlReader
+  @return always 0
+**************************************************/
+int XmlReader_compare(XmlReader* this, XmlReader* compared)
 {
   return 0;
 }
 
-PUBLIC void XmlReader_print(XmlReader* this)
+/**********************************************//** 
+  @brief Print an instance of the class XmlReader.
+  @public
+  @memberof XmlReader
+**************************************************/
+void XmlReader_print(XmlReader* this)
 {
 
 }
 
-PUBLIC unsigned int XmlReader_getSize(XmlReader* this)
+/**********************************************//** 
+  @brief Provide the size of the class or an instance
+  @public
+  @memberof XmlReader
+  @return Size in byte
+**************************************************/
+unsigned int XmlReader_getSize(XmlReader* this)
 {
   return sizeof(XmlReader);
 }
 
-PUBLIC XmlNode XmlReader_read(XmlReader * this)
+/**********************************************//** 
+  @brief read the next xml node from the XmlREaderstream
+  @public
+  @memberof XmlReader
+  @return Size in byte
+**************************************************/
+XmlNode XmlReader_read(XmlReader * this)
 {
-  int nbCharRead = 0;
+  XmlNode node = XMLNONE;
 
-  while ((nbCharRead<this->length) && (*(this->readPtr)!='<'))
+  while ((this->nbCharRead<this->length) && (node==XMLNONE))
   {
-    this->readPtr++;
-    nbCharRead++;
+    if (Memory_ncmp(this->readPtr, "<!--",4))
+    {
+      this->nbCharRead += XmlReader_readComment(this);
+      node = XMLCOMMENT;
+    }
+    else if (Memory_ncmp(this->readPtr, "<?xml",4))
+    {
+      this->nbCharRead += XmlReader_readVersion(this);
+      node = XMLVERSION;
+    }
+    else if(Memory_ncmp(this->readPtr, "</",2))
+    {
+      this->nbCharRead += XmlReader_readEndElement(this);
+      node = XMLENDELEMENT;
+    }
+    else if (Memory_ncmp(this->readPtr, "<", 1))
+    {
+      this->nbCharRead += XmlReader_readElement(this);
+      node = XMLELEMENT;
+    }
+    else
+    {
+      this->readPtr++;
+      this->nbCharRead++;
+    }
   }
 
-  return XMLNONE;
+  return node;
 }
 
-PRIVATE int XmlReader_readComment(XmlReader* this)
+PUBLIC int XmlReader_readVersion(XmlReader* this)
 {
+
 }
 
-PRIVATE int XmlReader_readElement(XmlReader* this)
+PUBLIC int XmlReader_readComment(XmlReader* this)
 {
+
+}
+
+PUBLIC int XmlReader_readEndElement(XmlReader* this)
+{
+
+}
+
+PUBLIC int XmlReader_readElement(XmlReader* this)
+{
+
 }

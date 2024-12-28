@@ -6,7 +6,11 @@
 typedef enum
 {
   XMLNONE,
-  XMLELEMENT
+  XMLCOMMENT,
+  XMLVERSION,
+  XMLELEMENT,
+  XMLENDELEMENT,
+  XMLATTRIBUTE
 } XmlNode;
 
 typedef struct XmlReader XmlReader;
