@@ -3,6 +3,11 @@
 #include "Object.h"
 #include "Memory.h"
 
+#define IS_ELEMENT_LETTER(C) ((((C)>='A') && ((C)<='Z')) || (((C)>='a') && ((C)<='z')) || ((C)=='_'))
+
+/**********************************************//**
+  @class Xmlreader
+**************************************************/
 struct XmlReader
 {
   Object object;
@@ -11,11 +16,6 @@ struct XmlReader
   int nbCharRead;
   int length;
 };
-
-PUBLIC int XmlReader_readVersion(XmlReader* this);
-PUBLIC int XmlReader_readComment(XmlReader* this);
-PUBLIC int XmlReader_readEndElement(XmlReader* this);
-PUBLIC int XmlReader_readElement(XmlReader* this);
 
 /**********************************************//**
   @private Class Description
@@ -29,6 +29,15 @@ Class xmlReaderClass =
   .f_print = (Printer)&XmlReader_print,
   .f_size = (Sizer)&XmlReader_getSize
 };
+
+/**********************************************//**
+  Private method declarations
+**************************************************/
+PUBLIC int XmlReader_readVersion(XmlReader* this);
+PUBLIC int XmlReader_readComment(XmlReader* this);
+PUBLIC int XmlReader_readEndElement(XmlReader* this);
+PUBLIC int XmlReader_readElement(XmlReader* this);
+PUBLIC int XmlReader_readAttribute(XmlReader* this);
 
 /**********************************************//** 
   @brief Create a new instance of the class XmlReader.
@@ -123,22 +132,22 @@ XmlNode XmlReader_read(XmlReader * this)
   {
     if (Memory_ncmp(this->readPtr, "<!--",4))
     {
-      this->nbCharRead += XmlReader_readComment(this);
+      XmlReader_readComment(this);
       node = XMLCOMMENT;
     }
     else if (Memory_ncmp(this->readPtr, "<?xml",4))
     {
-      this->nbCharRead += XmlReader_readVersion(this);
+      XmlReader_readVersion(this);
       node = XMLVERSION;
     }
     else if(Memory_ncmp(this->readPtr, "</",2))
     {
-      this->nbCharRead += XmlReader_readEndElement(this);
+      XmlReader_readEndElement(this);
       node = XMLENDELEMENT;
     }
     else if (Memory_ncmp(this->readPtr, "<", 1))
     {
-      this->nbCharRead += XmlReader_readElement(this);
+      XmlReader_readElement(this);
       node = XMLELEMENT;
     }
     else
@@ -153,20 +162,40 @@ XmlNode XmlReader_read(XmlReader * this)
 
 PUBLIC int XmlReader_readVersion(XmlReader* this)
 {
-
+  this->nbCharRead += 4;
+  this->readPtr += 4;
 }
 
 PUBLIC int XmlReader_readComment(XmlReader* this)
 {
+  this->nbCharRead += 4;
+  this->readPtr += 4;
 
+  while (this->nbCharRead<this->length)
+  {
+    if (Memory_ncmp(this->readPtr, "-->", 3))
+    {
+      this->nbCharRead += 3;
+      this->readPtr += 3;
+      return 1;
+    }
+    this->nbCharRead += 1;
+    this->readPtr += 1;
+  }
+  return 0;
 }
 
 PUBLIC int XmlReader_readEndElement(XmlReader* this)
 {
-
+  this->nbCharRead += 2;
 }
 
 PUBLIC int XmlReader_readElement(XmlReader* this)
+{
+
+}
+
+PUBLIC int XmlReader_readAttribute(XmlReader* this)
 {
 
 }
