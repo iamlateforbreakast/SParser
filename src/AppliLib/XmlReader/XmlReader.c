@@ -275,10 +275,42 @@ PRIVATE int XmlReader_readName(XmlReader* this)
 
 PRIVATE int XmlReader_consumeSpace(XmlReader* this)
 {
-
+  while (this->nbCharRead<this->length)
+  {
+    if (*this->readPtr==' ')
+    {
+      this->nbCharRead++;
+      this->readPtr++;
+    }
+    else
+      break;
+  }
 }
 
 PRIVATE int XmlReader_consumeString(XmlReader* this)
 {
+  if ((this->readPtr=='"') || (this->readPtr=='\''))
+  {
+    this->nbCharRead++;
+    this->readPtr++;
+  }
+  else
+  {
+    /* error */
+  }
+  while (this->nbCharRead<this->length)
+  {
+    if ((this->readPtr=='"') || (this->readPtr=='\''))
+    {
+      this->nbCharRead++;
+      this->readPtr++;
+      break;
+    }
+    else
+    {
+      this->nbCharRead++;
+      this->readPtr++;
+    }
+  }
 
 }
