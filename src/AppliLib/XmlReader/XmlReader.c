@@ -3,7 +3,8 @@
 #include "Object.h"
 #include "Memory.h"
 
-#define IS_ELEMENT_LETTER(C) ((((C)>='A') && ((C)<='Z')) || (((C)>='a') && ((C)<='z')) || ((C)=='_'))
+#define IS_ELEMENT_LETTER(C) ((((C)>='A') && ((C)<='Z')) || (((C)>='a') && ((C)<='z')) \
+|| ((C)=='_') || ((C)=='.') || ((C)=='-'))
 
 /**********************************************//**
   @class Xmlreader
@@ -15,6 +16,8 @@ struct XmlReader
   char * readPtr;
   int nbCharRead;
   int length;
+  int line;
+  int col;
 };
 
 /**********************************************//**
@@ -38,6 +41,9 @@ PUBLIC int XmlReader_readComment(XmlReader* this);
 PUBLIC int XmlReader_readEndElement(XmlReader* this);
 PUBLIC int XmlReader_readElement(XmlReader* this);
 PUBLIC int XmlReader_readAttribute(XmlReader* this);
+PRIVATE int XmlReader_readName(XmlReader* this);
+PRIVATE int XmlReader_consumeSpace(XmlReader* this);
+PRIVATE int XmlReader_consumeString(XmlReader* this);
 
 /**********************************************//** 
   @brief Create a new instance of the class XmlReader.
@@ -48,6 +54,8 @@ PUBLIC int XmlReader_readAttribute(XmlReader* this);
 XmlReader* XmlReader_new(String* string)
 {
   XmlReader* this = 0;
+
+  if (OBJECT_IS_INVALID(string)) return 0;
 
   this = (XmlReader*)Object_new(sizeof(XmlReader),&xmlReaderClass);
 
@@ -200,6 +208,12 @@ PUBLIC int XmlReader_readComment(XmlReader* this)
 PUBLIC int XmlReader_readEndElement(XmlReader* this)
 {
   this->nbCharRead += 2;
+  XmlReader_readName(this);
+  if (*this->readPtr=='>')
+  {
+    this->nbCharRead++;
+    this->readPtr++;
+  }
 }
 
 PUBLIC int XmlReader_readElement(XmlReader* this)
@@ -214,12 +228,57 @@ PUBLIC int XmlReader_readElement(XmlReader* this)
       this->readPtr++;
     }
     else
+    {
+      if (*this->readPtr=='>')
+      {
+        this->nbCharRead++;
+        this->readPtr++;
+      }
       return 1;
+    }
   }
   return 0;
 }
 
 PUBLIC int XmlReader_readAttribute(XmlReader* this)
+{
+  XmlReader_consumeSpace(this);
+  
+  XmlReader_readName(this);
+
+  if (*this->readPtr!='=') { /*error*/}
+
+  XmlReader_consumeString(this);
+
+  if (*this->readPtr=='>')
+  {
+    this->nbCharRead++;
+    this->readPtr++;
+  }
+
+  return 0;
+}
+
+PRIVATE int XmlReader_readName(XmlReader* this)
+{
+  while (this->nbCharRead<this->length)
+  {
+    if (IS_ELEMENT_LETTER(*this->readPtr))
+    {
+      this->nbCharRead++;
+      this->readPtr++;
+    }
+    else
+      break;
+  }
+}
+
+PRIVATE int XmlReader_consumeSpace(XmlReader* this)
+{
+
+}
+
+PRIVATE int XmlReader_consumeString(XmlReader* this)
 {
 
 }

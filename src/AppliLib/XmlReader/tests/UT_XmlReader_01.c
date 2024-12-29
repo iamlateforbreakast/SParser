@@ -55,9 +55,27 @@ PRIVATE int UT_XmlReader_01_step2()
 
   XmlNode node = XmlReader_read(testXmlReader);
 
+  UT_ASSERT((node==XMLVERSION));
+
   PRINT2((logChannel, "Step 2: Test 2 - Read XML comment: "));
 
   node = XmlReader_read(testXmlReader);
+
+  UT_ASSERT((node==XMLCOMMENT));
+
+  PRINT2((logChannel, "Step 2: Test 3 - Read XML element x 2: "));
+
+  node = XmlReader_read(testXmlReader);
+  XmlNode node2 = XmlReader_read(testXmlReader);
+
+  UT_ASSERT(((node==XMLELEMENT)&&(node2==XMLELEMENT)));
+
+  PRINT2((logChannel, "Step 2: Test 4 - Read XML end element x 2: "));
+
+  node = XmlReader_read(testXmlReader);
+  node2 = XmlReader_read(testXmlReader);
+
+  UT_ASSERT(((node==XMLENDELEMENT)&&(node2==XMLENDELEMENT)));
 
   XmlReader_delete(testXmlReader);
 
