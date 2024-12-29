@@ -44,6 +44,7 @@ PUBLIC int XmlReader_readAttribute(XmlReader* this);
 PRIVATE int XmlReader_readName(XmlReader* this);
 PRIVATE int XmlReader_consumeSpace(XmlReader* this);
 PRIVATE int XmlReader_consumeString(XmlReader* this);
+PRIVATE int XmlReader_readOneChar(XmlReader* this);
 
 /**********************************************//** 
   @brief Create a new instance of the class XmlReader.
@@ -313,4 +314,21 @@ PRIVATE int XmlReader_consumeString(XmlReader* this)
     }
   }
 
+}
+
+PRIVATE int XmlReader_readOneChar(XmlReader* this)
+{
+  this->nbCharRead++;
+  this->readPtr++;
+  if (*this->readPtr=='\n')
+  {
+    this->col = 0;
+    this->line++;
+  }
+  else
+  {
+    this->col++;
+  }
+  
+  return 1;
 }
