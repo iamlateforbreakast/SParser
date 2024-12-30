@@ -12,12 +12,12 @@
 #define DEBUG (0)
 #ifdef _WIN32
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("Passed\n");} \
-                          else { printf("Failed\n"); return 0;}
+                          { PRINT(("Passed\n"));} \
+                          else { PRINT(("Failed\n")); return 0;}
 #else
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("\x1b[32mPassed\x1b[0m\n");} \
-                          else { printf("\x1b[31mFailed\x1b[0m\n"); return 0;}
+                          { PRINT(("\x1b[32mPassed\x1b[0m\n"));} \
+                          else { PRINT(("\x1b[31mFailed\x1b[0m\n")); return 0;}
 #endif
 
 extern char words1000[];
@@ -205,12 +205,12 @@ int run_UT_Map_01()
   ObjectMgr* objMgr = ObjectMgr_getRef();
   UT_Map_01_init_keys();
 
-  UT_Map_01_step1();
-  UT_Map_01_step2();
-  UT_Map_01_step3();
-  UT_Map_01_step4();
-  UT_Map_01_step5();
-  UT_Map_01_step6();
+  isPassed = isPassed && UT_Map_01_step1();
+  isPassed = isPassed && UT_Map_01_step2();
+  isPassed = isPassed && UT_Map_01_step3();
+  isPassed = isPassed && UT_Map_01_step4();
+  isPassed = isPassed && UT_Map_01_step5();
+  isPassed = isPassed && UT_Map_01_step6();
 
   UT_Map_01_delete_keys(1);
 
