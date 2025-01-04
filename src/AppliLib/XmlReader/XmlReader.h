@@ -10,7 +10,8 @@ typedef enum
   XMLVERSION,
   XMLELEMENT,
   XMLENDELEMENT,
-  XMLATTRIBUTE
+  XMLATTRIBUTE,
+  XMLSTRING
 } XmlNode;
 
 typedef struct XmlReader XmlReader;
