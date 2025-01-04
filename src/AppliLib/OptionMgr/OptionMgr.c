@@ -76,6 +76,9 @@ PRIVATE OptionMgr * OptionMgr_new()
   const int nbOptions = sizeof(optionDefault)/sizeof(struct OptionDefault);
 
   this = (OptionMgr*)Object_new(sizeof(OptionMgr), &optionMgrClass);
+
+  if (OBJECT_IS_INVALID(this)) return 0;
+  
   this->options = Map_new();
   
   for (j=0; j<nbOptions; j++)
@@ -95,19 +98,18 @@ PRIVATE OptionMgr * OptionMgr_new()
 **************************************************/
 PUBLIC void OptionMgr_delete(OptionMgr * this)
 {
-  if (optionMgr!=0)
+  if (OBJECT_IS_INVALID(this)) return;
+  
+  if (this->object.refCount == 1)
   {
-    if (this->object.refCount == 1)
-    {
-      Map_delete(this->options);
-      Object_deallocate(&this->object);
-      optionMgr = 0;
-    }
-    else if (this->object.refCount > 1)
-    {
-      this->object.refCount = this->object.refCount - 1;
-    }
-  }    
+    Map_delete(this->options);
+    Object_deallocate(&this->object);
+    optionMgr = 0;
+  }
+  else if (this->object.refCount > 1)
+  {
+    this->object.refCount = this->object.refCount - 1;
+  } 
 }
 
 /**********************************************//** 
