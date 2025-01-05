@@ -287,9 +287,10 @@ PUBLIC int XmlReader_consumeElement(XmlReader* this)
       {
         this->nbCharRead++;
         this->readPtr++;
-        this->buffer[this->bufferUse] = 0;
-        this->bufferUse = 0;
       }
+      this->buffer[this->bufferUse] = 0;
+      this->bufferUse = 0;
+      
       return 1;
     }
   }
