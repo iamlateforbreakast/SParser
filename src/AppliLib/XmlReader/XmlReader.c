@@ -41,15 +41,15 @@ Class xmlReaderClass =
 /**********************************************//**
   Private method declarations
 **************************************************/
-PRIVATE int XmlReader_readVersion(XmlReader* this);
-PRIVATE int XmlReader_readComment(XmlReader* this);
-PRIVATE int XmlReader_readEndElement(XmlReader* this);
-PRIVATE int XmlReader_readElement(XmlReader* this);
-PRIVATE int XmlReader_readAttribute(XmlReader* this);
-PRIVATE int XmlReader_readName(XmlReader* this);
+PRIVATE int XmlReader_consumeVersion(XmlReader* this);
+PRIVATE int XmlReader_consumeComment(XmlReader* this);
+PRIVATE int XmlReader_consumeEndElement(XmlReader* this);
+PRIVATE int XmlReader_consumeElement(XmlReader* this);
+PRIVATE int XmlReader_consumeAttribute(XmlReader* this);
+PRIVATE int XmlReader_consumeName(XmlReader* this);
 PRIVATE int XmlReader_consumeSpace(XmlReader* this);
 PRIVATE int XmlReader_consumeString(XmlReader* this);
-PRIVATE int XmlReader_readOneChar(XmlReader* this);
+PRIVATE int XmlReader_consumeOneChar(XmlReader* this);
 
 /**********************************************//** 
   @brief Create a new instance of the class XmlReader.
@@ -144,29 +144,29 @@ PUBLIC unsigned int XmlReader_getSize(XmlReader* this)
 **************************************************/
 PUBLIC XmlNode XmlReader_read(XmlReader * this)
 {
-  XmlNode node = XMLNONE;
+  this->node = XMLNONE;
 
-  while ((this->nbCharRead<this->length) && (node==XMLNONE))
+  while ((this->nbCharRead<this->length) && (this->node==XMLNONE))
   {
     if (Memory_ncmp(this->readPtr, "<!--",4))
     {
-      XmlReader_readComment(this);
-      node = XMLCOMMENT;
+      XmlReader_consumeComment(this);
+      this->node = XMLCOMMENT;
     }
     else if (Memory_ncmp(this->readPtr, "<?xml",4))
     {
-      XmlReader_readVersion(this);
-      node = XMLVERSION;
+      XmlReader_consumeVersion(this);
+      this->node = XMLVERSION;
     }
     else if(Memory_ncmp(this->readPtr, "</",2))
     {
-      XmlReader_readEndElement(this);
-      node = XMLENDELEMENT;
+      XmlReader_consumeEndElement(this);
+      this->node = XMLENDELEMENT;
     }
     else if (Memory_ncmp(this->readPtr, "<", 1))
     {
-      XmlReader_readElement(this);
-      node = XMLELEMENT;
+      XmlReader_consumeElement(this);
+      this->node = XMLELEMENT;
     }
     else
     {
@@ -179,7 +179,20 @@ PUBLIC XmlNode XmlReader_read(XmlReader * this)
     }
   }
 
-  return node;
+  return this->node;
+}
+
+/**********************************************//** 
+  @brief Provide the content of the current node.
+  @public
+  @memberof XmlReader
+  @return String with content
+**************************************************/
+PUBLIC String* XmlReader_getContent(XmlReader* this)
+{
+  String* content = String_new(this->buffer);
+
+  return content;
 }
 
 /**********************************************//** 
@@ -188,7 +201,7 @@ PUBLIC XmlNode XmlReader_read(XmlReader * this)
   @memberof XmlReader
   @return Size in byte
 **************************************************/
-PUBLIC int XmlReader_readVersion(XmlReader* this)
+PUBLIC int XmlReader_consumeVersion(XmlReader* this)
 {
   this->nbCharRead += 4;
   this->readPtr += 4;
@@ -212,7 +225,7 @@ PUBLIC int XmlReader_readVersion(XmlReader* this)
   @memberof XmlReader
   @return int
 **************************************************/
-PUBLIC int XmlReader_readComment(XmlReader* this)
+PUBLIC int XmlReader_consumeComment(XmlReader* this)
 {
   this->nbCharRead += 4;
   this->readPtr += 4;
@@ -237,10 +250,10 @@ PUBLIC int XmlReader_readComment(XmlReader* this)
   @memberof XmlReader
   @return int
 **************************************************/
-PUBLIC int XmlReader_readEndElement(XmlReader* this)
+PUBLIC int XmlReader_consumeEndElement(XmlReader* this)
 {
   this->nbCharRead += 2;
-  XmlReader_readName(this);
+  XmlReader_consumeName(this);
   if (*this->readPtr=='>')
   {
     this->nbCharRead++;
@@ -254,7 +267,7 @@ PUBLIC int XmlReader_readEndElement(XmlReader* this)
   @memberof XmlReader
   @return int
 **************************************************/
-PUBLIC int XmlReader_readElement(XmlReader* this)
+PUBLIC int XmlReader_consumeElement(XmlReader* this)
 {
   this->nbCharRead += 1;
   this->readPtr += 1;
@@ -283,11 +296,11 @@ PUBLIC int XmlReader_readElement(XmlReader* this)
   return 0;
 }
 
-PUBLIC int XmlReader_readAttribute(XmlReader* this)
+PUBLIC int XmlReader_consumeAttribute(XmlReader* this)
 {
   XmlReader_consumeSpace(this);
   
-  XmlReader_readName(this);
+  XmlReader_consumeName(this);
 
   if (*this->readPtr!='=') { /*error*/}
 
@@ -302,7 +315,7 @@ PUBLIC int XmlReader_readAttribute(XmlReader* this)
   return 0;
 }
 
-PRIVATE int XmlReader_readName(XmlReader* this)
+PRIVATE int XmlReader_consumeName(XmlReader* this)
 {
   while (this->nbCharRead<this->length)
   {
@@ -358,7 +371,7 @@ PRIVATE int XmlReader_consumeString(XmlReader* this)
 
 }
 
-PRIVATE int XmlReader_readOneChar(XmlReader* this)
+PRIVATE int XmlReader_consumeOneChar(XmlReader* this)
 {
   this->nbCharRead++;
   this->readPtr++;

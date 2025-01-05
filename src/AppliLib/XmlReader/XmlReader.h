@@ -23,5 +23,6 @@ PUBLIC int XmlReader_compare(XmlReader* this, XmlReader* compared);
 PUBLIC void XmlReader_print(XmlReader* this);
 PUBLIC unsigned int XmlReader_getSize(XmlReader* this);
 PUBLIC XmlNode XmlReader_read(XmlReader* this);
+PUBLIC String* XmlReader_getContent(XmlReader* this);
 
 #endif /* _XMLREADER_H_ */

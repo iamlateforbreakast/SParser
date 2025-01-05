@@ -17,11 +17,11 @@
 #endif
 
 PRIVATE FILE * logChannel;
-PRIVATE char * testXmlBuffer = "<?xml version='1.0'?>"
+
+PRIVATE char * testXmlBuffer1 = "<?xml version='1.0'?>"
                                "<!-- This file represents a test -->"
                                "<directory><person>John Smith</person><person>Jane Doe</person></directory>";
-
-PRIVATE String* testXmlString;
+PRIVATE char * testXmlBuffer2 = "<?xml version='1.0'?>";
 
 PRIVATE int UT_XmlReader_01_step1()
 {
@@ -29,6 +29,7 @@ PRIVATE int UT_XmlReader_01_step1()
 
   PRINT2((logChannel, "Step 1: Test 1 - Create an XmlReader object: "));
 
+  String * testXmlString = String_newByRef(testXmlBuffer1);
   XmlReader * testXmlReader = XmlReader_new(testXmlString);
 
   isPassed = isPassed && (OBJECT_IS_VALID(testXmlReader));
@@ -38,6 +39,7 @@ PRIVATE int UT_XmlReader_01_step1()
   PRINT2((logChannel, "Step 1: Test 2 - Delete an XmlReader object: "));
 
   XmlReader_delete(testXmlReader);
+  String_delete(testXmlString);
 
   isPassed = isPassed && (OBJECT_IS_INVALID(testXmlReader));
   UT_ASSERT(isPassed);
@@ -49,6 +51,7 @@ PRIVATE int UT_XmlReader_01_step2()
 {
   int isPassed = 1;
 
+  String * testXmlString = String_newByRef(testXmlBuffer1);
   XmlReader * testXmlReader = XmlReader_new(testXmlString);
 
   PRINT2((logChannel, "Step 2: Test 1 - Read XML version: "));
@@ -70,7 +73,14 @@ PRIVATE int UT_XmlReader_01_step2()
 
   UT_ASSERT(((node==XMLELEMENT)&&(node2==XMLELEMENT)));
 
-  PRINT2((logChannel, "Step 2: Test 4 - Read XML end element x 2: "));
+  PRINT2((logChannel, "Step 2: Test 4 - Read XML text and end element: "));
+
+  node = XmlReader_read(testXmlReader);
+  node2 = XmlReader_read(testXmlReader);
+
+  UT_ASSERT(((node==XMLTEXT)&&(node2==XMLENDELEMENT)));
+
+  PRINT2((logChannel, "Step 2: Test 5 - Read XML end element x 2: "));
 
   node = XmlReader_read(testXmlReader);
   node2 = XmlReader_read(testXmlReader);
@@ -78,6 +88,7 @@ PRIVATE int UT_XmlReader_01_step2()
   UT_ASSERT(((node==XMLENDELEMENT)&&(node2==XMLENDELEMENT)));
 
   XmlReader_delete(testXmlReader);
+  String_delete(testXmlString);
 
   return isPassed;
 }
@@ -89,12 +100,12 @@ int main()
   logChannel = Debug_openChannel("UT_XmlReader_01.log");
   Debug_setStdoutChannel(logChannel);
 
-  testXmlString = String_newByRef(testXmlBuffer);
+  
 
   isPassed = isPassed && UT_XmlReader_01_step1();
   isPassed = isPassed && UT_XmlReader_01_step2();
 
-  String_delete(testXmlString);
+  
 
   ObjectMgr* objMgr = ObjectMgr_getRef();;
   ObjectMgr_reportUnallocated(objMgr);
