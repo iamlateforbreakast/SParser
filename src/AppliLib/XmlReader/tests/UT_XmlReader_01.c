@@ -19,7 +19,7 @@
 PRIVATE FILE * logChannel;
 PRIVATE char * testXmlBuffer = "<?xml version='1.0'?>"
                                "<!-- This file represents a test -->"
-                               "<root><person>John Smith</person><person>Jane Doe</person></root>";
+                               "<directory><person>John Smith</person><person>Jane Doe</person></directory>";
 
 PRIVATE String* testXmlString;
 

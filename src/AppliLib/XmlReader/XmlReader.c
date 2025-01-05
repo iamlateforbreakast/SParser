@@ -3,6 +3,8 @@
 #include "Object.h"
 #include "Memory.h"
 
+#define BUFFER_SIZE (512) /* In bytes */
+
 #define IS_ELEMENT_LETTER(C) ((((C)>='A') && ((C)<='Z')) || (((C)>='a') && ((C)<='z')) \
 || ((C)=='_') || ((C)=='.') || ((C)=='-'))
 
@@ -18,6 +20,8 @@ struct XmlReader
   int length;
   int line;
   int col;
+  int bufferUse;
+
   XmlNode node;
 };
 
@@ -68,6 +72,7 @@ PUBLIC XmlReader* XmlReader_new(String* string)
   this->length = String_getLength(string);
   this->nbCharRead = 0;
   this->node = XMLNONE;
+  this->buffer = (char*)Memory_alloc(BUFFER_SIZE);
 
   return this;
 }
@@ -80,6 +85,8 @@ PUBLIC XmlReader* XmlReader_new(String* string)
 PUBLIC void XmlReader_delete(XmlReader* this)
 {
   if (OBJECT_IS_INVALID(this)) return;
+
+  Memory_free(this->buffer, BUFFER_SIZE);
 
   /* De-allocate the base object */
   Object_deallocate(&this->object);
@@ -167,7 +174,7 @@ PUBLIC XmlNode XmlReader_read(XmlReader * this)
       this->nbCharRead++;
       if (*this->readPtr=='<')
       {
-        this->node = XMLSTRING;
+        this->node = XMLTEXT;
       }
     }
   }
@@ -251,10 +258,13 @@ PUBLIC int XmlReader_readElement(XmlReader* this)
 {
   this->nbCharRead += 1;
   this->readPtr += 1;
+  
   while (this->nbCharRead<this->length)
   {
     if (IS_ELEMENT_LETTER(*this->readPtr))
     {
+      this->buffer[this->bufferUse] = *this->readPtr;
+      this->bufferUse++;
       this->nbCharRead++;
       this->readPtr++;
     }
@@ -264,6 +274,8 @@ PUBLIC int XmlReader_readElement(XmlReader* this)
       {
         this->nbCharRead++;
         this->readPtr++;
+        this->buffer[this->bufferUse] = 0;
+        this->bufferUse = 0;
       }
       return 1;
     }

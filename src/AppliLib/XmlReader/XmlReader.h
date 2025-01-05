@@ -11,17 +11,17 @@ typedef enum
   XMLELEMENT,
   XMLENDELEMENT,
   XMLATTRIBUTE,
-  XMLSTRING
+  XMLTEXT
 } XmlNode;
 
 typedef struct XmlReader XmlReader;
 
-XmlReader* XmlReader_new(String* s);
-void XmlReader_delete(XmlReader* this);
-XmlReader* XmlReader_copy(XmlReader* this);
-int XmlReader_compare(XmlReader* this, XmlReader* compared);
-void XmlReader_print(XmlReader* this);
-unsigned int XmlReader_getSize(XmlReader* this);
-XmlNode XmlReader_read(XmlReader* this);
+PUBLIC XmlReader* XmlReader_new(String* s);
+PUBLIC void XmlReader_delete(XmlReader* this);
+PUBLIC XmlReader* XmlReader_copy(XmlReader* this);
+PUBLIC int XmlReader_compare(XmlReader* this, XmlReader* compared);
+PUBLIC void XmlReader_print(XmlReader* this);
+PUBLIC unsigned int XmlReader_getSize(XmlReader* this);
+PUBLIC XmlNode XmlReader_read(XmlReader* this);
 
 #endif /* _XMLREADER_H_ */
