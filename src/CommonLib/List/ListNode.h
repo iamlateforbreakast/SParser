@@ -105,9 +105,14 @@ PRIVATE ListNode* ListNode_newFromAllocator(Allocator* allocator, Object* object
 **************************************************/
 PRIVATE void ListNode_delete(ListNode* this)
 {
-  if (this != 0)
+  if (this == 0) return;
+  if (this->item != 0)
   {
-    if ((this->item) && (((Object*)this->item)->delete != 0))
+    if (!this->isOwner)
+    {
+      Object_deRef((Object*)this->item);
+    }
+    else if (((Object*)this->item)->delete != 0)
     {
       if (((Object*)this->item)->marker != 0x0B5EC7)
       {
@@ -115,14 +120,11 @@ PRIVATE void ListNode_delete(ListNode* this)
       }
       else
       {
-      if (this->isOwner)
         ((Object*)this->item)->delete(this->item);
-      else
-        Object_deRef((Object*)this->item);
+      }
       }
     }
     Object_deallocate(&this->object);
-  }
 }
 
 /**********************************************//**
