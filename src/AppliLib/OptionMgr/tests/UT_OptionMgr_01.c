@@ -18,9 +18,9 @@ typedef struct testOptionMgr
   Map* options;
 } testOptionMgr;
 
-extern OptionMgr* optionMgr;
+//extern OptionMgr* optionMgr;
 
-int step1()
+int UT_OptionMgr_01_step1()
 {
   testOptionMgr* testOptionMgr1 = 0;
   testOptionMgr* testOptionMgr2 = 0;
@@ -33,17 +33,17 @@ int step1()
   /* Test 2 */
   OptionMgr_delete((OptionMgr*)testOptionMgr1);
   PRINT(("Step 1: Test 2 - Check ref is not null: "));
-  UT_ASSERT((optionMgr!=0))
+  UT_ASSERT(0)
 
   /* Test 3 */
   OptionMgr_delete((OptionMgr*)testOptionMgr2);
   PRINT(("Step 1: Test 3 - Check ref is null: "));
-  UT_ASSERT((optionMgr == 0))
+  UT_ASSERT(0)
 
   /* Test 4 */
   OptionMgr_delete((OptionMgr*)testOptionMgr2);
   PRINT(("Step 1: Test 4 - Check delete can be called again: "));
-  UT_ASSERT((optionMgr == 0))
+  UT_ASSERT(0)
 
   /* Test 5 */
   PRINT(("Step 1: Test 5 - Check all memory is freed properly: "));
@@ -52,7 +52,7 @@ int step1()
   return 0;
 }
 
-int step2()
+int UT_OptionMgr_01_step2()
 {
   testOptionMgr* testOptionMgr1 = (testOptionMgr*)OptionMgr_getRef();
   const char dbName[] = "test.db";
@@ -75,7 +75,7 @@ int step2()
   return 0;
 }
 
-int step3()
+int UT_OptionMgr_01_step3()
 {
   OptionMgr* testOptionMgr1 = OptionMgr_getRef();
   String * optionIn = String_new("Yes");
@@ -96,7 +96,7 @@ int step3()
   return 0;
 }
 
-int step4()
+int UT_OptionMgr_01_step4()
   {
   const char *argv[] = { "sparse", "-o", "test2.db" };
   int argc = 3;
@@ -119,7 +119,7 @@ int step4()
   return 0;
 }
 
-int step5()
+int UT_OptionMgr_01_step5()
 {
   String * option = 0;
   FileIo * f = FileIo_new();
@@ -145,23 +145,25 @@ int step5()
   return 0;
 }
 
-int step6()
+int UT_OptionMgr_01_step6()
 {
   return 0;
 }
 
-int main()
+int run_UT_OptionMgr_01()
 {
-  step1();
-  step2();
-  step3();
-  step4();
-  step5();
-  step6();
+  int isPassed = 1;
+
+  isPassed = UT_OptionMgr_01_step1() && isPassed;
+  isPassed = UT_OptionMgr_01_step2() && isPassed;
+  isPassed = UT_OptionMgr_01_step3() && isPassed;
+  isPassed = UT_OptionMgr_01_step4() && isPassed;
+  isPassed = UT_OptionMgr_01_step5() && isPassed;
+  isPassed = UT_OptionMgr_01_step6() && isPassed;
 
   ObjectMgr* objMgr = ObjectMgr_getRef();
   ObjectMgr_report(objMgr);
   ObjectMgr_reportUnallocated(objMgr);
   Memory_report();
-  return 0;
+  return isPassed;
 }
