@@ -45,6 +45,7 @@ void Debug_dbgPrintf(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
+    if (!Debug_channelStdOut) Debug_channelStdOut = stdout;
     vfprintf(Debug_channelStdOut, fmt, args);
     va_end(args);
 }
