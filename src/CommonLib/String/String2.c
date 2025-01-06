@@ -181,6 +181,7 @@ PUBLIC int String_compare(String * this, String * compared)
   int i = 0;
   int result = 0;
 
+  if (!this) return -1;
   while ((i < (int)this->length)&&(i < (int)compared->length))
   {
      result = (int)this->buffer[i] - (int)compared->buffer[i];
