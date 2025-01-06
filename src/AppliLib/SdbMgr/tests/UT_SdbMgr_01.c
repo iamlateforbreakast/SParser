@@ -18,7 +18,7 @@ typedef struct TestSdbMgr
 SdbMgr * testSdbMgr = 0;
 String * sdbName = 0;
 
-int step1()
+int UT_SdbMgr_01_step1()
 {
   int isPassed = 1;
   PRINT(("Step 1: Test 1 - Create an instance of class SdbMgr: "));
@@ -31,7 +31,7 @@ int step1()
   return isPassed;
 }
 
-int step2()
+int UT_SdbMgr_01_step2()
 {
   int isPassed = 1;
   SdbRequest * createTable = 0;
@@ -57,7 +57,7 @@ int step2()
   return isPassed;
 }
 
-int step3()
+int UT_SdbMgr_01_step3()
 {
   int isPassed = 1;
   SdbRequest * request = 0;
@@ -79,7 +79,7 @@ int step3()
   return isPassed;
 }
 
-int step4()
+int UT_SdbMgr_01_step4()
 {
   int isPassed = 1;
   SdbRequest * request = 0;
@@ -105,7 +105,7 @@ int step4()
   return isPassed;
 }
 
-int step5()
+int UT_SdbMgr_01_step5()
 {
   int isPassed = 1;
   SdbMgr_delete(testSdbMgr);
@@ -116,13 +116,15 @@ int step5()
   return isPassed;
 }
 
-int main()
+int run_UT_SdbMgr_01()
 {
-  step1();
-  step2();
-  step3();
-  step4();
-  step5();
+  int isPassed = 1;
+
+  isPassed = UT_SdbMgr_01_step1() && isPassed;
+  isPassed = UT_SdbMgr_01_step2() && isPassed;
+  isPassed = UT_SdbMgr_01_step3() && isPassed;
+  isPassed = UT_SdbMgr_01_step4() && isPassed;
+  isPassed = UT_SdbMgr_01_step5() && isPassed;
   
-  return 0;
+  return isPassed;
 }
