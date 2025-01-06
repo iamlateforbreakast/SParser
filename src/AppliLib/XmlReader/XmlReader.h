@@ -1,6 +1,5 @@
 #ifndef _XMLREADER_H_
 #define _XMLREADER_H_
-#include "XmlElement.h"
 #include "String2.h"
 
 typedef enum
