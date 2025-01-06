@@ -15,7 +15,7 @@
 
 #define FILEMGR_MAX_PATH (1024)
 
-extern FileMgr * fileMgr;
+//extern FileMgr * fileMgr;
 
 PUBLIC void FileMgr_mergePath(FileMgr * this, String * path1, String * path2);
 
@@ -28,7 +28,7 @@ typedef struct TestFileMgr
   String * rootLocation;
 } TestFileMgr;
 
-int step1()
+int UT_FileMgr_01_step1()
 {
   FileMgr * testFileMgr = FileMgr_new();
 
@@ -58,7 +58,7 @@ int step1()
   FileIo_delete(f);
   String_delete(currentLocation);
   FileMgr_delete(testFileMgr);
-  UT_ASSERT((fileMgr == 0))
+  UT_ASSERT((testFileMgr == 0))
 
   /* Test 4 */
   PRINT(("Step 1: test 4 - Check all memory is freed properly: "));
@@ -72,7 +72,7 @@ int step1()
   return 1;
 }
 
-int step2()
+int UT_FileMgr_01_step2()
 {
   ObjectMgr* objMgr = ObjectMgr_getRef();
   FileMgr * testFileMgr = FileMgr_new();
@@ -116,7 +116,7 @@ int step2()
   return 1;
 }
 
-int step3()
+int UT_FileMgr_01_step3()
 {
   FileMgr * testFileMgr = FileMgr_new();
   String * testFileContent = 0;
@@ -154,7 +154,7 @@ int step3()
   return 1;
 }
 
-int step4()
+int UT_FileMgr_01_step4()
 {
   FileMgr * testFileMgr = FileMgr_new();
   String * testFileContent = 0;
@@ -173,7 +173,7 @@ int step4()
   return 1;
 }
 
-int step5()
+int UT_FileMgr_01_step5()
 {
   int isPassed = 1;
   FileMgr* testFileMgr = FileMgr_new();
@@ -190,7 +190,7 @@ int step5()
   return isPassed;
 }
 
-int step6()
+int UT_FileMgr_01_step6()
 {
   //PUBLIC List * FileMgr_filterFiles(FileMgr * this, const char * pattern);
   FileMgr* testFileMgr = FileMgr_new();
@@ -205,22 +205,23 @@ int step6()
   return 1;
 }
 
-int step7()
+int UT_FileMgr_01_step7()
 {
   //PUBLIC String * FileMgr_searchFile(FileMgr * this, String * name, List * preferredDir);
   return 1;
 }
 
-int main()
+int run_UT_FileMgr_01()
 {
-  //step1();
+  int isPassed = 1;
   //step2();
   //step3();
   //step4();
-  step5();
+  //isPassed = UT_FileMgr_01_step3() && isPassed;
   //step6();
+  isPassed = UT_FileMgr_01_step5() && isPassed;
 
   Memory_report();
 
-  return 0;
+  return isPassed;
 }
