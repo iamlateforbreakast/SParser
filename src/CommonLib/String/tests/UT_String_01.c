@@ -15,6 +15,7 @@
                           { PRINT(("\x1b[32mPassed\x1b[0m\n"));} \
                           else { PRINT(("\x1b[31mFailed\x1b[0m\n")); return 0;}
 #endif
+PRIVATE FILE* UT_String_01_logChannel = 0;
 PRIVATE int UT_String_01_step1()
 {
   int isPassed = 1;
@@ -23,12 +24,13 @@ PRIVATE int UT_String_01_step1()
   PRINT(("Step 1: Test 1 - Create an instance of class String: "));
   testString = String_new("Hello World!");
 
-  isPassed = isPassed && (testString!=0);
+  isPassed = isPassed && (OBJECT_IS_VALID(testString));
   UT_ASSERT((isPassed));
   PRINT(("Step 1: Test 2 - Delete instance of String: "));
   String_delete(testString);
 
-  UT_ASSERT((1));
+  isPassed = isPassed && (OBJECT_IS_INVALID(testString));
+  UT_ASSERT((isPassed));
   PRINT(("Step 1: Test 3 - Check all memory is freed: "));
   ObjectMgr * objectMgr = ObjectMgr_getRef();
   isPassed = isPassed && (ObjectMgr_report(objectMgr) == 1);
@@ -172,6 +174,8 @@ PUBLIC int run_UT_String_01()
 {
   int isPassed = 1;
   
+  UT_String_01_logChannel = Debug_openChannel("UT_String_01.log");
+  Debug_setStdoutChannel(UT_String_01_logChannel);
   isPassed = isPassed && UT_String_01_step1();
   isPassed = isPassed && UT_String_01_step2();
   isPassed = isPassed && UT_String_01_step3();
@@ -183,5 +187,6 @@ PUBLIC int run_UT_String_01()
   ObjectMgr_reportUnallocated(objMgr);
   Memory_report();
 
+  Debug_closeChannel(UT_String_01_logChannel);
   return isPassed;
 }
