@@ -33,7 +33,7 @@ extern char words1000[];
 PRIVATE int nbWords;
 PRIVATE String** wordKeys;
 PRIVATE TestObject** testObjects;
-PRIVATE FILE* channelLog = 0;
+PRIVATE FILE* UT_SkipList_01_channelLog = 0;
 
 int UT_SkipList_01_init_keys()
 {
@@ -205,8 +205,8 @@ int run_UT_SkipList_01()
 {
   int isPassed = 1;
 
-  channelLog = Debug_openChannel("UT_List_01.log");
-  Debug_setStdoutChannel(channelLog);
+  UT_SkipList_01_channelLog = Debug_openChannel("UT_SkipList_01.log");
+  Debug_setStdoutChannel(UT_SkipList_01_channelLog);
 
   UT_SkipList_01_init_keys();
 
@@ -221,6 +221,6 @@ int run_UT_SkipList_01()
   UT_SkipList_01_delete_keys();
 
   Memory_report();
-  Debug_closeChannel(channelLog);
+  Debug_closeChannel(UT_SkipList_01_channelLog);
   return isPassed;
 }
