@@ -23,7 +23,7 @@
 
 ObjectStore* objectStore = 0;
 MyAllocator* testAlloc = 0;
-AllocInfo* allocInfo = 0;
+AllocInfo* UT_List_02_allocInfo = 0;
 
 TestObject * items[MAX_OBJECT_NB];
 TestObject * removed[MAX_OBJECT_NB];
@@ -141,13 +141,13 @@ PUBLIC int run_UT_List_02()
   Debug_setStdoutChannel(channelLog);
   objectStore = ObjectStore_getRef();
   testAlloc = (MyAllocator*)MyAllocator_new(5000);
-  allocInfo = ObjectStore_createAllocator(objectStore, (Allocator*)testAlloc);
+  UT_List_02_allocInfo = ObjectStore_createAllocator(objectStore, (Allocator*)testAlloc);
 
   isPassed = isPassed && UT_List_02_step1();
   isPassed = isPassed && UT_List_02_step2();
   isPassed = isPassed && UT_List_02_step3();
 
-  ObjectStore_deleteAllocator(objectStore, allocInfo);
+  ObjectStore_deleteAllocator(objectStore, UT_List_02_allocInfo);
   ObjectStore_delete(objectStore);
 
   Debug_closeChannel(channelLog);
