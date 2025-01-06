@@ -161,6 +161,7 @@ PUBLIC unsigned int TransUnit_getSize(TransUnit* this)
 **************************************************/
 PUBLIC char* TransUnit_getName(TransUnit* this)
 {
+  if (this == 0) return 0;
   return String_getBuffer(FileDesc_getName(this->file));
 }
 
