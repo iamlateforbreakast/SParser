@@ -10,7 +10,7 @@
 #include <windows.h>	/* WinAPI */
 
 /* Windows sleep in 100ns units */
-int msleep(long msec) {
+static int msleep(long msec) {
   /* Declarations */
   HANDLE timer;	/* Timer handle */
   LARGE_INTEGER li;	/* Time definition */
@@ -34,7 +34,7 @@ int msleep(long msec) {
 #include <pthread.h>
 #include <time.h>
 #include <errno.h>
-int msleep(long msec)
+static int msleep(long msec)
 {
   struct timespec ts;
   int res;
@@ -78,7 +78,7 @@ void* taskBody(void* params)
   return 0;
 }
 
-int step1()
+int UT_TaskMgr_01_step1()
 {
   struct event
   {
@@ -113,6 +113,7 @@ int step1()
 	  evtIdx++;
 	}
 	clock = clock + 1;
+    if (clock == 65) TaskMgr_stop(taskMgr);
   }
 
   for (int i=0;i<5;++i) Task_destroy(testTasks[i]);
@@ -123,12 +124,11 @@ int step1()
   return isPassed;
 }
 
-
-int main()
+int run_UT_TaskMgr_01()
 {
   int isPassed = 1;
 
-  step1();
+  isPassed = UT_TaskMgr_01_step1() && isPassed;
 
   Memory_report();
 
