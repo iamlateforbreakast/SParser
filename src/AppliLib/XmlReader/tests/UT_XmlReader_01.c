@@ -149,7 +149,7 @@ int UT_XmlReader_01_step3()
   return isPassed;
 }
 
-int main()
+int run_UT_XmlReader_01()
 {
   int isPassed = 1;
 
