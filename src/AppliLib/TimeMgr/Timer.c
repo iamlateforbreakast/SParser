@@ -137,7 +137,7 @@ PUBLIC unsigned int Timer_isEqual(Timer * this, Timer * compared)
 **************************************************/
 PUBLIC void Timer_print(Timer * this)
 {
-  unsigned int size = 0;
+  //unsigned int size = 0;
   const char * format = "Timer %s : NbCalls %d\n"
                         "\tWall Total %Lfs Wall Avg. %Lfs\n"
                         "\tCPU Total %Lf CPU Avg. %Lfs\n";

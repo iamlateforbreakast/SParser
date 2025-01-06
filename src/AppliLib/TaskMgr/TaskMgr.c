@@ -19,7 +19,7 @@
 #endif
 
 #define MAX_TASKS (10)
-#define MAX_THREADS (5)
+#define MAX_THREADS (1)
 
 #define DEBUG (0)
 
@@ -94,9 +94,9 @@ Class taskMgrClass = {
 ************************************************************/
 PRIVATE TaskMgr* TaskMgr_new()
 {
-  int isSuccessful = 0;
   TaskMgr * this = 0;
   this = (TaskMgr*)Object_new(sizeof(TaskMgr), &taskMgrClass);
+
   if (this == 0) return 0;
 
   this->isStopping = 0;
@@ -277,7 +277,7 @@ PRIVATE void TaskMgr_waitForThread(TaskMgr * this)
 **************************************************/
 PRIVATE int TaskMgr_createWorkerThreads(TaskMgr* this)
 {
-  int isSuccessful = 1;
+  int isSuccessful = 0;
 
   for (int i = 0; i < this->nbThreads; ++i)
   {
@@ -304,7 +304,7 @@ PRIVATE int TaskMgr_createWorkerThreads(TaskMgr* this)
     }
 #endif
   }
-  return 0;
+  return isSuccessful;
 }
 
 /**********************************************//** 

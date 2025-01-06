@@ -141,6 +141,8 @@ PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement, List * r
   Error_new(ERROR_DBG, "SdbMgr: %s\n", statement);
   rc = sqlite3_prepare_v2(this->db, statement, -1, &res, 0);
   
+  if (rc!=SQLITE_OK) return 0;
+
   step = sqlite3_step(res);
   
   count = sqlite3_column_count(res);
@@ -170,7 +172,6 @@ PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement, List * r
 PRIVATE unsigned int SdbMgr_open(SdbMgr* this, String* sdbName)
 {
   unsigned int result = 0;
-  String ** requestResult = 0;
   
   this->name = String_getRef(sdbName);
   result = sqlite3_open(":memory:", &(this->db));

@@ -103,6 +103,8 @@ PUBLIC void XmlReader_delete(XmlReader* this)
 PUBLIC XmlReader* XmlReader_copy(XmlReader* this)
 {
 
+  return 0;
+
 }
 
 /**********************************************//** 
@@ -218,6 +220,8 @@ PUBLIC int XmlReader_consumeVersion(XmlReader* this)
     this->nbCharRead += 1;
     this->readPtr += 1;
   }
+
+  return 1;
 }
 
 /**********************************************//** 
@@ -260,6 +264,8 @@ PUBLIC int XmlReader_consumeEndElement(XmlReader* this)
     this->nbCharRead++;
     this->readPtr++;
   }
+
+  return 1;
 }
 
 /**********************************************//** 
@@ -279,8 +285,7 @@ PUBLIC int XmlReader_consumeElement(XmlReader* this)
     {
       this->buffer[this->bufferUse] = *this->readPtr;
       this->bufferUse++;
-      this->nbCharRead++;
-      this->readPtr++;
+      XmlReader_consumeOneChar(this);
     }
     else
     {
@@ -329,6 +334,8 @@ PRIVATE int XmlReader_consumeName(XmlReader* this)
     else
       break;
   }
+
+  return 1;
 }
 
 PRIVATE int XmlReader_consumeSpace(XmlReader* this)
@@ -343,6 +350,8 @@ PRIVATE int XmlReader_consumeSpace(XmlReader* this)
     else
       break;
   }
+
+  return 1;
 }
 
 PRIVATE int XmlReader_consumeString(XmlReader* this)
@@ -371,6 +380,7 @@ PRIVATE int XmlReader_consumeString(XmlReader* this)
     }
   }
 
+  return 1;
 }
 
 PRIVATE int XmlReader_consumeOneChar(XmlReader* this)

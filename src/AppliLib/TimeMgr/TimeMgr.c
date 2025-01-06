@@ -148,5 +148,5 @@ PUBLIC void TimeMgr_report(TimeMgr * this)
 {
   List * timers = Map_getAll(this->timers);
 
-  List_forEach(timers, &Timer_print);
+  List_forEach(timers, (void (*)(void*))&Timer_print);
 }
