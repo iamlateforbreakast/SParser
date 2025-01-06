@@ -25,19 +25,19 @@ extern char words1000[];
 
 List * keys;
 TestObject ** testObjects;
-int nbTokens = 0;
-PRIVATE FILE* logChannel = 0;
+int UT_Map_01_nbTokens = 0;
+PRIVATE FILE* UT_Map_01_logChannel = 0;
 
 int UT_Map_01_init_keys()
 {
   String * fullText = String_newByRef(words1000);
 
   keys = String_splitToken(fullText, " ");
-  nbTokens = List_getNbNodes(keys);
+  UT_Map_01_nbTokens = List_getNbNodes(keys);
 
-  testObjects = (TestObject**)Memory_alloc(nbTokens * sizeof(TestObject*));
+  testObjects = (TestObject**)Memory_alloc(UT_Map_01_nbTokens * sizeof(TestObject*));
 
-  for (int i = 0; i < nbTokens; i++)
+  for (int i = 0; i < UT_Map_01_nbTokens; i++)
   {
     testObjects[i] = TestObject_new();
   }
@@ -51,7 +51,7 @@ int UT_Map_01_delete_keys(int isOwner)
 {
   if (isOwner)
   {
-    for (int i = 0; i < nbTokens; i++)
+    for (int i = 0; i < UT_Map_01_nbTokens; i++)
     {
       TestObject_delete(testObjects[i]);
     }
@@ -94,9 +94,9 @@ int UT_Map_01_step2()
   Map * testMap = Map_new();
   String * key = 0;
   
-  PRINT(("Step 2: Test 1 - Insert %d object: ", nbTokens));
+  PRINT(("Step 2: Test 1 - Insert %d object: ", UT_Map_01_nbTokens));
   List_resetIterator(keys);
-  for (int i = 0; i < nbTokens; i++)
+  for (int i = 0; i < UT_Map_01_nbTokens; i++)
   {
     key = (String*)List_getNext(keys);
     TRACE(("-->%s\n", String_getBuffer(key)));
@@ -118,7 +118,7 @@ int UT_Map_01_step3()
   String * s = String_new("Hello world");
   String * item = 0;
   
-  PRINT(("Step 3: Test 1 - Insert %d object: ", nbTokens));
+  PRINT(("Step 3: Test 1 - Insert %d object: ", UT_Map_01_nbTokens));
   Map_find(testMap, s, (void**)&item);
  
   TRACE(("Value : %s\n", String_getBuffer(item)));
@@ -200,17 +200,17 @@ int UT_Map_01_step6()
 int run_UT_Map_01()
 {
   int isPassed = 1;
-  logChannel = Debug_openChannel("UT_Map_01.log");
-  Debug_setStdoutChannel(logChannel);
+  UT_Map_01_logChannel = Debug_openChannel("UT_Map_01.log");
+  Debug_setStdoutChannel(UT_Map_01_logChannel);
   ObjectMgr* objMgr = ObjectMgr_getRef();
   UT_Map_01_init_keys();
 
-  isPassed = isPassed && UT_Map_01_step1();
-  isPassed = isPassed && UT_Map_01_step2();
-  isPassed = isPassed && UT_Map_01_step3();
-  isPassed = isPassed && UT_Map_01_step4();
-  isPassed = isPassed && UT_Map_01_step5();
-  isPassed = isPassed && UT_Map_01_step6();
+  isPassed = UT_Map_01_step1() && isPassed;
+  isPassed = UT_Map_01_step2() && isPassed;
+  isPassed = UT_Map_01_step3() && isPassed;
+  isPassed = UT_Map_01_step4() && isPassed;
+  isPassed = UT_Map_01_step5() && isPassed;
+  isPassed = UT_Map_01_step6() && isPassed;
 
   UT_Map_01_delete_keys(1);
 
@@ -218,7 +218,7 @@ int run_UT_Map_01()
   ObjectMgr_reportUnallocated(objMgr);
   Memory_report();
 
-  Debug_closeChannel(logChannel);
+  Debug_closeChannel(UT_Map_01_logChannel);
   
   return isPassed;
 }
