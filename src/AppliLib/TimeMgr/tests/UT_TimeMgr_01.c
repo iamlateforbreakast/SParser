@@ -2,7 +2,7 @@
 #include "Object.h"
 #include "Map.h"
 #include "Memory.h"
-
+#include "Debug.h"
 #include <time.h>
 #include <stdio.h>
 
@@ -12,7 +12,7 @@
                           
 #ifdef _WIN32
 #include <windows.h>	/* WinAPI */
-int msleep(long msec) {
+static int msleep(long msec) {
   HANDLE timer;	/* Timer handle */
   LARGE_INTEGER li;	/* Time definition */
   if (!(timer = CreateWaitableTimer(NULL, 1, NULL)))
@@ -27,7 +27,7 @@ int msleep(long msec) {
   return 1;
 }
 #else
-int msleep(long msec)
+static int msleep(long msec)
 {
   struct timespec ts;
   int res;
@@ -50,7 +50,7 @@ typedef struct TestTimeMgr
   Map * timers;
 } TestTimeMgr;
 
-int step1()
+int UT_TimeMgr_01_step1()
 {
   TimeMgr * testTimeMgr1 = 0;
   TimeMgr * testTimeMgr2 = 0;
@@ -59,7 +59,7 @@ int step1()
   testTimeMgr2 = TimeMgr_getRef();
 
   /* Test 1 */
-  printf("Step 1: Test 1 - Check there is only one TimeMgr: ");
+  PRINT(("Step 1: Test 1 - Check there is only one TimeMgr: "));
 
   UT_ASSERT((testTimeMgr1==testTimeMgr2))
 
@@ -71,7 +71,7 @@ int step1()
   return 0;
 }
 
-int step2()
+int UT_TimeMgr_01_step2()
 {
   TimeMgr * testTimeMgr = 0;
   String * testTimerName = 0;
@@ -99,10 +99,12 @@ int step2()
   return 0;
 }
 
-int main()
+int run_UT_TimeMgr_01()
 {
-  step1();
-  step2();
+  int isPassed = 1;
 
-  return 0;
+  isPassed = UT_TimeMgr_01_step1() && isPassed;
+  isPassed = UT_TimeMgr_01_step2() && isPassed;
+
+  return isPassed;
 }
