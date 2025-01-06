@@ -12,7 +12,6 @@
 #include "Times.h"
 #include "List.h"
 #include "String2.h"
-#include "Words1000.h"
 #include "Error.h"
 
 #define DEBUG (0)
@@ -26,16 +25,18 @@
                           else { printf("\x1b[31mFailed\x1b[0m\n"); return 0;}
 #endif
 
-MyAllocator * testAlloc = 0;
-AllocInfo * allocInfo = 0;
+PRIVATE MyAllocator* UT_SkipList_02_testAlloc = 0;
+PRIVATE AllocInfo* allocInfo = 0;
 
-SkipList* testList;
+PRIVATE SkipList* testList;
 
-int nbWords;
-String** wordKeys;
-TestObject** testObjects;
+PRIVATE int nbWords;
+PRIVATE String** wordKeys;
+PRIVATE TestObject** testObjects;
 
-int init_keys()
+extern char words1000[];
+
+PRIVATE int UT_SkipList_02_init_keys()
 {
   String* allWords = String_new(words1000);
   List* tokens = 0;
@@ -58,7 +59,7 @@ int init_keys()
   return 1;
 }
 
-int delete_keys()
+PRIVATE int UT_SkipList_02_delete_keys()
 {
   for (int i = 0; i < nbWords; i++)
   {
@@ -71,7 +72,7 @@ int delete_keys()
   return 1;
 }
 
-int step1()
+PRIVATE int UT_SkipList_02_step1()
 {
   int isPassed = 1;
 
@@ -84,7 +85,7 @@ int step1()
 
   PRINT(("Step 1: Test 2 - Build a SkipList: "));
 
-  testList = SkipList_newFromAllocator((Allocator*)testAlloc);
+  testList = SkipList_newFromAllocator((Allocator*)UT_SkipList_02_testAlloc);
 
   if (testList == 0) Error_new(ERROR_FATAL, "Failed to create SkipList.\n");
 
@@ -104,7 +105,7 @@ int step1()
   return isPassed;
 }
 
-int step2()
+PRIVATE int UT_SkipList_02_step2()
 {
   int isPassed = 1;
   int aFewItems = 10;
@@ -123,7 +124,7 @@ int step2()
   return isPassed;
 }
 
-int step3()
+PRIVATE int UT_SkipList_02_step3()
 {
   int isPassed = 1;
 
@@ -133,7 +134,7 @@ int step3()
   return isPassed;
 }
 
-int step4()
+PRIVATE int UT_SkipList_02_step4()
 {
   void* itemPtr = 0;
   int isPassed = 1;
@@ -153,7 +154,7 @@ int step4()
   return isPassed;
 }
 
-int step5()
+PRIVATE int UT_SkipList_02_step5()
 {
   int isPassed = 1;
   void * itemPtr = 0;
@@ -167,7 +168,7 @@ int step5()
   return isPassed;
 }
 
-int step6()
+int UT_SkipList_02_step6()
 {
   int isPassed = 1;
 
@@ -179,7 +180,7 @@ int step6()
   return isPassed;
 }
 
-int step7()
+int UT_SkipList_02_step7()
 {
     /*testList = SkipList_newFromAllocator();
 
@@ -220,24 +221,26 @@ int step7()
     return 1;
 }
 
-int main()
+PUBLIC int run_UT_SkipList_02()
 {
   ObjectStore * objectStore = 0;
   
   objectStore = ObjectStore_getRef();
-  testAlloc = MyAllocator_new(5000);
-  allocInfo = ObjectStore_createAllocator(objectStore, (Allocator*)testAlloc);
+  UT_SkipList_02_testAlloc = MyAllocator_new(5000);
+  allocInfo = ObjectStore_createAllocator(objectStore, (Allocator*)UT_SkipList_02_testAlloc);
 
-  init_keys();
+  UT_SkipList_02_init_keys();
 
-  step1();
-  step2();
-  step3();
-  step4();
-  step5();
-  step6();
-  delete_keys();
+  UT_SkipList_02_step1();
+  UT_SkipList_02_step2();
+  UT_SkipList_02_step3();
+  UT_SkipList_02_step4();
+  UT_SkipList_02_step5();
+  UT_SkipList_02_step6();
+
+  UT_SkipList_02_delete_keys();
 
   ObjectStore_deleteAllocator(objectStore, allocInfo);
   ObjectStore_delete(objectStore);
+  return 0;
 }
