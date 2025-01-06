@@ -73,6 +73,7 @@ PUBLIC XmlReader* XmlReader_new(String* string)
   this->nbCharRead = 0;
   this->node = XMLNONE;
   this->buffer = (char*)Memory_alloc(BUFFER_SIZE);
+  this->bufferUse = 0;
 
   return this;
 }
