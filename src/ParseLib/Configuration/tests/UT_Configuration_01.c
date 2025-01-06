@@ -10,10 +10,10 @@
 
 #define DEBUG (1)
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("Passed\n");} \
-                          else { printf("Failed\n"); return 0;}
+                          { PRINT(("Passed\n"));} \
+                          else { PRINT(("Failed\n")); return 0;}
 
-int step1()
+int UT_Configuration_01_step1()
 {
   int isPassed = 1;
   Configuration* testConfiguration = 0;
@@ -46,17 +46,18 @@ int step1()
 
   return isPassed; 
 }
-int step2()
+
+int UT_Configuration_01_step2()
 {
   int isPassed = 1;
   return isPassed;
 }
 
-int main()
+int run_UT_Configuration_01()
 {
   int isPassed =1;
 
-  step1();
+  isPassed = UT_Configuration_01_step1() && isPassed;
 
   Memory_report();
   return isPassed;
