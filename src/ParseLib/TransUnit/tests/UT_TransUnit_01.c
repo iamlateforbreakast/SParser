@@ -12,7 +12,7 @@
                           { printf("Passed\n");} \
                           else { printf("Failed\n"); return 0;}
 
-int step1()
+int UT_TransUnit_01_step1()
 {
   int isPassed = 1;
   TransUnit* testTransUnit = 0;
@@ -40,7 +40,7 @@ int step1()
   return isPassed; 
 }
 
-int step2()
+int UT_TransUnit_01_step2()
 {
   int isPassed = 1;
 
@@ -88,7 +88,7 @@ int step2()
   return isPassed;
 }
 
-int step3()
+int UT_TransUnit_01_step3()
 {
   int isPassed = 1;
 
@@ -119,7 +119,8 @@ int step3()
   ObjectMgr_delete(objectMgr);
   return isPassed;
 }
-int step4()
+
+int UT_TransUnit_01_step4()
 {
   int isPassed = 1;
   FileMgr* fileMgr = FileMgr_new();
@@ -146,7 +147,8 @@ int step4()
   ObjectMgr_delete(objectMgr);
   return isPassed;
 }
-int step5()
+
+int UT_TransUnit_01_step5()
 {
   int isPassed = 1;
   FileMgr* fileMgr = FileMgr_new();
@@ -184,13 +186,13 @@ int step5()
   return isPassed;
 }
 
-int main()
+int run_UT_TransUnit_01()
 {
   int isPassed = 1;
   
-  step1();
-  step2();
-  step3();
+  isPassed = UT_TransUnit_01_step1() && isPassed;
+  isPassed = UT_TransUnit_01_step2() && isPassed;
+  isPassed = UT_TransUnit_01_step3() && isPassed;
   //step4();
 
   Memory_report();
