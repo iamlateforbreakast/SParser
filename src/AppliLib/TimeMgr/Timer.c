@@ -6,6 +6,7 @@
 #include "Memory.h"
 #include "Class.h"
 #include "Object.h"
+#include "Debug.h"
 
 #include <stdio.h>
 
@@ -150,9 +151,9 @@ PUBLIC void Timer_print(Timer * this)
   }
   //size = snprintf(0, 0, format, String_getBuffer(this->name), this->nbCalls, this->durationS, average_duration);
   //result = Memory_alloc(size);
-  printf(format, String_getBuffer(this->name), this->nbCalls, 
+   PRINT((format, String_getBuffer(this->name), this->nbCalls, 
          this->wallDurationS, wallAverageDuration,
-         this->cpuDurationS, cpuAverageDuration);
+         this->cpuDurationS, cpuAverageDuration));
 }
 
 /**********************************************//** 
@@ -174,14 +175,14 @@ PUBLIC void Timer_latchTime(Timer * this)
     this->cpuLatchedTimeS = cpuTimeS;
     this->wallDurationS = 0;
     this->cpuDurationS = 0;
-    printf("Timer.c: %Lf\n", this->cpuLatchedTimeS);
-    printf("Timer.c: %Lf\n", get_wall_time());
+    PRINT(("Timer.c: %Lf\n", this->cpuLatchedTimeS));
+    PRINT(("Timer.c: %Lf\n", get_wall_time()));
   }
   else
   { 
     this->nbCalls++;
-    printf("Timer.c: %Lf\n", this->cpuLatchedTimeS);
-    printf("Timer.c: %Lf\n", get_wall_time());
+    PRINT(("Timer.c: %Lf\n", this->cpuLatchedTimeS));
+    PRINT(("Timer.c: %Lf\n", get_wall_time()));
     this->wallDurationS = this->wallDurationS + wallTimeS - this->wallLatchedTimeS;
     this->cpuDurationS = this->cpuDurationS + cpuTimeS - this->cpuLatchedTimeS;
     this->wallLatchedTimeS = wallTimeS;
