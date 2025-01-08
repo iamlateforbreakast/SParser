@@ -153,14 +153,15 @@ int run_UT_List_01()
   int isPassed = 1;
   
   logChannel = Debug_openChannel("UT_List_01.log");
+  Debug_setStdoutChannel(logChannel);
 
   UT_List_01_init_testobjects();
 
-  isPassed = isPassed && UT_List_01_step1();
+  isPassed = UT_List_01_step1() && isPassed;
 
   UT_List_01_init_testobjects();
 
-  isPassed = isPassed && UT_List_01_step2();
+  isPassed = isPassed && UT_List_01_step2() && isPassed;
 
   UT_List_01_delete_testobjects();
 
