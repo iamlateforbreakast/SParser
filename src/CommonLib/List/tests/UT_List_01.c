@@ -23,7 +23,7 @@
 
 PRIVATE TestObject* items[MAX_OBJECT_NB * 2];
 
-PRIVATE FILE * logChannel;
+PRIVATE FILE * UT_List_01_logChannel;
 
 PRIVATE int UT_List_01_init_testobjects()
 {
@@ -54,41 +54,41 @@ PRIVATE int UT_List_01_step1()
 
   int i = 0;
 
-  PRINT2((logChannel, "Step 1: Test 1 - Create a list: "));
+  PRINT(("Step 1: Test 1 - Create a list: "));
   testList = List_new();
   isPassed = isPassed && OBJECT_IS_VALID(testList);
 
   UT_ASSERT(isPassed);
 
-  PRINT2((logChannel, "Step 1: Test 2 - Insert %d objects in list: ", MAX_OBJECT_NB * 2));
+  PRINT(("Step 1: Test 2 - Insert %d objects in list: ", MAX_OBJECT_NB * 2));
   for (i = 0; i < MAX_OBJECT_NB * 2; i++)
   {
     List_insertHead(testList, items[i], 1);
-    TRACE2((logChannel, "Nb items %d\n", List_getNbNodes(testList)));
-    TRACE2((logChannel, "  Allocated %d bytes at %x\n", ((Object*)items[i])->class->f_size(0), items[i]));
+    TRACE2((UT_List_01_logChannel, "Nb items %d\n", List_getNbNodes(testList)));
+    TRACE2((UT_List_01_logChannel, "  Allocated %d bytes at %x\n", ((Object*)items[i])->class->f_size(0), items[i]));
   }
   isPassed = isPassed && (List_getNbNodes(testList) == MAX_OBJECT_NB * 2);
 
   UT_ASSERT(isPassed);
-  PRINT2((logChannel, "Step 1: Test 3 - Remove %d objects from list: ", MAX_OBJECT_NB * 2));
+  PRINT(("Step 1: Test 3 - Remove %d objects from list: ", MAX_OBJECT_NB * 2));
   for (i = 0; i < MAX_OBJECT_NB * 2; i++)
   {
     removed[i] = List_removeHead(testList);
-    TRACE2((logChannel, "  Removed %d bytes at %x\n", ((Object*)removed[i])->class->f_size(0), removed[i]));
+    TRACE2((UT_List_01_logChannel, "  Removed %d bytes at %x\n", ((Object*)removed[i])->class->f_size(0), removed[i]));
     TestObject_delete(removed[i]);
   }
   isPassed = isPassed && (List_getNbNodes(testList) == 0);
   UT_ASSERT((isPassed));
 
-  PRINT2((logChannel, "Step 1: test 4 - Delete List: "));
+  PRINT(("Step 1: test 4 - Delete List: "));
   List_delete(testList);
   isPassed = isPassed && (OBJECT_IS_INVALID(testList));
   UT_ASSERT((isPassed));
 
-  PRINT2((logChannel, "Step 1: Test 5 - Check all memory is freed: "));
+  PRINT(("Step 1: Test 5 - Check all memory is freed: "));
   ObjectMgr * objectMgr = ObjectMgr_getRef();
   UT_ASSERT((ObjectMgr_report(objectMgr) == 1));
-  TRACE2((logChannel, "Nb objects left allocated: %d\n", ObjectMgr_report(objectMgr)));
+  TRACE2((UT_List_01_logChannel, "Nb objects left allocated: %d\n", ObjectMgr_report(objectMgr)));
   ObjectMgr_delete(objectMgr);
 
   return isPassed;
@@ -103,7 +103,7 @@ PRIVATE int UT_List_01_step2()
 
   int i = 0;
 
-  PRINT2((logChannel, "Step 2: Test 1 - Build 2 Lists: "));
+  PRINT(("Step 2: Test 1 - Build 2 Lists: "));
   testList1 = List_new();
   testList2 = List_new();
 
@@ -115,12 +115,12 @@ PRIVATE int UT_List_01_step2()
   for (i=0; i< MAX_OBJECT_NB; i++)
   {
     List_insertHead(testList1, items[i], 1);
-    TRACE2((logChannel, " Nb items %d\n", List_getNbNodes(testList1)));
+    TRACE2((UT_List_01_logChannel, " Nb items %d\n", List_getNbNodes(testList1)));
   }
   for (i= MAX_OBJECT_NB; i < MAX_OBJECT_NB * 2; i++)
   {
     List_insertTail(testList2, items[i], 1);
-    TRACE2((logChannel, " Nb items %d\n", List_getNbNodes(testList2)));
+    TRACE2((UT_List_01_logChannel, " Nb items %d\n", List_getNbNodes(testList2)));
   }
 
   isPassed = isPassed && (List_getNbNodes(testList1) == MAX_OBJECT_NB) && (List_getNbNodes(testList2) == MAX_OBJECT_NB);
@@ -152,8 +152,8 @@ int run_UT_List_01()
 {
   int isPassed = 1;
   
-  logChannel = Debug_openChannel("UT_List_01.log");
-  Debug_setStdoutChannel(logChannel);
+  UT_List_01_logChannel = Debug_openChannel("UT_List_01.log");
+  Debug_setStdoutChannel(UT_List_01_logChannel);
 
   UT_List_01_init_testobjects();
 
@@ -169,7 +169,7 @@ int run_UT_List_01()
   ObjectMgr_reportUnallocated(objMgr);
   Memory_report();
 
-  Debug_closeChannel(logChannel);
+  Debug_closeChannel(UT_List_01_logChannel);
 
   return isPassed;
 }

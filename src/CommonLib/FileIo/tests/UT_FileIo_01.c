@@ -26,7 +26,7 @@ PRIVATE const char* testFileName[5] = { "test1.file","test2.file","test3.file","
 PRIVATE char testBuffer[BUFFER_SIZE_BYTES];
 PRIVATE char readBuffer[BUFFER_SIZE_BYTES];
 
-PRIVATE FILE * logChannel;
+PRIVATE FILE * UT_FileIo_01_logChannel;
 
 PRIVATE int UT_FileIo_01_step1()
 {
@@ -192,8 +192,8 @@ int run_UT_FileIo_01()
 {
   int isPassed = 1;
 
-  logChannel = Debug_openChannel("UT_FileIo_01.log");
-  Debug_setStdoutChannel(logChannel);
+  UT_FileIo_01_logChannel = Debug_openChannel("UT_FileIo_01.log");
+  Debug_setStdoutChannel(UT_FileIo_01_logChannel);
 
   for (int i = 0; i < BUFFER_SIZE_BYTES; i++)
   {
@@ -218,7 +218,7 @@ int run_UT_FileIo_01()
 
   Memory_report();
 
-  Debug_closeChannel(logChannel);
+  Debug_closeChannel(UT_FileIo_01_logChannel);
 
   return isPassed;
 }

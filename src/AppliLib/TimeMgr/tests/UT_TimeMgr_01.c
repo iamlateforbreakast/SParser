@@ -5,6 +5,7 @@
 #include "Debug.h"
 #include <time.h>
 #include <stdio.h>
+#include <errno.h>
 
 #define UT_ASSERT(cond) if ((cond)) \
                           { printf("Passed\n");} \
