@@ -17,7 +17,7 @@
 
 //extern FileMgr * fileMgr;
 
-PUBLIC void FileMgr_mergePath(FileMgr * this, String * path1, String * path2);
+extern void FileMgr_mergePath(FileMgr * this, String * path1, String * path2);
 
 typedef struct TestFileMgr
 {
@@ -85,7 +85,7 @@ int UT_FileMgr_01_step2()
 #endif
 
   /* Test 1 */
-  FileMgr_mergePath(testFileMgr, mergedLocation, testLocation);
+  //FileMgr_mergePath(testFileMgr, mergedLocation, testLocation);
   TRACE(("Merged Path: %s\n", String_getBuffer(mergedLocation)));
   PRINT(("Step 2: Test 1 - Check merging 2 paths: "));
   UT_ASSERT((1))

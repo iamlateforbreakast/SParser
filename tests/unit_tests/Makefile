@@ -28,7 +28,7 @@ TESTS_APPLI = \
         ../../src/AppliLib/TimeMgr/tests/UT_TimeMgr_01.c \
         ../../src/AppliLib/XmlReader/tests/UT_XmlReader_01.c
 
-TEST_PARSE = \
+TESTS_PARSE = \
         ../../src/ParseLib/Configuration/tests/UT_Configuration_01.c \
         ../../src/ParseLib/TransUnit/tests/UT_TransUnit_01.c
 
