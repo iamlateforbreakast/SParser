@@ -42,8 +42,8 @@ STUBS = \
 
 all: run_ut_tests
 
-run_ut_tests: main.c $(TESTS) $(STUBS)
-	gcc -DUNIT_TEST $(CFLAGS) main.c $(TESTS_COMMON) $(TESTS_APPLI) $(TESTS_PARSE) $(STUBS) $(LDFLAGS) -o run_UT_tests
+run_ut_tests: main.c $(TESTS_COMMON) $(TESTS_APPLI) $(TESTS_PARSE) $(STUBS)
+	gcc -DUNIT_TEST $(CFLAGS) main.c $(TESTS_PARSE) $(TESTS_APPLI) $(TESTS_COMMON) $(STUBS) $(LDFLAGS) -o run_UT_tests
 
 clean:
 	rm -rf *.o

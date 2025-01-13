@@ -21,7 +21,7 @@
                           else {  PRINT(("\x1b[31mFailed\x1b[0m\n")); return 0;}
 #endif
 
-PRIVATE TestObject* items[MAX_OBJECT_NB * 2];
+PRIVATE TestObject* UT_List_01_items[MAX_OBJECT_NB * 2];
 
 PRIVATE FILE * UT_List_01_logChannel;
 
@@ -29,7 +29,7 @@ PRIVATE int UT_List_01_init_testobjects()
 {
   for (int i = 0; i < MAX_OBJECT_NB * 2; i++)
   {
-    items[i] = TestObject_new();
+    UT_List_01_items[i] = TestObject_new();
   }
 
   return 1;
@@ -39,7 +39,7 @@ PRIVATE int UT_List_01_delete_testobjects()
 {
   for (int i = 0; i < MAX_OBJECT_NB * 2; i++)
   {
-    TestObject_delete(items[i]);
+    TestObject_delete(UT_List_01_items[i]);
   }
 
   return 1;
@@ -63,9 +63,9 @@ PRIVATE int UT_List_01_step1()
   PRINT(("Step 1: Test 2 - Insert %d objects in list: ", MAX_OBJECT_NB * 2));
   for (i = 0; i < MAX_OBJECT_NB * 2; i++)
   {
-    List_insertHead(testList, items[i], 1);
+    List_insertHead(testList, UT_List_01_items[i], 1);
     TRACE2((UT_List_01_logChannel, "Nb items %d\n", List_getNbNodes(testList)));
-    TRACE2((UT_List_01_logChannel, "  Allocated %d bytes at %x\n", ((Object*)items[i])->class->f_size(0), items[i]));
+    TRACE2((UT_List_01_logChannel, "  Allocated %d bytes at %x\n", ((Object*)UT_List_01_items[i])->class->f_size(0), UT_List_01_items[i]));
   }
   isPassed = isPassed && (List_getNbNodes(testList) == MAX_OBJECT_NB * 2);
 
@@ -114,12 +114,12 @@ PRIVATE int UT_List_01_step2()
 
   for (i=0; i< MAX_OBJECT_NB; i++)
   {
-    List_insertHead(testList1, items[i], 1);
+    List_insertHead(testList1, UT_List_01_items[i], 1);
     TRACE2((UT_List_01_logChannel, " Nb items %d\n", List_getNbNodes(testList1)));
   }
   for (i= MAX_OBJECT_NB; i < MAX_OBJECT_NB * 2; i++)
   {
-    List_insertTail(testList2, items[i], 1);
+    List_insertTail(testList2, UT_List_01_items[i], 1);
     TRACE2((UT_List_01_logChannel, " Nb items %d\n", List_getNbNodes(testList2)));
   }
 

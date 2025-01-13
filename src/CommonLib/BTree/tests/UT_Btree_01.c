@@ -22,7 +22,7 @@
 #define ORDER (3)
 
 List * keys;
-TestObject ** testObjects;
+TestObject ** UT_BTree_01_testObjects;
 TestObject ** removedObjects;
 int nbTokens = 0;
 
@@ -34,13 +34,13 @@ int init_keys()
   keys = String_splitToken(fullText, " ");
   nbTokens = List_getNbNodes(keys);
 
-  testObjects = (TestObject**)Memory_alloc(nbTokens * sizeof(TestObject*));
+  UT_BTree_01_testObjects = (TestObject**)Memory_alloc(nbTokens * sizeof(TestObject*));
   removedObjects = (TestObject**)Memory_alloc(nbTokens * sizeof(TestObject*));
 
   for (int i = 0; i < nbTokens; i++)
   {
 	key = (String*)List_getNext(keys);
-    testObjects[i] = TestObject_new();
+    UT_BTree_01_testObjects[i] = TestObject_new();
   }
 
   String_delete(fullText);
@@ -52,10 +52,10 @@ int delete_keys()
 {
   for (int i = 0; i < nbTokens; i++)
   {
-    TestObject_delete(testObjects[i]);
+    TestObject_delete(UT_BTree_01_testObjects[i]);
   }
   List_delete(keys);
-  Memory_free(testObjects,sizeof(testObjects));
+  Memory_free(UT_BTree_01_testObjects,sizeof(UT_BTree_01_testObjects));
   Memory_free(removedObjects, sizeof(removedObjects));
   
   return 1;
@@ -75,7 +75,7 @@ int step1()
   UT_ASSERT((1));
 
   PRINT(("Step 1: Test 2 - Insert one object: "));
-  BTree_add(testTree, (Object*)key, (Object*)testObjects[0], 0);
+  BTree_add(testTree, (Object*)key, (Object*)UT_BTree_01_testObjects[0], 0);
   UT_ASSERT((1));
 
   PRINT(("Step 1: Test 3 - Remove the object: "));
@@ -110,7 +110,7 @@ int step2()
   {
 	key = List_getNext(keys);
 	Object_print((Object*)key);
-    BTree_add(testTree, (Object*)key, (Object*)testObjects[i], 0);
+    BTree_add(testTree, (Object*)key, (Object*)UT_BTree_01_testObjects[i], 0);
   }
   UT_ASSERT((1));
 
@@ -154,7 +154,7 @@ int step3()
   {
 	key = List_getNext(keys);
 	Object_print((Object*)key);
-    BTree_add(testTree, (Object*)key, (Object*)testObjects[i], 0);
+    BTree_add(testTree, (Object*)key, (Object*)UT_BTree_01_testObjects[i], 0);
   }
   UT_ASSERT((1));
 

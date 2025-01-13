@@ -27,12 +27,12 @@
 
 #define NB_OBJECTS (10000)
 
-SkipList* testList;
+SkipList* UT_SkipList_01_testList;
 extern char words1000[];
 
 PRIVATE int nbWords;
-PRIVATE String** wordKeys;
-PRIVATE TestObject** testObjects;
+PRIVATE String** UT_SkipList_01_wordKeys;
+PRIVATE TestObject** UT_SkipList_01_testObjects;
 PRIVATE FILE* UT_SkipList_01_channelLog = 0;
 
 int UT_SkipList_01_init_keys()
@@ -43,13 +43,13 @@ int UT_SkipList_01_init_keys()
   tokens = String_splitToken(allWords, " ");
   nbWords = List_getNbNodes(tokens);
 
-  wordKeys = (String**)Memory_alloc(nbWords * sizeof(String*));
-  testObjects = (TestObject**)Memory_alloc(nbWords * sizeof(TestObject*));
+  UT_SkipList_01_wordKeys = (String**)Memory_alloc(nbWords * sizeof(String*));
+  UT_SkipList_01_testObjects = (TestObject**)Memory_alloc(nbWords * sizeof(TestObject*));
 
   for (int i = 0; i < nbWords; i++)
   {
-    wordKeys[i] = (String*)List_getNext(tokens);
-    testObjects[i] = TestObject_new();
+    UT_SkipList_01_wordKeys[i] = (String*)List_getNext(tokens);
+    UT_SkipList_01_testObjects[i] = TestObject_new();
   }
 
   List_delete(tokens);
@@ -62,11 +62,11 @@ int UT_SkipList_01_delete_keys()
 {
   for (int i = 0; i < nbWords; i++)
   {
-    TestObject_delete(testObjects[i]);
-    String_delete(wordKeys[i]);
+    TestObject_delete(UT_SkipList_01_testObjects[i]);
+    String_delete(UT_SkipList_01_wordKeys[i]);
   }
-  Memory_free(wordKeys, sizeof(wordKeys));
-  Memory_free(testObjects, sizeof(testObjects));
+  Memory_free(UT_SkipList_01_wordKeys, sizeof(UT_SkipList_01_wordKeys));
+  Memory_free(UT_SkipList_01_testObjects, sizeof(UT_SkipList_01_testObjects));
 
   return 1;
 }
@@ -84,10 +84,10 @@ int UT_SkipList_01_step1()
 
   PRINT(("Step 1: Test 2 - Build a SkipList: "));
 
-  testList = SkipList_new(NB_OBJECTS + 1);
+  UT_SkipList_01_testList = SkipList_new(NB_OBJECTS + 1);
 
-  char* checkObjectPtr = (char*)testList;
-  char* checkSkipListPtr = (char*)testList + (sizeof(Object) / MEM_ALIGN) * MEM_ALIGN;
+  char* checkObjectPtr = (char*)UT_SkipList_01_testList;
+  char* checkSkipListPtr = (char*)UT_SkipList_01_testList + (sizeof(Object) / MEM_ALIGN) * MEM_ALIGN;
 
   TRACE(("\n  Object id: %d\n", *(unsigned int*)checkObjectPtr));
   isPassed = isPassed && ((*(unsigned int*)checkObjectPtr) == 1);
@@ -111,9 +111,9 @@ int UT_SkipList_01_step2()
 
   for (int i = 0; i < aFewItems; i++)
   {
-    //TRACE(("  Inserting: ")); String_print(wordKeys[i]); PRINT(("\n"));
-    SkipList_add(testList, (Object*)wordKeys[i], (Object*)testObjects[i]);
-    SkipList_print(testList);
+    //TRACE(("  Inserting: ")); String_print(UT_SkipList_01_wordKeys[i]); PRINT(("\n"));
+    SkipList_add(UT_SkipList_01_testList, (Object*)UT_SkipList_01_wordKeys[i], (Object*)UT_SkipList_01_testObjects[i]);
+    SkipList_print(UT_SkipList_01_testList);
   }
 
   UT_ASSERT((isPassed));
@@ -126,7 +126,7 @@ int UT_SkipList_01_step3()
   int isPassed = 1;
 
   PRINT(("Step 3: Test 1 - Print %d items: ", 10));
-  SkipList_print(testList);
+  SkipList_print(UT_SkipList_01_testList);
 
   return isPassed;
 }
@@ -140,8 +140,8 @@ int UT_SkipList_01_step4()
   TRACE(("\n"));
   for (int i = 0; i < 10; i++)
   {
-    itemPtr = SkipList_get(testList, (Object*)wordKeys[i]);
-    isPassed = isPassed && (itemPtr == testObjects[i]);
+    itemPtr = SkipList_get(UT_SkipList_01_testList, (Object*)UT_SkipList_01_wordKeys[i]);
+    isPassed = isPassed && (itemPtr == UT_SkipList_01_testObjects[i]);
 
     if (isPassed) TRACE(("Item %d retrieved.\n", i)); else TRACE(("Item %d failed to retrieved.\n", i));
   }
@@ -157,8 +157,8 @@ int UT_SkipList_01_step5()
   void * itemPtr = 0;
 
   PRINT(("Step 5: Test 1 - Remove some items: "));
-  itemPtr = SkipList_remove(testList, (Object*)wordKeys[0]);
-  SkipList_print(testList);
+  itemPtr = SkipList_remove(UT_SkipList_01_testList, (Object*)UT_SkipList_01_wordKeys[0]);
+  SkipList_print(UT_SkipList_01_testList);
 
   UT_ASSERT((isPassed));
 
@@ -170,7 +170,7 @@ int UT_SkipList_01_step6()
   int isPassed = 1;
 
   PRINT(("Step 5: Test 1 - Delete the SkipList instance: "));
-  SkipList_delete(testList);
+  SkipList_delete(UT_SkipList_01_testList);
 
   UT_ASSERT((isPassed));
 
@@ -179,21 +179,21 @@ int UT_SkipList_01_step6()
 
 int UT_SkipList_01_step7()
 {
-  SkipList * testList = SkipList_new();
+  SkipList * UT_SkipList_01_testList = SkipList_new();
 
   long double cpu_time0 = get_cpu_time();
   long double wall_time0 = get_wall_time();
 
   for (int i = 0; i < nbWords; i++)
   {
-    SkipList_add(testList, (Object*)wordKeys[i], (Object*)testObjects[i]);
+    SkipList_add(UT_SkipList_01_testList, (Object*)UT_SkipList_01_wordKeys[i], (Object*)UT_SkipList_01_testObjects[i]);
     //printf("Adding %d\n", randomKeys[i]);
   }
 
   long double cpu_time1 = get_cpu_time();
   long double wall_time1 = get_wall_time();
 
-  SkipList_delete(testList);
+  SkipList_delete(UT_SkipList_01_testList);
   
   printf("Insert CPU time %Lf\n", (cpu_time1- cpu_time0)/nbWords);
   printf("Insert Wall Time %Lf\n", (wall_time1 - wall_time0)/nbWords);
