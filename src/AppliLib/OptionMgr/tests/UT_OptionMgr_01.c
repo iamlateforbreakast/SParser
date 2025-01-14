@@ -9,8 +9,8 @@
 #include <stdio.h>
 #define DEBUG (0)
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("Passed\n");} \
-                          else { printf("Failed\n"); return 0;}
+                          { PRINT(("Passed\n"));} \
+                          else { PRINT(("Failed\n")); return 0;}
 
 typedef struct testOptionMgr
 {
@@ -20,25 +20,35 @@ typedef struct testOptionMgr
 
 //extern OptionMgr* optionMgr;
 
+PRIVATE FILE * UT_OptionMgr_01_logChannel;
+
 int UT_OptionMgr_01_step1()
 {
+  int isPassed = 1;
+
   testOptionMgr* testOptionMgr1 = 0;
   testOptionMgr* testOptionMgr2 = 0;
   /* Test 1 */
   testOptionMgr1 = (testOptionMgr*)OptionMgr_getRef();
   testOptionMgr2 = (testOptionMgr*)OptionMgr_getRef();
   PRINT(("Step 1: Test 1 - Check there is only one OptionMgr: "));
-  UT_ASSERT((testOptionMgr1 == testOptionMgr1))
+  isPassed = (testOptionMgr1 == testOptionMgr1) && isPassed;
+
+  UT_ASSERT((isPassed));
 
   /* Test 2 */
   OptionMgr_delete((OptionMgr*)testOptionMgr1);
   PRINT(("Step 1: Test 2 - Check ref is not null: "));
-  UT_ASSERT(0)
+  isPassed = OBJECT_IS_VALID(testOptionMgr2) && isPassed;
+  isPassed = OBJECT_IS_INVALID(testOptionMgr1) && isPassed;
+
+  UT_ASSERT((isPassed));
 
   /* Test 3 */
   OptionMgr_delete((OptionMgr*)testOptionMgr2);
   PRINT(("Step 1: Test 3 - Check ref is null: "));
-  UT_ASSERT(0)
+  isPassed = OBJECT_IS_INVALID(testOptionMgr2) && isPassed;
+  UT_ASSERT((testOptionMgr2));
 
   /* Test 4 */
   OptionMgr_delete((OptionMgr*)testOptionMgr2);
@@ -49,7 +59,7 @@ int UT_OptionMgr_01_step1()
   PRINT(("Step 1: Test 5 - Check all memory is freed properly: "));
   UT_ASSERT((Memory_getAllocRequestNb() == (Memory_getFreeRequestNb() + 1)))
 
-  return 0;
+  return isPassed;
 }
 
 int UT_OptionMgr_01_step2()
@@ -113,7 +123,7 @@ int UT_OptionMgr_01_step4()
   /* Test 5 */
   //String_delete(option);
   OptionMgr_delete(testOptionMgr1);
-  printf("Step 4: Test 2 - Check all memory is freed properly: ");
+  PRINT(("Step 4: Test 2 - Check all memory is freed properly: "));
   UT_ASSERT((Memory_getAllocRequestNb() == (Memory_getFreeRequestNb() + 1)))
 
   return 0;
@@ -127,11 +137,11 @@ int UT_OptionMgr_01_step5()
   OptionMgr* testOptionMgr1 = OptionMgr_getRef();
 
   PRINT(("Step 5: Test 1 - Check options can be read from file: "));
-  printf("  Working directory: %s\n", String_getBuffer(currentWorkingDir));
+  PRINT(("  Working directory: %s\n", String_getBuffer(currentWorkingDir)));
 
   OptionMgr_readFromFile(testOptionMgr1);
   option = OptionMgr_getOption(testOptionMgr1,"DB Name");
-  printf("  DB Name option = %s\n", String_getBuffer(option));
+  PRINT(("  DB Name option = %s\n", String_getBuffer(option)));
 
 
 
@@ -139,7 +149,7 @@ int UT_OptionMgr_01_step5()
   FileIo_delete(f);
   String_delete(currentWorkingDir);
   OptionMgr_delete(testOptionMgr1);
-  printf("Step 5: Test 2 - Check all memory is freed properly: ");
+  PRINT(("Step 5: Test 2 - Check all memory is freed properly: "));
   UT_ASSERT((Memory_getAllocRequestNb() == (Memory_getFreeRequestNb() + 1)))
 
   return 0;
@@ -150,9 +160,16 @@ int UT_OptionMgr_01_step6()
   return 0;
 }
 
+#ifdef MAIN
+int main()
+#else
 int run_UT_OptionMgr_01()
+#endif
 {
   int isPassed = 1;
+
+  UT_OptionMgr_01_logChannel = Debug_openChannel("UT_OptionMgr_01.log");
+  Debug_setStdoutChannel(UT_OptionMgr_01_logChannel);
 
   isPassed = UT_OptionMgr_01_step1() && isPassed;
   isPassed = UT_OptionMgr_01_step2() && isPassed;
@@ -165,5 +182,8 @@ int run_UT_OptionMgr_01()
   ObjectMgr_report(objMgr);
   ObjectMgr_reportUnallocated(objMgr);
   Memory_report();
+
+  Debug_closeChannel(UT_OptionMgr_01_logChannel);
+
   return isPassed;
 }

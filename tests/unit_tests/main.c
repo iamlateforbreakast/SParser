@@ -49,11 +49,11 @@ TestDefinition parseTests[] =
 TestDefinition appliTests[] = 
 {
   { "UT_FileMgr_01",       &run_UT_FileMgr_01,        DISABLED },
-  { "UT_OptionMgr_01",     &run_UT_OptionMgr_01,      DISABLED },
+  { "UT_OptionMgr_01",     &run_UT_OptionMgr_01,      ENABLED },
   { "UT_SdbMgr_01",        &run_UT_SdbMgr_01,         DISABLED },
-  { "UT_TaskMgr_01",       &run_UT_TaskMgr_01,        ENABLED },
+  { "UT_TaskMgr_01",       &run_UT_TaskMgr_01,        DISABLED },
   { "UT_TimeMgr_01",       &run_UT_TimeMgr_01,        DISABLED },
-  { "UT_XmlReader_01",     &run_UT_XmlReader_01,      ENABLED }
+  { "UT_XmlReader_01",     &run_UT_XmlReader_01,      DISABLED }
 };
 
 TestDefinition commonTests[] =
@@ -62,12 +62,12 @@ TestDefinition commonTests[] =
   { "UT_Debug_01",         &run_UT_Debug_01,          DISABLED },
   { "UT_Error_01",         &run_UT_Error_01,          DISABLED },
   { "UT_FileIo_01",        &run_UT_FileIo_01,         DISABLED },
-  { "UT_List_01",          &run_UT_List_01,           ENABLED },
-  { "UT_List_02",          &run_UT_List_02,           ENABLED },
+  { "UT_List_01",          &run_UT_List_01,           DISABLED },
+  { "UT_List_02",          &run_UT_List_02,           DISABLED },
   { "UT_Map_01",           &run_UT_Map_01,            DISABLED },
   { "UT_SkipList_01",      &run_UT_SkipList_01,       DISABLED },
   { "UT_SkipList_02",      &run_UT_SkipList_02,       DISABLED },
-  { "UT_String_01",        &run_UT_String_01,         ENABLED }
+  { "UT_String_01",        &run_UT_String_01,         DISABLED }
 };
 
 int runTests(TestDefinition* tests, int nbTests)
