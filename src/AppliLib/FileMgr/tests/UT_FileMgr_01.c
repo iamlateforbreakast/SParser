@@ -10,8 +10,8 @@
 
 #define DEBUG (0)
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("Passed\n");} \
-                          else { printf("Failed\n"); return 0;}
+                          { PRINT(("Passed\n"));} \
+                          else { PRINT(("Failed\n")); return 0;}
 
 #define FILEMGR_MAX_PATH (1024)
 
@@ -27,6 +27,8 @@ typedef struct TestFileMgr
   char * separator;
   String * rootLocation;
 } TestFileMgr;
+
+PRIVATE FILE * UT_FileMgr_01_logChannel;
 
 int UT_FileMgr_01_step1()
 {
@@ -211,17 +213,26 @@ int UT_FileMgr_01_step7()
   return 1;
 }
 
+#ifdef MAIN
+int main()
+#else
 int run_UT_FileMgr_01()
+#endif
 {
   int isPassed = 1;
-  //step2();
-  //step3();
-  //step4();
-  //isPassed = UT_FileMgr_01_step3() && isPassed;
-  //step6();
+
+  UT_FileMgr_01_logChannel = Debug_openChannel("UT_FileMgr_01.log");
+  Debug_setStdoutChannel(UT_FileMgr_01_logChannel);
+  isPassed = UT_FileMgr_01_step1() && isPassed;
+  isPassed = UT_FileMgr_01_step2() && isPassed;
+  isPassed = UT_FileMgr_01_step3() && isPassed;
+  isPassed = UT_FileMgr_01_step4() && isPassed;
   isPassed = UT_FileMgr_01_step5() && isPassed;
+  isPassed = UT_FileMgr_01_step6() && isPassed;
 
   Memory_report();
+
+  Debug_closeChannel(UT_FileMgr_01_logChannel);
 
   return isPassed;
 }
