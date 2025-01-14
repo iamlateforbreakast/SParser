@@ -48,6 +48,7 @@ int UT_OptionMgr_01_step1()
   OptionMgr_delete((OptionMgr*)testOptionMgr2);
   PRINT(("Step 1: Test 3 - Check ref is null: "));
   isPassed = OBJECT_IS_INVALID(testOptionMgr2) && isPassed;
+  
   UT_ASSERT((testOptionMgr2));
 
   /* Test 4 */
