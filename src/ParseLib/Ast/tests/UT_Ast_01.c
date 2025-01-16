@@ -13,6 +13,8 @@
                           { PRINT(("Passed\n"));} \
                           else { PRINT(("Failed\n")); return 0;}
 
+FILE * UT_Ast_01_logChannel;
+
 int UT_Ast_01_step1()
 {
   int isPassed = 1;
@@ -20,13 +22,22 @@ int UT_Ast_01_step1()
   return isPassed;
 }
 
+#ifdef MAIN
+int main()
+#else
 int run_UT_Ast_01()
+#endif
 {
   int isPassed = 1;
   
+  UT_Ast_01_logChannel = Debug_openChannel("UT_XmlReader_01.log");
+  Debug_setStdoutChannel(UT_Ast_01_logChannel);
+
   isPassed = UT_Ast_01_step1() && isPassed;
 
   Memory_report();
+
+  Debug_closeChannel(UT_Ast_01_logChannel);
 
   return isPassed;
 }

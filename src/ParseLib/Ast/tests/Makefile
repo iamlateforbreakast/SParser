@@ -1,5 +1,5 @@
 all: UT_Ast_01.c ../Ast.c ../Ast.h
-	gcc -DUNIT_TEST -g UT_Ast_01.c ../Ast.c \
+	gcc -DUNIT_TEST -DMAIN -g UT_Ast_01.c ../Ast.c \
 	-I../../include -I../../../CommonLib/include -I../../../AppliLib/include \
 	-L../../../CommonLib -L../../../AppliLib -L../.. \
 	-lParse -lAppli -lCommon \
