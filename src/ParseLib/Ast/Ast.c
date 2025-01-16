@@ -2,6 +2,7 @@
 
 #include "Ast.h"
 #include "Object.h"
+#include "DataAccess.h"
 
 /**********************************************//**
   @class Ast
@@ -9,6 +10,11 @@
 struct Ast
 {
   Object object;
+  DataAccess* data;
+};
+
+struct AstData
+{
   int a;
 };
 
