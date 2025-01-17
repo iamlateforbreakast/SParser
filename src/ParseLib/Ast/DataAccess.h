@@ -17,3 +17,9 @@ struct DataAccess
   Setter set;
   Getter get;
 };
+
+struct SQLite_info
+{
+  sqlite3* db;
+  int id;
+};

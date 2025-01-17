@@ -19,6 +19,10 @@ int UT_Ast_01_step1()
 {
   int isPassed = 1;
 
+  PRINT(("Step 1: Test 1 - Create an Ast object: "));
+
+  ut_assert((0));
+
   return isPassed;
 }
 
