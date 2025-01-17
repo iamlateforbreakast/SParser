@@ -8,8 +8,8 @@
 #include <errno.h>
 
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("Passed\n");} \
-                          else { printf("Failed\n"); return 0;}
+                          { PRINT(("Passed\n"));} \
+                          else { PRINT(("Failed\n")); return 0;}
                           
 #ifdef _WIN32
 #include <windows.h>	/* WinAPI */

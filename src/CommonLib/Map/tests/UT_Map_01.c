@@ -142,8 +142,8 @@ int UT_Map_01_step4()
   Map_insert(testMap, s, item, 1);
   Map_find(testMap, s, (void**)&newItem);
   
-  printf("New value : %s\n",
-          String_getBuffer(newItem));
+  PRINT(("New value : %s\n",
+          String_getBuffer(newItem)));
   
   String_delete(s);
   String_delete(item);

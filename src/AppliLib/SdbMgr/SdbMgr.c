@@ -12,8 +12,10 @@
 #include "Memory.h"
 #include "Error.h"
 #include "List.h"
-
+#include "Debug.h"
 #include <sqlite3.h>
+
+#define DEBUG (0)
 
 /**********************************************//** 
   @class SdbMgr

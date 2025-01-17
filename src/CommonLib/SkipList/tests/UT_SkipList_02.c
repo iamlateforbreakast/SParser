@@ -17,12 +17,12 @@
 #define DEBUG (0)
 #ifdef _WIN32
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("Passed\n");} \
-                          else { printf("Failed\n"); return 0;}
+                          { PRINT(("Passed\n"));} \
+                          else { PRINT(("Failed\n")); return 0;}
 #else
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("\x1b[32mPassed\x1b[0m\n");} \
-                          else { printf("\x1b[31mFailed\x1b[0m\n"); return 0;}
+                          { PRINT(("\x1b[32mPassed\x1b[0m\n"));} \
+                          else { PRINT(("\x1b[31mFailed\x1b[0m\n")); return 0;}
 #endif
 
 PRIVATE MyAllocator* UT_SkipList_02_testAlloc = 0;
@@ -196,7 +196,7 @@ int UT_SkipList_02_step7()
         unsigned int swap = randomKeys[i];
         randomKeys[i] = randomKeys[j];
         randomKeys[j] = swap;
-        //printf("Swapping %d and %d\n",i,j);
+        //PRINT(("Swapping %d and %d\n",i,j));
     }
 
     long double cpu_time0 = get_cpu_time();
@@ -205,7 +205,7 @@ int UT_SkipList_02_step7()
     for (int i=0; i<NB_OBJECTS; i++)
     {
         SkipList_add(testList, randomKeys[i], &randomValues[i]);
-        //printf("Adding %d\n", randomKeys[i]);
+        //PRINT(("Adding %d\n", randomKeys[i]));
     }
 
     long double cpu_time1 = get_cpu_time();
@@ -215,8 +215,8 @@ int UT_SkipList_02_step7()
     SkipList_print(testList);
     SkipList_delete(testList);
 
-    printf("Insert CPU time %Lf\n", (cpu_time1- cpu_time0)/NB_OBJECTS);
-    printf("Insert Wall Time %Lf\n", (wall_time1 - wall_time0)/NB_OBJECTS);*/
+    PRINT(("Insert CPU time %Lf\n", (cpu_time1- cpu_time0)/NB_OBJECTS));
+    PRINT(("Insert Wall Time %Lf\n", (wall_time1 - wall_time0)/NB_OBJECTS));*/
 
     return 1;
 }

@@ -67,7 +67,7 @@ int UT_SdbMgr_01_step2()
 
   if (SdbRequest_getNbResult(checkTable)!=0)
   {
-    printf("Found a record!\n");
+    PRINT(("Found a record!\n"));
   }
 
   SdbRequest_delete(createTable);

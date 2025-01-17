@@ -123,7 +123,7 @@ PRIVATE int UT_List_02_step2()
 
   PRINT(("Step 2: Test 5 - Check all memory is freed: "));
   UT_ASSERT((MyAllocator_report((Allocator*)testAlloc) != 1));
-  printf("Nb objects left allocated in custom allocator: %d\n", MyAllocator_report((Allocator*)testAlloc));
+  PRINT(("Nb objects left allocated in custom allocator: %d\n", MyAllocator_report((Allocator*)testAlloc)));
 
   return 0;
 }

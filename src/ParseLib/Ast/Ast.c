@@ -5,6 +5,9 @@
 #include "Ast.h"
 #include "Object.h"
 #include "DataAccess.h"
+#include "Debug.h"
+
+#define DEBUG (0)
 
 /**********************************************//**
   @class Ast
@@ -109,17 +112,17 @@ void* SQLite_alloc(void* info)
   return 0;
 }
 
-void SQLite_dealloc(MyObject* object)
+void SQLite_dealloc(Ast* object)
 {
   char* sqlDelete;
   //int result;
   //char* err_msg;
   sqlite3_stmt* stmt;
-  sqlite3* db = (sqlite3*)((struct SQLite_info*)((MyObject*)object)->data->info)->db;
-  int id = ((struct SQLite_info*)((MyObject*)object)->data->info)->id;
+  sqlite3* db = (sqlite3*)((struct SQLite_info*)((Ast*)object)->data->info)->db;
+  int id = ((struct SQLite_info*)((Ast*)object)->data->info)->id;
 
   sqlDelete = "DELETE FROM Ast WHERE Id=?;";
-  sqlite3_prepare_v2(db, sqlDelete, -1, &stmt, NULL);
+  sqlite3_prepare_v2(db, sqlDelete, -1, &stmt, 0);
   sqlite3_bind_int(stmt, 1, id);
   sqlite3_step(stmt);
 

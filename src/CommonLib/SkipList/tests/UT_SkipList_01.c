@@ -187,7 +187,7 @@ int UT_SkipList_01_step7()
   for (int i = 0; i < nbWords; i++)
   {
     SkipList_add(UT_SkipList_01_testList, (Object*)UT_SkipList_01_wordKeys[i], (Object*)UT_SkipList_01_testObjects[i]);
-    //printf("Adding %d\n", randomKeys[i]);
+    //PRINT(("Adding %d\n", randomKeys[i]));
   }
 
   long double cpu_time1 = get_cpu_time();
@@ -195,8 +195,8 @@ int UT_SkipList_01_step7()
 
   SkipList_delete(UT_SkipList_01_testList);
   
-  printf("Insert CPU time %Lf\n", (cpu_time1- cpu_time0)/nbWords);
-  printf("Insert Wall Time %Lf\n", (wall_time1 - wall_time0)/nbWords);
+  PRINT(("Insert CPU time %Lf\n", (cpu_time1- cpu_time0)/nbWords));
+  PRINT(("Insert Wall Time %Lf\n", (wall_time1 - wall_time0)/nbWords));
   
   return 1;
 }

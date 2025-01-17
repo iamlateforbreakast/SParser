@@ -144,7 +144,7 @@ PRIVATE int UT_String_01_step5()
     {
     compareString = String_newByRef(compareText[i]);
         comp = String_compare(testString, compareString);
-        printf("Compare %s with %s result = %d\n", String_getBuffer(testString), String_getBuffer(compareString), comp);
+        PRINT(("Compare %s with %s result = %d\n", String_getBuffer(testString), String_getBuffer(compareString), comp));
         String_delete(compareString);
     }
 
@@ -164,7 +164,7 @@ PRIVATE int UT_String_01_step6()
 
   String_append(testString, "123");
 
-  printf("String append %s\n", String_getBuffer(testString));
+  PRINT(("String append %s\n", String_getBuffer(testString)));
 
   String_delete(testString);
   return isPassed;
