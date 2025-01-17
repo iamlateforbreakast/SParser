@@ -7,8 +7,8 @@
 #define DEBUG (0)
 #ifdef _WIN32
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("Passed\n");} \
-                          else { printf("Failed\n"); return 0;}
+                          { PRINT(("Passed\n"));} \
+                          else { PRINT(("Failed\n")); return 0;}
 #else
 #define UT_ASSERT(cond) if ((cond)) \
                           { PRINT(("\x1b[32mPassed\x1b[0m\n"));} \
