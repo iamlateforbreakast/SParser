@@ -5,6 +5,7 @@
 #include "Memory.h"
 #include "Error.h"
 #include "Debug.h"
+#include "Ast.h"
 
 #include <stdio.h>
 
@@ -34,7 +35,7 @@ int run_UT_Ast_01()
 {
   int isPassed = 1;
   
-  UT_Ast_01_logChannel = Debug_openChannel("UT_XmlReader_01.log");
+  UT_Ast_01_logChannel = Debug_openChannel("UT_Ast_01.log");
   Debug_setStdoutChannel(UT_Ast_01_logChannel);
 
   isPassed = UT_Ast_01_step1() && isPassed;

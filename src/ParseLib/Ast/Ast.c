@@ -3,6 +3,7 @@
 #include "sqlite3.h"
 
 #include "Ast.h"
+#include "SdbMgr.h"
 #include "Object.h"
 #include "DataAccess.h"
 #include "Debug.h"
@@ -36,7 +37,7 @@ PRIVATE Class astClass =
   .f_size = (Sizer)&Ast_getSize
 };
 
-Ast* Ast_new(DataAccess* data)
+Ast* Ast_new(SdbMgr* sdbMgr)
 {
   Ast * this;
 

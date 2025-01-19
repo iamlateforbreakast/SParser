@@ -3,9 +3,11 @@
 #ifndef _AST_H_
 #define _AST_H_
 
+#include "DataAccess.h"
+
 typedef struct Ast Ast;
 
-Ast* Ast_new();
+Ast* Ast_new(DataAccess* data);
 void Ast_delete(Ast* this);
 Ast* Ast_copy(Ast* this);
 void Ast_print(Ast* this);
