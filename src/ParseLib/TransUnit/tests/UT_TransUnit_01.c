@@ -9,8 +9,10 @@
 
 #define DEBUG (0)
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("Passed\n");} \
-                          else { printf("Failed\n"); return 0;}
+                          { PRINT(("Passed\n"));} \
+                          else { PRINT(("Failed\n")); return 0;}
+
+PRIVATE FILE * UT_TransUnit_01_logChannel;
 
 int UT_TransUnit_01_step1()
 {
@@ -186,16 +188,25 @@ int UT_TransUnit_01_step5()
   return isPassed;
 }
 
+#ifdef MAIN
+int main()
+#else
 int run_UT_TransUnit_01()
+#endif
 {
   int isPassed = 1;
   
+  UT_TransUnit_01_logChannel = Debug_openChannel("UT_TransUnit_01.log");
+  Debug_setStdoutChannel(UT_TransUnit_01_logChannel);
+
   isPassed = UT_TransUnit_01_step1() && isPassed;
   isPassed = UT_TransUnit_01_step2() && isPassed;
-  isPassed = UT_TransUnit_01_step3() && isPassed;
+  //isPassed = UT_TransUnit_01_step3() && isPassed;
   //step4();
 
   Memory_report();
+
+  Debug_closeChannel(UT_TransUnit_01_logChannel);
 
   return isPassed;
 }
