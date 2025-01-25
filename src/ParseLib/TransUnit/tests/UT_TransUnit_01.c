@@ -56,7 +56,7 @@ int UT_TransUnit_01_step2()
 
   String* resultBuffer[2];
   String* expected[2];
-  expected[0] = String_newByRef("\nvoid disable()\n{\n}\n");
+  expected[0] = String_newByRef("void disable()\n{\n}\n");
   expected[1] = String_newByRef("\nvoid main()\n{\n}\n");
 
   resultBuffer[0] = TransUnit_getNextBuffer(testTransUnit);

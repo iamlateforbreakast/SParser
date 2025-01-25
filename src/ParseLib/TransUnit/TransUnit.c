@@ -100,8 +100,8 @@ PUBLIC TransUnit* TransUnit_new(FileDesc* file, FileMgr* fileMgr)
 
   this->nbCharRead = 0;
   this->store = MacroStore_new();
-  this->outputBufferSize = OUTPUT_BUFFER_SIZE;
-  this->outputBuffer = Memory_alloc(this->outputBufferSize);
+  //this->outputBufferSize = OUTPUT_BUFFER_SIZE;
+  //this->outputBuffer = Memory_alloc(this->outputBufferSize);
   this->nbCharWritten = 0;
 
   return this;
@@ -124,7 +124,7 @@ PUBLIC void TransUnit_delete(TransUnit* this)
   }
   List_delete(this->buffers);
   MacroStore_delete(this->store);
-  Memory_free(this->outputBuffer, this->outputBufferSize);
+  //Memory_free(this->outputBuffer, this->outputBufferSize);
 
   /* De-allocate the base object */
   Object_deallocate(&this->object);
@@ -179,6 +179,8 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
   int start = this->currentBuffer->nbCharRead;
 
   /* Reset output buffer */
+  this->outputBufferSize = OUTPUT_BUFFER_SIZE;
+  this->outputBuffer = Memory_alloc(this->outputBufferSize);
   Memory_set(this->outputBuffer, 0, this->outputBufferSize);
   this->nbCharWritten = 0;
 
@@ -277,7 +279,11 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
     {
       PRINT(("Lastbuffer\n"));
       PRINT(("Total number of chr written: %d\n", this->nbCharWritten));
-      return 0;
+      String * s = String_new(0);
+      String_setBuffer(s, this->outputBuffer, 1);
+      this->outputBuffer = 0;
+      
+      return s;
     }
   }
 
