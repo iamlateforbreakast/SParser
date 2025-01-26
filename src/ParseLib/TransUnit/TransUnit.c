@@ -40,6 +40,7 @@ struct TransUnit
   char* outputBuffer;
   int outputBufferSize;
   int nbCharWritten;
+  TransUnitState state;
 };
 
 /**********************************************//**
@@ -100,9 +101,10 @@ PUBLIC TransUnit* TransUnit_new(FileDesc* file, FileMgr* fileMgr)
 
   this->nbCharRead = 0;
   this->store = MacroStore_new();
-  //this->outputBufferSize = OUTPUT_BUFFER_SIZE;
-  //this->outputBuffer = Memory_alloc(this->outputBufferSize);
+  this->outputBufferSize = 0;
+  this->outputBuffer = 0;
   this->nbCharWritten = 0;
+  this->state = NOT_STARTED;
 
   return this;
 }
@@ -124,7 +126,6 @@ PUBLIC void TransUnit_delete(TransUnit* this)
   }
   List_delete(this->buffers);
   MacroStore_delete(this->store);
-  //Memory_free(this->outputBuffer, this->outputBufferSize);
 
   /* De-allocate the base object */
   Object_deallocate(&this->object);
@@ -173,6 +174,8 @@ PUBLIC char* TransUnit_getName(TransUnit* this)
 **************************************************/
 PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
 {
+  if (this->state==COMPLETED) return 0;
+
   char* ptr = this->currentBuffer->currentPtr;  //String_getBuffer(this->currentBuffer);
   int isFinished = 0;
   int isReadingContent = 0;
@@ -282,6 +285,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
       String * s = String_new(0);
       String_setBuffer(s, this->outputBuffer, 1);
       this->outputBuffer = 0;
+      this->state = COMPLETED;
       
       return s;
     }

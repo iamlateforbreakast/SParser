@@ -24,7 +24,8 @@ int UT_TransUnit_01_step1()
 
   PRINT(("Step 1: Test 1 - Create an instance of class TransUnit: "));
   testTransUnit = TransUnit_new(c_file, fileMgr);
-  UT_ASSERT((testTransUnit != 0));
+  isPassed = (testTransUnit != 0) && isPassed;
+  UT_ASSERT((isPassed));
 
   PRINT(("Step 1: Test 2 - Delete an instance of class TransUnit: "));
   TransUnit_delete(testTransUnit);
