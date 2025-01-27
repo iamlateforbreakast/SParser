@@ -148,7 +148,11 @@ PRIVATE int UT_List_01_step2()
   return isPassed;
 }
 
+#ifdef MAIN
+int main()
+#else
 int run_UT_List_01()
+#endif
 {
   int isPassed = 1;
   
