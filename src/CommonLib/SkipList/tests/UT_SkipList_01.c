@@ -201,7 +201,11 @@ int UT_SkipList_01_step7()
   return 1;
 }
 
+#ifdef MAIN
+int main()
+#else
 int run_UT_SkipList_01()
+#endif
 {
   int isPassed = 1;
 
