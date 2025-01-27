@@ -73,7 +73,11 @@ int step2()
   return 1;
 }
 
-void main()
+#ifdef MAIN
+int main()
+#else
+int run_UT_Times_01()
+#endif
 {
   step1();
   step2();
