@@ -197,7 +197,11 @@ int UT_Map_01_step6()
   return 0;
 }
 
+#ifdef MAIN
+int main()
+#else
 int run_UT_Map_01()
+#endif
 {
   int isPassed = 1;
   UT_Map_01_logChannel = Debug_openChannel("UT_Map_01.log");
