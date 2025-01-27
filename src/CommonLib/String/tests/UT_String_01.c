@@ -170,7 +170,11 @@ PRIVATE int UT_String_01_step6()
   return isPassed;
 }
 
+#ifdef MAIN
+PUBLIC int main()
+#else
 PUBLIC int run_UT_String_01()
+#endif
 {
   int isPassed = 1;
   
