@@ -188,7 +188,11 @@ PUBLIC void FileIo_openDir(FileIo* this, String* fullFileName);
 PUBLIC void FileIo_createDir(FileIo* this, String* fullDirName);
 */
 
+#ifdef MAIN
+int main()
+#else
 int run_UT_FileIo_01()
+#endif
 {
   int isPassed = 1;
 
