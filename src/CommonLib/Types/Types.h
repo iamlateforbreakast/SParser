@@ -13,6 +13,11 @@
   #define PRIVATE
 #endif
 
+#ifndef WIN32
+#define INVALID_MEMORY (0x00000000)
+#else
+#define INVALID_MEMORY (0xffffffcd)
+#endif
 union mem_align
 {
   void * a;
