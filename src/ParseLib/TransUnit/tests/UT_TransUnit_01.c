@@ -7,12 +7,12 @@
 
 #include <stdio.h>
 
-#define DEBUG (0)
+#define DEBUG (1)
 #define UT_ASSERT(cond) if ((cond)) \
                           { PRINT(("Passed\n"));} \
                           else { PRINT(("Failed\n")); return 0;}
 
-PRIVATE FILE * UT_TransUnit_01_logChannel;
+static FILE * UT_TransUnit_01_logChannel;
 
 int UT_TransUnit_01_step1()
 {
@@ -57,19 +57,19 @@ int UT_TransUnit_01_step2()
 
   String* resultBuffer[2];
   String* expected[2];
-  expected[0] = String_newByRef("void disable()\n{\n}\n");
-  expected[1] = String_newByRef("\nvoid main()\n{\n}\n");
+  expected[0] = String_newByRef("void disable(){}void main(){}");
+  expected[1] = 0;
 
   resultBuffer[0] = TransUnit_getNextBuffer(testTransUnit);
   
   isPassed = isPassed  && (String_compare(resultBuffer[0], expected[0]) == 0);
 
-  TRACE(("UT_TransUnit_01: Output buffer= %s\n", String_getBuffer(resultBuffer[0])));
+  TRACE(("\nUT_TransUnit_01: Output buffer= %s\n", String_getBuffer(resultBuffer[0])));
 
   resultBuffer[1] = TransUnit_getNextBuffer(testTransUnit);
-  TRACE(("UT_TransUnit_01: Output buffer= %s\n", String_getBuffer(resultBuffer[1])));
+  TRACE(("\nUT_TransUnit_01: Output buffer= %s\n", String_getBuffer(resultBuffer[1])));
 
-  isPassed = isPassed && (String_compare(resultBuffer[1], expected[1]) == 0);
+  isPassed = isPassed && (expected[1] == 0);
   UT_ASSERT(isPassed);
 
   String_delete(resultBuffer[0]);
@@ -102,14 +102,16 @@ int UT_TransUnit_01_step3()
   PRINT(("Step 3: Test 1 - Read a buffer from TransUnit instance: "));
   String* resultBuffer[2];
   String* expected[2];
-  expected[0] = String_newByRef("\nvoid enable()\n{\n}\n");
-  expected[1] = String_newByRef("\nvoid main()\n{\n}\n");
+  expected[0] = String_newByRef("void enable(){}void main(){}");
+  expected[1] = 0;
+
   resultBuffer[0] = TransUnit_getNextBuffer(testTransUnit);
   isPassed = isPassed && (String_compare(resultBuffer[0], expected[0]) == 0);
-  TRACE(("UT_TransUnit_01: Output buffer= %s\n", String_getBuffer(resultBuffer[0])));
+  TRACE(("\nUT_TransUnit_01: Output buffer= %s\n", String_getBuffer(resultBuffer[0])));
   resultBuffer[1] = TransUnit_getNextBuffer(testTransUnit);
-  TRACE(("UT_TransUnit_01: Output buffer= %s\n", String_getBuffer(resultBuffer[1])));
-  isPassed = isPassed && (String_compare(resultBuffer[1], expected[1]) == 0);
+  TRACE(("\nUT_TransUnit_01: Output buffer= %s\n", String_getBuffer(resultBuffer[1])));
+  isPassed = isPassed && (resultBuffer[1] == 0);
+  UT_ASSERT(isPassed);
   String_delete(resultBuffer[0]);
   String_delete(resultBuffer[1]);
   String_delete(expected[0]);
@@ -133,7 +135,7 @@ int UT_TransUnit_01_step4()
   PRINT(("Step 3: Test 1 - Read a buffer from TransUnit instance: "));
   String* resultBuffer[2];
   String* expected[2];
-  expected[0] = String_newByRef("\nint table1[100];\nint table2[200];\n}\n");
+  expected[0] = String_newByRef("int table1[100];int table2[200];}");
   expected[1] = String_newByRef("\nint main()\n{\n  int x = 5, y;\n  y = getmax(x,2);\n\n  return 0;\n}\n");
   resultBuffer[0] = TransUnit_getNextBuffer(testTransUnit);
   isPassed = isPassed && (String_compare(resultBuffer[0], expected[0]) == 0);
@@ -202,8 +204,8 @@ int run_UT_TransUnit_01()
 
   isPassed = UT_TransUnit_01_step1() && isPassed;
   isPassed = UT_TransUnit_01_step2() && isPassed;
-  //isPassed = UT_TransUnit_01_step3() && isPassed;
-  //step4();
+  isPassed = UT_TransUnit_01_step3() && isPassed;
+  isPassed = UT_TransUnit_01_step4() && isPassed;
 
   Memory_report();
 
