@@ -21,7 +21,7 @@
 
 #define DEBUG (0)
 
-#define IS_MACRO_LETTER(C) ((((C)>='A') && ((C)<='Z')) || (((C)>='a') && ((C)<='z')) || ((C)=='_'))
+#define IS_MACRO_LETTER(C) ((((C)>='A') && ((C)<='Z')) || (((C)>='a') && ((C)<='z')) || (((C)>='0') && ((C)<='9')) || ((C)=='_'))
 /* Size of the output buffer in bytes */
 #define OUTPUT_BUFFER_SIZE (20000)
 
@@ -82,7 +82,7 @@ PUBLIC TransUnit* TransUnit_new(FileDesc* file, FileMgr* fileMgr)
     return 0;
   }
 
-  PRINT(("TransUnit_new: Processing %s\n", String_getBuffer(FileDesc_getFullName(file))));
+  TRACE(("TransUnit_new: Processing %s\n", String_getBuffer(FileDesc_getFullName(file))));
   this = (TransUnit*)Object_new(sizeof(TransUnit), &transUnitClass);
 
   if (this == 0) return 0;
@@ -280,8 +280,8 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
     int a = TransUnit_popBuffer(this);
     if (!a)
     {
-      PRINT(("Lastbuffer\n"));
-      PRINT(("Total number of chr written: %d\n", this->nbCharWritten));
+      TRACE(("Lastbuffer\n"));
+      TRACE(("Total number of chr written: %d\n", this->nbCharWritten));
       String * s = String_new(0);
       String_setBuffer(s, this->outputBuffer, 1);
       this->outputBuffer = 0;
@@ -407,6 +407,7 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
 
   String* parameter = 0;
   unsigned int paramLength = 0;
+  List* parameters = 0;
 
   this->currentBuffer->currentPtr += 7;
   this->currentBuffer->nbCharRead += 7;
@@ -434,6 +435,30 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
   {
     this->currentBuffer->currentPtr++;
     this->currentBuffer->nbCharRead++;
+    while (*this->currentBuffer->currentPtr != ')')
+    {
+      start = this->currentBuffer->nbCharRead;
+      paramLength = 0;
+      while ((*this->currentBuffer->currentPtr != ',') && (*this->currentBuffer->currentPtr != ')'))
+      {
+        this->currentBuffer->currentPtr++;
+        this->currentBuffer->nbCharRead++;
+        paramLength++;
+      }
+      if (parameters == 0)
+      {
+        parameters = List_new();
+      }
+      parameter = String_subString(this->currentBuffer->string, start, paramLength); // StringBuffer_readback(this->currentBuffer, paramLength);
+      printf("Macro argument %s\n", String_getBuffer(parameter));
+      paramLength = 0;
+      List_insertTail(parameters, parameter, 1);
+      if (*this->currentBuffer->currentPtr == ',')
+      {
+        this->currentBuffer->currentPtr++;
+        this->currentBuffer->nbCharRead++;
+      }
+    }
     start = this->currentBuffer->nbCharRead;
     while ((*this->currentBuffer->currentPtr != ')') && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
     {
@@ -613,10 +638,14 @@ PRIVATE int TransUnit_popBuffer(TransUnit* this)
 
 PRIVATE int TransUnit_expandMacro(TransUnit* this)
 {
-#if 0
+  unsigned int ret;
+
   String * inStr = String_newByRef(this->currentBuffer->currentPtr);
 
-  outStr = MacroStore_expandMacro(this->store, inStr);
+  ret = MacroStore_expandMacro(this->store, inStr, this->outputBuffer);
+  this->currentBuffer->currentPtr += ret;
+  this->currentBuffer->nbCharRead += ret;
+#if 0
   if (outStr) TransUnit_pushNewBuffer(this, outStr);
 #endif
   return 0;
