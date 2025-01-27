@@ -10,7 +10,7 @@
 #include "MacroDefinition.h"
 #include "Debug.h"
 
-#define MAX_CHILDREN (28)
+#define MAX_CHILDREN (38)
 
 typedef struct MacroStore MacroStore;
 
@@ -86,6 +86,10 @@ PRIVATE MacroStore* MacroStore_new()
     {
       convert[c] = 1;
       convertBack[1] = c;
+    }
+    else if ((c>='0') && (c<='9'))
+    {
+      convert[c] = c - '0' + convert['Z'] + 1;
     }
     else
     {
