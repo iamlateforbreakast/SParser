@@ -136,7 +136,11 @@ int UT_SdbMgr_01_step5()
   return isPassed;
 }
 
-int run_UT_SdbMgr_01()
+#ifdef MAIN
+PUBLIC int main()
+#else
+PUBLIC int run_UT_SdbMgr_01()
+#endif
 {
   int isPassed = 1;
 
