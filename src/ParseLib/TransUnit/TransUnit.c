@@ -284,6 +284,8 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
       TRACE(("Total number of chr written: %d\n", this->nbCharWritten));
       String * s = String_new(0);
       String_setBuffer(s, this->outputBuffer, 1);
+      //String* s = String_new(this->outputBuffer);
+      //Memory_free(this->outputBuffer,OUTPUT_BUFFER_SIZE);
       this->outputBuffer = 0;
       this->state = COMPLETED;
       
@@ -641,11 +643,8 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
   int length = 1;
   MacroDefinition *macroDefinition;
   enum MacroEvalName status;
-  String * inStr = String_newByRef(this->currentBuffer->currentPtr);
-
-  //ret = MacroStore_expandMacro(this->store, inStr, 
-  //                             &this->outputBuffer[this->nbCharWritten],
-  //                             &this->nbCharWritten);
+  //String * inStr = String_newByRef(this->currentBuffer->currentPtr);
+  
   status = MacroStore_evalName(this->store, this->currentBuffer->currentPtr, length, &macroDefinition);
   while (status ==  E_POSSIBLE_MACRO)
   {
@@ -654,21 +653,20 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
   }
   if (status==E_NOT_MACRO)
   {
-    this->outputBuffer[this->nbCharWritten] = *(this->currentBuffer->currentPtr);
-    this->nbCharWritten++;
-    this->currentBuffer->currentPtr ++;
-    this->currentBuffer->nbCharRead ++;
     return 0;
   }
+  char* macroExpansionBuffer = Memory_alloc(4096);
   this->currentBuffer->currentPtr+=length;
   this->currentBuffer->nbCharRead+=length;
-  Memory_copy(&this->outputBuffer[this->nbCharWritten],
+  Memory_set(macroExpansionBuffer, 0, 4096);
+  Memory_copy(macroExpansionBuffer,
               String_getBuffer(macroDefinition->body),
-              String_getLength(macroDefinition->body)); 
-  this->nbCharWritten+=String_getLength(macroDefinition->body);
-#if 0
-  if (outStr) TransUnit_pushNewBuffer(this, outStr);
-#endif
+              String_getLength(macroDefinition->body));
+  //String_setBuffer(macroExpansion, macroExpansionBuffer, 1);
+  String* macroExpansion = String_new(macroExpansionBuffer);
+  TransUnit_pushNewBuffer(this, macroExpansion);
+  Memory_free(macroExpansionBuffer, 4096);
+
   return 0;
 }
 
