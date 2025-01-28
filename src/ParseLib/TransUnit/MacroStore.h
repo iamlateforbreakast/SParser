@@ -48,7 +48,7 @@ PRIVATE int MacroStore_removeName(MacroStore* this, String* name);
 PRIVATE enum MacroEvalName MacroStore_evalName(MacroStore * this, char * ptr, int length, MacroDefinition** outMacroDef);
 PRIVATE void MacroStore_printChildrenNodes(MacroStore* this, struct MacroStoreNode* node, char* name, int l);
 PRIVATE void MacroStore_deleteChildrenNodes(MacroStore* this, struct MacroStoreNode* node);
-PRIVATE unsigned int MacroStore_expandMacro(MacroStore* this, String* inStr, char* outStr);
+PRIVATE unsigned int MacroStore_expandMacro(MacroStore* this, String* inStr, char* outStr, int* outWritten);
 
 PRIVATE Class macroStoreClass =
 {
@@ -281,14 +281,14 @@ PRIVATE void MacroStore_deleteChildrenNodes(MacroStore* this, struct MacroStoreN
     }
   }
 }
-PRIVATE unsigned int MacroStore_expandMacro(MacroStore* this, String* inStr, char* outStr)
+PRIVATE unsigned int MacroStore_expandMacro(MacroStore* this, String* inStr, char* outStr, int* outWritten)
 {
   int length = 1;
   enum MacroEvalName status;
   MacroDefinition* macroDefinition = 0;
   String* name;
   status = MacroStore_evalName(this, String_getBuffer(inStr), length, &macroDefinition);
-  if (status == E_NOT_MACRO) return 0;
+  if (status == E_NOT_MACRO) return 1; // At least read a character
   while ((status == E_POSSIBLE_MACRO) && (length<(int)String_getLength(inStr)))
   {
     length++;
@@ -298,6 +298,7 @@ PRIVATE unsigned int MacroStore_expandMacro(MacroStore* this, String* inStr, cha
   name = String_subString(inStr, 0, length);
   printf("Expanding Macro %s : %s\n", String_getBuffer(name), String_getBuffer(macroDefinition->body));
   Memory_copy(outStr, String_getBuffer(macroDefinition->body), String_getLength(macroDefinition->body));
+  *outWritten += String_getLength(macroDefinition->body);
   if (macroDefinition->parameters == 0) return length;
   return length;
 }

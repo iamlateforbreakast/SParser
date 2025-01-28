@@ -638,13 +638,34 @@ PRIVATE int TransUnit_popBuffer(TransUnit* this)
 
 PRIVATE int TransUnit_expandMacro(TransUnit* this)
 {
-  unsigned int ret;
-
+  int length = 1;
+  MacroDefinition *macroDefinition;
+  enum MacroEvalName status;
   String * inStr = String_newByRef(this->currentBuffer->currentPtr);
 
-  ret = MacroStore_expandMacro(this->store, inStr, this->outputBuffer);
-  this->currentBuffer->currentPtr += ret;
-  this->currentBuffer->nbCharRead += ret;
+  //ret = MacroStore_expandMacro(this->store, inStr, 
+  //                             &this->outputBuffer[this->nbCharWritten],
+  //                             &this->nbCharWritten);
+  status = MacroStore_evalName(this->store, this->currentBuffer->currentPtr, length, &macroDefinition);
+  while (status ==  E_POSSIBLE_MACRO)
+  {
+    length++;
+    status = MacroStore_evalName(this->store, this->currentBuffer->currentPtr, length, &macroDefinition);
+  }
+  if (status==E_NOT_MACRO)
+  {
+    this->outputBuffer[this->nbCharWritten] = *(this->currentBuffer->currentPtr);
+    this->nbCharWritten++;
+    this->currentBuffer->currentPtr ++;
+    this->currentBuffer->nbCharRead ++;
+    return 0;
+  }
+  this->currentBuffer->currentPtr+=length;
+  this->currentBuffer->nbCharRead+=length;
+  Memory_copy(&this->outputBuffer[this->nbCharWritten],
+              String_getBuffer(macroDefinition->body),
+              String_getLength(macroDefinition->body)); 
+  this->nbCharWritten+=String_getLength(macroDefinition->body);
 #if 0
   if (outStr) TransUnit_pushNewBuffer(this, outStr);
 #endif
