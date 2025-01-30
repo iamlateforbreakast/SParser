@@ -163,6 +163,7 @@ PUBLIC unsigned int TransUnit_getSize(TransUnit* this)
 PUBLIC char* TransUnit_getName(TransUnit* this)
 {
   if (this == 0) return 0;
+
   return String_getBuffer(FileDesc_getName(this->file));
 }
 
@@ -175,7 +176,6 @@ PUBLIC char* TransUnit_getName(TransUnit* this)
 PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
 {
   if (this->state==COMPLETED) return 0;
-
   char* ptr = this->currentBuffer->currentPtr;  //String_getBuffer(this->currentBuffer);
   int isFinished = 0;
   int isReadingContent = 0;
@@ -274,7 +274,10 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
         this->currentBuffer->currentPtr++;
         this->currentBuffer->nbCharRead++;
         this->nbCharWritten++; // Need to check max value
+
         if (this->nbCharWritten >= OUTPUT_BUFFER_SIZE) Error_new(ERROR_FATAL, "Output BUffer is overflowing.\n");
+
+
       }
     }
     int a = TransUnit_popBuffer(this);
@@ -284,11 +287,8 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
       TRACE(("Total number of chr written: %d\n", this->nbCharWritten));
       String * s = String_new(0);
       String_setBuffer(s, this->outputBuffer, 1);
-      //String* s = String_new(this->outputBuffer);
-      //Memory_free(this->outputBuffer,OUTPUT_BUFFER_SIZE);
       this->outputBuffer = 0;
       this->state = COMPLETED;
-      
       return s;
     }
   }
@@ -385,7 +385,7 @@ PRIVATE void TransUnit_consumeInclude(TransUnit* this)
 
   /* Load the new buffer using the file manager */
   FileDesc* fileDesc = FileMgr_isManaged(this->fm, fileName);
-
+  
   if (fileDesc != 0)
   {
     String* buffer = FileDesc_load(fileDesc);
@@ -437,6 +437,7 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
   {
     this->currentBuffer->currentPtr++;
     this->currentBuffer->nbCharRead++;
+    
     while (*this->currentBuffer->currentPtr != ')')
     {
       start = this->currentBuffer->nbCharRead;
@@ -451,16 +452,21 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
       {
         parameters = List_new();
       }
+
       parameter = String_subString(this->currentBuffer->string, start, paramLength); // StringBuffer_readback(this->currentBuffer, paramLength);
       printf("Macro argument %s\n", String_getBuffer(parameter));
+
       paramLength = 0;
+
       List_insertTail(parameters, parameter, 1);
+
       if (*this->currentBuffer->currentPtr == ',')
       {
         this->currentBuffer->currentPtr++;
         this->currentBuffer->nbCharRead++;
       }
     }
+
     start = this->currentBuffer->nbCharRead;
     while ((*this->currentBuffer->currentPtr != ')') && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
     {
@@ -643,18 +649,19 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
   int length = 1;
   MacroDefinition *macroDefinition;
   enum MacroEvalName status;
-  //String * inStr = String_newByRef(this->currentBuffer->currentPtr);
-  
+
   status = MacroStore_evalName(this->store, this->currentBuffer->currentPtr, length, &macroDefinition);
   while (status ==  E_POSSIBLE_MACRO)
   {
     length++;
     status = MacroStore_evalName(this->store, this->currentBuffer->currentPtr, length, &macroDefinition);
   }
-  if (status==E_NOT_MACRO)
+
+  if (status == E_NOT_MACRO)
   {
     return 0;
   }
+
   char* macroExpansionBuffer = Memory_alloc(4096);
   this->currentBuffer->currentPtr+=length;
   this->currentBuffer->nbCharRead+=length;
@@ -662,9 +669,45 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
   Memory_copy(macroExpansionBuffer,
               String_getBuffer(macroDefinition->body),
               String_getLength(macroDefinition->body));
-  //String_setBuffer(macroExpansion, macroExpansionBuffer, 1);
   String* macroExpansion = String_new(macroExpansionBuffer);
   TransUnit_pushNewBuffer(this, macroExpansion);
+
+  int bracketCount = 0;
+  int isArgParseComplete = 0;
+  int start = 0;
+  List * args;
+  String* arg;
+  String* inStr = String_newByRef(this->currentBuffer->currentPtr);
+  /* Parse arguments */
+  while (!isArgParseComplete) // while E_POSSIBLE_MACRO
+  {
+    char nextChar = *this->currentBuffer->currentPtr;
+    if (nextChar == '(')
+    {
+      if (bracketCount == 0)
+      {
+        start = 1;
+      }
+      bracketCount++;
+    }
+    else if (nextChar == ',') 
+    {
+      arg = String_subString(inStr, start, length);
+    }
+    else if (nextChar == ')') {
+      if (bracketCount == 1)
+      {
+        arg = String_subString(inStr, start, length);
+        isArgParseComplete = 1;
+      }
+      else bracketCount--;
+    }
+    else
+    {
+      this->currentBuffer->currentPtr++;
+      this->currentBuffer->nbCharRead++;
+    }
+  }
   Memory_free(macroExpansionBuffer, 4096);
 
   return 0;
