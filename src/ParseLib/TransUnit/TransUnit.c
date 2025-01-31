@@ -662,15 +662,13 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
     return 0;
   }
 
-  char* macroExpansionBuffer = Memory_alloc(4096);
+  /* Consume macro name */
   this->currentBuffer->currentPtr+=length;
   this->currentBuffer->nbCharRead+=length;
+
+  /* Expansion buffer */
+  char* macroExpansionBuffer = Memory_alloc(4096);
   Memory_set(macroExpansionBuffer, 0, 4096);
-  Memory_copy(macroExpansionBuffer,
-              String_getBuffer(macroDefinition->body),
-              String_getLength(macroDefinition->body));
-  String* macroExpansion = String_new(macroExpansionBuffer);
-  TransUnit_pushNewBuffer(this, macroExpansion);
 
   int bracketCount = 0;
   int isArgParseComplete = 0;
@@ -678,38 +676,60 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
   List * args;
   String* arg;
   String* inStr = String_newByRef(this->currentBuffer->currentPtr);
-  /* Parse arguments */
-  while (!isArgParseComplete) // while E_POSSIBLE_MACRO
+
+  if (*this->currentBuffer->currentPtr == '(')
   {
-    char nextChar = *this->currentBuffer->currentPtr;
-    if (nextChar == '(')
+    /* Parse arguments */
+    while (!isArgParseComplete) // while E_POSSIBLE_MACRO
     {
-      if (bracketCount == 0)
+      char nextChar = *this->currentBuffer->currentPtr;
+      if (nextChar == '(')
       {
-        start = 1;
+        if (bracketCount == 0)
+        {
+          start = 1;
+          length = 0;
+        }
+        bracketCount++;
+        this->currentBuffer->currentPtr++;
+        this->currentBuffer->nbCharRead++;
       }
-      bracketCount++;
-    }
-    else if (nextChar == ',') 
-    {
-      arg = String_subString(inStr, start, length);
-    }
-    else if (nextChar == ')') {
-      if (bracketCount == 1)
+      else if (nextChar == ',')
       {
         arg = String_subString(inStr, start, length);
-        isArgParseComplete = 1;
+        String_print(arg);
+        this->currentBuffer->currentPtr++;
+        this->currentBuffer->nbCharRead++;
+        start = 1;
+        length = 0;
       }
-      else bracketCount--;
-    }
-    else
-    {
-      this->currentBuffer->currentPtr++;
-      this->currentBuffer->nbCharRead++;
+      else if (nextChar == ')')
+      {
+        if (bracketCount == 1)
+        {
+          arg = String_subString(inStr, start, length);
+          String_print(arg);
+          isArgParseComplete = 1;
+        }
+        else bracketCount--;
+        this->currentBuffer->currentPtr++;
+        this->currentBuffer->nbCharRead++;
+      }
+      else
+      {
+        this->currentBuffer->currentPtr++;
+        this->currentBuffer->nbCharRead++;
+        length++;
+      }
     }
   }
-  Memory_free(macroExpansionBuffer, 4096);
 
+  Memory_copy(macroExpansionBuffer,
+  String_getBuffer(macroDefinition->body),
+  String_getLength(macroDefinition->body));
+  String* macroExpansion = String_new(macroExpansionBuffer);
+  TransUnit_pushNewBuffer(this, macroExpansion);
+  //Memory_free(macroExpansionBuffer, 4096);
   return 0;
 }
 
