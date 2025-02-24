@@ -64,6 +64,7 @@ PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue);
 PRIVATE int TransUnit_pushNewBuffer(TransUnit* this, String* content);
 PRIVATE int TransUnit_popBuffer(TransUnit* this);
 PRIVATE int TransUnit_expandMacro(TransUnit* this);
+PRIVATE String* TransUnit_expandString(String* s, MacroStore* localMacroStore);
 
 /**********************************************//**
   @brief Create a new TransUnit object.
@@ -644,6 +645,12 @@ PRIVATE int TransUnit_popBuffer(TransUnit* this)
   return List_getNbNodes(this->buffers);
 }
 
+/**********************************************//**
+  @brief Attempts to expand a macro at current pointer position
+  @private
+  @memberof TransUnit
+  @return 0 if not possible to expand macro.
+**************************************************/
 PRIVATE int TransUnit_expandMacro(TransUnit* this)
 {
   int length = 1;
@@ -673,13 +680,15 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
   int bracketCount = 0;
   int isArgParseComplete = 0;
   int start = 0;
-  List * args;
-  String* arg;
+  List * argNames = List_new();
+  String* argValue;
+  MacroStore* localMacroStore = 0;
   String* inStr = String_newByRef(this->currentBuffer->currentPtr);
 
   if (*this->currentBuffer->currentPtr == '(')
   {
-    /* Parse arguments */
+    /* Parse arguments and create a local macro Store */
+    localMacroStore = MacroStore_new();
     while (!isArgParseComplete) // while E_POSSIBLE_MACRO
     {
       char nextChar = *this->currentBuffer->currentPtr;
@@ -696,8 +705,12 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
       }
       else if (nextChar == ',')
       {
-        arg = String_subString(inStr, start, length);
-        String_print(arg);
+        argValue = String_subString(inStr, start, length);
+        String_print(argValue);
+        /* Insert argument in macroStore */
+        MacroDefinition * m = MacroDefinition_new(0,argValue);
+        String * arg = (String*)List_getNext(argNames);
+        MacroStore_insertName(localMacroStore, arg, m);
         this->currentBuffer->currentPtr++;
         this->currentBuffer->nbCharRead++;
         start = 1;
@@ -707,8 +720,12 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
       {
         if (bracketCount == 1)
         {
-          arg = String_subString(inStr, start, length);
-          String_print(arg);
+          argValue = String_subString(inStr, start, length);
+          String_print(argValue);
+          /* Insert argument in macroStore */
+          MacroDefinition* m = MacroDefinition_new(0, argValue);
+          String * arg = (String*)List_getNext(argNames);
+          MacroStore_insertName(localMacroStore, arg, m);
           isArgParseComplete = 1;
         }
         else bracketCount--;
@@ -724,72 +741,55 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
     }
   }
 
-  Memory_copy(macroExpansionBuffer,
-  String_getBuffer(macroDefinition->body),
-  String_getLength(macroDefinition->body));
-  String* macroExpansion = String_new(macroExpansionBuffer);
-  TransUnit_pushNewBuffer(this, macroExpansion);
+  if (macroDefinition->parameters)
+  {
+    String* expandedString = TransUnit_expandString(macroDefinition->body, localMacroStore);
+  }
+  else
+  {
+    Memory_copy(macroExpansionBuffer,
+      String_getBuffer(macroDefinition->body),
+      String_getLength(macroDefinition->body));
+    String* macroExpansion = String_new(macroExpansionBuffer);
+    TransUnit_pushNewBuffer(this, macroExpansion);
+  }
   //Memory_free(macroExpansionBuffer, 4096);
   return 0;
 }
 
-/* Consume macro param */
-/*if (c == '(')
+PRIVATE String * TransUnit_expandString(String* s, MacroStore* localMacroStore)
 {
-  c = StringProcessor_readChar(this, 1);
-  c = StringProcessor_readChar(this, 0);
-  while (c != ')')
-  {
-    while ((c != ',') && (c != ')'))
-    {
-      paramLength++;
-      c = StringProcessor_readChar(this, 1);
-      c = StringProcessor_readChar(this, 0);
-    }
-    if (macroDefinition->parameters == 0)
-    {
-      macroDefinition->parameters = List_new();
-    }
-    parameter = StringBuffer_readback(this->currentBuffer, paramLength);
-    paramLength = 0;
+  String* result = 0;
+  int bufferSize = 2048;
+  char* expandBuffer = Memory_alloc(bufferSize);
+  char* readPtr = String_getBuffer(s);
+  int length = 1;
+  MacroDefinition* body = 0;
+  enum MacroEvalName status = 0;
 
-    List_insert(macroDefinition->parameters, parameter);
-    if (c == ',')
-    {
-      c = StringProcessor_readChar(this, 1);
-      c = StringProcessor_readChar(this, 0);
-    }
+  PRINT(("TransUnit_expandString:\n"));
+  PRINT(("  Input buffer: %s\n", readPtr));
+  status = MacroStore_evalName(localMacroStore, readPtr, length, &body);
+  while (status == E_POSSIBLE_MACRO)
+  {
+    length++;
+    status = MacroStore_evalName(localMacroStore, readPtr, length, &body);
   }
 
-  c = StringProcessor_readChar(this, 1);
-}
-
-if ((c != 10) && (c != 13))
-{
-  c = StringProcessor_readChar(this, 0);
-  while (c == 32)
+  if (status == E_NOT_MACRO)
   {
-    c = StringProcessor_readChar(this, 1);
-    c = StringProcessor_readChar(this, 0);
+    return 0;
   }
-  result = 0;
-
-  while ((c != 10) && (c != 13))
+  else if (status == E_DEFINED_MACRO)
   {
-    result++;
-    c = StringProcessor_readChar(this, 1);
-    c = StringProcessor_readChar(this, 0);
+    PRINT((" Argument: %s\n", body->body));
   }
-  //printf("Read define: result=%d\n", result);
-  macroDefinition->body = StringBuffer_readback(this->currentBuffer, result);
-  String_print(macroDefinition->body, "#define: ");
+  else
+  {
+    /* Error */
+  }
+
+  result = String_new(0);
+  String_setBuffer(result, expandBuffer, 1);
+  return result;
 }
-if (!Map_insert(this->macros, macroDefinition->name, (void*)macroDefinition))
-{
-  String_print(macroDefinition->name, "StringProcessor.c: Could not store macro ");
-}
-if (Map_find(this->macros, macroDefinition->name, 0))
-{
-  String_print(macroDefinition->name, "StringProcessor.c: Found the macro again->");
-}
-}*/
