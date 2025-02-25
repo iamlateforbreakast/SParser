@@ -459,7 +459,7 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
 
       paramLength = 0;
 
-      List_insertTail(parameters, parameter, 1);
+      List_insertHead(parameters, parameter, 1);
 
       if (*this->currentBuffer->currentPtr == ',')
       {
@@ -493,10 +493,12 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
   String* macroBody = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
   //String_print(macroBody);
 
-  MacroDefinition* macroDefinition = MacroDefinition_new(0, macroBody);
+  MacroDefinition* macroDefinition = MacroDefinition_new(parameters, macroBody);
   //Map_insert(this->macros, macroName, macroDefinition, 1);
   MacroStore_insertName(this->store, macroName, macroDefinition);
 
+  printf("Defined macro: %s\n", String_getBuffer(macroName));
+  printf("Nb param: %d\n", List_getNbNodes(macroDefinition->parameters));
   String_delete(macroName);
 }
 
@@ -680,7 +682,7 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
   int bracketCount = 0;
   int isArgParseComplete = 0;
   int start = 0;
-  List * argNames = List_new();
+  List * argNames = macroDefinition->parameters;
   String* argValue;
   MacroStore* localMacroStore = 0;
   String* inStr = String_newByRef(this->currentBuffer->currentPtr);
@@ -713,7 +715,7 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
         MacroStore_insertName(localMacroStore, arg, m);
         this->currentBuffer->currentPtr++;
         this->currentBuffer->nbCharRead++;
-        start = 1;
+        start += (length + 1);
         length = 0;
       }
       else if (nextChar == ')')
@@ -741,9 +743,14 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
     }
   }
 
+  printf("Macro expansion: %s\n", String_getBuffer(macroDefinition->body));
+  
+
   if (macroDefinition->parameters)
   {
+    printf("Macro parameters: %d\n", List_getNbNodes(macroDefinition->parameters));
     String* expandedString = TransUnit_expandString(macroDefinition->body, localMacroStore);
+    TransUnit_pushNewBuffer(this, expandedString);
   }
   else
   {
@@ -763,31 +770,43 @@ PRIVATE String * TransUnit_expandString(String* s, MacroStore* localMacroStore)
   int bufferSize = 2048;
   char* expandBuffer = Memory_alloc(bufferSize);
   char* readPtr = String_getBuffer(s);
+  char* writePtr = expandBuffer;
   int length = 1;
   MacroDefinition* body = 0;
   enum MacroEvalName status = 0;
 
   PRINT(("TransUnit_expandString:\n"));
   PRINT(("  Input buffer: %s\n", readPtr));
-  status = MacroStore_evalName(localMacroStore, readPtr, length, &body);
-  while (status == E_POSSIBLE_MACRO)
+  Memory_set(expandBuffer, 0, bufferSize);
+  while (readPtr < String_getBuffer(s) + String_getLength(s))
   {
-    length++;
     status = MacroStore_evalName(localMacroStore, readPtr, length, &body);
+    while (status == E_POSSIBLE_MACRO)
+    {
+      length++;
+      status = MacroStore_evalName(localMacroStore, readPtr, length, &body);
+    }
+
+    if (status == E_NOT_MACRO)
+    {
+      Memory_copy(writePtr, readPtr, length);
+      readPtr++;
+      writePtr += length;
+    }
+    else if (status == E_DEFINED_MACRO)
+    {
+      PRINT((" Argument: %s\n", String_getBuffer(body->body)));
+      Memory_copy(writePtr, String_getBuffer(body->body), String_getLength(body->body));
+      readPtr += length;
+      writePtr += String_getLength(body->body);
+    }
+    else
+    {
+      /* Error */
+    }
   }
 
-  if (status == E_NOT_MACRO)
-  {
-    return 0;
-  }
-  else if (status == E_DEFINED_MACRO)
-  {
-    PRINT((" Argument: %s\n", body->body));
-  }
-  else
-  {
-    /* Error */
-  }
+  PRINT(("Expanded Buffer %s\n:", expandBuffer));
 
   result = String_new(0);
   String_setBuffer(result, expandBuffer, 1);
