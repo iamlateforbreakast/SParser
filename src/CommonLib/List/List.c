@@ -52,13 +52,12 @@ PUBLIC List* List_new()
   
   this = (List*)Object_new(sizeof(List),&listClass);
 
-  if (this != 0)
-  {
-    this->head = 0;
-    this->tail = 0;
-    this->iterator = this->head;
-    this->nbNodes = 0;
-  }
+  if (OBJECT_IS_INVALID(this)) return 0;
+
+  this->head = 0;
+  this->tail = 0;
+  this->iterator = this->head;
+  this->nbNodes = 0;
 
   return this;
 }
@@ -75,13 +74,12 @@ PUBLIC List * List_newFromAllocator(Allocator * allocator)
 
   this = (List*)Object_newFromAllocator(&listClass, allocator);
   
-  if (this != 0)
-  {
-    this->head = 0;
-    this->tail = 0;
-    this->iterator = this->head;
-    this->nbNodes = 0;
-  }
+  if (OBJECT_IS_INVALID(this)) return 0;
+
+  this->head = 0;
+  this->tail = 0;
+  this->iterator = this->head;
+  this->nbNodes = 0;
 
   return this;
 }
@@ -93,29 +91,28 @@ PUBLIC List * List_newFromAllocator(Allocator * allocator)
 **************************************************/
 PUBLIC void List_delete(List* this)
 {
-  if (this!=0)
-  {
-    ListNode* node = 0;
+  if (OBJECT_IS_INVALID(this)) return;
+  
+  ListNode* node = 0;
 
-    /* De-allocate the specific members */
-    while ((node = this->tail) != 0)
-    {
-      this->tail = node->next;
-      ListNode_delete(node);
-    }
-    if (this->object.refCount == 1)
-    {
-      this->nbNodes = 0;
-      this->iterator = 0;
-      this->head = 0;
-      this->tail = 0;
-      /* De-allocate the base object */
-      Object_deallocate(&this->object);
-    }
-    else if (this->object.refCount>1)
-    {
-      this->object.refCount--;
-    }
+  /* De-allocate the specific members */
+  while ((node = this->tail) != 0)
+  {
+    this->tail = node->next;
+    ListNode_delete(node);
+  }
+  if (this->object.refCount == 1)
+  {
+    this->nbNodes = 0;
+    this->iterator = 0;
+    this->head = 0;
+    this->tail = 0;
+    /* De-allocate the base object */
+    Object_deallocate(&this->object);
+  }
+  else if (this->object.refCount>1)
+  {
+    this->object.refCount--;
   }
 }
 
@@ -131,21 +128,20 @@ PUBLIC List* List_copy(List* this)
   ListNode * iterator = 0;
   ListNode * node = 0;
   
-  if (this!=0)
+  if (OBJECT_IS_INVALID(this)) return 0;
+  
+  copy = List_new();
+  iterator = this->tail;
+  while (iterator!=0)
   {
-    copy = List_new();
-    iterator = this->tail;
-    while (iterator!=0)
+    if (((Object*)iterator->item)->copy!=0)
     {
-      if (((Object*)iterator->item)->copy!=0)
-      {
-        node = (ListNode *)((Object*)iterator->item)->copy(iterator->item);
-        List_insertHead(copy, node, iterator->isOwner);
-      }
-      iterator = iterator->next;
+      node = (ListNode *)((Object*)iterator->item)->copy(iterator->item);
+      List_insertHead(copy, node, iterator->isOwner);
     }
-    copy->iterator = copy->tail;
+    iterator = iterator->next;
   }
+  copy->iterator = copy->tail;
   
   return copy;
 }
@@ -172,16 +168,15 @@ PUBLIC void List_print(List * this)
 {
   ListNode* iterator = 0;
 
-  if (this != 0)
+  if (OBJECT_IS_INVALID(this)) return;
+  
+  PRINT((" ~ List Object: %d\n", this->object.uniqId));
+  iterator = this->tail;
+  while (iterator != 0)
   {
-    PRINT((" ~ List Object: %d\n", this->object.uniqId));
-    iterator = this->tail;
-    while (iterator != 0)
-    {
-      Object_print((Object*)iterator->item);
-      PRINT(("\n"));
-      iterator = iterator->next;
-    }
+    Object_print((Object*)iterator->item);
+    PRINT(("\n"));
+    iterator = iterator->next;
   }
 }
 
@@ -299,6 +294,8 @@ PUBLIC void List_forEach(List* this, void (*method)(void* o))
 **************************************************/
 PUBLIC unsigned int List_getNbNodes(List * this)
 {
+  if (OBJECT_IS_INVALID(this)) return 0;
+
   return this->nbNodes;
 }
 
@@ -318,18 +315,17 @@ PUBLIC void * List_getNext(List * this)
 {
   void * result = 0;
   
-  if (this != 0)
+  if (OBJECT_IS_INVALID(this)) return 0;
+  
+  if (this->iterator == 0)
   {
-    if (this->iterator == 0)
-    {
-      this->iterator = this->tail;
-      result = 0;
-    }
-    else
-    {
-      result = this->iterator->item;
-      this->iterator = this->iterator->next;
-    }
+    this->iterator = this->tail;
+    result = 0;
+  }
+  else
+  {
+    result = this->iterator->item;
+    this->iterator = this->iterator->next;
   }
   
   return result;
@@ -345,7 +341,9 @@ PUBLIC void * List_removeHead(List * this)
   ListNode * headNode = 0;
   void * item = 0;
 
-  if ((this!=0) && (this->nbNodes!=0))
+  if (OBJECT_IS_INVALID(this)) return 0;
+
+  if (this->nbNodes!=0)
   {
     headNode = this->head;
     item = this->head->item;
@@ -381,7 +379,9 @@ PUBLIC void* List_removeTail(List* this)
   ListNode* tailNode = 0;
   void* item = 0;
 
-  if ((this != 0) && (this->nbNodes != 0))
+  if (OBJECT_IS_INVALID(this)) return 0;
+
+  if (this->nbNodes != 0)
   {
     tailNode = this->tail;
     item = this->tail->item;
@@ -416,20 +416,19 @@ PUBLIC void * List_getHead(List * this)
 {
   void * result = 0;
   
-  if (this!=0)
+  if (OBJECT_IS_INVALID(this)) return 0;
+  
+  if (this->head!=0)
   {
-    if (this->head!=0)
-    {
-      result = this->head->item;
-    }
+    result = this->head->item;
   }
+  
   return result;
 }
 
 PUBLIC void List_resetIterator(List * this)
 {
-  if (this!=0)
-  {
-    this->iterator = this->tail;
-  }
+  if (OBJECT_IS_INVALID(this)) return;
+
+  this->iterator = this->tail;
 }
