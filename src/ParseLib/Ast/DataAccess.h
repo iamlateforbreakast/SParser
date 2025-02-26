@@ -1,4 +1,9 @@
-typedef struct MyObject MyObject;
+/* DataAccess.h */
+#ifndef _DATAACCESS_H_
+#define _DATAACCESS_H_
+#include "Object.h"
+#include "SdbMgr.h"
+
 typedef struct DataAccess DataAccess;
 typedef void (*Initialise)(void *);
 typedef void (*Finalise)(void *);
@@ -18,8 +23,20 @@ struct DataAccess
   Getter get;
 };
 
-struct SQLite_info
+#if 0
+DataAccess* DataAccess_newSQLite()
 {
-  sqlite3* db;
-  int id;
-};
+  DataAccess* data;
+  struct SQLite_info sqlite_info;
+
+  data->init = (Initialise)SQLite_init;
+  data->final = (Finalise)SQLite_final;
+  data->alloc = (Allocate)SQLite_alloc;
+  data->dealloc = (Deallocate)SQLite_dealloc;
+  data->set = (Setter)SQLite_setProperty;
+  data->get = (Getter)SQLite_getProperty;
+  data->info = &sqlite_info;
+}
+#endif
+
+#endif

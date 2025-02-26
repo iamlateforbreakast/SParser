@@ -22,6 +22,7 @@ struct Ast
 struct AstData
 {
   int a;
+  SdbMgr* sdbMgr;
 };
 
 /**********************************************//**
@@ -37,7 +38,7 @@ PRIVATE Class astClass =
   .f_size = (Sizer)&Ast_getSize
 };
 
-Ast* Ast_new(SdbMgr* sdbMgr)
+Ast* Ast_new(DataAccess* data)
 {
   Ast * this;
 
@@ -46,7 +47,11 @@ Ast* Ast_new(SdbMgr* sdbMgr)
   if (OBJECT_IS_INVALID(this)) return 0;
 
   this->data = data;
+  //this->sdbMgr = sdbMgr;
   this->data->alloc(data->info);
+
+  //SdbRequest* alloc = SdbRequest_new("INSERT INTO Ast VALUES(NULL,0,0,0);");
+  //SdbRequest_execute(alloc);
 
   return this;
 }
@@ -74,6 +79,7 @@ int Ast_getSize(Ast* this)
   return sizeof(Ast);
 }
 
+#if 0
 void SQLite_init(void * info)
 {
   char* err_msg = 0;
@@ -129,3 +135,4 @@ void SQLite_dealloc(Ast* object)
 
   sqlite3_finalize(stmt);
 }
+#endif
