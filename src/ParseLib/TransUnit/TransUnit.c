@@ -59,6 +59,7 @@ PRIVATE Class transUnitClass =
 PRIVATE void TransUnit_consumeLineComment(TransUnit* this);
 PRIVATE void TransUnit_consumeMultilineComment(TransUnit* this);
 PRIVATE void TransUnit_consumeInclude(TransUnit* this);
+PRIVATE void TransUnit_consumeString(TransUnit* this);
 PRIVATE void TransUnit_readMacroDefinition(TransUnit* this);
 PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue);
 PRIVATE int TransUnit_pushNewBuffer(TransUnit* this, String* content);
@@ -86,6 +87,7 @@ PUBLIC TransUnit* TransUnit_new(FileDesc* file, FileMgr* fileMgr)
   TRACE(("TransUnit_new: Processing %s\n", String_getBuffer(FileDesc_getFullName(file))));
   this = (TransUnit*)Object_new(sizeof(TransUnit), &transUnitClass);
 
+  /* TODO: Use INVALID check */
   if (this == 0) return 0;
 
   this->file = file;
@@ -117,6 +119,7 @@ PUBLIC TransUnit* TransUnit_new(FileDesc* file, FileMgr* fileMgr)
 **************************************************/
 PUBLIC void TransUnit_delete(TransUnit* this)
 {
+  /* TODO: Use INVALID check */
   if (this == 0) return;
 
   /* De-allocate the specific members */
@@ -177,6 +180,7 @@ PUBLIC char* TransUnit_getName(TransUnit* this)
 PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
 {
   if (this->state==COMPLETED) return 0;
+
   char* ptr = this->currentBuffer->currentPtr;  //String_getBuffer(this->currentBuffer);
   int isFinished = 0;
   int isReadingContent = 0;
@@ -257,6 +261,11 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
       else if (0) //nothing to read
       {
         //unstack
+      }
+      else if (Memory_ncmp(this->currentBuffer->currentPtr, "\"", 1))
+      {
+        TransUnit_consumeString(this);
+        start = this->currentBuffer->nbCharRead;
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "\n", 1))
       {
@@ -399,6 +408,36 @@ PRIVATE void TransUnit_consumeInclude(TransUnit* this)
   }
   String_delete(fileName);
 } 
+
+/**********************************************//**
+  @brief TBC.
+  @private
+  @memberof TransUnit
+**************************************************/
+PRIVATE void TransUnit_consumeString(TransUnit* this)
+{
+  /* Read the first " and copy to output buffer */
+  this->outputBuffer[this->nbCharWritten] = *(this->currentBuffer->currentPtr);
+  this->currentBuffer->currentPtr ++;
+  this->currentBuffer->nbCharRead ++;
+  this->nbCharWritten++;
+
+  /* Need to check for EOL which causes an error */
+  while ((*this->currentBuffer->currentPtr != '\"') &&
+         (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
+  {
+    this->outputBuffer[this->nbCharWritten] = *(this->currentBuffer->currentPtr);
+    this->currentBuffer->currentPtr++;
+    this->currentBuffer->nbCharRead++;
+    this->nbCharWritten++;
+  }
+
+  /* Read the last " and copy to output buffer */
+  this->outputBuffer[this->nbCharWritten] = *(this->currentBuffer->currentPtr);
+  this->currentBuffer->currentPtr++;
+  this->currentBuffer->nbCharRead++;
+  this->nbCharWritten++;
+}
 
 /**********************************************//**
   @brief TBC.
@@ -687,6 +726,8 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
   MacroStore* localMacroStore = 0;
   String* inStr = String_newByRef(this->currentBuffer->currentPtr);
 
+  List_resetIterator(macroDefinition->parameters);
+
   if (*this->currentBuffer->currentPtr == '(')
   {
     /* Parse arguments and create a local macro Store */
@@ -704,14 +745,15 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
         bracketCount++;
         this->currentBuffer->currentPtr++;
         this->currentBuffer->nbCharRead++;
+        length++;
       }
-      else if (nextChar == ',')
+      else if ((nextChar == ',')&&(bracketCount==0))
       {
         argValue = String_subString(inStr, start, length);
         String_print(argValue);
         /* Insert argument in macroStore */
         MacroDefinition * m = MacroDefinition_new(0,argValue);
-        String * arg = (String*)List_getNext(argNames);
+        String * arg = String_copy((String*)List_getNext(argNames));
         MacroStore_insertName(localMacroStore, arg, m);
         this->currentBuffer->currentPtr++;
         this->currentBuffer->nbCharRead++;
@@ -726,13 +768,14 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
           String_print(argValue);
           /* Insert argument in macroStore */
           MacroDefinition* m = MacroDefinition_new(0, argValue);
-          String * arg = (String*)List_getNext(argNames);
+          String* arg = String_copy((String*)List_getNext(argNames));
           MacroStore_insertName(localMacroStore, arg, m);
           isArgParseComplete = 1;
         }
         else bracketCount--;
         this->currentBuffer->currentPtr++;
         this->currentBuffer->nbCharRead++;
+        length++;
       }
       else
       {
@@ -774,12 +817,29 @@ PRIVATE String * TransUnit_expandString(String* s, MacroStore* localMacroStore)
   int length = 1;
   MacroDefinition* body = 0;
   enum MacroEvalName status = 0;
+  int stringify = 0;
+  int concat = 0;
 
   PRINT(("TransUnit_expandString:\n"));
   PRINT(("  Input buffer: %s\n", readPtr));
   Memory_set(expandBuffer, 0, bufferSize);
   while (readPtr < String_getBuffer(s) + String_getLength(s))
   {
+    /* Check if we need to stringigy or concatenate */
+    if (*readPtr == '#')
+      if (*(readPtr + 1) == '#')
+      {
+        concat = 1;
+        readPtr += 2;
+      }
+      else
+      {
+        stringify = 1;
+        readPtr++;
+        *writePtr = '"';
+        writePtr++;
+      }
+
     status = MacroStore_evalName(localMacroStore, readPtr, length, &body);
     while (status == E_POSSIBLE_MACRO)
     {
@@ -799,6 +859,12 @@ PRIVATE String * TransUnit_expandString(String* s, MacroStore* localMacroStore)
       Memory_copy(writePtr, String_getBuffer(body->body), String_getLength(body->body));
       readPtr += length;
       writePtr += String_getLength(body->body);
+      if (stringify)
+      {
+        *writePtr = '"';
+        writePtr++;
+        stringify = 0;
+      }
     }
     else
     {
