@@ -277,9 +277,8 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
         this->currentBuffer->currentPtr++;
         this->currentBuffer->nbCharRead++;
       }
-      else
+      else if (!TransUnit_expandMacro(this))
       {
-        TransUnit_expandMacro(this);
         this->outputBuffer[this->nbCharWritten] = *(this->currentBuffer->currentPtr);
         this->currentBuffer->currentPtr++;
         this->currentBuffer->nbCharRead++;
@@ -804,7 +803,7 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
     TransUnit_pushNewBuffer(this, macroExpansion);
   }
   //Memory_free(macroExpansionBuffer, 4096);
-  return 0;
+  return 1;
 }
 
 PRIVATE String * TransUnit_expandString(String* s, MacroStore* localMacroStore)
