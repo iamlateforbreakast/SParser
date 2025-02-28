@@ -184,7 +184,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
   char* ptr = this->currentBuffer->currentPtr;  //String_getBuffer(this->currentBuffer);
   int isFinished = 0;
   int isReadingContent = 0;
-  int start = this->currentBuffer->nbCharRead;
+  //int start = this->currentBuffer->nbCharRead;
 
   /* Reset output buffer */
   this->outputBufferSize = OUTPUT_BUFFER_SIZE;
@@ -199,22 +199,22 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
       if (Memory_ncmp(this->currentBuffer->currentPtr, "//", 2))
       {
         TransUnit_consumeLineComment(this);
-        start = this->currentBuffer->nbCharRead;
+        //start = this->currentBuffer->nbCharRead;
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "/*", 2))
       {
         TransUnit_consumeMultilineComment(this);
-        start = this->currentBuffer->nbCharRead;
+        //start = this->currentBuffer->nbCharRead;
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "#include", 8))
       {
         TransUnit_consumeInclude(this);
-        start = this->currentBuffer->nbCharRead;
+        //start = this->currentBuffer->nbCharRead;
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "#define", 7))
       {
         TransUnit_readMacroDefinition(this);
-        start = this->currentBuffer->nbCharRead;
+        //start = this->currentBuffer->nbCharRead;
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "#ifndef", 7))
       {
@@ -222,7 +222,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
         this->currentBuffer->nbCharRead += 7;
         // Check macro is not defined
         TransUnit_checkMacro(this, 0);
-        start = this->currentBuffer->nbCharRead;
+        //start = this->currentBuffer->nbCharRead;
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "#ifdef", 6))
       {
@@ -230,19 +230,19 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
         this->currentBuffer->nbCharRead += 6;
         // Check macro is defined
         TransUnit_checkMacro(this, 1);
-        start = this->currentBuffer->nbCharRead;
+        //start = this->currentBuffer->nbCharRead;
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "#undef", 6))
       {
         this->currentBuffer->currentPtr += 6;
         this->currentBuffer->nbCharRead += 6;
-        start = this->currentBuffer->nbCharRead;
+        //start = this->currentBuffer->nbCharRead;
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "#if", 2))
       {
         this->currentBuffer->currentPtr += 2;
         this->currentBuffer->nbCharRead += 2;
-        start = this->currentBuffer->nbCharRead;
+        //start = this->currentBuffer->nbCharRead;
       }
       /*else if (Memory_ncmp(this->currentBuffer->currentPtr, "#else", 4))
       {
@@ -256,7 +256,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
       {
         this->currentBuffer->currentPtr += 5;
         this->currentBuffer->nbCharRead += 5;
-        start = this->currentBuffer->nbCharRead;
+        //start = this->currentBuffer->nbCharRead;
       }
       else if (0) //nothing to read
       {
@@ -265,7 +265,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "\"", 1))
       {
         TransUnit_consumeString(this);
-        start = this->currentBuffer->nbCharRead;
+        //start = this->currentBuffer->nbCharRead;
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "\n", 1))
       {
@@ -752,7 +752,7 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
         String_print(argValue);
         /* Insert argument in macroStore */
         MacroDefinition * m = MacroDefinition_new(0,argValue);
-        String * arg = String_copy((String*)List_getNext(argNames));
+        String * arg = (String*)List_getNext(argNames);
         MacroStore_insertName(localMacroStore, arg, m);
         this->currentBuffer->currentPtr++;
         this->currentBuffer->nbCharRead++;
@@ -767,7 +767,7 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
           String_print(argValue);
           /* Insert argument in macroStore */
           MacroDefinition* m = MacroDefinition_new(0, argValue);
-          String* arg = String_copy((String*)List_getNext(argNames));
+          String* arg = (String*)List_getNext(argNames);
           MacroStore_insertName(localMacroStore, arg, m);
           isArgParseComplete = 1;
         }
@@ -783,6 +783,7 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
         length++;
       }
     }
+    String_delete(inStr);
   }
 
   printf("Macro expansion: %s\n", String_getBuffer(macroDefinition->body));
@@ -793,6 +794,8 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
     printf("Macro parameters: %d\n", List_getNbNodes(macroDefinition->parameters));
     String* expandedString = TransUnit_expandString(macroDefinition->body, localMacroStore);
     TransUnit_pushNewBuffer(this, expandedString);
+    MacroStore_delete(localMacroStore);
+    Memory_free(macroExpansionBuffer, 4096);
   }
   else
   {
