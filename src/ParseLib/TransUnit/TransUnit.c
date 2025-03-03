@@ -267,6 +267,12 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
         TransUnit_consumeString(this);
         //start = this->currentBuffer->nbCharRead;
       }
+      else if (Memory_ncmp(this->currentBuffer->currentPtr, "\r\n", 2))
+      {
+        this->currentBuffer->currentPtr += 2;
+        this->currentBuffer->nbCharRead += 2;
+        /* TODO: Update line being processed in Buffer */
+      }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "\n", 1))
       {
         this->currentBuffer->currentPtr++;
