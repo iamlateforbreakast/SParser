@@ -37,6 +37,7 @@ PRIVATE Buffer * Buffer_new(String * content)
 {
   Buffer * this = 0;
 
+  /* TODO: Check if string can be undefined */
   this = (Buffer*)Object_new(sizeof(Buffer), &bufferClass);
 
   this->string = content;
@@ -62,7 +63,7 @@ PRIVATE void Buffer_delete(Buffer * this)
 
 PRIVATE void Buffer_print(Buffer * this)
 {
-
+  /* TODO: Implement */
 }
 
 PRIVATE unsigned int Buffer_getSize(Buffer * this)

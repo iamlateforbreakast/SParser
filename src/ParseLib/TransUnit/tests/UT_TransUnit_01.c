@@ -70,24 +70,6 @@ int UT_TransUnit_01_step2()
   resultBuffer[1] = TransUnit_getNextBuffer(testTransUnit);
   TRACE(("UT_TransUnit_01: Output buffer= %s\n", String_getBuffer(resultBuffer[1])));
 
-
-
-
-
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
   isPassed = isPassed && (resultBuffer[1] == 0);
   UT_ASSERT(isPassed);
 
@@ -106,6 +88,7 @@ int UT_TransUnit_01_step2()
   ObjectMgr_delete(objectMgr);
   return isPassed;
 }
+
 int UT_TransUnit_01_step3()
 {
   int isPassed = 1;
@@ -186,34 +169,34 @@ int UT_TransUnit_01_step5()
 
   FileMgr* fileMgr = FileMgr_new();
   ObjectMgr* objectMgr = ObjectMgr_getRef();
-  //FileDesc* c_file = FileMgr_addFile(fileMgr, "test.c");
-  //FileDesc* h_file = FileMgr_addFile(fileMgr, "test.h");
 
-  FileDesc* c_file = FileMgr_addFile(fileMgr, "BTree.c");
-  FileDesc* h_file1 = FileMgr_addFile(fileMgr, "BTree.h");
-  FileDesc* h_file2 = FileMgr_addFile(fileMgr, "Node.h");
-  FileDesc* h_file3 = FileMgr_addFile(fileMgr, "Memory.h");
+  FileDesc* c_file = FileMgr_addFile(fileMgr, "test_define_args.c");
   TransUnit* testTransUnit = TransUnit_new(c_file, fileMgr);
 
-  PRINT(("Step 3: Test 1 - Read a buffer from TransUnit instance: "));
+  PRINT(("Step 5: Test 1 - Read a buffer from TransUnit instance: "));
+  String* resultBuffer;
+  String* expected;
+  expected = String_newByRef("static int table1[100];static int table2[200];}");
 
-  for (int i = 0; i < 3; ++i)
-  {
-    String* buffer = TransUnit_getNextBuffer(testTransUnit);
-    PRINT(("Output buffer: %s\n", String_getBuffer(buffer)));
-    String_delete(buffer);
-  }
-  
-  //PRINT(("Step 1: Test 2 - Delete an instance of class TransUnit: "));
+  resultBuffer = TransUnit_getNextBuffer(testTransUnit);
+
+  isPassed = isPassed && (String_compare(resultBuffer, expected) == 0);
+
+  UT_ASSERT(1);
+
   TransUnit_delete(testTransUnit);
-
+  String_delete(expected);
+  String_delete(resultBuffer);
   FileMgr_delete(fileMgr);
 
-  PRINT(("Step 3: Test 2 - Check all memory is freed: "));
+  ObjectMgr_reportUnallocated(objectMgr);
+
+  TRACE(("\nUT_TransUnit_01: Output buffer= %s\n", String_getBuffer(resultBuffer)));
+
+  PRINT(("Step 4: Test 2 - Check all memory is freed: "));
   UT_ASSERT((ObjectMgr_report(objectMgr) == 1));
   TRACE(("Nb objects left allocated: %d\n", ObjectMgr_report(objectMgr)));
 
-  ObjectMgr_reportUnallocated(objectMgr);
   ObjectMgr_delete(objectMgr);
 
   return isPassed;
@@ -233,6 +216,7 @@ int run_UT_TransUnit_01()
   isPassed = UT_TransUnit_01_step2() && isPassed;
   isPassed = UT_TransUnit_01_step3() && isPassed;
   isPassed = UT_TransUnit_01_step4() && isPassed;
+  isPassed = UT_TransUnit_01_step5() && isPassed;
 
   Memory_report();
 
