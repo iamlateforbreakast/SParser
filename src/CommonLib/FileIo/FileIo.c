@@ -224,7 +224,7 @@ PUBLIC List * FileIo_listDirs(FileIo * this, String * directory)
   hFind = FindFirstFileA("*", &FindFileData);
   if (hFind == INVALID_HANDLE_VALUE)
   {
-    printf("FindFirstFile failed (%d)\n", GetLastError());
+    PRINT(("FindFirstFile failed (%d)\n", GetLastError()));
   }
   else
   {        
@@ -235,7 +235,7 @@ PUBLIC List * FileIo_listDirs(FileIo * this, String * directory)
         //char text[MAX_PATH];
         size_t nb = 0;
         //wcstombs_s(&nb, text, 100, FindFileData.cFileName, wcslen(FindFileData.cFileName));
-        printf("=>%s\n", FindFileData.cFileName);
+        PRINT(("=>%s\n", FindFileData.cFileName));
         String* s = String_new(FindFileData.cFileName);
         List_insertTail(result, s, 1);
       }
@@ -246,7 +246,7 @@ PUBLIC List * FileIo_listDirs(FileIo * this, String * directory)
   struct dirent *directoryEntry = 0;
   String * name = 0;
   DIR * dirHandle = opendir(String_getBuffer(directory));
-  printf("%s\n",String_getBuffer(directory));
+  PRINT(("%s\n",String_getBuffer(directory)));
   if (dirHandle!=0)
   {
     result = List_new();
@@ -261,7 +261,7 @@ PUBLIC List * FileIo_listDirs(FileIo * this, String * directory)
           name = String_new(directoryEntry->d_name);
           //FileMgr_mergePath(this, fullName, name);
           List_insertHead(result,name, 1);
-          printf("%s\n",String_getBuffer(name));
+          PRINT(("%s\n",String_getBuffer(name)));
         }
       }
     }
@@ -283,7 +283,7 @@ PUBLIC List* FileIo_listFiles(FileIo* this, String* directory)
   hFind = FindFirstFileA(String_getBuffer(filter), &FindFileData);
   if (hFind == INVALID_HANDLE_VALUE)
   {
-    printf("FindFirstFile failed (%d)\n", GetLastError());
+    PRINT(("FindFirstFile failed (%d)\n", GetLastError()));
   }
   else
   {        

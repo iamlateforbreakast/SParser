@@ -23,8 +23,8 @@
 extern char words1000[];
 
 
-List * keys;
-TestObject ** testObjects;
+List * UT_Map_01_keys;
+TestObject ** UT_Map_01_testObjects;
 int UT_Map_01_nbTokens = 0;
 PRIVATE FILE* UT_Map_01_logChannel = 0;
 
@@ -32,14 +32,14 @@ int UT_Map_01_init_keys()
 {
   String * fullText = String_newByRef(words1000);
 
-  keys = String_splitToken(fullText, " ");
-  UT_Map_01_nbTokens = List_getNbNodes(keys);
+  UT_Map_01_keys = String_splitToken(fullText, " ");
+  UT_Map_01_nbTokens = List_getNbNodes(UT_Map_01_keys);
 
-  testObjects = (TestObject**)Memory_alloc(UT_Map_01_nbTokens * sizeof(TestObject*));
+  UT_Map_01_testObjects = (TestObject**)Memory_alloc(UT_Map_01_nbTokens * sizeof(TestObject*));
 
   for (int i = 0; i < UT_Map_01_nbTokens; i++)
   {
-    testObjects[i] = TestObject_new();
+    UT_Map_01_testObjects[i] = TestObject_new();
   }
 
   String_delete(fullText);
@@ -53,11 +53,11 @@ int UT_Map_01_delete_keys(int isOwner)
   {
     for (int i = 0; i < UT_Map_01_nbTokens; i++)
     {
-      TestObject_delete(testObjects[i]);
+      TestObject_delete(UT_Map_01_testObjects[i]);
     }
   }
-  List_delete(keys);
-  Memory_free(testObjects, sizeof(testObjects));
+  List_delete(UT_Map_01_keys);
+  Memory_free(UT_Map_01_testObjects, sizeof(UT_Map_01_testObjects));
 
   return 1;
 }
@@ -74,8 +74,8 @@ int UT_Map_01_step1()
   UT_ASSERT((testMap!=0));
 
   PRINT(("Step 1: Test 2 - Insert an object: "));
-  key = (String*)List_getNext(keys);
-  Map_insert(testMap, key, testObjects[0], 0);
+  key = (String*)List_getNext(UT_Map_01_keys);
+  Map_insert(testMap, key, UT_Map_01_testObjects[0], 0);
 
   UT_ASSERT((1));
 
@@ -95,12 +95,12 @@ int UT_Map_01_step2()
   String * key = 0;
   
   PRINT(("Step 2: Test 1 - Insert %d object: ", UT_Map_01_nbTokens));
-  List_resetIterator(keys);
+  List_resetIterator(UT_Map_01_keys);
   for (int i = 0; i < UT_Map_01_nbTokens; i++)
   {
-    key = (String*)List_getNext(keys);
+    key = (String*)List_getNext(UT_Map_01_keys);
     TRACE(("-->%s\n", String_getBuffer(key)));
-    Map_insert(testMap, key, testObjects[i], 0);
+    Map_insert(testMap, key, UT_Map_01_testObjects[i], 0);
   }
   
   UT_ASSERT((1));
@@ -142,8 +142,8 @@ int UT_Map_01_step4()
   Map_insert(testMap, s, item, 1);
   Map_find(testMap, s, (void**)&newItem);
   
-  printf("New value : %s\n",
-          String_getBuffer(newItem));
+  PRINT(("New value : %s\n",
+          String_getBuffer(newItem)));
   
   String_delete(s);
   String_delete(item);
@@ -197,7 +197,11 @@ int UT_Map_01_step6()
   return 0;
 }
 
+#ifdef MAIN
+int main()
+#else
 int run_UT_Map_01()
+#endif
 {
   int isPassed = 1;
   UT_Map_01_logChannel = Debug_openChannel("UT_Map_01.log");

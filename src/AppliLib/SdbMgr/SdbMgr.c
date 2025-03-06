@@ -12,8 +12,10 @@
 #include "Memory.h"
 #include "Error.h"
 #include "List.h"
-
+#include "Debug.h"
 #include <sqlite3.h>
+
+#define DEBUG (0)
 
 /**********************************************//** 
   @class SdbMgr
@@ -138,7 +140,7 @@ PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement, List * r
   unsigned int i;
   String * temp = 0;
   
-  Error_new(ERROR_DBG, "SdbMgr: %s\n", statement);
+  TRACE(("SdbMgr: %s\n", statement));
   rc = sqlite3_prepare_v2(this->db, statement, -1, &res, 0);
   
   if (rc!=SQLITE_OK) return 0;
@@ -146,7 +148,7 @@ PUBLIC unsigned int SdbMgr_execute(SdbMgr* this, const char* statement, List * r
   step = sqlite3_step(res);
   
   count = sqlite3_column_count(res);
-  Error_new(ERROR_DBG, "Count = %d\n", count);
+  TRACE(("Count = %d\n", count));
    if ((count>0) && (result!=0))
    {
     while (step != SQLITE_DONE)

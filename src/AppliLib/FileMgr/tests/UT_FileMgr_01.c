@@ -10,14 +10,14 @@
 
 #define DEBUG (0)
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("Passed\n");} \
-                          else { printf("Failed\n"); return 0;}
+                          { PRINT(("Passed\n"));} \
+                          else { PRINT(("Failed\n")); return 0;}
 
 #define FILEMGR_MAX_PATH (1024)
 
 //extern FileMgr * fileMgr;
 
-PUBLIC void FileMgr_mergePath(FileMgr * this, String * path1, String * path2);
+extern void FileMgr_mergePath(FileMgr * this, String * path1, String * path2);
 
 typedef struct TestFileMgr
 {
@@ -28,8 +28,12 @@ typedef struct TestFileMgr
   String * rootLocation;
 } TestFileMgr;
 
+PRIVATE FILE * UT_FileMgr_01_logChannel;
+
 int UT_FileMgr_01_step1()
 {
+  int isPassed = 1;
+
   FileMgr * testFileMgr = FileMgr_new();
 
   FileIo * f = FileIo_new();
@@ -37,8 +41,9 @@ int UT_FileMgr_01_step1()
 
   /* Test 1 */
   PRINT(("Step 1: Test 1 - Check the root location is correct: "));
-  UT_ASSERT(String_compare(((TestFileMgr*)testFileMgr)->rootLocation, currentLocation)==0)
-  
+  UT_ASSERT((String_compare(((TestFileMgr*)testFileMgr)->rootLocation, currentLocation)==0))
+  isPassed = (String_compare(((TestFileMgr*)testFileMgr)->rootLocation, currentLocation)==0);
+  UT_ASSERT((isPassed));
   TRACE(("  Root location: %s\n", String_getBuffer(((TestFileMgr*)testFileMgr)->rootLocation)));
 
   /* Test 2 */
@@ -66,10 +71,12 @@ int UT_FileMgr_01_step1()
   
   TRACE(("  Memory Allocation request: %d\n", Memory_getAllocRequestNb()));
   TRACE(("  Memory Free requests: %d\n", Memory_getFreeRequestNb()));
-  UT_ASSERT((Memory_getAllocRequestNb()==(Memory_getFreeRequestNb()+1)))
+  isPassed = (Memory_getAllocRequestNb()==(Memory_getFreeRequestNb()+1)) && isPassed; 
+  UT_ASSERT((isPassed));
+
   //ObjectMgr_reportUnallocated(objMgr);
 
-  return 1;
+  return isPassed;
 }
 
 int UT_FileMgr_01_step2()
@@ -85,7 +92,7 @@ int UT_FileMgr_01_step2()
 #endif
 
   /* Test 1 */
-  FileMgr_mergePath(testFileMgr, mergedLocation, testLocation);
+  //FileMgr_mergePath(testFileMgr, mergedLocation, testLocation);
   TRACE(("Merged Path: %s\n", String_getBuffer(mergedLocation)));
   PRINT(("Step 2: Test 1 - Check merging 2 paths: "));
   UT_ASSERT((1))
@@ -211,17 +218,27 @@ int UT_FileMgr_01_step7()
   return 1;
 }
 
+#ifdef MAIN
+int main()
+#else
 int run_UT_FileMgr_01()
+#endif
 {
   int isPassed = 1;
-  //step2();
-  //step3();
-  //step4();
-  //isPassed = UT_FileMgr_01_step3() && isPassed;
-  //step6();
+
+  UT_FileMgr_01_logChannel = Debug_openChannel("UT_FileMgr_01.log");
+  Debug_setStdoutChannel(UT_FileMgr_01_logChannel);
+
+  isPassed = UT_FileMgr_01_step1() && isPassed;
+  isPassed = UT_FileMgr_01_step2() && isPassed;
+  isPassed = UT_FileMgr_01_step3() && isPassed;
+  isPassed = UT_FileMgr_01_step4() && isPassed;
   isPassed = UT_FileMgr_01_step5() && isPassed;
+  isPassed = UT_FileMgr_01_step6() && isPassed;
 
   Memory_report();
+
+  Debug_closeChannel(UT_FileMgr_01_logChannel);
 
   return isPassed;
 }

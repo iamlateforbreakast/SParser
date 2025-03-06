@@ -8,7 +8,8 @@ SOURCES = \
  	./Configuration/Configuration.c \
  	./Configuration/Product.c \
 	./TransUnit/TransUnit.c \
-	./FileReader/FileReader.c
+	./FileReader/FileReader.c \
+        ./Ast/Ast.c
 
 HEADERS = $(SOURCES:.c=.h) ./Grammar2/Grammar2.h ./GrammarC99/GrammarC99.h ./Grammar/Grammar.h
 

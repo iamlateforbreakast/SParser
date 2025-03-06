@@ -17,12 +17,12 @@
 #define DEBUG (0)
 #ifdef _WIN32
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("Passed\n");} \
-                          else { printf("Failed\n"); return 0;}
+                          { PRINT(("Passed\n"));} \
+                          else { PRINT(("Failed\n")); return 0;}
 #else
 #define UT_ASSERT(cond) if ((cond)) \
-                          { printf("\x1b[32mPassed\x1b[0m\n");} \
-                          else { printf("\x1b[31mFailed\x1b[0m\n"); return 0;}
+                          { PRINT(("\x1b[32mPassed\x1b[0m\n"));} \
+                          else { PRINT(("\x1b[31mFailed\x1b[0m\n")); return 0;}
 #endif
 
 PRIVATE MyAllocator* UT_SkipList_02_testAlloc = 0;
@@ -30,9 +30,9 @@ PRIVATE AllocInfo* allocInfo = 0;
 
 PRIVATE SkipList* testList;
 
-PRIVATE int nbWords;
+PRIVATE int UT_SkipLIst_01_nbWords;
 PRIVATE String** wordKeys;
-PRIVATE TestObject** testObjects;
+PRIVATE TestObject** UT_SkipLIst_01_testObjects;
 
 extern char words1000[];
 
@@ -42,15 +42,15 @@ PRIVATE int UT_SkipList_02_init_keys()
   List* tokens = 0;
 
   tokens = String_splitToken(allWords, " ");
-  nbWords = List_getNbNodes(tokens);
+  UT_SkipLIst_01_nbWords = List_getNbNodes(tokens);
 
-  wordKeys = (String**)Memory_alloc(nbWords * sizeof(String*));
-  testObjects = (TestObject**)Memory_alloc(nbWords * sizeof(TestObject*));
+  wordKeys = (String**)Memory_alloc(UT_SkipLIst_01_nbWords * sizeof(String*));
+  UT_SkipLIst_01_testObjects = (TestObject**)Memory_alloc(UT_SkipLIst_01_nbWords * sizeof(TestObject*));
 
-  for (int i = 0; i < nbWords; i++)
+  for (int i = 0; i < UT_SkipLIst_01_nbWords; i++)
   {
     wordKeys[i] = (String*)List_getNext(tokens);
-    testObjects[i] = TestObject_new();
+    UT_SkipLIst_01_testObjects[i] = TestObject_new();
   }
 
   List_delete(tokens);
@@ -61,13 +61,13 @@ PRIVATE int UT_SkipList_02_init_keys()
 
 PRIVATE int UT_SkipList_02_delete_keys()
 {
-  for (int i = 0; i < nbWords; i++)
+  for (int i = 0; i < UT_SkipLIst_01_nbWords; i++)
   {
-    TestObject_delete(testObjects[i]);
+    TestObject_delete(UT_SkipLIst_01_testObjects[i]);
     String_delete(wordKeys[i]);
   }
   Memory_free(wordKeys, sizeof(wordKeys));
-  Memory_free(testObjects, sizeof(testObjects));
+  Memory_free(UT_SkipLIst_01_testObjects, sizeof(UT_SkipLIst_01_testObjects));
 
   return 1;
 }
@@ -115,7 +115,7 @@ PRIVATE int UT_SkipList_02_step2()
   for (int i = 0; i < aFewItems; i++)
   {
     //TRACE(("  Inserting: ")); String_print(wordKeys[i]); PRINT(("\n"));
-    SkipList_add(testList, (Object*)wordKeys[i], (Object*)testObjects[i]);
+    SkipList_add(testList, (Object*)wordKeys[i], (Object*)UT_SkipLIst_01_testObjects[i]);
     SkipList_print(testList);
   }
 
@@ -144,7 +144,7 @@ PRIVATE int UT_SkipList_02_step4()
   for (int i = 0; i < 10; i++)
   {
     itemPtr = SkipList_get(testList, (Object*)wordKeys[i]);
-    isPassed = isPassed && (itemPtr == testObjects[i]);
+    isPassed = isPassed && (itemPtr == UT_SkipLIst_01_testObjects[i]);
 
     if (isPassed) TRACE(("Item %d retrieved.\n", i)); else TRACE(("Item %d failed to retrieved.\n", i));
   }
@@ -196,7 +196,7 @@ int UT_SkipList_02_step7()
         unsigned int swap = randomKeys[i];
         randomKeys[i] = randomKeys[j];
         randomKeys[j] = swap;
-        //printf("Swapping %d and %d\n",i,j);
+        //PRINT(("Swapping %d and %d\n",i,j));
     }
 
     long double cpu_time0 = get_cpu_time();
@@ -205,7 +205,7 @@ int UT_SkipList_02_step7()
     for (int i=0; i<NB_OBJECTS; i++)
     {
         SkipList_add(testList, randomKeys[i], &randomValues[i]);
-        //printf("Adding %d\n", randomKeys[i]);
+        //PRINT(("Adding %d\n", randomKeys[i]));
     }
 
     long double cpu_time1 = get_cpu_time();
@@ -215,8 +215,8 @@ int UT_SkipList_02_step7()
     SkipList_print(testList);
     SkipList_delete(testList);
 
-    printf("Insert CPU time %Lf\n", (cpu_time1- cpu_time0)/NB_OBJECTS);
-    printf("Insert Wall Time %Lf\n", (wall_time1 - wall_time0)/NB_OBJECTS);*/
+    PRINT(("Insert CPU time %Lf\n", (cpu_time1- cpu_time0)/NB_OBJECTS));
+    PRINT(("Insert Wall Time %Lf\n", (wall_time1 - wall_time0)/NB_OBJECTS));*/
 
     return 1;
 }

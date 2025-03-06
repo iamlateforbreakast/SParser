@@ -240,7 +240,7 @@ PRIVATE void* TaskMgr_threadBody(void* p)
       }
     else
     {
-      //printf("Wait failed %d\n", GetLastError());
+      //PRINT(("Wait failed %d\n", GetLastError()));
     }
   }
 }
@@ -286,7 +286,7 @@ PRIVATE int TaskMgr_createWorkerThreads(TaskMgr* this)
     pthread_detach(this->threadHandle[i]);
     if (this->threadHandle[i] == 0)
     {
-      printf("CreateThread error.\n");
+      PRINT(("CreateThread error.\n"));
       return 0;
     }
 #else
@@ -299,7 +299,7 @@ PRIVATE int TaskMgr_createWorkerThreads(TaskMgr* this)
       &this->threadId[i]); // receive thread identifier
     if (this->threadHandle[i] == NULL)
     {
-      printf("CreateThread error: %d\n", GetLastError());
+      PRINT(("CreateThread error: %d\n", GetLastError()));
       return 0;
     }
 #endif
@@ -340,13 +340,13 @@ PRIVATE int TaskMgr_initSemaphores(TaskMgr* this)
   // Create nb task empty semaphore
   if (sem_init(&this->semEmpty, 0, MAX_TASKS))
   {
-    printf("CreateSemaphore Empty error.\n");
+    PRINT(("CreateSemaphore Empty error.\n"));
     isSuccessful = 0;
   }
   // Create nb task full semaphore
   if (sem_init(&this->semFull, 0, 0))
   {
-    printf("CreateSemaphore Full error.\n");
+    PRINT(("CreateSemaphore Full error.\n"));
     isSuccessful = 0;
   }
 #else
@@ -354,14 +354,14 @@ PRIVATE int TaskMgr_initSemaphores(TaskMgr* this)
   this->semEmpty = CreateSemaphore(NULL, MAX_TASKS, MAX_TASKS, NULL);
   if (this->semEmpty == NULL)
   {
-    printf("CreateSemaphore Empty error: %d\n", GetLastError());
+    PRINT(("CreateSemaphore Empty error: %d\n", GetLastError()));
     isSuccessful = 0;
   }
   // Create nb task full semaphore
   this->semFull = CreateSemaphore(NULL, 0, MAX_TASKS, NULL);
   if (this->semFull == NULL)
   {
-    printf("CreateSemaphore Full error: %d\n", GetLastError());
+    PRINT(("CreateSemaphore Full error: %d\n", GetLastError()));
     isSuccessful = 0;
   }
 #endif
@@ -461,7 +461,7 @@ PRIVATE int TaskMgr_initLock(TaskMgr * this)
 #ifndef WIN32
   if (pthread_mutex_init(&this->mutex, NULL) != 0) 
   {
-    printf("TaskMgr createMutex error.\n");
+    PRINT(("TaskMgr createMutex error.\n"));
   }
 #else
   this->mutex = CreateMutex(
@@ -470,7 +470,7 @@ PRIVATE int TaskMgr_initLock(TaskMgr * this)
     NULL);             // unnamed mutex
   if (this->mutex == NULL)
   {
-    printf("TaskMgr createMutex error: %d\n", GetLastError());
+    PRINT(("TaskMgr createMutex error: %d\n", GetLastError()));
   }
 #endif
   return isSuccessful;
