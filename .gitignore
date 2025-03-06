@@ -13,3 +13,4 @@ src/ParseLib/Grammar2/Grammar2.lex.c
 src/ParseLib/Grammar2/Grammar2.parse.c
 src/ParseLib/Grammar2/Grammar2.parse.h
 test.pool
+.vscode
