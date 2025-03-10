@@ -489,7 +489,7 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
       }
 
       parameter = String_subString(this->currentBuffer->string, start, paramLength); // StringBuffer_readback(this->currentBuffer, paramLength);
-      printf("Macro argument %s\n", String_getBuffer(parameter));
+      DEBUG(("Macro argument %s\n", String_getBuffer(parameter)));
 
       paramLength = 0;
 
@@ -531,8 +531,8 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
   //Map_insert(this->macros, macroName, macroDefinition, 1);
   MacroStore_insertName(this->store, macroName, macroDefinition);
 
-  printf("Defined macro: %s\n", String_getBuffer(macroName));
-  printf("Nb param: %d\n", List_getNbNodes(macroDefinition->parameters));
+  DEBUG(("Defined macro: %s\n", String_getBuffer(macroName)));
+  DEBUG(("Nb param: %d\n", List_getNbNodes(macroDefinition->parameters)));
   String_delete(macroName);
 }
 
@@ -782,12 +782,12 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
     String_delete(inStr);
   }
 
-  printf("Macro expansion: %s\n", String_getBuffer(macroDefinition->body));
+  DEBUG(("Macro expansion: %s\n", String_getBuffer(macroDefinition->body)));
   
 
   if (macroDefinition->parameters)
   {
-    printf("Macro parameters: %d\n", List_getNbNodes(macroDefinition->parameters));
+    DEBUG(("Macro parameters: %d\n", List_getNbNodes(macroDefinition->parameters)));
     String* expandedString = TransUnit_expandString(macroDefinition->body, localMacroStore);
     TransUnit_pushNewBuffer(this, expandedString);
     MacroStore_delete(localMacroStore);
