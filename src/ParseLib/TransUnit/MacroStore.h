@@ -47,11 +47,11 @@ PRIVATE void MacroStore_print(MacroStore * this);
 PRIVATE unsigned int MacroStore_getSize(MacroStore * this);
 PRIVATE int MacroStore_insertName(MacroStore * this, String * name, MacroDefinition * body);
 PRIVATE int MacroStore_isDefName(MacroStore * this, String * name);
-PRIVATE int MacroStore_removeName(MacroStore * this, String * name);
+//PRIVATE int MacroStore_removeName(MacroStore * this, String * name);
 PRIVATE enum MacroEvalName MacroStore_evalName(MacroStore * this, char * ptr, int length, MacroDefinition** outMacroDef);
 PRIVATE void MacroStore_printChildrenNodes(MacroStore * this, struct MacroStoreNode * node, char* name, int l);
 PRIVATE void MacroStore_deleteChildrenNodes(MacroStore * this, struct MacroStoreNode * node);
-PRIVATE unsigned int MacroStore_expandMacro(MacroStore* this, String* inStr, char* outStr, int* outWritten);
+//PRIVATE unsigned int MacroStore_expandMacro(MacroStore* this, String* inStr, char* outStr, int* outWritten);
 
 /**********************************************//**
   @private Class Description
@@ -194,7 +194,7 @@ PRIVATE int MacroStore_insertName(MacroStore* this, String* name, MacroDefinitio
   int c = 0;
   for (int i = 0; i < length; i++)
   {
-    c = convert[buffer[i]];
+    c = convert[(int)buffer[i]];
     if (currentNode->isLeaf)
     {
       currentNode->isLeaf = 0;
@@ -233,7 +233,7 @@ PRIVATE int MacroStore_isDefName(MacroStore* this, String* name)
 
   for (int i = 0; i < length; i++)
   {
-    int c = convert[buffer[i]];
+    int c = convert[(int)buffer[i]];
     if (currentNode->children[c]) currentNode = currentNode->children[c];
     else
       return 0; // Not found
@@ -243,6 +243,7 @@ PRIVATE int MacroStore_isDefName(MacroStore* this, String* name)
   return 0;
 }
 
+#if 0
 PRIVATE int MacroStore_removeName(MacroStore* this, String* name)
 {
   char* buffer = String_getBuffer(name);
@@ -250,14 +251,15 @@ PRIVATE int MacroStore_removeName(MacroStore* this, String* name)
   struct MacroStoreNode* currentNode = this->root;
 
   /* Store is empty */
-  if (currentNode->isLeaf) return 0;
+  //if (currentNode->isLeaf) return 0;
 
-  for (int i = 0; i < length; i++)
-  {
-   int  c = convert[buffer[i]];
-  }
+  //for (int i = 0; i < length; i++)
+  //{
+   //int  c = convert[(int)buffer[i]];
+  //}
   return 0;
 }
+#endif
 
 /**********************************************//**
   @brief Check if the next N characters are a macro name or part of a macro name.
@@ -277,7 +279,7 @@ PRIVATE enum MacroEvalName MacroStore_evalName(MacroStore* this, char* buffer, i
   *body = 0;
   for (i = 0; i < length; i++)
   {
-    c = convert[buffer[i]];
+    c = convert[(int)buffer[i]];
     if (c == 0) return E_NOT_MACRO;
     if (currentNode->children[c])
       currentNode = currentNode->children[c];
@@ -337,6 +339,7 @@ PRIVATE void MacroStore_deleteChildrenNodes(MacroStore* this, struct MacroStoreN
   }
 }
 
+#if 0
 PRIVATE unsigned int MacroStore_expandMacro(MacroStore* this, String* inStr, char* outStr, int* outWritten)
 {
   int length = 1;
@@ -367,4 +370,5 @@ PRIVATE unsigned int MacroStore_expandMacro(MacroStore* this, String* inStr, cha
 
   return length;
 }
+#endif
 #endif /* _MACROSTORE_H_ */ 
