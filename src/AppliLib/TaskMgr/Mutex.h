@@ -19,6 +19,7 @@ typedef struct Mutex
 #endif
 } Mutex;
 
+#if 0
 PRIVATE void Mutex_new(Mutex * this, int initState);
 PRIVATE void Mutex_delete(Mutex * this);
 PRIVATE void Mutex_take(Mutex * this);
@@ -71,4 +72,5 @@ PRIVATE void Mutex_waitAvailability(Mutex * this)
   //     pthread_mutex_t *restrict mutex,
   //     const struct timespec *restrict abstime
 }
+#endif
 #endif /* _MUTEX_H_ */
