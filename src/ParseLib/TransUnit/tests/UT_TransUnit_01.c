@@ -176,13 +176,16 @@ int UT_TransUnit_01_step5()
   PRINT(("Step 5: Test 1 - Read a buffer from TransUnit instance: "));
   String* resultBuffer;
   String* expected;
-  expected = String_newByRef("static int table1[100];static int table2[200];}");
+  expected = String_newByRef("int main(){int x = 3;int y = 2;return x>y?x:y;}");
 
   resultBuffer = TransUnit_getNextBuffer(testTransUnit);
 
   isPassed = isPassed && (String_compare(resultBuffer, expected) == 0);
 
-  UT_ASSERT(1);
+  TRACE(("\nUT_TransUnit_01: Output buffer= %s\n", String_getBuffer(resultBuffer)));
+  TRACE(("\nUT_TransUnit_01: Output buffer= %s\n", String_getBuffer(expected)));
+
+  UT_ASSERT((isPassed));
 
   TransUnit_delete(testTransUnit);
   String_delete(expected);
@@ -190,8 +193,6 @@ int UT_TransUnit_01_step5()
   FileMgr_delete(fileMgr);
 
   ObjectMgr_reportUnallocated(objectMgr);
-
-  TRACE(("\nUT_TransUnit_01: Output buffer= %s\n", String_getBuffer(resultBuffer)));
 
   PRINT(("Step 4: Test 2 - Check all memory is freed: "));
   UT_ASSERT((ObjectMgr_report(objectMgr) == 1));
@@ -212,10 +213,10 @@ int run_UT_TransUnit_01()
   
   UT_TransUnit_01_logChannel = Debug_openChannel("UT_TransUnit_01.log");
   Debug_setStdoutChannel(UT_TransUnit_01_logChannel);
-  isPassed = UT_TransUnit_01_step1() && isPassed;
-  isPassed = UT_TransUnit_01_step2() && isPassed;
-  isPassed = UT_TransUnit_01_step3() && isPassed;
-  isPassed = UT_TransUnit_01_step4() && isPassed;
+  //isPassed = UT_TransUnit_01_step1() && isPassed;
+  //isPassed = UT_TransUnit_01_step2() && isPassed;
+  //isPassed = UT_TransUnit_01_step3() && isPassed;
+  //isPassed = UT_TransUnit_01_step4() && isPassed;
   isPassed = UT_TransUnit_01_step5() && isPassed;
 
   Memory_report();

@@ -773,7 +773,7 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
         this->currentBuffer->currentPtr++;
         this->currentBuffer->nbCharRead++;
       }
-      else if ((nextChar == ',')&&(bracketCount==0))
+      else if ((nextChar == ',')&&(bracketCount==1))
       {
         argValue = String_subString(inStr, start, length);
         String_print(argValue);
