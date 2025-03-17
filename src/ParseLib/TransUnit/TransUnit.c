@@ -183,6 +183,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
 
   char* ptr = this->currentBuffer->currentPtr;  //String_getBuffer(this->currentBuffer);
   int isReadingContent = 0;
+  //int start = this->currentBuffer->nbCharRead;
 
   /* Reset output buffer */
   this->outputBufferSize = OUTPUT_BUFFER_SIZE;
@@ -197,18 +198,22 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
       if (Memory_ncmp(this->currentBuffer->currentPtr, "//", 2))
       {
         TransUnit_consumeLineComment(this);
+        //start = this->currentBuffer->nbCharRead;
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "/*", 2))
       {
         TransUnit_consumeMultilineComment(this);
+        //start = this->currentBuffer->nbCharRead;
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "#include", 8))
       {
         TransUnit_consumeInclude(this);
+        //start = this->currentBuffer->nbCharRead;
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "#define", 7))
       {
         TransUnit_readMacroDefinition(this);
+        //start = this->currentBuffer->nbCharRead;
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "#ifndef", 7))
       {
@@ -216,6 +221,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
         this->currentBuffer->nbCharRead += 7;
         // Check macro is not defined
         TransUnit_checkMacro(this, 0);
+        //start = this->currentBuffer->nbCharRead;
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "#ifdef", 6))
       {
@@ -223,16 +229,19 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
         this->currentBuffer->nbCharRead += 6;
         // Check macro is defined
         TransUnit_checkMacro(this, 1);
+        //start = this->currentBuffer->nbCharRead;
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "#undef", 6))
       {
         this->currentBuffer->currentPtr += 6;
         this->currentBuffer->nbCharRead += 6;
+        //start = this->currentBuffer->nbCharRead;
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "#if", 2))
       {
         this->currentBuffer->currentPtr += 2;
         this->currentBuffer->nbCharRead += 2;
+        //start = this->currentBuffer->nbCharRead;
       }
       /*else if (Memory_ncmp(this->currentBuffer->currentPtr, "#else", 4))
       {
@@ -246,6 +255,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
       {
         this->currentBuffer->currentPtr += 5;
         this->currentBuffer->nbCharRead += 5;
+        //start = this->currentBuffer->nbCharRead;
       }
       else if (0) //nothing to read
       {
@@ -254,6 +264,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "\"", 1))
       {
         TransUnit_consumeString(this);
+        //start = this->currentBuffer->nbCharRead;
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "\r\n", 2))
       {
@@ -285,7 +296,6 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
     }
     int isStackNotEmpty = TransUnit_popBuffer(this);
 
-    /* Check if the stack of buffers is empty, if so Translation Unit is complete. */
     if (!isStackNotEmpty)
     {
       TRACE(("TransUnit.c: Lastbuffer was processed.\n"));
@@ -736,11 +746,15 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
         {
           start = 1;
           length = 0;
+          bracketCount = 1;
         }
-        bracketCount++;
+        else
+        {
+          bracketCount++;
+          length++;
+        }
         this->currentBuffer->currentPtr++;
         this->currentBuffer->nbCharRead++;
-        length++;
       }
       else if ((nextChar == ',')&&(bracketCount==0))
       {
