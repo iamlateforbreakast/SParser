@@ -60,6 +60,7 @@ PRIVATE void TransUnit_consumeLineComment(TransUnit* this);
 PRIVATE void TransUnit_consumeMultilineComment(TransUnit* this);
 PRIVATE void TransUnit_consumeInclude(TransUnit* this);
 PRIVATE void TransUnit_consumeString(TransUnit* this);
+PRIVATE void TransUnit_consumeNewLine(TransUnit* this);
 PRIVATE void TransUnit_readMacroDefinition(TransUnit* this);
 PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue);
 PRIVATE int TransUnit_pushNewBuffer(TransUnit* this, String* content);
@@ -270,12 +271,14 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
       {
         this->currentBuffer->currentPtr += 2;
         this->currentBuffer->nbCharRead += 2;
+        TransUnit_consumeNewLine(this);
         /* TODO: Update line being processed in Buffer */
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "\n", 1))
       {
         this->currentBuffer->currentPtr++;
         this->currentBuffer->nbCharRead++;
+        TransUnit_consumeNewLine(this);
       }
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "\t", 1))
       {
@@ -442,6 +445,20 @@ PRIVATE void TransUnit_consumeString(TransUnit* this)
   this->currentBuffer->currentPtr++;
   this->currentBuffer->nbCharRead++;
   this->nbCharWritten++;
+}
+
+/**********************************************//**
+  @brief TBC.
+  @private
+  @memberof TransUnit
+**************************************************/
+PRIVATE void TransUnit_consumeNewLine(TransUnit* this)
+{
+  while ((*this->currentBuffer->currentPtr == ' ') || (*this->currentBuffer->currentPtr == '\t'))
+  {
+    this->currentBuffer->currentPtr++;
+    this->currentBuffer->nbCharRead++;
+  }
 }
 
 /**********************************************//**
