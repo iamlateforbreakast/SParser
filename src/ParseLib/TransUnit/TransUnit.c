@@ -66,7 +66,7 @@ PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue);
 PRIVATE int TransUnit_pushNewBuffer(TransUnit* this, String* content);
 PRIVATE int TransUnit_popBuffer(TransUnit* this);
 PRIVATE int TransUnit_expandMacro(TransUnit* this);
-PRIVATE String* TransUnit_expandString(String* s, MacroStore* localMacroStore);
+PRIVATE String* TransUnit_expandString(TransUnit* this, String* s, MacroStore* localMacroStore);
 
 /**********************************************//**
   @brief Create a new TransUnit object.
@@ -181,10 +181,6 @@ PUBLIC char* TransUnit_getName(TransUnit* this)
 PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
 {
   if (this->state==COMPLETED) return 0;
-
-  char* ptr = this->currentBuffer->currentPtr;  //String_getBuffer(this->currentBuffer);
-  int isReadingContent = 0;
-  //int start = this->currentBuffer->nbCharRead;
 
   /* Reset output buffer */
   this->outputBufferSize = OUTPUT_BUFFER_SIZE;
@@ -303,6 +299,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
     {
       TRACE(("TransUnit.c: Lastbuffer was processed.\n"));
       TRACE(("TransUnit.c: Total number of chr written: %d\n", this->nbCharWritten));
+      this->outputBuffer[this->nbCharWritten] = 0;
       String * s = String_new(0);
       String_setBuffer(s, this->outputBuffer, 1);
       this->outputBuffer = 0;
@@ -819,7 +816,7 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
   if (macroDefinition->parameters)
   {
     TRACE(("Macro parameters: %d\n", List_getNbNodes(macroDefinition->parameters)));
-    String* expandedString = TransUnit_expandString(macroDefinition->body, localMacroStore);
+    String* expandedString = TransUnit_expandString(this, macroDefinition->body, localMacroStore);
     TransUnit_pushNewBuffer(this, expandedString);
     MacroStore_delete(localMacroStore);
     Memory_free(macroExpansionBuffer, 4096);
@@ -836,7 +833,7 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
   return 1;
 }
 
-PRIVATE String * TransUnit_expandString(String* s, MacroStore* localMacroStore)
+PRIVATE String * TransUnit_expandString(TransUnit* this, String* s, MacroStore* localMacroStore)
 {
   String* result = 0;
   int bufferSize = 2048;
