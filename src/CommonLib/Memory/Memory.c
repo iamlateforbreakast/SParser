@@ -74,13 +74,19 @@ PUBLIC void Memory_free(void* pointer, unsigned int nbBytes)
 **************************************************/
 PUBLIC void * Memory_realloc(void * pointer, unsigned int prevSizeBytes, unsigned int newSizeBytes)
 {
+  void *p = realloc(pointer, newSizeBytes);
+
+  Memory_nbBytesAllocated = Memory_nbBytesAllocated - prevSizeBytes + newSizeBytes;
+
+#if 0
   if (pointer!=0)
   {
     Memory_free(pointer, prevSizeBytes);
   }
   pointer = Memory_alloc(newSizeBytes);
-  
-  return pointer;
+#endif
+
+  return p;
 }
 
 /**********************************************//** 
@@ -143,7 +149,7 @@ PUBLIC int Memory_cmp(void * pointer, void * compared)
 **************************************************/
 PUBLIC unsigned int Memory_len(const void * pointer)
 {
-  return strlen(pointer);
+  return (unsigned int)strlen(pointer);
 }
 
 /**********************************************//** 
@@ -154,7 +160,7 @@ PUBLIC unsigned int Memory_len(const void * pointer)
 PUBLIC void Memory_report()
 {
   PRINT(("Memory Usage Report:\n"
-                                        "Number of memory allocation Requests: %d\n"
+         "Number of memory allocation Requests: %d\n"
          "Number of memory de-allocation Requests: %d\n", Memory_allocRequestId, Memory_freeRequestId));
 }
 
