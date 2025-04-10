@@ -21,6 +21,8 @@ struct Buffer
   char* currentPtr;
   char* startPtr;
   int nbCharRead;
+  char* writePtr;
+  int nbCharWritten;
 };
 
 PRIVATE Class bufferClass =
@@ -33,11 +35,17 @@ PRIVATE Class bufferClass =
   .f_size = (Sizer)&Buffer_getSize
 };
 
-PRIVATE Buffer * Buffer_new(String * content)
+PRIVATE Buffer* Buffer_new()
 {
   Buffer * this = 0;
 
-  /* TODO: Check if string can be undefined */
+  this = (Buffer*)Object_new(sizeof(Buffer), &bufferClass);
+
+  return this;
+}
+PRIVATE Buffer * Buffer_newFromString(String * content)
+{
+  Buffer * this = 0;
   this = (Buffer*)Object_new(sizeof(Buffer), &bufferClass);
 
   this->string = content;
@@ -69,5 +77,8 @@ PRIVATE void Buffer_print(Buffer * this)
 PRIVATE unsigned int Buffer_getSize(Buffer * this)
 {
   return sizeof(this);
+}
+PRIVATE unsigned int Buffer_writeNChar(Buffer* this, char* buf, int nchar)
+{
 }
 #endif /* _BUFFER_H_ */
