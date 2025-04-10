@@ -37,6 +37,7 @@ struct TransUnit
   MacroStore* store;
   Buffer* currentBuffer;
   int nbCharRead;
+  // Buffer* output;
   char* outputBuffer;
   int outputBufferSize;
   int nbCharWritten;
@@ -98,7 +99,7 @@ PUBLIC TransUnit* TransUnit_new(FileDesc* file, FileMgr* fileMgr)
 
   /* Create new buffer */
   String* content = FileDesc_load(file);
-  Buffer* buffer = Buffer_new(content);
+  Buffer* buffer = Buffer_newFromString(content);
 
   List_insertHead(this->buffers, buffer, 0);
   this->currentBuffer = buffer;
@@ -183,6 +184,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
   if (this->state==COMPLETED) return 0;
 
   /* Reset output buffer */
+  /* this->outputBuffer = Buffer_new(); */
   this->outputBufferSize = OUTPUT_BUFFER_SIZE;
   this->outputBuffer = Memory_alloc(this->outputBufferSize);
   Memory_set(this->outputBuffer, 0, this->outputBufferSize);
@@ -190,8 +192,10 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
 
   while (1)
   {
+    /* !Buffer_isError(input) && !Buffer_isRead(input) && !Buffer_overflow(output) */
     while ((this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
     {
+      /* Buffer_accept(this->currentBUffer, "//");*/
       if (Memory_ncmp(this->currentBuffer->currentPtr, "//", 2))
       {
         TransUnit_consumeLineComment(this);
@@ -288,21 +292,29 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
         this->currentBuffer->nbCharRead++;
         this->nbCharWritten++; // Need to check max value
 
-        if (this->nbCharWritten >= OUTPUT_BUFFER_SIZE) Error_new(ERROR_FATAL, "Output BUffer is overflowing.\n");
-
+        if (this->nbCharWritten >= this->outputBufferSize)
+        {
+          this->outputBuffer = Memory_realloc(this->outputBuffer, this->outputBufferSize, this->outputBufferSize * 2);
+          this->outputBuffer[this->outputBufferSize] = 0;
+          this->outputBufferSize = this->outputBufferSize * 2;
+          Error_new(ERROR_NORMAL, "Output Buffer is overflowing.\n");
+        }
 
       }
     }
+    /* Should be stack is empty */
     int isStackNotEmpty = TransUnit_popBuffer(this);
 
     if (!isStackNotEmpty)
     {
       TRACE(("TransUnit.c: Lastbuffer was processed.\n"));
       TRACE(("TransUnit.c: Total number of chr written: %d\n", this->nbCharWritten));
+      /* Buffer_toString(this->outputBUffer); */
       this->outputBuffer[this->nbCharWritten] = 0;
       String * s = String_new(0);
       String_setBuffer(s, this->outputBuffer, 1);
       this->outputBuffer = 0;
+      /* Buffer_delete(this->outputBuffer)*/
       this->state = COMPLETED;
       return s;
     }
@@ -674,7 +686,7 @@ PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue)
 **************************************************/
 PRIVATE int TransUnit_pushNewBuffer(TransUnit* this, String* content)
 {
-  Buffer* buffer = Buffer_new(content);
+  Buffer* buffer = Buffer_newFromString(content);
 
   List_insertHead(this->buffers, buffer, 0);
   this->currentBuffer = buffer;
