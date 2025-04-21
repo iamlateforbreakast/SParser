@@ -30,7 +30,7 @@ PRIVATE unsigned int IncludeDir_getSize(IncludeInfo * this)
 {
   return sizeof(IncludeInfo);
 }
-
+#if 0
 PRIVATE Class includeInfoClass =
 {
   .f_new = (Constructor)0,
@@ -40,7 +40,7 @@ PRIVATE Class includeInfoClass =
   .f_print = (Printer)0,
   .f_size = (Sizer)&IncludeDir_getSize
 };
-
+#endif
  /**********************************************//**
    @class FileReader
  **************************************************/
@@ -203,9 +203,9 @@ PUBLIC char * FileReader_addFile(FileReader * this, String * fileName)
   // Not freed
   List * dirList = 0;
   FileDesc * fileDesc = 0;
-  String * fullPath = 0;
+  //String * fullPath = 0;
   String * newFileContent = 0;
-  struct IncludeInfo * dirInfo = 0;
+  //struct IncludeInfo * dirInfo = 0;
   char * result = 0;
   
 #if 0
