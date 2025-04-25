@@ -13,12 +13,13 @@ PRIVATE Buffer * Buffer_new();
 PRIVATE void Buffer_delete(Buffer * this);
 PRIVATE void Buffer_print(Buffer * this);
 PRIVATE unsigned int Buffer_getSize(Buffer * this);
+PRIVATE unsigned int Buffer_accept(Buffer* this, char* keyword);
 
 struct Buffer
 {
   Object object;
   String* string;
-  char* currentPtr;
+  char* readPtr;
   char* startPtr;
   int nbCharRead;
   char* writePtr;
@@ -50,7 +51,7 @@ PRIVATE Buffer * Buffer_newFromString(String * content)
 
   this->string = content;
   this->startPtr = String_getBuffer(this->string);
-  this->currentPtr = this->startPtr;
+  this->readPtr = this->startPtr;
   this->nbCharRead = 0;
 
   return this;
@@ -63,7 +64,7 @@ PRIVATE void Buffer_delete(Buffer * this)
   /* De-allocate the specific members */
   String_delete(this->string);
   this->startPtr = 0;
-  this->currentPtr = 0;
+  this->readPtr = 0;
   this->nbCharRead = 0;
   /* De-allocate the base object */
   Object_deallocate(&this->object);
@@ -78,7 +79,20 @@ PRIVATE unsigned int Buffer_getSize(Buffer * this)
 {
   return sizeof(this);
 }
+
 PRIVATE unsigned int Buffer_writeNChar(Buffer* this, char* buf, int nchar)
 {
+}
+
+PRIVATE unsigned int Buffer_accept(Buffer* this, char* keyword)
+{
+  if (Memory_ncmp(this->readPtr, keyword, sizeof(keyword)))
+  {
+    this->readPtr += sizeof(keyword);
+    this->nbCharRead += sizeof(keyword);
+    return 1;
+  }
+  else
+    return 0;
 }
 #endif /* _BUFFER_H_ */

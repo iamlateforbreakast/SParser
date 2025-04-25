@@ -224,6 +224,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
         TransUnit_checkMacro(this, 0);
         //start = this->currentBuffer->nbCharRead;
       }
+      /* Buffer_accept(this->currentBuffer, "#ifdef") */
       else if (Memory_ncmp(this->currentBuffer->currentPtr, "#ifdef", 6))
       {
         this->currentBuffer->currentPtr += 6;
