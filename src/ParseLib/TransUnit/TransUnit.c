@@ -22,8 +22,6 @@
 #define DEBUG (0)
 
 #define IS_MACRO_LETTER(C) ((((C)>='A') && ((C)<='Z')) || (((C)>='a') && ((C)<='z')) || (((C)>='0') && ((C)<='9')) || ((C)=='_'))
-/* Size of the output buffer in bytes */
-#define OUTPUT_BUFFER_SIZE (20000)
 
 /**********************************************//**
   @class TransUnit
@@ -37,8 +35,8 @@ struct TransUnit
   MacroStore* store;
   Buffer* currentBuffer;
   int nbCharRead;
-  // Buffer* output;
-  char* outputBuffer;
+  Buffer* output;
+  // char* outputBuffer;
   int outputBufferSize;
   int nbCharWritten;
   TransUnitState state;
@@ -184,19 +182,19 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
   if (this->state==COMPLETED) return 0;
 
   /* Reset output buffer */
-  /* this->outputBuffer = Buffer_new(); */
-  this->outputBufferSize = OUTPUT_BUFFER_SIZE;
-  this->outputBuffer = Memory_alloc(this->outputBufferSize);
-  Memory_set(this->outputBuffer, 0, this->outputBufferSize);
-  this->nbCharWritten = 0;
+  this->outputBuffer = Buffer_new();
+  /* this->outputBufferSize = OUTPUT_BUFFER_SIZE; */
+  /* this->outputBuffer = Memory_alloc(this->outputBufferSize); */
+  /* Memory_set(this->outputBuffer, 0, this->outputBufferSize); */
+  /* this->nbCharWritten = 0; */
 
   while (1)
   {
-    /* !Buffer_isError(input) && !Buffer_isRead(input) && !Buffer_overflow(output) */
-    while ((this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
+    while (!Buffer_isEmpty(this->currentBuffer))
+    //while ((this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
     {
-      /* Buffer_accept(this->currentBUffer, "//");*/
-      if (Memory_ncmp(this->currentBuffer->currentPtr, "//", 2))
+      if (Buffer_accept(this->currentBuffer, "//"))
+      /* if (Memory_ncmp(this->currentBuffer->currentPtr, "//", 2)) */
       {
         TransUnit_consumeLineComment(this);
         //start = this->currentBuffer->nbCharRead;
