@@ -18,8 +18,11 @@ PRIVATE Buffer * Buffer_newFromString();
 PRIVATE void Buffer_delete(Buffer * this);
 PRIVATE void Buffer_print(Buffer * this);
 PRIVATE unsigned int Buffer_getSize(Buffer * this);
-PRIVATE unsigned int Buffer_accept(Buffer* this, char* keyword);
+PRIVATE unsigned int Buffer_accept(Buffer* this, const char* keyword);
 
+/**********************************************//**
+  @class Buffer
+**************************************************/
 struct Buffer
 {
   Object object;
@@ -31,6 +34,9 @@ struct Buffer
   int size;
 };
 
+/**********************************************//**
+  @private Class Description
+**************************************************/
 PRIVATE Class bufferClass =
 {
   .f_new = (Constructor)0,
@@ -41,11 +47,19 @@ PRIVATE Class bufferClass =
   .f_size = (Sizer)&Buffer_getSize
 };
 
+/**********************************************//**
+  @brief Create a new Buffer object.
+  @public
+  @memberof TransUnit
+  @return Created Buffer instance.
+**************************************************/
 PRIVATE Buffer* Buffer_new()
 {
   Buffer* this = 0;
 
   this = (Buffer*)Object_new(sizeof(Buffer), &bufferClass);
+
+  if (OBJECT_IS_INVALID(this)) return 0;
 
   this->size = DEFAULT_SIZE;
   this->content = (char*)Memory_alloc(this->size);
@@ -60,11 +74,19 @@ PRIVATE Buffer* Buffer_new()
   return this;
 }
 
+/**********************************************//**
+  @brief Create a new Buffer object from a given String
+  @public
+  @memberof TransUnit
+  @return Created Buffer instance.
+**************************************************/
 PRIVATE Buffer * Buffer_newFromString(String* content)
 {
   Buffer * this = 0;
 
   this = (Buffer*)Object_new(sizeof(Buffer), &bufferClass);
+
+  if (OBJECT_IS_INVALID(this)) return 0;
 
   this->content = String_getBuffer(content);
   this->size = String_getSize(content);
@@ -77,9 +99,14 @@ PRIVATE Buffer * Buffer_newFromString(String* content)
   return this;
 }
 
+/**********************************************//**
+  @brief Delete an instance of a Buffer object.
+  @public
+  @memberof TransUnit
+**************************************************/
 PRIVATE void Buffer_delete(Buffer * this)
 {
-  if (this == 0) return;
+  if (OBJECT_IS_INVALID(this)) return;
 
   /* De-allocate the specific members */
 
@@ -93,28 +120,85 @@ PRIVATE void Buffer_delete(Buffer * this)
   Object_deallocate(&this->object);
 }
 
+/**********************************************//**
+  @brief Print an instance of a Buffer object.
+  @public
+  @memberof TransUnit
+**************************************************/
 PRIVATE void Buffer_print(Buffer * this)
 {
 
 }
 
+/**********************************************//**
+  @brief Give the size in bytes of an instance of a Buffer object.
+  @public
+  @memberof TransUnit
+  @return size in bytes of instance
+**************************************************/
 PRIVATE unsigned int Buffer_getSize(Buffer * this)
 {
   return sizeof(this);
 }
 
+/**********************************************//**
+  @brief Write a buffer to the Buffer object.
+  @public
+  @memberof TransUnit
+**************************************************/
 PRIVATE unsigned int Buffer_writeNChar(Buffer* this, char* buf, int nchar)
 {
+  if ((this->nbCharWritten + nchar) > this->size)
+  {
+    PRINT(("Must resize\n"));
+    this->content = Memory_realloc(this->content, this->size, this->size * 2);
+    this->size *= 2;
+
+    return 0;
+  }
+  for (int idx = 0; idx < nchar; idx++)
+  {
+    *this->writePtr = buf[idx];
+    this->writePtr++;
+  }
+  this->nbCharWritten += nchar;
+
+  return 1;
 }
 
-PRIVATE unsigned int Buffer_accept(Buffer* this, char* keyword)
+/**********************************************//**
+  @brief Accept a keyword from the Buffer object.
+  @public
+  @memberof TransUnit
+**************************************************/
+PRIVATE unsigned int Buffer_accept(Buffer* this, const char* keyword)
 {
-  if (Memory_ncmp(this->readPtr, keyword, sizeof(keyword)))
+  int len1, len2;
+
+  if ((this->content + this->size) < (this->readPtr + Memory_len(keyword)))
   {
-    this->readPtr += sizeof(keyword);
-    this->nbCharRead += sizeof(keyword);
-    return 1;
-}
+    len1 = this->readPtr + Memory_len(keyword) - this->content - this->size;
+    len2 = Memory_len(keyword) - len1;
+  }
+  else
+  {
+    len1 = Memory_len(keyword);
+    len2 = 0;
+  }
+
+  if (Memory_ncmp(this->readPtr, keyword, len1))
+  {
+    this->readPtr += len1;
+    this->nbCharRead += len1;
+    if (Memory_ncmp(this->content, keyword + len1, len2))
+    {
+      this->readPtr += len2;
+      this->nbCharRead += len2;
+      return 1;
+    }
+    else
+      return 0;
+  }
   else
     return 0;
 }
