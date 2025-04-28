@@ -105,7 +105,7 @@ PUBLIC TransUnit* TransUnit_new(FileDesc* file, FileMgr* fileMgr)
   this->nbCharRead = 0;
   this->store = MacroStore_new();
   this->outputBufferSize = 0;
-  this->outputBuffer = 0;
+  //this->outputBuffer = 0;
   this->nbCharWritten = 0;
   this->state = NOT_STARTED;
 
@@ -182,7 +182,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
   if (this->state==COMPLETED) return 0;
 
   /* Reset output buffer */
-  this->outputBuffer = Buffer_new();
+  this->output = Buffer_new();
   /* this->outputBufferSize = OUTPUT_BUFFER_SIZE; */
   /* this->outputBuffer = Memory_alloc(this->outputBufferSize); */
   /* Memory_set(this->outputBuffer, 0, this->outputBufferSize); */
@@ -199,48 +199,54 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
         TransUnit_consumeLineComment(this);
         //start = this->currentBuffer->nbCharRead;
       }
-      else if (Memory_ncmp(this->currentBuffer->currentPtr, "/*", 2))
+      else if (Buffer_accept(this->currentBuffer,"/*"))
+      /* else if (Memory_ncmp(this->currentBuffer->currentPtr, "/*", 2)) */
       {
         TransUnit_consumeMultilineComment(this);
         //start = this->currentBuffer->nbCharRead;
       }
-      else if (Memory_ncmp(this->currentBuffer->currentPtr, "#include", 8))
+      else if (Buffer_access(this->currentBuffer,"#include"))
+      /* else if (Memory_ncmp(this->currentBuffer->currentPtr, "#include", 8)) */
       {
         TransUnit_consumeInclude(this);
         //start = this->currentBuffer->nbCharRead;
       }
-      else if (Memory_ncmp(this->currentBuffer->currentPtr, "#define", 7))
+      else if (Buffer_accept(this->currentBuffer,"#define"))
+      /* else if (Memory_ncmp(this->currentBuffer->currentPtr, "#define", 7)) */
       {
         TransUnit_readMacroDefinition(this);
         //start = this->currentBuffer->nbCharRead;
       }
-      else if (Memory_ncmp(this->currentBuffer->currentPtr, "#ifndef", 7))
+      else if (Buffer_accept(this->currentBuffer,"#ifndef"))
+      /* else if (Memory_ncmp(this->currentBuffer->currentPtr, "#ifndef", 7)) */
       {
-        this->currentBuffer->currentPtr += 7;
-        this->currentBuffer->nbCharRead += 7;
+        //this->currentBuffer->currentPtr += 7;
+        //this->currentBuffer->nbCharRead += 7;
         // Check macro is not defined
         TransUnit_checkMacro(this, 0);
         //start = this->currentBuffer->nbCharRead;
       }
-      /* Buffer_accept(this->currentBuffer, "#ifdef") */
-      else if (Memory_ncmp(this->currentBuffer->currentPtr, "#ifdef", 6))
+      else if (Buffer_accept(this->currentBuffer, "#ifdef"))
+      /* else if (Memory_ncmp(this->currentBuffer->currentPtr, "#ifdef", 6)) */
       {
-        this->currentBuffer->currentPtr += 6;
-        this->currentBuffer->nbCharRead += 6;
+        //this->currentBuffer->currentPtr += 6;
+        //this->currentBuffer->nbCharRead += 6;
         // Check macro is defined
         TransUnit_checkMacro(this, 1);
         //start = this->currentBuffer->nbCharRead;
       }
-      else if (Memory_ncmp(this->currentBuffer->currentPtr, "#undef", 6))
+      else if (Buffer_accept(this->currentBuffer, "#undef"))
+      /* else if (Memory_ncmp(this->currentBuffer->currentPtr, "#undef", 6)) */
       {
-        this->currentBuffer->currentPtr += 6;
-        this->currentBuffer->nbCharRead += 6;
+        //this->currentBuffer->currentPtr += 6;
+        //this->currentBuffer->nbCharRead += 6;
         //start = this->currentBuffer->nbCharRead;
       }
-      else if (Memory_ncmp(this->currentBuffer->currentPtr, "#if", 2))
+      else if (Buffer_accept(this->currentBuffer,"#if"))
+      /* else if (Memory_ncmp(this->currentBuffer->currentPtr, "#if", 2))*/
       {
-        this->currentBuffer->currentPtr += 2;
-        this->currentBuffer->nbCharRead += 2;
+        //this->currentBuffer->currentPtr += 2;
+        //this->currentBuffer->nbCharRead += 2;
         //start = this->currentBuffer->nbCharRead;
       }
       /*else if (Memory_ncmp(this->currentBuffer->currentPtr, "#else", 4))
@@ -251,38 +257,43 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
       {
         Error
       }*/
-      else if (Memory_ncmp(this->currentBuffer->currentPtr, "#error", 5))
+      else if (Buffer_accept(this->currentBuffer, "#error"))
+      /* else if (Memory_ncmp(this->currentBuffer->currentPtr, "#error", 5)) */
       {
-        this->currentBuffer->currentPtr += 5;
-        this->currentBuffer->nbCharRead += 5;
+        //this->currentBuffer->currentPtr += 5;
+        //this->currentBuffer->nbCharRead += 5;
         //start = this->currentBuffer->nbCharRead;
       }
       else if (0) //nothing to read
       {
         //unstack
       }
-      else if (Memory_ncmp(this->currentBuffer->currentPtr, "\"", 1))
+      else if (Buffer_accept(this->currentBuffer,"\""))
+      /* else if (Memory_ncmp(this->currentBuffer->currentPtr, "\"", 1)) */
       {
         TransUnit_consumeString(this);
         //start = this->currentBuffer->nbCharRead;
       }
-      else if (Memory_ncmp(this->currentBuffer->currentPtr, "\r\n", 2))
+      else if (Buffer_accept(this->currentBuffer, "\r\n"))
+      /* else if (Memory_ncmp(this->currentBuffer->currentPtr, "\r\n", 2)) */
       {
-        this->currentBuffer->currentPtr += 2;
-        this->currentBuffer->nbCharRead += 2;
+        //this->currentBuffer->currentPtr += 2;
+        //this->currentBuffer->nbCharRead += 2;
         TransUnit_consumeNewLine(this);
         /* TODO: Update line being processed in Buffer */
       }
-      else if (Memory_ncmp(this->currentBuffer->currentPtr, "\n", 1))
+      else if (Buffer_accept(this->currentBuffer, "\n"))
+      /* else if (Memory_ncmp(this->currentBuffer->currentPtr, "\n", 1)) */
       {
-        this->currentBuffer->currentPtr++;
-        this->currentBuffer->nbCharRead++;
+        //this->currentBuffer->currentPtr++;
+        //this->currentBuffer->nbCharRead++;
         TransUnit_consumeNewLine(this);
       }
-      else if (Memory_ncmp(this->currentBuffer->currentPtr, "\t", 1))
+      else if (Buffer_accept(this->currentBuffer, "\t"))
+      /* else if (Memory_ncmp(this->currentBuffer->currentPtr, "\t", 1)) */
       {
-        this->currentBuffer->currentPtr++;
-        this->currentBuffer->nbCharRead++;
+        //this->currentBuffer->currentPtr++;
+        //this->currentBuffer->nbCharRead++;
       }
       else if (!TransUnit_expandMacro(this))
       {
