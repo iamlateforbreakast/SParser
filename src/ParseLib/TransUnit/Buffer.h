@@ -31,6 +31,7 @@ PRIVATE String* Buffer_toString(Buffer* this);
 struct Buffer
 {
   Object object;
+  String* string;
   char *content;
   char* readPtr;
   int nbCharRead;
@@ -67,6 +68,7 @@ PRIVATE Buffer* Buffer_new()
   if (OBJECT_IS_INVALID(this)) return 0;
 
   this->size = DEFAULT_SIZE;
+  this->string = 0;
   this->content = (char*)Memory_alloc(this->size);
   *this->content = 0;
 
@@ -93,6 +95,7 @@ PRIVATE Buffer * Buffer_newFromString(String* content)
 
   if (OBJECT_IS_INVALID(this)) return 0;
 
+  this->string = content;
   this->content = String_getBuffer(content);
   this->size = String_getSize(content);
 
@@ -115,7 +118,10 @@ PRIVATE void Buffer_delete(Buffer * this)
 
   /* De-allocate the specific members */
 
-  Memory_free(this->content, this->size);
+  if (this->string)
+    String_delete(this->string);
+  else
+    Memory_free(this->content, this->size);
   this->content = 0;
   this->readPtr = 0;
   this->writePtr = 0;

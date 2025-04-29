@@ -3,7 +3,7 @@ all: UT_TransUnit_01 UT_MacroStore_01
 #%.d: %.c
 #	gcc -MM -I../../include -I../../../CommonLib/include -I../../../AppliLib/include -o $@ $<
  
-UT_TransUnit_01: UT_TransUnit_01.c ../TransUnit.c ../TransUnit.h
+UT_TransUnit_01: UT_TransUnit_01.c ../TransUnit.c ../TransUnit.h ../Buffer.h ../MacroStore.h
 	gcc -DUNIT_TEST -DMAIN -g UT_TransUnit_01.c ../TransUnit.c \
 	-I../../include -I../../../CommonLib/include -I../../../AppliLib/include \
 	-L../../../CommonLib -L../../../AppliLib -L../.. \
