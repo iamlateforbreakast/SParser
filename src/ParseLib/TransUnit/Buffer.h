@@ -222,6 +222,11 @@ PRIVATE int Buffer_accept(Buffer* this, const char* keyword)
 **************************************************/
 PRIVATE int Buffer_readOneChar(Buffer* this, char* c)
 {
+  *c = *this->readPtr;
+  this->nbCharRead++;
+  this->readPtr++;
+  if ((this->readPtr) >= (this->content + this->size))
+    this->readPtr = this->content;
   return 0;
 }
 
@@ -242,7 +247,7 @@ PRIVATE int Buffer_readWithDelimiter(Buffer* this, char c, String** extracted)
 
 PRIVATE int Buffer_isEmpty(Buffer* this)
 {
-
+  return (this->readPtr == this->writePtr);
 }
 
 PRIVATE String* Buffer_toString(Buffer* this)
