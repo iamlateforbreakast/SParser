@@ -464,7 +464,7 @@ PRIVATE void TransUnit_consumeString(TransUnit* this)
   //this->nbCharWritten++;
 
   /* Need to check for EOL which causes an error */
-  while (!Buffer_accept(this->currentBuffer, '\"'))
+  while (!Buffer_accept(this->currentBuffer, "\""))
   //while ((*this->currentBuffer->currentPtr != '\"') &&
   //       (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
   {

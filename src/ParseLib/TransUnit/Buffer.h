@@ -17,11 +17,11 @@ PRIVATE Buffer * Buffer_new();
 PRIVATE Buffer * Buffer_newFromString();
 PRIVATE void Buffer_delete(Buffer * this);
 PRIVATE void Buffer_print(Buffer * this);
-PRIVATE int Buffer_getSize(Buffer * this);
+PRIVATE unsigned int Buffer_getSize(Buffer * this);
 PRIVATE int Buffer_accept(Buffer* this, const char* keyword);
 PRIVATE int Buffer_writeNChar(Buffer* this, char* buf, int nchar);
 PRIVATE int Buffer_readOneChar(Buffer* this, char* c);
-PRIVATE int Buffer_readWithDelimiter(Buffer* this, char c);
+PRIVATE int Buffer_readWithDelimiter(Buffer* this, char c, String** extracted);
 PRIVATE int Buffer_isEmpty(Buffer* this);
 PRIVATE String* Buffer_toString(Buffer* this);
 
@@ -151,7 +151,7 @@ PRIVATE unsigned int Buffer_getSize(Buffer * this)
   @public
   @memberof TransUnit
 **************************************************/
-PRIVATE unsigned int Buffer_writeNChar(Buffer* this, char* buf, int nchar)
+PRIVATE int Buffer_writeNChar(Buffer* this, char* buf, int nchar)
 {
   if ((this->nbCharWritten + nchar) > this->size)
   {
@@ -176,7 +176,7 @@ PRIVATE unsigned int Buffer_writeNChar(Buffer* this, char* buf, int nchar)
   @public
   @memberof TransUnit
 **************************************************/
-PRIVATE unsigned int Buffer_accept(Buffer* this, const char* keyword)
+PRIVATE int Buffer_accept(Buffer* this, const char* keyword)
 {
   int len1, len2;
 
