@@ -17,8 +17,13 @@ PRIVATE Buffer * Buffer_new();
 PRIVATE Buffer * Buffer_newFromString();
 PRIVATE void Buffer_delete(Buffer * this);
 PRIVATE void Buffer_print(Buffer * this);
-PRIVATE unsigned int Buffer_getSize(Buffer * this);
-PRIVATE unsigned int Buffer_accept(Buffer* this, const char* keyword);
+PRIVATE int Buffer_getSize(Buffer * this);
+PRIVATE int Buffer_accept(Buffer* this, const char* keyword);
+PRIVATE int Buffer_writeNChar(Buffer* this, char* buf, int nchar);
+PRIVATE int Buffer_readOneChar(Buffer* this, char* c);
+PRIVATE int Buffer_readWithDelimiter(Buffer* this, char c);
+PRIVATE int Buffer_isEmpty(Buffer* this);
+PRIVATE String* Buffer_toString(Buffer* this);
 
 /**********************************************//**
   @class Buffer
@@ -201,5 +206,41 @@ PRIVATE unsigned int Buffer_accept(Buffer* this, const char* keyword)
   }
   else
     return 0;
+}
+
+/**********************************************//**
+  @brief Read one character from the Buffer object.
+  @public
+  @memberof TransUnit
+  @return status: failed = 0, success = 1
+**************************************************/
+PRIVATE int Buffer_readOneChar(Buffer* this, char* c)
+{
+  return 0;
+}
+
+/**********************************************//**
+  @brief Read a string between 2 delimiters from the Buffer object.
+  @public
+  @memberof TransUnit
+  @return status: failed = 0, success = 1
+**************************************************/
+PRIVATE int Buffer_readWithDelimiter(Buffer* this, char c, String** extracted)
+{
+  String* result;
+
+  *extracted = result;
+
+  return 0;
+}
+
+PRIVATE int Buffer_isEmpty(Buffer* this)
+{
+
+}
+
+PRIVATE String* Buffer_toString(Buffer* this)
+{
+
 }
 #endif /* _BUFFER_H_ */
