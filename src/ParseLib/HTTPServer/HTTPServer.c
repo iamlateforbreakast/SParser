@@ -123,7 +123,7 @@ Class httpServerClass =
 PUBLIC HTTPServer* HTTPServer_new()
 {
   HTTPServer* this = 0;
-  int sockOptions = 1;
+  //int sockOptions = 1;
   this = (HTTPServer*)Object_new(sizeof(HTTPServer), &httpServerClass);
 
   if (OBJECT_IS_INVALID(this)) return 0;
@@ -260,7 +260,7 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
     }
     PRINT(("Received connection\n"));
 
-    int msg_len = 0;
+    //int msg_len = 0;
     
     void * params[5];
     params[0] = &client_fd;
@@ -295,7 +295,7 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
 **************************************************/
 PRIVATE void* HTTPServer_listenTaskBody(void* params)
 { 
-  int msg_len = 0;
+  //int msg_len = 0;
 #ifndef WIN32
   int* client_fd = ((struct ConnectionParam**)params)[0]->client_fd;
 #else
@@ -311,7 +311,7 @@ PRIVATE void* HTTPServer_listenTaskBody(void* params)
     FileMgr* fm = FileMgr_new();
     String* errorMessage = String_newByRef("<doctype !html><html><head><title>Error</title></head>"
         "<body><h1>Error!</h1></body></html>\r\n");
-    int nbRequestProcessed = 0;
+    //int nbRequestProcessed = 0;
 
     int msg_len = recv(*client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
     
