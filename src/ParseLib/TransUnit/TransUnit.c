@@ -22,6 +22,7 @@
 #define DEBUG (0)
 
 #define IS_MACRO_LETTER(C) ((((C)>='A') && ((C)<='Z')) || (((C)>='a') && ((C)<='z')) || (((C)>='0') && ((C)<='9')) || ((C)=='_'))
+/* Size of the output buffer in bytes */
 
 /**********************************************//**
   @class TransUnit
@@ -181,6 +182,10 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
 {
   if (this->state==COMPLETED) return 0;
 
+  //char* ptr = this->currentBuffer->currentPtr;  //String_getBuffer(this->currentBuffer);
+  //int isReadingContent = 0;
+  //int start = this->currentBuffer->nbCharRead;
+
   /* Reset output buffer */
   this->output = Buffer_new();
   /* this->outputBufferSize = OUTPUT_BUFFER_SIZE; */
@@ -205,7 +210,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
         TransUnit_consumeMultilineComment(this);
         //start = this->currentBuffer->nbCharRead;
       }
-      else if (Buffer_access(this->currentBuffer,"#include"))
+      else if (Buffer_accept(this->currentBuffer,"#include"))
       /* else if (Memory_ncmp(this->currentBuffer->currentPtr, "#include", 8)) */
       {
         TransUnit_consumeInclude(this);
@@ -297,19 +302,21 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
       }
       else if (!TransUnit_expandMacro(this))
       {
-        this->outputBuffer[this->nbCharWritten] = *(this->currentBuffer->currentPtr);
-        this->currentBuffer->currentPtr++;
-        this->currentBuffer->nbCharRead++;
-        this->nbCharWritten++; // Need to check max value
+        char c;
+        Buffer_readOneChar(this->currentBuffer, &c);
+        Buffer_writeNChar(this->output, &c, 1);
+        //this->outputBuffer[this->nbCharWritten] = *(this->currentBuffer->currentPtr);
+        //this->currentBuffer->currentPtr++;
+        //this->currentBuffer->nbCharRead++;
+        //this->nbCharWritten++; // Need to check max value
 
-        if (this->nbCharWritten >= this->outputBufferSize)
-        {
-          this->outputBuffer = Memory_realloc(this->outputBuffer, this->outputBufferSize, this->outputBufferSize * 2);
-          this->outputBuffer[this->outputBufferSize] = 0;
-          this->outputBufferSize = this->outputBufferSize * 2;
-          Error_new(ERROR_NORMAL, "Output Buffer is overflowing.\n");
-        }
-
+        //if (this->nbCharWritten >= this->outputBufferSize)
+        //{
+        //  this->outputBuffer = Memory_realloc(this->outputBuffer, this->outputBufferSize, this->outputBufferSize * 2);
+        //  this->outputBuffer[this->outputBufferSize] = 0;
+        //  this->outputBufferSize = this->outputBufferSize * 2;
+        //  Error_new(ERROR_NORMAL, "Output Buffer is overflowing.\n");
+        //}
       }
     }
     /* Should be stack is empty */
@@ -319,12 +326,12 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
     {
       TRACE(("TransUnit.c: Lastbuffer was processed.\n"));
       TRACE(("TransUnit.c: Total number of chr written: %d\n", this->nbCharWritten));
-      /* Buffer_toString(this->outputBUffer); */
-      this->outputBuffer[this->nbCharWritten] = 0;
+      Buffer_toString(this->output);
+      //this->outputBuffer[this->nbCharWritten] = 0;
       String * s = String_new(0);
-      String_setBuffer(s, this->outputBuffer, 1);
-      this->outputBuffer = 0;
-      /* Buffer_delete(this->outputBuffer)*/
+      //String_setBuffer(s, this->outputBuffer, 1);
+      //this->outputBuffer = 0;
+      Buffer_delete(this->output);
       this->state = COMPLETED;
       return s;
     }
@@ -346,10 +353,11 @@ PRIVATE void TransUnit_consumeLineComment(TransUnit* this)
 
   int start = this->currentBuffer->nbCharRead;
 
-  while (!Memory_ncmp(this->currentBuffer->currentPtr, "\n", 1) && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
+  while (Buffer_accept(this->currentBuffer, "\n"))
+  // while (!Memory_ncmp(this->currentBuffer->currentPtr, "\n", 1) && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
   {
-    this->currentBuffer->currentPtr++;
-    this->currentBuffer->nbCharRead++;
+    //this->currentBuffer->currentPtr++;
+    //this->currentBuffer->nbCharRead++;
   }
 #if DEBUG
   String* lineComment = 0;
@@ -368,13 +376,16 @@ PRIVATE void TransUnit_consumeMultilineComment(TransUnit* this)
 {
   int start = this->currentBuffer->nbCharRead;
 
-  while (!Memory_ncmp(this->currentBuffer->currentPtr, "*/", 2) && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
+  while (!Buffer_accept(this->currentBuffer, "*/"))
+  //while (!Memory_ncmp(this->currentBuffer->currentPtr, "*/", 2) && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
   {
-    this->currentBuffer->currentPtr++;
-    this->currentBuffer->nbCharRead++;
+    char c;
+    Buffer_readOneChar(this->currentBuffer, &c);
+    //this->currentBuffer->currentPtr++;
+    //this->currentBuffer->nbCharRead++;
   }
-  this->currentBuffer->currentPtr += 2;
-  this->currentBuffer->nbCharRead += 2;
+  //this->currentBuffer->currentPtr += 2;
+  //this->currentBuffer->nbCharRead += 2;
 #if DEBUG
   String* multiLineComment = 0;
   multiLineComment = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
@@ -394,14 +405,17 @@ PRIVATE void TransUnit_consumeInclude(TransUnit* this)
   int start = this->currentBuffer->nbCharRead;
   int isStarted = 0;
 
-  this->currentBuffer->currentPtr += 8;
-  this->currentBuffer->nbCharRead += 8;
+  //this->currentBuffer->currentPtr += 8;
+  //this->currentBuffer->nbCharRead += 8;
 
+  /* Buffer_acceptWithDelimiter(this->output, '\"'); */
+#if 0
   while ((*this->currentBuffer->currentPtr != '\"') &&
          (*this->currentBuffer->currentPtr != '<') && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
   {
-    this->currentBuffer->currentPtr++;
-    this->currentBuffer->nbCharRead++;
+    Buffer_readOneChar();
+    //this->currentBuffer->currentPtr++;
+    //this->currentBuffer->nbCharRead++;
   }
   start = this->currentBuffer->nbCharRead;
 
@@ -417,7 +431,7 @@ PRIVATE void TransUnit_consumeInclude(TransUnit* this)
   this->currentBuffer->nbCharRead++;
 
   fileName = String_subString(this->currentBuffer->string, start + 1, this->currentBuffer->nbCharRead - start - 2);
-
+#endif
   PRINT(("TransUnit_consumeInclude: %s\n", String_getBuffer(fileName)));
 
   /* Load the new buffer using the file manager */
@@ -444,26 +458,30 @@ PRIVATE void TransUnit_consumeInclude(TransUnit* this)
 PRIVATE void TransUnit_consumeString(TransUnit* this)
 {
   /* Read the first " and copy to output buffer */
-  this->outputBuffer[this->nbCharWritten] = *(this->currentBuffer->currentPtr);
-  this->currentBuffer->currentPtr ++;
-  this->currentBuffer->nbCharRead ++;
-  this->nbCharWritten++;
+  //this->outputBuffer[this->nbCharWritten] = *(this->currentBuffer->currentPtr);
+  //this->currentBuffer->currentPtr ++;
+  //this->currentBuffer->nbCharRead ++;
+  //this->nbCharWritten++;
 
   /* Need to check for EOL which causes an error */
-  while ((*this->currentBuffer->currentPtr != '\"') &&
-         (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
+  while (!Buffer_accept(this->currentBuffer, '\"'))
+  //while ((*this->currentBuffer->currentPtr != '\"') &&
+  //       (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
   {
-    this->outputBuffer[this->nbCharWritten] = *(this->currentBuffer->currentPtr);
-    this->currentBuffer->currentPtr++;
-    this->currentBuffer->nbCharRead++;
-    this->nbCharWritten++;
+    char c;
+    Buffer_readOneChar(this->currentBuffer, &c);
+    Buffer_writeNChar(this->output, &c, 1);
+    //this->outputBuffer[this->nbCharWritten] = *(this->currentBuffer->currentPtr);
+    //this->currentBuffer->currentPtr++;
+    //this->currentBuffer->nbCharRead++;
+    //this->nbCharWritten++;
   }
 
   /* Read the last " and copy to output buffer */
-  this->outputBuffer[this->nbCharWritten] = *(this->currentBuffer->currentPtr);
-  this->currentBuffer->currentPtr++;
-  this->currentBuffer->nbCharRead++;
-  this->nbCharWritten++;
+  //this->outputBuffer[this->nbCharWritten] = *(this->currentBuffer->currentPtr);
+  //this->currentBuffer->currentPtr++;
+  //this->currentBuffer->nbCharRead++;
+  //this->nbCharWritten++;
 }
 
 /**********************************************//**
@@ -473,11 +491,13 @@ PRIVATE void TransUnit_consumeString(TransUnit* this)
 **************************************************/
 PRIVATE void TransUnit_consumeNewLine(TransUnit* this)
 {
+#if 0
   while ((*this->currentBuffer->currentPtr == ' ') || (*this->currentBuffer->currentPtr == '\t'))
   {
     this->currentBuffer->currentPtr++;
     this->currentBuffer->nbCharRead++;
   }
+#endif
 }
 
 /**********************************************//**
@@ -487,7 +507,7 @@ PRIVATE void TransUnit_consumeNewLine(TransUnit* this)
 **************************************************/
 PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
 {
-
+#if 0
   String* parameter = 0;
   unsigned int paramLength = 0;
   List* parameters = 0;
@@ -580,6 +600,7 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
   TRACE(("Defined macro: %s\n", String_getBuffer(macroName)));
   TRACE(("Nb param: %d\n", List_getNbNodes(macroDefinition->parameters)));
   String_delete(macroName);
+#endif
 }
 
 /**********************************************//**
@@ -589,6 +610,7 @@ PRIVATE void TransUnit_readMacroDefinition(TransUnit* this)
 **************************************************/
 PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue)
 {
+#if 0
   /* Consume spaces */
   while ((*this->currentBuffer->currentPtr == ' ') && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
   {
@@ -687,6 +709,7 @@ PRIVATE void TransUnit_checkMacro(TransUnit* this, int checkForTrue)
   }
   //TRACE(("TransUnit_checkMacro: BUffer extracted %s\n", String_getBuffer(buffer)));
   //PRINT(("TransUnit_checkMacro: outbuffer %s\n", this->outputBuffer));
+#endif
 }
 
 /**********************************************//**
@@ -701,7 +724,7 @@ PRIVATE int TransUnit_pushNewBuffer(TransUnit* this, String* content)
   List_insertHead(this->buffers, buffer, 0);
   this->currentBuffer = buffer;
 
-  TRACE(("TransuNit_pushNewBuffer: Buffer %d\n", List_getNbNodes(this->buffers)));
+  TRACE(("TransUnit_pushNewBuffer: Buffer %d\n", List_getNbNodes(this->buffers)));
 
   return 0;
 }
@@ -735,10 +758,14 @@ PRIVATE int TransUnit_popBuffer(TransUnit* this)
 **************************************************/
 PRIVATE int TransUnit_expandMacro(TransUnit* this)
 {
+#if 0
   int length = 1;
   MacroDefinition *macroDefinition;
   enum MacroEvalName status;
+  Buffer* newBuffer;
 
+  status = MacroStore_expandMacro(this->store, this->output, &newBuffer);
+  /* status = MacroStore_evalName(this->store, this->output, &newBuffer); */
   status = MacroStore_evalName(this->store, this->currentBuffer->currentPtr, length, &macroDefinition);
   while (status ==  E_POSSIBLE_MACRO)
   {
@@ -852,6 +879,7 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
     TransUnit_pushNewBuffer(this, macroExpansion);
   }
   //Memory_free(macroExpansionBuffer, 4096);
+#endif
   return 1;
 }
 
