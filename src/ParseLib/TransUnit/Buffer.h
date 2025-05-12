@@ -21,6 +21,7 @@ PRIVATE unsigned int Buffer_getSize(Buffer * this);
 PRIVATE int Buffer_accept(Buffer* this, const char* keyword);
 PRIVATE int Buffer_writeNChar(Buffer* this, char* buf, int nchar);
 PRIVATE int Buffer_readOneChar(Buffer* this, char* c);
+PRIVATE int Buffer_peekOneChar(Buffer* this, char* c);
 PRIVATE int Buffer_readWithDelimiter(Buffer* this, char c, String** extracted);
 PRIVATE int Buffer_isEmpty(Buffer* this);
 PRIVATE String* Buffer_toString(Buffer* this);
@@ -97,7 +98,7 @@ PRIVATE Buffer * Buffer_newFromString(String* content)
 
   this->string = content;
   this->content = String_getBuffer(content);
-  this->size = String_getSize(content);
+  this->size = String_getLength(content);
 
   this->readPtr = this->content;
   this->nbCharRead = 0;
@@ -184,7 +185,7 @@ PRIVATE int Buffer_writeNChar(Buffer* this, char* buf, int nchar)
 **************************************************/
 PRIVATE int Buffer_accept(Buffer* this, const char* keyword)
 {
-  int len1, len2;
+  long long int len1, len2;
 
   if ((this->content + this->size) < (this->readPtr + Memory_len(keyword)))
   {
@@ -227,7 +228,22 @@ PRIVATE int Buffer_readOneChar(Buffer* this, char* c)
   this->readPtr++;
   if ((this->readPtr) >= (this->content + this->size))
     this->readPtr = this->content;
-  return 0;
+  if ((this->readPtr == this->writePtr)) return 0;
+  /* Success: one character was read */
+  return 1;
+}
+/**********************************************//**
+  @brief Read one character from the Buffer object.
+  @public
+  @memberof TransUnit
+  @return status: failed = 0, success = 1
+**************************************************/
+PRIVATE int Buffer_peekOneChar(Buffer* this, char* c)
+{
+  *c = *this->readPtr;
+  if ((this->readPtr == this->writePtr)) return 0;
+  /* Success: one character was read */
+  return 1;
 }
 
 /**********************************************//**
@@ -238,7 +254,7 @@ PRIVATE int Buffer_readOneChar(Buffer* this, char* c)
 **************************************************/
 PRIVATE int Buffer_readWithDelimiter(Buffer* this, char c, String** extracted)
 {
-  String* result;
+  String* result = 0;
 
   *extracted = result;
 
@@ -252,6 +268,28 @@ PRIVATE int Buffer_isEmpty(Buffer* this)
 
 PRIVATE String* Buffer_toString(Buffer* this)
 {
+  String* result = 0;
+  int size = 0;
+  char* buffer ;
+  int stringLength = 0;
 
+  if (this->readPtr > this->writePtr)
+  {
+    stringLength = this->writePtr - this->content + this->size;
+    buffer = Memory_alloc(stringLength + 1);
+    Memory_copy(buffer, this->readPtr, this->size - stringLength);
+    Memory_copy(buffer, this->content, this->writePtr - this->content);
+    buffer[stringLength] = 0;
+  }
+  else
+  {
+    stringLength = this->writePtr - this->content;
+    buffer = Memory_alloc(stringLength + 1);
+    Memory_copy(buffer, this->content, stringLength);
+    buffer[stringLength] = 0;
+  }
+  result = String_new(0);
+  String_setBuffer(result, buffer, 1);
+  return result;
 }
 #endif /* _BUFFER_H_ */
