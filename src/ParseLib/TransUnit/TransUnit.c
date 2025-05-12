@@ -326,9 +326,9 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
     {
       TRACE(("TransUnit.c: Lastbuffer was processed.\n"));
       TRACE(("TransUnit.c: Total number of chr written: %d\n", this->nbCharWritten));
-      Buffer_toString(this->output);
+      
       //this->outputBuffer[this->nbCharWritten] = 0;
-      String * s = String_new(0);
+      String * s = Buffer_toString(this->output);
       //String_setBuffer(s, this->outputBuffer, 1);
       //this->outputBuffer = 0;
       Buffer_delete(this->output);
@@ -350,15 +350,18 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
 PRIVATE void TransUnit_consumeLineComment(TransUnit* this)
 {
   const char* eol = "\n";
-
+  char c;
   int start = this->currentBuffer->nbCharRead;
 
-  while (Buffer_accept(this->currentBuffer, "\n"))
+  int isSuccess = Buffer_readOneChar(this->currentBuffer, &c);
+  while ((isSuccess) && (c!='\n'))
   // while (!Memory_ncmp(this->currentBuffer->currentPtr, "\n", 1) && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
   {
     //this->currentBuffer->currentPtr++;
     //this->currentBuffer->nbCharRead++;
+    isSuccess = Buffer_readOneChar(this->currentBuffer, &c);
   }
+  TransUnit_consumeNewLine(this);
 #if DEBUG
   String* lineComment = 0;
   lineComment = String_subString(this->currentBuffer->string, start, this->currentBuffer->nbCharRead - start);
@@ -491,13 +494,15 @@ PRIVATE void TransUnit_consumeString(TransUnit* this)
 **************************************************/
 PRIVATE void TransUnit_consumeNewLine(TransUnit* this)
 {
-#if 0
-  while ((*this->currentBuffer->currentPtr == ' ') || (*this->currentBuffer->currentPtr == '\t'))
+  char c;
+  int start = this->currentBuffer->nbCharRead;
+  int isSuccess = Buffer_peekOneChar(this->currentBuffer, &c);
+
+  while ((isSuccess) && (c == '\t') && (c == ' '))
   {
-    this->currentBuffer->currentPtr++;
-    this->currentBuffer->nbCharRead++;
+    isSuccess = Buffer_readOneChar(this->currentBuffer, &c);
+    isSuccess = Buffer_peekOneChar(this->currentBuffer, &c);
   }
-#endif
 }
 
 /**********************************************//**
@@ -880,7 +885,7 @@ PRIVATE int TransUnit_expandMacro(TransUnit* this)
   }
   //Memory_free(macroExpansionBuffer, 4096);
 #endif
-  return 1;
+  return 0;
 }
 
 PRIVATE String * TransUnit_expandString(TransUnit* this, String* s, MacroStore* localMacroStore)
