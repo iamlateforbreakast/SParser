@@ -180,6 +180,7 @@ PUBLIC char* TransUnit_getName(TransUnit* this)
 **************************************************/
 PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
 {
+  /* Ensure the input buffer is not empty */
   if (this->state==COMPLETED) return 0;
 
   //char* ptr = this->currentBuffer->currentPtr;  //String_getBuffer(this->currentBuffer);
@@ -195,6 +196,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
 
   while (1)
   {
+    /* Parse a full Buffer */
     while (!Buffer_isEmpty(this->currentBuffer))
     //while ((this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
     {
@@ -343,7 +345,7 @@ PUBLIC String* TransUnit_getNextBuffer(TransUnit* this)
 }
 
 /**********************************************//**
-  @brief TBC.
+  @brief Read a line comment but not the EOL.
   @private
   @memberof TransUnit
 **************************************************/
@@ -353,6 +355,8 @@ PRIVATE void TransUnit_consumeLineComment(TransUnit* this)
   char c;
   int start = this->currentBuffer->nbCharRead;
 
+  /* Read until EOL */
+  /* TODO: Buffer_readUntilEOL(this->currentBuffer); */
   int isSuccess = Buffer_readOneChar(this->currentBuffer, &c);
   while ((isSuccess) && (c!='\n'))
   // while (!Memory_ncmp(this->currentBuffer->currentPtr, "\n", 1) && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
@@ -361,6 +365,7 @@ PRIVATE void TransUnit_consumeLineComment(TransUnit* this)
     //this->currentBuffer->nbCharRead++;
     isSuccess = Buffer_readOneChar(this->currentBuffer, &c);
   }
+  /* EOL consume somewhere else */
   TransUnit_consumeNewLine(this);
 #if DEBUG
   String* lineComment = 0;
