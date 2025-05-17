@@ -416,7 +416,9 @@ PRIVATE void TransUnit_consumeInclude(TransUnit* this)
   //this->currentBuffer->currentPtr += 8;
   //this->currentBuffer->nbCharRead += 8;
 
-  /* Buffer_acceptWithDelimiter(this->output, '\"'); */
+  /* if (Buffer_acceptWithDelimiter(this->currentBuffer, '\"')) */
+  /* Buffer_getString(); */
+  /* else if (Buffer_acceptWithDelimiter(this->currentBuffer, '<>') Buffer_*/
 #if 0
   while ((*this->currentBuffer->currentPtr != '\"') &&
          (*this->currentBuffer->currentPtr != '<') && (this->currentBuffer->nbCharRead < (int)String_getLength(this->currentBuffer->string)))
