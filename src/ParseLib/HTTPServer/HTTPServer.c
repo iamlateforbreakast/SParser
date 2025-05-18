@@ -73,6 +73,7 @@ int msleep(long msec)
 #endif
 #define REQUEST_BUFFER_SIZE (4096)
 #define RESPONSE_BUFFER_SIZE (4096)
+#define MAX_CONNECTIONS (5)
 
 PRIVATE void* HTTPServer_listenTaskBody(void* params);
 
@@ -98,6 +99,7 @@ struct ConnectionParam
 #else
   SOCKET client_fd;
 #endif
+  Task* connections[MAX_CONNECTIONS];
 };
 
 /**********************************************//**
@@ -177,7 +179,7 @@ PUBLIC HTTPServer* HTTPServer_new()
 **************************************************/
 PUBLIC void HTTPServer_delete(HTTPServer* this)
 {
-  if (OBJECT_IS_VALID(this)) return;
+  if (OBJECT_IS_INVALID(this)) return;
 #ifndef WIN32
   close(this->fd);
 #else
@@ -243,13 +245,13 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
   struct sockaddr_in client_addr;
   int client_addr_len = sizeof(client_addr);
   int *client_fd = malloc(sizeof(int));
-  char *requestBuffer = (char*)malloc(REQUEST_BUFFER_SIZE);
+  //char *requestBuffer = (char*)malloc(REQUEST_BUFFER_SIZE);
 
-  Memory_set(requestBuffer, 0, REQUEST_BUFFER_SIZE);
+  //Memory_set(requestBuffer, 0, REQUEST_BUFFER_SIZE);
 
   TaskMgr* taskMgr = TaskMgr_getRef();
   int nbRequests = 0;
-  while (nbRequests<5)
+  while (nbRequests<MAX_CONNECTIONS)
   {
     if ((*client_fd = accept(this->fd,
                            (struct sockaddr *)&client_addr, 
@@ -278,7 +280,7 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
   TaskMgr_stop(taskMgr);
   //Task_destroy(connectionListen);
   TaskMgr_delete(taskMgr);
-  free(requestBuffer);
+  //free(requestBuffer);
   free(client_fd);
 #ifndef WIN32
   close(this->fd);
