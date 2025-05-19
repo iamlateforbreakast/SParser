@@ -125,7 +125,7 @@ Class httpServerClass =
 PUBLIC HTTPServer* HTTPServer_new()
 {
   HTTPServer* this = 0;
-  //int sockOptions = 1;
+  int sockOptions = 1;
   this = (HTTPServer*)Object_new(sizeof(HTTPServer), &httpServerClass);
 
   if (OBJECT_IS_INVALID(this)) return 0;
@@ -146,7 +146,7 @@ PUBLIC HTTPServer* HTTPServer_new()
     exit(1);
   }
 #ifndef WIN32
-  if (setsockopt(this->fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int))<0) {
+  if (setsockopt(this->fd, SOL_SOCKET, SO_REUSEADDR, (void*)&sockOptions, sizeof(sockOptions)) < 0) {
 #else
   if (setsockopt(this->fd, SOL_SOCKET, SO_REUSEADDR, (char*)&sockOptions, sizeof(int)) < 0) {
 #endif
@@ -260,7 +260,7 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
       PRINT(("accept failed"));
       exit(1);
     }
-    PRINT(("Received connection\n"));
+    PRINT(("Received connection request\n"));
 
     //int msg_len = 0;
     
@@ -316,7 +316,8 @@ PRIVATE void* HTTPServer_listenTaskBody(void* params)
     //int nbRequestProcessed = 0;
 
     int msg_len = recv(*client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
-    
+    /* Fails if following line commented out */
+    PRINT(("Request Buffer %s\n", requestBuffer));
     if (msg_len<0) PRINT(("Error Receiving from socket\n"));
 
     HTTPRequest* request = HTTPRequest_new(requestBuffer);
