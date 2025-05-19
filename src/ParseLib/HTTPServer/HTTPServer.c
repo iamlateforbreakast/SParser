@@ -74,8 +74,10 @@ int msleep(long msec)
 #define REQUEST_BUFFER_SIZE (4096)
 #define RESPONSE_BUFFER_SIZE (4096)
 #define MAX_CONNECTIONS (5)
+#define PORT (8080)
 
 PRIVATE void* HTTPServer_listenTaskBody(void* params);
+PRIVATE HTTPResponse* HTTPServer_serveRequest(HTTPRequest* request);
 
 /**********************************************//**
   @class HTTPServer
@@ -91,6 +93,7 @@ struct HTTPServer
   WSADATA wsa;
   SOCKET fd;
 #endif
+  Task* connections[MAX_CONNECTIONS];
 };
 struct ConnectionParam
 {
@@ -99,7 +102,6 @@ struct ConnectionParam
 #else
   SOCKET client_fd;
 #endif
-  Task* connections[MAX_CONNECTIONS];
 };
 
 /**********************************************//**
@@ -138,19 +140,22 @@ PUBLIC HTTPServer* HTTPServer_new()
   }
 #endif
 
-  this->port = 8080;
+  this->port = PORT;
 
   /* Socket_create */
-  if ((this->fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-    PRINT(("socket failed\n"));
+  if ((this->fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+  {
+    PRINT(("Socket failed.\n"));
+    HTTPServer_delete(this);
     exit(1);
   }
 #ifndef WIN32
   if (setsockopt(this->fd, SOL_SOCKET, SO_REUSEADDR, (void*)&sockOptions, sizeof(sockOptions)) < 0) {
 #else
-  if (setsockopt(this->fd, SOL_SOCKET, SO_REUSEADDR, (char*)&sockOptions, sizeof(int)) < 0) {
+  if (setsockopt(this->fd, SOL_SOCKET, SO_REUSEADDR, (char*)&sockOptions, sizeof(sockOptions)) < 0) {
 #endif
-    PRINT(("setsockopt failed\n"));
+    PRINT(("Setsockopt failed.\n"));
+    HTTPServer_delete(this);
     exit(1);
   }
   // config socket
@@ -164,7 +169,8 @@ PUBLIC HTTPServer* HTTPServer_new()
     (struct sockaddr*)&this->server_addr,
     sizeof(this->server_addr)) < 0)
   {
-    PRINT(("bind failed"));
+    PRINT(("Bind failed."));
+    HTTPServer_delete(this);
     exit(1);
   }
 
@@ -237,17 +243,15 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
 
   // listen for connections
   if (listen(this->fd, 10) < 0) {
-    PRINT(("listen failed\n"));
+    PRINT(("Listen failed.\n"));
+    HTTPServer_delete(this);
     exit(1);
   }
 
   // client info
   struct sockaddr_in client_addr;
   int client_addr_len = sizeof(client_addr);
-  int *client_fd = malloc(sizeof(int));
-  //char *requestBuffer = (char*)malloc(REQUEST_BUFFER_SIZE);
-
-  //Memory_set(requestBuffer, 0, REQUEST_BUFFER_SIZE);
+  int *client_fd = malloc(sizeof(int) * MAX_CONNECTIONS);
 
   TaskMgr* taskMgr = TaskMgr_getRef();
   int nbRequests = 0;
@@ -257,12 +261,10 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
                            (struct sockaddr *)&client_addr, 
                            &client_addr_len)) < 0) 
     {
-      PRINT(("accept failed"));
+      PRINT(("Accept failed.\n"));
       exit(1);
     }
-    PRINT(("Received connection request\n"));
-
-    //int msg_len = 0;
+    PRINT(("Received connection request.\n"));
     
     void * params[5];
     params[0] = &client_fd;
@@ -280,7 +282,6 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
   TaskMgr_stop(taskMgr);
   //Task_destroy(connectionListen);
   TaskMgr_delete(taskMgr);
-  //free(requestBuffer);
   free(client_fd);
 #ifndef WIN32
   close(this->fd);
@@ -298,7 +299,7 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
 PRIVATE void* HTTPServer_listenTaskBody(void* params)
 { 
   //int msg_len = 0;
-#ifndef WIN32
+#ifndef WIN32   
   int* client_fd = ((struct ConnectionParam**)params)[0]->client_fd;
 #else
   SOCKET client_fd = ((struct ConnectionParam**)params)[0]->client_fd;
@@ -307,109 +308,148 @@ PRIVATE void* HTTPServer_listenTaskBody(void* params)
   Memory_set(requestBuffer, 0, REQUEST_BUFFER_SIZE);
 
   PRINT(("Listen body starts\n Client FD:%d\n", client_fd));
+  
   /* request = Connection_waitForHttpRequest*/
   if ((client_fd) && (requestBuffer))
   {
-    FileMgr* fm = FileMgr_new();
-    String* errorMessage = String_newByRef("<doctype !html><html><head><title>Error</title></head>"
-        "<body><h1>Error!</h1></body></html>\r\n");
-    //int nbRequestProcessed = 0;
-
-    int msg_len = recv(*client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
-    /* Fails if following line commented out */
-    PRINT(("Request Buffer %s\n", requestBuffer));
-    if (msg_len<0) PRINT(("Error Receiving from socket\n"));
-
-    HTTPRequest* request = HTTPRequest_new(requestBuffer);
-    HTTPRequest_print(request);
-    String* content = errorMessage;
-    HTTPResponse* response = HTTPResponse_new();
-
-    PRINT(("Requested path %s\n", String_getBuffer(HTTPRequest_getPath(request))));
-    if (String_matchWildcard(HTTPRequest_getPath(request),"/index.html"))
+    int nbCharRead = 0;
+    do 
     {
-      PRINT(("Load index.html\n"));
-        FileDesc* fd = FileMgr_addFile(fm, "index.html");
-        if (fd)
-        {
-          content = FileMgr_load(fm, "index.html");
-          HTTPResponse_setVersion(response, 1, 1);
-          HTTPResponse_setStatusCode(response, 200);
-          HTTPResponse_setReason(response, REASON_OK);
-          HTTPResponse_addHeader(response, "Content - Type", "text/html; charset=UTF-8");
-          HTTPResponse_setBody(response, String_getBuffer(content));
-    }
-      } else if (String_matchWildcard(HTTPRequest_getPath(request), "/hello.css"))
+      int msg_len = recv(*client_fd, &requestBuffer[nbCharRead], REQUEST_BUFFER_SIZE - 1, 0);
+      if (msg_len>0)
       {
-        PRINT(("Load hello.cs\n"));
-        FileDesc* fd = FileMgr_addFile(fm, "hello.css");
-        if (fd)
+        nbCharRead += msg_len;
+        //PRINT(("%d out of %d\n", nbCharRead, REQUEST_BUFFER_SIZE));
+        //PRINT(("Request Buffer %s\n", requestBuffer));
+        HTTPRequest* request = HTTPRequest_new(requestBuffer);
+        //HTTPRequest_print(request);
+        HTTPResponse* response = HTTPServer_serveRequest(request);
+        HTTPRequest_delete(request);
+        char* responseBuffer = (char*)malloc(RESPONSE_BUFFER_SIZE);
+        Memory_set(responseBuffer, 0, RESPONSE_BUFFER_SIZE);
+        int nbCharToWrite = HTTPResponse_generate(response, responseBuffer, RESPONSE_BUFFER_SIZE - 1);
+        if ((client_fd) && (responseBuffer))
         {
-          content = FileMgr_load(fm, "hello.css");
-          HTTPResponse_setVersion(response, 1, 1);
-          HTTPResponse_setStatusCode(response, 200);
-          HTTPResponse_setReason(response, REASON_OK);
-          HTTPResponse_addHeader(response, "Content - Type", "text/css; charset=UTF-8");
-          HTTPResponse_setBody(response, String_getBuffer(content));
+          int msg_len = send(*client_fd, responseBuffer, nbCharToWrite, 0);
+          if (msg_len == 0) 
+          {
+            PRINT(("Client closed connection\n"));
+          }
+          free(responseBuffer);
+          HTTPResponse_delete(response);
+          PRINT(("Response completed.\n"));
+          break;
         }
-      } else if (String_matchWildcard(HTTPRequest_getPath(request), "/hello.js"))
+      }
+      else if (msg_len == 0)
       {
-        PRINT(("Load hello.js\n"));
-        FileDesc* fd = FileMgr_addFile(fm, "hello.js");
-        if (fd)
-        {
-          content = FileMgr_load(fm, "hello.js");
-          HTTPResponse_setVersion(response, 1, 1);
-          HTTPResponse_setStatusCode(response, 200);
-          HTTPResponse_setReason(response, REASON_OK);
-          HTTPResponse_addHeader(response, "Content - Type", "text/javascript; charset=UTF-8");
-          HTTPResponse_setBody(response, String_getBuffer(content));
-        }
-      } else if (String_matchWildcard(HTTPRequest_getPath(request), "/favicon.ico"))
-      {
-        PRINT(("Load fvicon.ico\n"));
-        FileDesc* fd = FileMgr_addFile(fm, "favicon.png");
-        if (fd)
-        {
-          content = FileMgr_load(fm, "favicon.png");
-          HTTPResponse_setVersion(response, 1, 1);
-          HTTPResponse_setStatusCode(response, 200);
-          HTTPResponse_setReason(response, REASON_OK);
-          HTTPResponse_addHeader(response, "Content - Type", "image/png; charset=UTF-8");
-          HTTPResponse_setBody(response, String_getBuffer(content));
-        }
+        PRINT(("Connection closed.\n"));
+        break;
       }
       else
-      {
-        HTTPResponse_setVersion(response, 1, 1);
-        HTTPResponse_setStatusCode(response, 200);
-        HTTPResponse_setReason(response, REASON_OK);
-        HTTPResponse_addHeader(response, "Content - Type", "text/html; charset=UTF-8");
-        HTTPResponse_setBody(response, String_getBuffer(errorMessage));
+      {  
+        PRINT(("Error reading socket.\n"));
+        return 0;
       }
+    } while (1);
+    
+    /* Fails if following line commented out */
 
-      HTTPRequest_delete(request);
-    char* responseBuffer = (char*)malloc(RESPONSE_BUFFER_SIZE);
-    Memory_set(responseBuffer, 0, RESPONSE_BUFFER_SIZE);
-    int nbCharToWrite = HTTPResponse_generate(response, responseBuffer, RESPONSE_BUFFER_SIZE - 1);
-    if ((client_fd) && (responseBuffer))
-    {
-       msg_len = send(*client_fd, responseBuffer, nbCharToWrite, 0);
-      if (msg_len == 0) 
-      {
-        PRINT(("Client closed connection\n"));
-      }
-    }
-    free(responseBuffer);
-    HTTPResponse_delete(response);
-    PRINT(("Request completed.\n"));
+    
     #ifndef WIN32
     close(*client_fd);
     #else
     closesocket(client_fd);
     #endif
-    FileMgr_delete(fm);
-    String_delete(errorMessage);
+    //FileMgr_delete(fm);
+    //String_delete(errorMessage);
   }
   return 0;
+}
+
+PRIVATE HTTPResponse* HTTPServer_serveRequest(HTTPRequest* request)
+{ 
+  HTTPResponse* response = HTTPResponse_new();
+  String* errorMessage = String_newByRef("<doctype !html><html><head><title>Error</title></head>"
+    "<body><h1>Error!</h1></body></html>\r\n");
+  String* content = errorMessage;
+  FileMgr* fm = FileMgr_new();
+
+  PRINT(("Requested path %s\n", String_getBuffer(HTTPRequest_getPath(request))));
+  if (String_matchWildcard(HTTPRequest_getPath(request),"/index.html"))
+  {
+    PRINT(("Load index.html\n"));
+    FileDesc* fd = FileMgr_addFile(fm, "index.html");
+    if (fd)
+    {
+      content = FileMgr_load(fm, "index.html");
+      HTTPResponse_setVersion(response, 1, 1);
+      HTTPResponse_setStatusCode(response, 200);
+      HTTPResponse_setReason(response, REASON_OK);
+      HTTPResponse_addHeader(response, "Content - Type", "text/html; charset=UTF-8");
+      HTTPResponse_setBody(response, String_getBuffer(content));
+    }
+  } else if (String_matchWildcard(HTTPRequest_getPath(request), "/hello.css"))
+  {
+    PRINT(("Load hello.cs\n"));
+    FileDesc* fd = FileMgr_addFile(fm, "hello.css");
+    if (fd)
+    {
+      content = FileMgr_load(fm, "hello.css");
+      HTTPResponse_setVersion(response, 1, 1);
+      HTTPResponse_setStatusCode(response, 200);
+      HTTPResponse_setReason(response, REASON_OK);
+      HTTPResponse_addHeader(response, "Content - Type", "text/css; charset=UTF-8");
+      HTTPResponse_setBody(response, String_getBuffer(content));
+    }
+    else
+    {
+      PRINT(("Cannot find hello.css.\n"));
+    }
+  } else if (String_matchWildcard(HTTPRequest_getPath(request), "/hello.js"))
+  {
+    PRINT(("Load hello.js\n"));
+    FileDesc* fd = FileMgr_addFile(fm, "hello.js");
+    if (fd)
+    {
+      content = FileMgr_load(fm, "hello.js");
+      HTTPResponse_setVersion(response, 1, 1);
+      HTTPResponse_setStatusCode(response, 200);
+      HTTPResponse_setReason(response, REASON_OK);
+      HTTPResponse_addHeader(response, "Content - Type", "text/javascript; charset=UTF-8");
+      HTTPResponse_setBody(response, String_getBuffer(content));
+    }
+    else
+    {
+      PRINT(("Cannot find hello.js.\n"));
+      exit(1);
+    }
+  } else if (String_matchWildcard(HTTPRequest_getPath(request), "/favicon.ico"))
+  {
+    PRINT(("Load favicon.ico\n"));
+    FileDesc* fd = FileMgr_addFile(fm, "favicon.ico");
+    if (fd)
+    {
+      content = FileMgr_load(fm, "favicon.ico");
+      HTTPResponse_setVersion(response, 1, 1);
+      HTTPResponse_setStatusCode(response, 200);
+      HTTPResponse_setReason(response, REASON_OK);
+      HTTPResponse_addHeader(response, "Content - Type", "image/png; charset=UTF-8");
+      HTTPResponse_setBody(response, String_getBuffer(content));
+    }
+    else
+    {
+      PRINT(("Cannot find favicon.ico.\n"));
+      exit(1);
+    }
+  }
+  else
+  {
+    HTTPResponse_setVersion(response, 1, 1);
+    HTTPResponse_setStatusCode(response, 200);
+    HTTPResponse_setReason(response, REASON_OK);
+    HTTPResponse_addHeader(response, "Content - Type", "text/html; charset=UTF-8");
+    HTTPResponse_setBody(response, String_getBuffer(errorMessage));
+  }
+  return response;
 }
