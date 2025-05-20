@@ -26,6 +26,7 @@ PRIVATE unsigned int HTTPResponse_getSize(HTTPResponse* this);
 PRIVATE void HTTPResponse_setVersion(HTTPResponse* this, int majorVersion, int minorVersion);
 PRIVATE void HTTPResponse_setStatusCode(HTTPResponse* this, int code);
 PRIVATE void HTTPResponse_setReason(HTTPResponse* this, enum Reason);
+PRIVATE void HTTPResponse_setMimeType(HTTPResponse* this, const char* mimeType);
 PRIVATE void HTTPResponse_addHeader(HTTPResponse* this, char* key, char* value);
 PRIVATE void HTTPResponse_setBody(HTTPResponse* this, char* body);
 PRIVATE int HTTPResponse_generate(HTTPResponse* this, char* buffer, int size);
@@ -40,6 +41,7 @@ struct HTTPResponse
   enum Reason reason;
   int majorVersion;
   int minorVersion;
+  char* mimeType;
   Map* headers;
   String* body;
   int isValid;
@@ -182,6 +184,17 @@ PRIVATE void HTTPResponse_setVersion(HTTPResponse* this, int majorVersion, int m
   @memberof HTTPServer
   @return TBD
 **************************************************/
+PRIVATE void HTTPResponse_setMimeType(HTTPResponse* this, const char* mimeType)
+{
+  this->mimeType = mimeType;
+}
+
+/**********************************************//**
+  @brief TBD
+  @private
+  @memberof HTTPServer
+  @return TBD
+**************************************************/
 PRIVATE void HTTPResponse_addHeader(HTTPResponse* this, char* key, char* value)
 {
 
@@ -207,7 +220,8 @@ PRIVATE void HTTPResponse_setBody(HTTPResponse* this, char* body)
 PRIVATE int HTTPResponse_generate(HTTPResponse* this, char * buffer, int size)
 {
 #ifndef WIN32
-  int nbCharToWrite = snprintf(buffer, size,"HTTP/%d.%d %d OK\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n%s", this->majorVersion, this->minorVersion, this->statusCode, String_getBuffer(this->body));
+  int nbCharToWrite = snprintf(buffer, size,"HTTP/%d.%d %d OK\r\nContent-Type: %s; charset=UTF-8\r\n\r\n%s", 
+                        this->majorVersion, this->minorVersion, this->statusCode, this->mimeType, String_getBuffer(this->body));
 #else
    int nbCharToWrite = sprintf_s(buffer, size,"HTTP/%d.%d %d OK\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n%s\r\n\r\n", this->majorVersion, this->minorVersion, this->statusCode, String_getBuffer(this->body));
 #endif
