@@ -254,15 +254,15 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
 
   struct sockaddr_in client_addr;
   int client_addr_len = sizeof(client_addr);
-  SOCKET client_fd = 0;
-  char *requestBuffer = (char*)malloc(REQUEST_BUFFER_SIZE);
+  int *client_fd = malloc(sizeof(int) * MAX_CONNECTIONS);
+
   TaskMgr* taskMgr = TaskMgr_getRef();
   int nbRequests = 0;
   while (nbRequests<MAX_CONNECTIONS)
   {
-    if ((client_fd = accept(this->fd,
-      (struct sockaddr*)&client_addr,
-      &client_addr_len)) < 0) 
+    if ((*client_fd = accept(this->fd,
+                           (struct sockaddr *)&client_addr, 
+                           &client_addr_len)) < 0) 
     {
       PRINT(("Accept failed.\n"));
       exit(1);
@@ -303,25 +303,25 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
   @public
   @memberof HTTPServer
 **************************************************/
-PRIVATE void* HTTPServer_listenTaskBody(void** params)
-{
+PRIVATE void* HTTPServer_listenTaskBody(void* params)
+{ 
   //int msg_len = 0;
-#ifndef WIN32
-  int client_fd = ((struct ConnectionParam**)params)[0]->client_fd;
+#ifndef WIN32   
+  int* client_fd = ((struct ConnectionParam**)params)[0]->client_fd;
 #else
   SOCKET client_fd = ((struct ConnectionParam**)params)[0]->client_fd;
 #endif
   char* requestBuffer = (char*)malloc(REQUEST_BUFFER_SIZE);
   Memory_set(requestBuffer, 0, REQUEST_BUFFER_SIZE);
 
-  PRINT(("Listen body starts\n Client FD:%d\n", client_fd));
+  PRINT(("Listen body starts\n Client FD:%d\n", *client_fd));
   /* request = Connection_waitForHttpRequest*/
   if ((client_fd) && (requestBuffer))
   {
     int nbCharRead = 0;
     do 
     {
-      int msg_len = recv(client_fd, &requestBuffer[nbCharRead], REQUEST_BUFFER_SIZE - 1, 0);
+      int msg_len = recv(*client_fd, &requestBuffer[nbCharRead], REQUEST_BUFFER_SIZE - 1, 0);
       if (msg_len>0)
       {
         nbCharRead += msg_len;
@@ -333,7 +333,7 @@ PRIVATE void* HTTPServer_listenTaskBody(void** params)
         int nbCharToWrite = HTTPResponse_generate(response, responseBuffer, RESPONSE_BUFFER_SIZE - 1);
         if ((client_fd) && (responseBuffer))
         {
-          int msg_len = send(client_fd, responseBuffer, nbCharToWrite, 0);
+          int msg_len = send(*client_fd, responseBuffer, nbCharToWrite, 0);
           if (msg_len == 0) 
           {
             PRINT(("Client closed connection\n"));
@@ -366,10 +366,10 @@ PRIVATE void* HTTPServer_listenTaskBody(void** params)
 PRIVATE HTTPResponse* HTTPServer_serveRequest(HTTPRequest* request)
 { 
   HTTPResponse* response = HTTPResponse_new();
+
   HTTPResponse_setVersion(response, 1, 1);
   HTTPResponse_setStatusCode(response, 200);
   HTTPResponse_setReason(response, REASON_OK);
-  HTTPResponse_addHeader(response, "Content - Type", "text/html; charset=UTF-8");
 
   FileMgr* fm = FileMgr_new();
 
@@ -382,23 +382,26 @@ PRIVATE HTTPResponse* HTTPServer_serveRequest(HTTPRequest* request)
     if (fd)
     {
       String* content = content = FileMgr_load(fm, "index.html");
+      HTTPResponse_addHeader(response, "Content - Type", "text/html; charset=UTF-8");
       HTTPResponse_setBody(response, String_getBuffer(content));
     }
     else
     {
       String* errorMessage = String_newByRef("<doctype !html><html><head><title>Error</title></head>"
         "<body><h1>Error!</h1></body></html>\r\n");
+      HTTPResponse_addHeader(response, "Content - Type", "text/html; charset=UTF-8");
       HTTPResponse_setBody(response, String_getBuffer(errorMessage));
     }
   }
   else if (String_matchWildcard(HTTPRequest_getPath(request), "/hello.css"))
   {
-    PRINT(("Loading hello.cs: "));
+    PRINT(("Loading hello.css: "));
     FileDesc* fd = FileMgr_addFile(fm, "hello.css");
     if (fd)
     {
       String* content = FileMgr_load(fm, "hello.css"); 
       HTTPResponse_setBody(response, String_getBuffer(content));
+      HTTPResponse_addHeader(response, "Content - Type", "text/css; charset=UTF-8");
       PRINT(("Done\n"));
     }
     else
@@ -414,6 +417,7 @@ PRIVATE HTTPResponse* HTTPServer_serveRequest(HTTPRequest* request)
     {
       String* content = FileMgr_load(fm, "hello.js");
       HTTPResponse_setBody(response, String_getBuffer(content));
+      HTTPResponse_addHeader(response, "Content - Type", "text/javascript; charset=UTF-8");
       PRINT(("Done\n"));
     }
     else
@@ -429,6 +433,7 @@ PRIVATE HTTPResponse* HTTPServer_serveRequest(HTTPRequest* request)
     if (fd)
     {
       String* content = FileMgr_load(fm, "favicon.ico");
+      HTTPResponse_addHeader(response, "Content - Type", "text/x-icon; charset=UTF-8");
       HTTPResponse_setBody(response, String_getBuffer(content));
       PRINT(("Done\n"));
     }
