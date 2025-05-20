@@ -382,14 +382,15 @@ PRIVATE HTTPResponse* HTTPServer_serveRequest(HTTPRequest* request)
     if (fd)
     {
       String* content = content = FileMgr_load(fm, "index.html");
-      HTTPResponse_addHeader(response, "Content - Type", "text/html; charset=UTF-8");
+      HTTPResponse_setMimeType(response, "text/html");
       HTTPResponse_setBody(response, String_getBuffer(content));
     }
     else
     {
       String* errorMessage = String_newByRef("<doctype !html><html><head><title>Error</title></head>"
         "<body><h1>Error!</h1></body></html>\r\n");
-      HTTPResponse_addHeader(response, "Content - Type", "text/html; charset=UTF-8");
+      HTTPResponse_setMimeType(response, "text/html");  
+      //HTTPResponse_addHeader(response, "Content - Type", "text/html; charset=UTF-8");
       HTTPResponse_setBody(response, String_getBuffer(errorMessage));
     }
   }
@@ -401,7 +402,7 @@ PRIVATE HTTPResponse* HTTPServer_serveRequest(HTTPRequest* request)
     {
       String* content = FileMgr_load(fm, "hello.css"); 
       HTTPResponse_setBody(response, String_getBuffer(content));
-      HTTPResponse_addHeader(response, "Content - Type", "text/css; charset=UTF-8");
+      HTTPResponse_setMimeType(response, "text/css");
       PRINT(("Done\n"));
     }
     else
@@ -417,7 +418,8 @@ PRIVATE HTTPResponse* HTTPServer_serveRequest(HTTPRequest* request)
     {
       String* content = FileMgr_load(fm, "hello.js");
       HTTPResponse_setBody(response, String_getBuffer(content));
-      HTTPResponse_addHeader(response, "Content - Type", "text/javascript; charset=UTF-8");
+      HTTPResponse_setMimeType(response, "text/javascript");
+      //HTTPResponse_addHeader(response, "Content - Type", "text/javascript; charset=UTF-8");
       PRINT(("Done\n"));
     }
     else
@@ -433,7 +435,8 @@ PRIVATE HTTPResponse* HTTPServer_serveRequest(HTTPRequest* request)
     if (fd)
     {
       String* content = FileMgr_load(fm, "favicon.ico");
-      HTTPResponse_addHeader(response, "Content - Type", "text/x-icon; charset=UTF-8");
+      HTTPResponse_setMimeType(response, "text/x-icon");
+      //HTTPResponse_addHeader(response, "Content - Type", "text/x-icon; charset=UTF-8");
       HTTPResponse_setBody(response, String_getBuffer(content));
       PRINT(("Done\n"));
     }
