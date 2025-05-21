@@ -223,7 +223,8 @@ PRIVATE int HTTPResponse_generate(HTTPResponse* this, char * buffer, int size)
   int nbCharToWrite = snprintf(buffer, size,"HTTP/%d.%d %d OK\r\nContent-Type: %s; charset=UTF-8\r\n\r\n%s", 
                         this->majorVersion, this->minorVersion, this->statusCode, this->mimeType, String_getBuffer(this->body));
 #else
-   int nbCharToWrite = sprintf_s(buffer, size,"HTTP/%d.%d %d OK\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n%s\r\n\r\n", this->majorVersion, this->minorVersion, this->statusCode, String_getBuffer(this->body));
+  int nbCharToWrite = sprintf_s(buffer, size,"HTTP/%d.%d %d OK\r\nContent-Type: %s; charset=UTF-8\r\n\r\n%s\r\n\r\n", 
+                        this->majorVersion, this->minorVersion, this->statusCode, this->mimeType, String_getBuffer(this->body));
 #endif
   return nbCharToWrite;
 }
