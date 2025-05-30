@@ -114,6 +114,8 @@ PRIVATE void HTTPRequest_delete(HTTPRequest * this)
 **************************************************/
 PRIVATE HTTPRequest * HTTPRequest_copy(HTTPRequest * this)
 {
+  if (OBJECT_IS_INVALID(this)) return 0;
+
   return 0;
 }
 
@@ -138,8 +140,8 @@ PRIVATE void HTTPRequest_print(HTTPRequest * this)
   if (this->method == METHOD_INVALID) PRINT(("Method: INVALID\n"));
   if (this->method == METHOD_GET) PRINT(("Method: GET\n"));
   if (this->method == METHOD_POST) PRINT(("Method: POST\n"));
-  PRINT(("Path: %s\n", String_getBuffer(this->path)));
-  PRINT(("Version: %d.%d\n", this->majorVersion, this->minorVersion));
+  //PRINT(("Path: %s\n", String_getBuffer(this->path)));
+  //PRINT(("Version: %d.%d\n", this->majorVersion, this->minorVersion));
   //PRINT(("Host: %s\n", host));
   //PRINT(("User-Agent: %s\n", userAgent)); 
 }

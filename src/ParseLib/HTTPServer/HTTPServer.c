@@ -111,6 +111,12 @@ struct ConnectionParam
 #endif
 };
 
+struct RouteParam
+{
+  char* pattern;
+  
+};
+
 /**********************************************//**
   @private Class Description
 **************************************************/
@@ -363,6 +369,7 @@ PRIVATE void* HTTPServer_listenTaskBody(void* params)
   }
   return 0;
 }
+
 PRIVATE HTTPResponse* HTTPServer_serveRequest(HTTPRequest* request)
 { 
   HTTPResponse* response = HTTPResponse_new();
