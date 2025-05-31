@@ -1,4 +1,4 @@
-/* Socket.h */
+/* HTTPSocket.h */
 #ifndef _HTTPSOCKET_H_
 #define _HTTPSOCKET_H_
 
@@ -14,9 +14,19 @@
 #include <winsock2.h>
 #endif
 
-typedef struct Socket Socket;
+typedef struct HTTPSocket HTTPSocket;
 
-struct Socket
+// Global Var: TODO Need protection
+static int HTTPSocket_isInitialised = 0;
+
+PRIVATE HTTPSocket* HTTPSocket_new(struct sockaddr * addr, int port);
+PRIVATE void HTTPSocket_delete(HTTPSocket * this);
+PRIVATE HTTPSocket* HTTPSocket_copy(HTTPSocket* this);
+
+/**********************************************//**
+  @class HTTPSocket
+**************************************************/
+struct HTTPSocket
 {
 #ifndef WIN32
   int fd;
@@ -24,9 +34,24 @@ struct Socket
   WSADATA wsa;
   SOCKET fd;
 #endif
+  int port;
+  struct sockaddr * addr;
 };
 
-PRIVATE void Socket_init()
+/**********************************************//**
+  @private Class Description
+**************************************************/
+PRIVATE Class httpSocketClass =
+{
+  .f_new = 0,
+  .f_delete = (Destructor)&HTTPSocket_delete,
+  .f_copy = (Copy_Operator)&HTTPSocket_copy,
+  .f_comp = (Comp_Operator)&HTTPSocket_compare,
+  .f_print = (Printer)&HTTPSocket_print,
+  .f_size = (Sizer)&HTTPSocket_getSize
+};
+
+PRIVATE int HTTPSocket_init()
 {
 #ifdef WIN32   
   if (WSAStartup(MAKEWORD(2, 2), &this->wsa) != 0) {
@@ -43,38 +68,110 @@ PRIVATE void Socket_init()
   @param[in] none
   @return New instance of class Socket.
 **************************************************/
-PRIVATE int Socket_create(Socket * this)
+PRIVATE HTTPSocket* HTTPSocket_new(struct sockaddr * addr, int port)
 {
+  HTTPSocket* this = 0;
+  int sockOptions = 1;
+
+  if (HTTPSocket_isInitialised == 0)
+  {
+    if (!HTTPSocket_init()) return 0;
+    HTTPSocket_isInitialised = 1;
+  }
+  this = (HTTPSocket*)Object_new(sizeof(HTTPSocket), &httpSocketClass);
+
+  if (this == 0) return 0;
+
   this->fd = socket(AF_INET, SOCK_STREAM, 0);
   if ((this->fd) < 0)
   {
     PRINT(("Socket creation failed\n"));
-    exit(1);
+    return 0;
   }
 
-  #ifndef WIN32
-  if (setsockopt(this->fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int))<0) {
+#ifndef WIN32
+  if (setsockopt(this->fd, SOL_SOCKET, SO_REUSEADDR, (int*)&sockOptions, sizeof(int)) < 0)
+  {
+    return 0;
+  }
 #else
-  if (setsockopt(this->fd, SOL_SOCKET, SO_REUSEADDR, (char*)&sockOptions, sizeof(int)) < 0) {
+  if (setsockopt(this->fd, SOL_SOCKET, SO_REUSEADDR, (char*)&sockOptions, sizeof(int)) < 0)
+  {
+    return 0;
+  }
 #endif
 
-  return 1;
+  if (bind(this->fd, addr, sizeof(this->server_addr)) < 0)
+  {
+    PRINT(("HTTPSocket: bind failed"));
+    return 0;
+  }
+
+  return this;
 }
 
 /**********************************************//**
-  @brief Bind the socket.
+  @brief Close the socket.
   @private
   @memberof HTTPServer
   @param[in] none
-  @return New instance of class Socket.
 **************************************************/
-PRIVATE void Socket_bind(Socket * this, struct sockaddr * addr)
+PRIVATE void HTTPSocket_delete(HTTPSocket * this)
 {
-  if (bind(this->fd, addr, sizeof(this->server_addr)) < 0)
-  {
-    PRINT(("bind failed"));
-    exit(1);
-  }
+  if (OBJECT_IS_INVALID(this)) return
+  
+#ifndef WIN32
+  close(this->fd);
+#else
+  closesocket(this->fd);
+  WSACleanup();
+#endif
+
+  Object_deallocate(&this->object);
+}
+
+/**********************************************//**
+  @brief Copy an instance of the class HTTPSocket.
+  @private
+  @memberof HTTPServer
+  @return Copy of the instance
+**************************************************/
+PRIVATE HTTPSocket* HTTPSocket_copy(HTTPSocket* this)
+{
+  return 0;
+}
+
+/**********************************************//**
+  @brief Compare 2 instances of the class HTTPSocket.
+  @public
+  @memberof HTTPServer
+  @return 0 if different, 1 if equal.
+**************************************************/
+PRIVATE int HTTPSocket_compare(HTTPSocket* this, HTTPSocket* compared)
+{
+  return 0;
+}
+
+/**********************************************//**
+  @brief Print an instance of the class HTTPSocket.
+  @public
+  @memberof HTTPServer
+**************************************************/
+PRIVATE void HTTPSocket_print(HTTPSocket* this)
+{
+
+}
+
+/**********************************************//**
+  @brief Get the size of an HTTPResponse. If parameter is 0
+  return the size of the class.
+  @public
+  @memberof HTTPServer
+  @return Size of an instance of HTTPResponse
+**************************************************/
+PRIVATE unsigned int HTTPSocket_getSize(HTTPSocket* this)
+{
+  return sizeof(HTTPSocket);
 }
 
 /**********************************************//**
@@ -83,7 +180,7 @@ PRIVATE void Socket_bind(Socket * this, struct sockaddr * addr)
   @memberof HTTPServer
   @param[in] none
 **************************************************/
-PRIVATE int Socket_listen(Socket * this)
+PRIVATE int HTTPSocket_listen(Socket * this)
 {
   int result = listen(this->fd, 10);
 
@@ -96,13 +193,13 @@ PRIVATE int Socket_listen(Socket * this)
 }
 
 /**********************************************//**
-  @brief Bind the socket.
+  @brief Accept connection to the socket.
   @private
   @memberof HTTPServer
   @param[in] none
   @return New instance of class Socket.
 **************************************************/
-PRIVATE void Socket_accept(Socket * this, struct sockaddr * addr)
+PRIVATE void HTTPSocket_accept(Socket * this, struct sockaddr * addr)
 {
 
 }
@@ -114,7 +211,7 @@ PRIVATE void Socket_accept(Socket * this, struct sockaddr * addr)
   @param[in] none
   @return New instance of class Socket.
 **************************************************/
-PRIVATE int Socket_readFrom(Socket * this)
+PRIVATE int HTTPSocket_readFrom(Socket * this)
 {
   int nbBytesRead = recv(*client_fd, &requestBuffer[0], REQUEST_BUFFER_SIZE - 1, 0);
 }
@@ -126,25 +223,11 @@ PRIVATE int Socket_readFrom(Socket * this)
   @param[in] none
   @return New instance of class Socket.
 **************************************************/
-PRIVATE void Socket_writeTo(Socket * this)
+PRIVATE void HTTPSocket_writeTo(Socket * this)
 {
   int nbBytesWritten = send(*client_fd, responseBuffer, nbCharToWrite, 0);
 }
 
-/**********************************************//**
-  @brief Close the socket.
-  @private
-  @memberof HTTPServer
-  @param[in] none
-**************************************************/
-PRIVATE void Socket_close(Socket * this)
-{
-#ifndef WIN32
-  close(this->fd);
-#else
-  closesocket(this->fd);
-  WSACleanup();
-#endif
-}
+
 
 #endif /* _HTTPSOCKET_H_ */
