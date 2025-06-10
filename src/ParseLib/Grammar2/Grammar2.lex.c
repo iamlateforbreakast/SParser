@@ -1045,7 +1045,11 @@ int get_buffer_top(void * yyscanner);
  * down here because we want the user's section 1 to have been scanned first.
  * The user has a chance to override it with an option.
  */
+#ifndef WIN32
 #include <unistd.h>
+#else
+#include <io.h>
+#endif
 #endif
 
 #ifndef YY_EXTRA_TYPE
@@ -1201,6 +1205,7 @@ static int input ( yyscan_t yyscanner );
 #define YY_INPUT(buf,result,max_size) \
 	errno=0; \
 	while ( (result = (int) read( fileno(yyin), buf, (yy_size_t) max_size )) < 0 ) \
+    //WIN32: while ( (result = (int) _read( _fileno(yyin), buf, (yy_size_t) max_size )) < 0 ) \
 	{ \
 		if( errno != EINTR) \
 		{ \
@@ -2087,6 +2092,7 @@ static void yy_load_buffer_state  (yyscan_t yyscanner)
     }
 
         b->yy_is_interactive = file ? (isatty( fileno(file) ) > 0) : 0;
+		// WIN32: b->yy_is_interactive = file ? (_isatty( _fileno(file) ) > 0) : 0;
     
 	errno = oerrno;
 }
@@ -2839,5 +2845,3 @@ void count(void * yyscanner)
 
     /*ECHO;*/
 }
-
-
