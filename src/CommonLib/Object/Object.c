@@ -19,6 +19,7 @@
 **************************************************/
 PRIVATE ObjectMgr * Object_objMgrPtr = 0;
 PRIVATE ObjectStore * Object_objectStore = 0;
+
 #define OBJECT_MARKER (0x0B5EC7)
 
 /**********************************************//** 
@@ -49,7 +50,7 @@ PUBLIC Object * Object_new(unsigned int size, Class * class)
   {
     this->delete = (Destructor)0;
     this->copy = (Copy_Operator)0;
-	this->size = class->f_size(0);
+    this->size = 0;
   }
   this->refCount = 1;
   this->allocator = 0;
@@ -101,6 +102,7 @@ PUBLIC void Object_delete(Object * this)
     this->class->f_delete(this);
   }
 }
+
 /**********************************************//**
   @brief De-allocate an instance of the class Object.
   @public
@@ -207,5 +209,7 @@ PUBLIC void Object_deRef(Object * this)
 **************************************************/
 PUBLIC int Object_isValid(Object* this)
 {
+  if (this == 0) return 0;
+
   return ((MEMORY_ISVALID(this) && (this->marker == OBJECT_MARKER)));
 }
