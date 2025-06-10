@@ -5,7 +5,6 @@
 #include "ObjectMgr.h"
 #include "Memory.h"
 #include "Debug.h"
-
 #include <stdio.h>
 
 #define DEBUG (0)
@@ -19,15 +18,15 @@
                           else { PRINT(("\x1b[31mFailed\x1b[0m\n")); return 0;}
 #endif
 
-#define ORDER (10)
+#define ORDER (3)
 
 extern char words1000[];
+
 PRIVATE List * keys;
-PRIVATE TestObject ** testObjects;
+PRIVATE TestObject ** UT_BTree_01_testObjects;
 PRIVATE TestObject ** removedObjects;
 PRIVATE int nbTokens = 0;
 PRIVATE FILE* UT_BTree_01_channelLog = 0;
-
 PRIVATE int UT_BTree_01_init_keys()
 {
   String * fullText = String_newByRef(words1000);
@@ -36,13 +35,13 @@ PRIVATE int UT_BTree_01_init_keys()
   keys = String_splitToken(fullText, " ");
   nbTokens = List_getNbNodes(keys);
 
-  testObjects = (TestObject**)Memory_alloc(nbTokens * sizeof(TestObject*));
+  UT_BTree_01_testObjects = (TestObject**)Memory_alloc(nbTokens * sizeof(TestObject*));
   removedObjects = (TestObject**)Memory_alloc(nbTokens * sizeof(TestObject*));
 
   for (int i = 0; i < nbTokens; i++)
   {
 	key = (String*)List_getNext(keys);
-    testObjects[i] = TestObject_new();
+    UT_BTree_01_testObjects[i] = TestObject_new();
   }
 
   String_delete(fullText);
@@ -54,10 +53,10 @@ PRIVATE int UT_BTree_01_delete_keys()
 {
   for (int i = 0; i < nbTokens; i++)
   {
-    TestObject_delete(testObjects[i]);
+    TestObject_delete(UT_BTree_01_testObjects[i]);
   }
   List_delete(keys);
-  Memory_free(testObjects,sizeof(testObjects));
+  Memory_free(UT_BTree_01_testObjects,sizeof(UT_BTree_01_testObjects));
   Memory_free(removedObjects, sizeof(removedObjects));
   
   return 1;
@@ -66,6 +65,7 @@ PRIVATE int UT_BTree_01_delete_keys()
 PRIVATE int UT_BTree_01_step1()
 {
   int isPassed = 1;
+
   TestObject * removedObject = 0;
   String * key = (String*)List_getHead(keys);
 
@@ -75,20 +75,26 @@ PRIVATE int UT_BTree_01_step1()
   PRINT(("Step 1: Test 1 - Create an instance of class BTree: "));
   testTree = BTree_new(ORDER);
   isPassed = isPassed && (OBJECT_IS_VALID(testTree));
+
   UT_ASSERT((isPassed));
 
   PRINT(("Step 1: Test 2 - Insert one object: "));
   BTree_add(testTree, (Object*)key, (Object*)testObjects[0], 0);
+
   UT_ASSERT((isPassed));
 
   PRINT(("Step 1: test 3 - Check the number of nodes: "));
   unsigned int nbNodes = BTree_getNbNodes(testTree);
+  //PRINT(("  Nb nodes = %d\n", nbNodes));
   isPassed = isPassed && (nbNodes == 1);
+
   UT_ASSERT(isPassed);
+
   PRINT(("Step 1: Test 3 - Remove the object: "));
   removedObject = (TestObject*)BTree_remove(testTree, (Object*)key);
   nbNodes = BTree_getNbNodes(testTree);
   isPassed = isPassed && (nbNodes == 0);
+
   UT_ASSERT((isPassed));
 	
   PRINT(("Step 1: Test 4 - Delete BTree: "));
@@ -98,11 +104,13 @@ PRIVATE int UT_BTree_01_step1()
   UT_ASSERT((isPassed));
 
   PRINT(("Step 1: Test 5 - Check all memory is freed: "));
+
   ObjectMgr* objectMgr = ObjectMgr_getRef();
   isPassed = isPassed && (ObjectMgr_report(objectMgr) == 1);
   UT_ASSERT((isPassed));
   TRACE(("Nb objects left allocated: %d\n", ObjectMgr_report(objectMgr)));
   ObjectMgr_delete(objectMgr);
+
   return isPassed;
 }
 
@@ -120,6 +128,7 @@ PRIVATE int UT_BTree_01_step2()
   PRINT(("Step 2: Test 1 - Create an instance of class BTree: "));
   testTree = BTree_new(ORDER);
   isPassed = isPassed && (OBJECT_IS_VALID(testTree));
+  
   UT_ASSERT((isPassed));
 
   PRINT(("Step 2: Test 2 - Insert %d object: ", n));
@@ -130,6 +139,7 @@ PRIVATE int UT_BTree_01_step2()
     BTree_add(testTree, (Object*)key, (Object*)testObjects[i], 0);
 	int nbNodes = BTree_getNbNodes(testTree);
 	isPassed = isPassed && (nbNodes == i + 1);
+
   }
   UT_ASSERT((isPassed));
 
@@ -173,7 +183,7 @@ PRIVATE int UT_BTree_01_step3()
   {
 	key = List_getNext(keys);
 	Object_print((Object*)key);
-    BTree_add(testTree, (Object*)key, (Object*)testObjects[i], 0);
+    BTree_add(testTree, (Object*)key, (Object*)UT_BTree_01_testObjects[i], 0);
   }
   UT_ASSERT((1));
 
@@ -188,7 +198,6 @@ PRIVATE int UT_BTree_01_step3()
 	//Object_print(key);
 	removedObjects[i] = (TestObject*)BTree_remove(testTree, (Object*)key);
 	//BTree_print(testTree);
-
   }
 
   
@@ -200,11 +209,17 @@ PRIVATE int UT_BTree_01_step3()
   return isPassed;
 }
 
+#ifdef MAIN
+int main()
+#else
 PUBLIC int run_UT_BTree_01(void)
+#endif
 {
   int isPassed = 1;
+
   UT_BTree_01_channelLog = Debug_openChannel("UT_BTree_01.log");
   Debug_setStdoutChannel(UT_BTree_01_channelLog);
+
   ObjectMgr* objMgr = ObjectMgr_getRef();
 
   UT_BTree_01_init_keys();
@@ -212,38 +227,14 @@ PUBLIC int run_UT_BTree_01(void)
   isPassed = isPassed && UT_BTree_01_step1();
   isPassed = isPassed && UT_BTree_01_step2();
   isPassed = isPassed && UT_BTree_01_step3();
-  //step2();
+  
   UT_BTree_01_delete_keys();
 
   ObjectMgr_report(objMgr);
   ObjectMgr_reportUnallocated(objMgr);
   Memory_report();
 
-  //printf("Btree size of pool in   bytes: %d\n", BTree_reportSizeInBytes(testTree));
-  //printf("Btree size of pool in Kibytes: %d\n", BTree_reportSizeInBytes(testTree) / 1024);
-  //printf("Btree size of pool in Mibytes: %d\n", BTree_reportSizeInBytes(testTree) / (1024 * 1024));
-  //BTree_print(testTree);
-	
-  //double cpu_time1 = get_cpu_time();
-  //double wall_time1 = get_wall_time();
-	
-  //printf("Insert CPU time %f\n", cpu_time1 - cpu_time0);
-  //printf("Insert Wall time %f\n", wall_time1 - wall_time0);
   Debug_closeChannel(UT_BTree_01_channelLog);
-  //cpu_time0 = get_cpu_time();
-  //wall_time0 = get_wall_time();
-
-  //for (int i = 0; i< NB_ITEMS; i++)
-  //{
-    //BTree_get(testTree, keys[i], &pTestItem);
-    //printf("test item = %x %x\n", pTestItem, &items[i]);
-  //}
-
-  //cpu_time1 = get_cpu_time();
-  //wall_time1 = get_wall_time();
-
-  //printf("Search CPU time %f\n", cpu_time1 - cpu_time0);
-  //printf("Search Wall time %f\n", wall_time1 - wall_time0);
 
   return isPassed;
 }
