@@ -3,6 +3,8 @@
 #ifndef _MACROSTORE_H_
 #define _MACROSTORE_H_
 
+#include "MacroDefinition.h"
+#include "Buffer.h"
 #include "Types.h"
 #include "Class.h"
 #include "Object.h"
