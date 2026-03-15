@@ -28,7 +28,7 @@ struct XmlReader
 /**********************************************//**
   @private Class Description
 **************************************************/
-Class xmlReaderClass = 
+PRIVATE Class xmlReaderClass = 
 {
   .f_new = (Constructor)0,
   .f_delete = (Destructor)&XmlReader_delete,
@@ -67,8 +67,7 @@ PUBLIC XmlReader* XmlReader_new(String* string)
 
   if (OBJECT_IS_INVALID(this)) return 0;
   
-  this->buffer = String_getBuffer(string);
-  this->readPtr = this->buffer;
+  this->readPtr = String_getBuffer(string);
   this->length = String_getLength(string);
   this->nbCharRead = 0;
   this->node = XMLNONE;
@@ -86,6 +85,9 @@ PUBLIC XmlReader* XmlReader_new(String* string)
 PUBLIC void XmlReader_delete(XmlReader* this)
 {
   if (OBJECT_IS_INVALID(this)) return;
+
+  this->readPtr = 0;
+  this->node = XMLNONE;
 
   Memory_free(this->buffer, BUFFER_SIZE);
 
@@ -173,12 +175,12 @@ PUBLIC XmlNode XmlReader_read(XmlReader * this)
     }
     else
     {
-      this->readPtr++;
-      this->nbCharRead++;
       if (*this->readPtr=='<')
       {
         this->node = XMLTEXT;
       }
+      this->readPtr++;
+      this->nbCharRead++;
     }
   }
 
@@ -206,8 +208,8 @@ PUBLIC String* XmlReader_getContent(XmlReader* this)
 **************************************************/
 PUBLIC int XmlReader_consumeVersion(XmlReader* this)
 {
-  this->nbCharRead += 4;
-  this->readPtr += 4;
+  this->nbCharRead += 5;
+  this->readPtr += 5;
 
   while (this->nbCharRead<this->length)
   {
@@ -258,6 +260,7 @@ PUBLIC int XmlReader_consumeComment(XmlReader* this)
 PUBLIC int XmlReader_consumeEndElement(XmlReader* this)
 {
   this->nbCharRead += 2;
+  this->readPtr += 2;
   XmlReader_consumeName(this);
   if (*this->readPtr=='>')
   {
@@ -303,7 +306,7 @@ PUBLIC int XmlReader_consumeElement(XmlReader* this)
   return 0;
 }
 
-PUBLIC int XmlReader_consumeAttribute(XmlReader* this)
+PRIVATE int XmlReader_consumeAttribute(XmlReader* this)
 {
   XmlReader_consumeSpace(this);
   
