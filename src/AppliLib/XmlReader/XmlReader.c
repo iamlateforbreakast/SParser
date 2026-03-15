@@ -415,9 +415,7 @@ PRIVATE int XmlReader_consumeSpace(XmlReader* this)
 
 PRIVATE int XmlReader_consumeOneChar(XmlReader* this)
 {
-  this->nbCharRead++;
-  this->readPtr++;
-  if (*this->readPtr=='\n')
+  if (*this->readPtr == '\n')   // check before advancing
   {
     this->col = 0;
     this->line++;
@@ -426,6 +424,7 @@ PRIVATE int XmlReader_consumeOneChar(XmlReader* this)
   {
     this->col++;
   }
-  
+  this->nbCharRead++;
+  this->readPtr++;
   return 1;
 }
