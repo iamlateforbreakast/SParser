@@ -2,6 +2,7 @@
 #include "XmlReader.h"
 #include "Object.h"
 #include "Memory.h"
+#include "Error.h"
 
 #define BUFFER_SIZE (512) /* In bytes */
 
@@ -21,7 +22,7 @@ struct XmlReader
   int line;
   int col;
   int bufferUse;
-
+  int isInsideElement;
   XmlNode node;
 };
 
@@ -73,6 +74,9 @@ PUBLIC XmlReader* XmlReader_new(String* string)
   this->node = XMLNONE;
   this->buffer = (char*)Memory_alloc(BUFFER_SIZE);
   this->bufferUse = 0;
+  this->line = 1;
+  this->col = 1;
+  this->isInsideElement = 0;
 
   return this;
 }
@@ -158,7 +162,7 @@ PUBLIC XmlNode XmlReader_read(XmlReader * this)
       XmlReader_consumeComment(this);
       this->node = XMLCOMMENT;
     }
-    else if (Memory_ncmp(this->readPtr, "<?xml",4))
+    else if (Memory_ncmp(this->readPtr, "<?xml",5))
     {
       XmlReader_consumeVersion(this);
       this->node = XMLVERSION;
@@ -167,6 +171,17 @@ PUBLIC XmlNode XmlReader_read(XmlReader * this)
     {
       XmlReader_consumeEndElement(this);
       this->node = XMLENDELEMENT;
+    }
+    else if (*this->readPtr == ' ' && this->isInsideElement)
+    {
+      XmlReader_consumeAttribute(this);
+      this->node = XMLATTRIBUTE;
+    }
+    else if (*this->readPtr == '>' && this->isInsideElement)
+    {
+      this->nbCharRead++;
+      this->readPtr++;
+      this->isInsideElement = 0;
     }
     else if (Memory_ncmp(this->readPtr, "<", 1))
     {
@@ -208,6 +223,8 @@ PUBLIC String* XmlReader_getContent(XmlReader* this)
 **************************************************/
 PUBLIC int XmlReader_consumeVersion(XmlReader* this)
 {
+  this->buffer[0] = 0;
+
   this->nbCharRead += 5;
   this->readPtr += 5;
 
@@ -234,6 +251,8 @@ PUBLIC int XmlReader_consumeVersion(XmlReader* this)
 **************************************************/
 PUBLIC int XmlReader_consumeComment(XmlReader* this)
 {
+  this->buffer[0] = 0;
+
   this->nbCharRead += 4;
   this->readPtr += 4;
 
@@ -267,6 +286,8 @@ PUBLIC int XmlReader_consumeEndElement(XmlReader* this)
     this->nbCharRead++;
     this->readPtr++;
   }
+  
+  this->isInsideElement = 0;
 
   return 1;
 }
@@ -281,25 +302,23 @@ PUBLIC int XmlReader_consumeElement(XmlReader* this)
 {
   this->nbCharRead += 1;
   this->readPtr += 1;
-  
-  while (this->nbCharRead<this->length)
+
+  while (this->nbCharRead < this->length)
   {
     if (IS_ELEMENT_LETTER(*this->readPtr))
     {
-      this->buffer[this->bufferUse] = *this->readPtr;
-      this->bufferUse++;
+      if (this->bufferUse < BUFFER_SIZE - 1)
+      {
+        this->buffer[this->bufferUse++] = *this->readPtr;
+      }
       XmlReader_consumeOneChar(this);
     }
     else
     {
-      if (*this->readPtr=='>')
-      {
-        this->nbCharRead++;
-        this->readPtr++;
-      }
       this->buffer[this->bufferUse] = 0;
       this->bufferUse = 0;
-      
+      /* Stay positioned at the space or '>' — do not consume */
+      this->isInsideElement = 1;
       return 1;
     }
   }
@@ -309,21 +328,58 @@ PUBLIC int XmlReader_consumeElement(XmlReader* this)
 PRIVATE int XmlReader_consumeAttribute(XmlReader* this)
 {
   XmlReader_consumeSpace(this);
-  
-  XmlReader_consumeName(this);
 
-  if (*this->readPtr!='=') { /*error*/}
+  /* Capture attribute name into buffer */
+  int i = 0;
+  while (this->nbCharRead < this->length && IS_ELEMENT_LETTER(*this->readPtr))
+  {
+    if (i < BUFFER_SIZE - 1)
+    {
+      this->buffer[i++] = *this->readPtr;
+    }
+    this->nbCharRead++;
+    this->readPtr++;
+  }
+  this->buffer[i] = 0;
 
-  XmlReader_consumeString(this);
-
-  if (*this->readPtr=='>')
+  /* Consume '=' */
+  if (*this->readPtr == '=')
   {
     this->nbCharRead++;
     this->readPtr++;
   }
+  else
+  {
+    Error_new(ERROR_NORMAL, "XmlReader: expected '=' in attribute\n");
+    return 0;
+  }
 
-  return 0;
+  /* Consume quoted value, matching open and close delimiter */
+  if ((*this->readPtr == '"') || (*this->readPtr == '\''))
+  {
+    char openQuote = *this->readPtr;
+    this->nbCharRead++;
+    this->readPtr++;
+    while (this->nbCharRead < this->length && *this->readPtr != openQuote)
+    {
+      this->nbCharRead++;
+      this->readPtr++;
+    }
+    if (*this->readPtr == openQuote)
+    {
+      this->nbCharRead++;
+      this->readPtr++;
+    }
+  }
+  else
+  {
+    Error_new(ERROR_NORMAL, "XmlReader: expected quoted attribute value\n");
+    return 0;
+  }
+
+  return 1;
 }
+
 
 PRIVATE int XmlReader_consumeName(XmlReader* this)
 {
@@ -352,35 +408,6 @@ PRIVATE int XmlReader_consumeSpace(XmlReader* this)
     }
     else
       break;
-  }
-
-  return 1;
-}
-
-PRIVATE int XmlReader_consumeString(XmlReader* this)
-{
-  if ((*this->readPtr=='"') || (*this->readPtr=='\''))
-  {
-    this->nbCharRead++;
-    this->readPtr++;
-  }
-  else
-  {
-    /* error */
-  }
-  while (this->nbCharRead<this->length)
-  {
-    if ((*this->readPtr=='"') || (*this->readPtr=='\''))
-    {
-      this->nbCharRead++;
-      this->readPtr++;
-      break;
-    }
-    else
-    {
-      this->nbCharRead++;
-      this->readPtr++;
-    }
   }
 
   return 1;
