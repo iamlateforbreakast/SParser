@@ -16,14 +16,15 @@
 struct XmlReader
 {
   Object object;
-  char * buffer;
+  char * content;
   char * readPtr;
   int nbCharRead;
   int length;
   int line;
   int col;
-  int bufferUse;
+  int contentUse;
   int isInsideElement;
+  int isError;
   XmlNode node;
 };
 
@@ -73,11 +74,12 @@ PUBLIC XmlReader* XmlReader_new(String* string)
   this->length = String_getLength(string);
   this->nbCharRead = 0;
   this->node = XMLNONE;
-  this->buffer = (char*)Memory_alloc(BUFFER_SIZE);
-  this->bufferUse = 0;
+  this->content = (char*)Memory_alloc(BUFFER_SIZE);
+  this->contentUse = 0;
   this->line = 1;
   this->col = 1;
   this->isInsideElement = 0;
+  this->isError = 0;
 
   return this;
 }
@@ -94,7 +96,7 @@ PUBLIC void XmlReader_delete(XmlReader* this)
   this->readPtr = 0;
   this->node = XMLNONE;
 
-  Memory_free(this->buffer, BUFFER_SIZE);
+  Memory_free(this->content, BUFFER_SIZE);
 
   /* De-allocate the base object */
   Object_deallocate(&this->object);
@@ -154,34 +156,35 @@ PUBLIC unsigned int XmlReader_getSize(XmlReader* this)
 **************************************************/
 PUBLIC XmlNode XmlReader_read(XmlReader * this)
 {
+  this->isError = 0;
   this->node = XMLNONE;
 
-  while ((this->nbCharRead<this->length) && (this->node==XMLNONE))
+  /* While node has not been found */
+  while ((this->nbCharRead<this->length) && (this->node==XMLNONE) && !this->isError )
   {
     if (Memory_ncmp(this->readPtr, "<!--",4))
     {
-      XmlReader_consumeComment(this);
+      this->isError = XmlReader_consumeComment(this);
       this->node = XMLCOMMENT;
     }
     else if (Memory_ncmp(this->readPtr, "<?xml",5))
     {
-      XmlReader_consumeVersion(this);
+      this->isError = XmlReader_consumeVersion(this);
       this->node = XMLVERSION;
     }
     else if(Memory_ncmp(this->readPtr, "</",2))
     {
-      XmlReader_consumeEndElement(this);
+      this->isError = XmlReader_consumeEndElement(this);
       this->node = XMLENDELEMENT;
     }
     else if (*this->readPtr == ' ' && this->isInsideElement)
     {
-      XmlReader_consumeAttribute(this);
+      this->isError = XmlReader_consumeAttribute(this);
       this->node = XMLATTRIBUTE;
     }
     else if (*this->readPtr == '>' && this->isInsideElement)
     {
-      this->nbCharRead++;
-      this->readPtr++;
+      XmlReader_consumeOneChar(this);
       this->isInsideElement = 0;
     }
     else if (Memory_ncmp(this->readPtr, "<", 1))
@@ -207,7 +210,10 @@ PUBLIC XmlNode XmlReader_read(XmlReader * this)
 **************************************************/
 PUBLIC String* XmlReader_getContent(XmlReader* this)
 {
-  String* content = String_new(this->buffer);
+  String* content = String_new(this->content);
+  
+  this->content[0] = 0;
+  this->contentUse = 0;
 
   return content;
 }
@@ -220,7 +226,7 @@ PUBLIC String* XmlReader_getContent(XmlReader* this)
 **************************************************/
 PUBLIC int XmlReader_consumeVersion(XmlReader* this)
 {
-  this->buffer[0] = 0;
+  this->content[0] = 0;
 
   this->nbCharRead += 5;
   this->readPtr += 5;
@@ -248,7 +254,7 @@ PUBLIC int XmlReader_consumeVersion(XmlReader* this)
 **************************************************/
 PUBLIC int XmlReader_consumeComment(XmlReader* this)
 {
-  this->buffer[0] = 0;
+  this->content[0] = 0;
 
   this->nbCharRead += 4;
   this->readPtr += 4;
@@ -304,9 +310,9 @@ PUBLIC int XmlReader_consumeElement(XmlReader* this)
   {
     if (IS_ELEMENT_LETTER(*this->readPtr))
     {
-      if (this->bufferUse < BUFFER_SIZE - 1)
+      if (this->contentUse < BUFFER_SIZE - 1)
       {
-        this->buffer[this->bufferUse++] = *this->readPtr;
+        this->content[this->contentUse++] = *this->readPtr;
       }
       XmlReader_consumeOneChar(this);
     }
@@ -314,15 +320,15 @@ PUBLIC int XmlReader_consumeElement(XmlReader* this)
     {
       this->nbCharRead++;
       this->readPtr++;
-      this->buffer[this->bufferUse] = 0;
-      this->bufferUse = 0;
+      this->content[this->contentUse] = 0;
+      this->contentUse = 0;
       this->isInsideElement = 0;
       return 1;
     }
     else
     {
-      this->buffer[this->bufferUse] = 0;
-      this->bufferUse = 0;
+      this->content[this->contentUse] = 0;
+      this->contentUse = 0;
       /* Stay positioned at the space or '>' — do not consume */
       this->isInsideElement = 1;
       return 1;
@@ -341,12 +347,12 @@ PRIVATE int XmlReader_consumeAttribute(XmlReader* this)
   {
     if (i < BUFFER_SIZE - 1)
     {
-      this->buffer[i++] = *this->readPtr;
+      this->content[i++] = *this->readPtr;
     }
     this->nbCharRead++;
     this->readPtr++;
   }
-  this->buffer[i] = 0;
+  this->content[i] = 0;
 
   /* Consume '=' */
   if (*this->readPtr == '=')
@@ -442,6 +448,7 @@ PRIVATE int XmlReader_consumeString(XmlReader* this)
     if (*this->readPtr=='<')
     {
       /* String is read, do not consume */
+      this->content[this->contentUse] = 0;
       return 1;
     }
     else if (*this->readPtr == '\n')
@@ -451,15 +458,15 @@ PRIVATE int XmlReader_consumeString(XmlReader* this)
     }
     else
     {
-      if (this->bufferUse < BUFFER_SIZE - 1)
+      if (this->contentUse < BUFFER_SIZE - 1)
       {
-        this->buffer[this->bufferUse++] = *this->readPtr;
+        this->content[this->contentUse++] = *this->readPtr;
         XmlReader_consumeOneChar(this);
       }
       else
       {
-        this->buffer[this->bufferUse] = 0;
-        this->bufferUse = 0;
+        this->content[this->contentUse] = 0;
+        this->contentUse = 0;
         /* Stay positioned at the next char — do not consume */
         return 1; 
       }

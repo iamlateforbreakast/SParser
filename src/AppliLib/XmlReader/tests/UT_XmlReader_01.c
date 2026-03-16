@@ -25,6 +25,9 @@ PRIVATE char * testXmlBuffer2 = "<phone_book>"
                                 "<employee id='123'>Maggie Mack</employee>"
                                 "<employee site='uk' id='124'>Alan Ackerman</employee>"
                                 "</phone_book>";
+PRIVATE char * testXmlBuffer3 = "<!-- This file represents a test -->\n"
+                                "<directory><person country=\"USA\">John Smith\n"
+                                "</person><person country \"UK\">Jane Doe</person> </directory>";
 
 PRIVATE int UT_XmlReader_01_step1()
 {
@@ -79,16 +82,37 @@ PRIVATE int UT_XmlReader_01_step2()
   PRINT2((logChannel, "Step 2: Test 4 - Read XML text and end element: "));
 
   node = XmlReader_read(testXmlReader);
+  String* textContent = XmlReader_getContent(testXmlReader);
+  String* checkTextContent = String_newByRef("John Smith");
   node2 = XmlReader_read(testXmlReader);
+  isPassed = isPassed && (node==XMLTEXT);
+  isPassed = isPassed && (node2==XMLENDELEMENT);
+  isPassed = isPassed && (String_compare(textContent, checkTextContent)==0);
+  String_delete(textContent);
+  String_delete(checkTextContent);
 
-  UT_ASSERT(((node==XMLTEXT)&&(node2==XMLENDELEMENT)));
+  UT_ASSERT((isPassed));
 
   PRINT2((logChannel, "Step 2: Test 5 - Read XML text and end element: "));
 
   node = XmlReader_read(testXmlReader);
   node2 = XmlReader_read(testXmlReader);
+  textContent = XmlReader_getContent(testXmlReader);
+  checkTextContent = String_newByRef("Jane Doe");
+  isPassed = isPassed && (node==XMLELEMENT);
+  isPassed = isPassed && (node2==XMLTEXT);
+  isPassed = isPassed && (String_compare(textContent, checkTextContent)==0);
+  String_delete(textContent);
+  String_delete(checkTextContent);
+  
+  UT_ASSERT((isPassed));
 
-  UT_ASSERT(((node==XMLELEMENT)&&(node2==XMLTEXT)));
+  PRINT2((logChannel, "Step 2: Test 6 - Read XML end element: "));
+
+  node = XmlReader_read(testXmlReader);
+  isPassed = isPassed && (node==XMLENDELEMENT);
+  
+  UT_ASSERT((isPassed));
 
   XmlReader_delete(testXmlReader);
   String_delete(testXmlString);
@@ -143,6 +167,60 @@ int UT_XmlReader_01_step3()
   String_delete(attributeName);
   String_delete(check3Name);
 
+  PRINT2((logChannel, "Step 3: Test 4 - Read XML text: "));
+  XmlReader_delete(testXmlReader);
+  String_delete(testXmlString);
+
+  return isPassed;
+}
+
+int UT_XmlReader_01_step4()
+{
+  int isPassed = 1;
+
+  String * testXmlString = String_newByRef(testXmlBuffer2);
+  XmlReader * testXmlReader = XmlReader_new(testXmlString);
+
+  PRINT2((logChannel, "Step 4: Test 1 - Read XML attribute with double quotes: "));
+
+  XmlNode node = XMLNONE;
+  while (node != XMLATTRIBUTE)
+  {
+    node = XmlReader_read(testXmlReader);
+  }
+  String* attributeName = XmlReader_getContent(testXmlReader);
+  String* checkName = String_newByRef("site");
+  
+  isPassed = isPassed && (node==XMLATTRIBUTE);
+  isPassed = isPassed && (String_compare(attributeName, checkName)==0);
+
+  UT_ASSERT((isPassed));
+
+  String_delete(attributeName);
+  String_delete(checkName);
+
+  PRINT2((logChannel, "Step 4: Test 2 - Read multiple attributes on one element: "));
+  XmlNode node2 = XMLNONE;
+  while (node2 != XMLATTRIBUTE)
+  {
+    node2 = XmlReader_read(testXmlReader);
+  }
+  String* attribute2Name = XmlReader_getContent(testXmlReader);
+  String* check2Name = String_newByRef("id");
+  isPassed = isPassed && (node2==XMLATTRIBUTE);
+  isPassed = isPassed && (String_compare(attribute2Name, check2Name)==0);
+
+  PRINT2((logChannel, "Step 4: Test 3 - Read XML text content: "));
+  node = XMLNONE;
+  while (node != XMLTEXT)
+  { 
+    node = XmlReader_read(testXmlReader);
+  } 
+  String* textContent = XmlReader_getContent(testXmlReader);
+  String* checkTextContent = String_newByRef("Alan Ackerman");
+  isPassed = isPassed && (node==XMLTEXT);
+  isPassed = isPassed && (String_compare(textContent, checkTextContent)==0);
+
   XmlReader_delete(testXmlReader);
   String_delete(testXmlString);
 
@@ -163,6 +241,7 @@ int run_UT_XmlReader_01()
   isPassed = isPassed && UT_XmlReader_01_step1();
   isPassed = isPassed && UT_XmlReader_01_step2();
   isPassed = isPassed && UT_XmlReader_01_step3();
+  isPassed = isPassed && UT_XmlReader_01_step4();
 
   ObjectMgr* objMgr = ObjectMgr_getRef();;
   ObjectMgr_reportUnallocated(objMgr);
@@ -172,3 +251,29 @@ int run_UT_XmlReader_01()
 
   return isPassed;
 }
+
+/* TODO:
+High value — gaps in already-wired functionality:
+-------------------------------------------------
+
+[-] consumeAttribute with double quotes (id="123") — only single-quote path is covered
+
+[-] Multiple attributes on one element (site='uk' id='124' in testXmlBuffer2 is right there but not walked through)
+
+[X] getContent after XMLTEXT — the text content reading path is completely unverified
+
+Medium value — error/edge paths:
+--------------------------------
+
+[-] Unterminated comment and unterminated multiline — these return different values (0 vs 1) but neither is tested
+
+[-] Missing = in attribute and unquoted attribute value — both Error_new paths in consumeAttribute
+
+[-] A test string with newlines to exercise the line/col tracking in consumeOneChar
+
+Low value for now — stubs:
+--------------------------
+
+[-] copy, compare, print, getSize are all stubs so testing them adds little until they're implemented
+
+*/
