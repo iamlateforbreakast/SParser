@@ -162,12 +162,17 @@ int UT_XmlReader_01_step3()
   
   isPassed = isPassed && (node==XMLATTRIBUTE);
 
+  String * attributeValue = XmlReader_getAttributeValue(testXmlReader);
+  String * checkAttributeValue = String_newByRef("123");
+  isPassed = isPassed && (String_compare(attributeValue, checkAttributeValue)==0);
+  String_delete(attributeValue);
+  String_delete(checkAttributeValue);
+
   UT_ASSERT((isPassed));
 
   String_delete(attributeName);
   String_delete(check3Name);
 
-  PRINT2((logChannel, "Step 3: Test 4 - Read XML text: "));
   XmlReader_delete(testXmlReader);
   String_delete(testXmlString);
 
@@ -178,7 +183,7 @@ int UT_XmlReader_01_step4()
 {
   int isPassed = 1;
 
-  String * testXmlString = String_newByRef(testXmlBuffer2);
+  String * testXmlString = String_newByRef(testXmlBuffer3);
   XmlReader * testXmlReader = XmlReader_new(testXmlString);
 
   PRINT2((logChannel, "Step 4: Test 1 - Read XML attribute with double quotes: "));
@@ -189,30 +194,34 @@ int UT_XmlReader_01_step4()
     node = XmlReader_read(testXmlReader);
   }
   String* attributeName = XmlReader_getContent(testXmlReader);
-  String* checkName = String_newByRef("site");
+  String* checkName = String_newByRef("country");
   
-  isPassed = isPassed && (node==XMLATTRIBUTE);
   isPassed = isPassed && (String_compare(attributeName, checkName)==0);
-
-  UT_ASSERT((isPassed));
 
   String_delete(attributeName);
   String_delete(checkName);
 
+  UT_ASSERT((isPassed));
+
   PRINT2((logChannel, "Step 4: Test 2 - Read multiple attributes on one element: "));
-  XmlNode node2 = XMLNONE;
-  while (node2 != XMLATTRIBUTE)
+  XmlNode node2 = XmlReader_read(testXmlReader);
+  while (((node2 != XMLATTRIBUTE) && (node2 != XMLNONE)))
   {
     node2 = XmlReader_read(testXmlReader);
   }
   String* attribute2Name = XmlReader_getContent(testXmlReader);
-  String* check2Name = String_newByRef("id");
+  String* check2Name = String_newByRef("country");
   isPassed = isPassed && (node2==XMLATTRIBUTE);
   isPassed = isPassed && (String_compare(attribute2Name, check2Name)==0);
 
+  String_delete(attribute2Name);
+  String_delete(check2Name);
+
+  UT_ASSERT((isPassed));
+  
   PRINT2((logChannel, "Step 4: Test 3 - Read XML text content: "));
-  node = XMLNONE;
-  while (node != XMLTEXT)
+  node = XmlReader_read(testXmlReader);;
+  while ((node != XMLTEXT) && (node!=XMLNONE))
   { 
     node = XmlReader_read(testXmlReader);
   } 
@@ -223,6 +232,8 @@ int UT_XmlReader_01_step4()
 
   XmlReader_delete(testXmlReader);
   String_delete(testXmlString);
+
+  UT_ASSERT((isPassed));
 
   return isPassed;
 }

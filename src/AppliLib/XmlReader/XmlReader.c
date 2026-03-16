@@ -17,12 +17,14 @@ struct XmlReader
 {
   Object object;
   char * content;
+  char * attrValue;
   char * readPtr;
   int nbCharRead;
   int length;
   int line;
   int col;
   int contentUse;
+  int attrValueUse;
   int isInsideElement;
   int isError;
   XmlNode node;
@@ -75,7 +77,7 @@ PUBLIC XmlReader* XmlReader_new(String* string)
   this->nbCharRead = 0;
   this->node = XMLNONE;
   this->content = (char*)Memory_alloc(BUFFER_SIZE);
-  this->attrValue = (cahr*)Memory_alloc(BUFFER_SIZE);
+  this->attrValue = (char*)Memory_alloc(BUFFER_SIZE);
   this->contentUse = 0;
   this->attrValueUse = 0;
   this->line = 1;
@@ -227,7 +229,7 @@ PUBLIC String* XmlReader_getContent(XmlReader* this)
   @memberof XmlReader
   @return String with content
 **************************************************/
-PUBLIC String* XmlReader_getAttrValue(XmlReader* this)
+PUBLIC String* XmlReader_getAttributeValue(XmlReader* this)
 {
   return String_new(this->attrValue);
 }
