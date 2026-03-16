@@ -75,7 +75,9 @@ PUBLIC XmlReader* XmlReader_new(String* string)
   this->nbCharRead = 0;
   this->node = XMLNONE;
   this->content = (char*)Memory_alloc(BUFFER_SIZE);
+  this->attrValue = (cahr*)Memory_alloc(BUFFER_SIZE);
   this->contentUse = 0;
+  this->attrValueUse = 0;
   this->line = 1;
   this->col = 1;
   this->isInsideElement = 0;
@@ -97,7 +99,8 @@ PUBLIC void XmlReader_delete(XmlReader* this)
   this->node = XMLNONE;
 
   Memory_free(this->content, BUFFER_SIZE);
-
+  Memory_free(this->attrValue, BUFFER_SIZE);
+  
   /* De-allocate the base object */
   Object_deallocate(&this->object);
   
@@ -219,6 +222,17 @@ PUBLIC String* XmlReader_getContent(XmlReader* this)
 }
 
 /**********************************************//** 
+  @brief Provide the value of the current attribue.
+  @public
+  @memberof XmlReader
+  @return String with content
+**************************************************/
+PUBLIC String* XmlReader_getAttrValue(XmlReader* this)
+{
+  return String_new(this->attrValue);
+}
+
+/**********************************************//** 
   @brief Read the version node from the XmlReaderstream
   @public
   @memberof XmlReader
@@ -337,61 +351,56 @@ PUBLIC int XmlReader_consumeElement(XmlReader* this)
   return 0;
 }
 
+/**********************************************//** 
+  @brief Read an attribute (name="value")
+  @private
+**************************************************/
 PRIVATE int XmlReader_consumeAttribute(XmlReader* this)
 {
-  XmlReader_consumeSpace(this);
+  /* 1. Clear previous buffers */
+  this->content[0] = 0;
+  this->contentUse = 0;
+  this->attrValue[0] = 0;
+  this->attrValueUse = 0;
 
-  /* Capture attribute name into buffer */
-  int i = 0;
-  while (this->nbCharRead < this->length && IS_ELEMENT_LETTER(*this->readPtr))
-  {
-    if (i < BUFFER_SIZE - 1)
-    {
-      this->content[i++] = *this->readPtr;
+  /* 2. Skip leading whitespace */
+  while (this->nbCharRead < this->length && (*this->readPtr == ' ' || *this->readPtr == '\t')) {
+    XmlReader_consumeOneChar(this);
+  }
+
+  /* 3. Consume Attribute Name (e.g., 'id') */
+  while (this->nbCharRead < this->length && IS_ELEMENT_LETTER(*this->readPtr)) {
+    if (this->contentUse < BUFFER_SIZE - 1) {
+      this->content[this->contentUse++] = *this->readPtr;
     }
-    this->nbCharRead++;
-    this->readPtr++;
+    XmlReader_consumeOneChar(this);
   }
-  this->content[i] = 0;
+  this->content[this->contentUse] = '\0';
 
-  /* Consume '=' */
-  if (*this->readPtr == '=')
-  {
-    this->nbCharRead++;
-    this->readPtr++;
+  /* 4. Expect '=' */
+  while (this->nbCharRead < this->length && *this->readPtr != '=') {
+    XmlReader_consumeOneChar(this);
   }
-  else
-  {
-    Error_new(ERROR_NORMAL, "XmlReader: expected '=' in attribute\n");
-    return 0;
-  }
+  XmlReader_consumeOneChar(this); // Skip '='
 
-  /* Consume quoted value, matching open and close delimiter */
-  if ((*this->readPtr == '"') || (*this->readPtr == '\''))
-  {
-    char openQuote = *this->readPtr;
-    this->nbCharRead++;
-    this->readPtr++;
-    while (this->nbCharRead < this->length && *this->readPtr != openQuote)
-    {
-      this->nbCharRead++;
-      this->readPtr++;
+  /* 5. Expect quote (single or double) */
+  char quoteType = *this->readPtr;
+  if (quoteType != '\'' && quoteType != '\"') return 1; // Error: malformed XML
+  XmlReader_consumeOneChar(this); // Skip opening quote
+
+  /* 6. Consume Attribute Value */
+  while (this->nbCharRead < this->length && *this->readPtr != quoteType) {
+    if (this->attrValueUse < BUFFER_SIZE - 1) {
+      this->attrValue[this->attrValueUse++] = *this->readPtr;
     }
-    if (*this->readPtr == openQuote)
-    {
-      this->nbCharRead++;
-      this->readPtr++;
-    }
+    XmlReader_consumeOneChar(this);
   }
-  else
-  {
-    Error_new(ERROR_NORMAL, "XmlReader: expected quoted attribute value\n");
-    return 0;
-  }
+  this->attrValue[this->attrValueUse] = '\0';
+  
+  XmlReader_consumeOneChar(this); // Skip closing quote
 
-  return 1;
+  return 0; // Success
 }
-
 
 PRIVATE int XmlReader_consumeName(XmlReader* this)
 {
