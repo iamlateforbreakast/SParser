@@ -56,7 +56,9 @@ PRIVATE ObjectMgr * ObjectMgr_new()
   int i = 0;
   
   this = (ObjectMgr*)Memory_alloc(sizeof(ObjectMgr));
-    
+  if (OBJECT_IS_INVALID(this)) return 0;
+  
+  this->object.marker = OBJECT_MARKER;
   this->object.delete = (void(*)(Object*))&ObjectMgr_delete;
   this->object.copy = (Object*(*)(Object*))&ObjectMgr_copy;
   this->object.size = sizeof(ObjectMgr);
@@ -69,7 +71,7 @@ PRIVATE ObjectMgr * ObjectMgr_new()
   this->freeRequestId = 0;
   this->nbAllocatedObjects = 1;
   this->maxNbObjectAllocated = 1;
-  memset(this->allocatedObjects, 0, MAX_NB_OBJECTS * sizeof(Object*));
+  memset(this->allocatedObjects, 0, MAX_NB_OBJECTS * sizeof(ObjectInfo));
   
   for (i=2; i<MAX_NB_OBJECTS-1; i++)
   {
@@ -96,14 +98,14 @@ PRIVATE ObjectMgr * ObjectMgr_new()
 **************************************************/
 PUBLIC void ObjectMgr_delete(ObjectMgr * this)
 {
+  if OBJECT_IS_INVALID(this) return;
+
   this->object.refCount = this->object.refCount - 1;
   
   if (this->object.refCount == 0)
   {
-    //ObjectMgr_report(this);
-    /* TODO: memset(this, 0, sizeof(ObjectMgr)); */
+    this->object.marker = 0;
     Memory_free(this, sizeof(ObjectMgr));
-    this = 0;
   } 
 }
 
@@ -206,14 +208,14 @@ PUBLIC Object * ObjectMgr_allocate(ObjectMgr * this, unsigned int size)
   @param[in] object Reference to instance of Object.
 **************************************************/
 PUBLIC void ObjectMgr_deallocate(ObjectMgr * this, Object * object)
-{
-  unsigned int idx =  object->id;
-  
+{ 
   /* Error case: this is NULL */
-  if (this == 0) return;
+  if (OBJECT_IS_INVALID(this)) return;
 
   /* Error case: request to free a NULL pointer */
   if (object == 0) return;
+
+  unsigned int idx =  object->id;
 
   /* Error case: No allocated object left to free */
   if (this->nbAllocatedObjects <= 1) return;
@@ -244,7 +246,9 @@ PUBLIC void ObjectMgr_deallocate(ObjectMgr * this, Object * object)
   @memberof ObjectMgr
 **************************************************/
 PUBLIC void ObjectMgr_reportUnallocated(ObjectMgr* this)
-     {
+{
+  if (OBJECT_IS_INVALID(this)) return;
+
   int idx = this->usedSpace;
   PRINT(("Id of first unallocated object: "));
 

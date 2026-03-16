@@ -9,6 +9,7 @@
 
 #define OBJECT_IS_INVALID(X) (!Object_isValid((Object*)X))
 #define OBJECT_IS_VALID(X) (Object_isValid((Object*)X))
+#define OBJECT_MARKER (0x0B5EC7)
 
 typedef struct Object Object;
 
