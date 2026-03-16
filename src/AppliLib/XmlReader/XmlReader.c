@@ -259,7 +259,7 @@ PUBLIC int XmlReader_consumeVersion(XmlReader* this)
     this->readPtr += 1;
   }
 
-  return 1;
+  return 0;
 }
 
 /**********************************************//** 
@@ -281,12 +281,12 @@ PUBLIC int XmlReader_consumeComment(XmlReader* this)
     {
       this->nbCharRead += 3;
       this->readPtr += 3;
-      return 1;
+      return 0;
     }
     this->nbCharRead += 1;
     this->readPtr += 1;
   }
-  return 0;
+  return 1;
 }
  
 /**********************************************//** 
@@ -308,7 +308,7 @@ PUBLIC int XmlReader_consumeEndElement(XmlReader* this)
   
   this->isInsideElement = 0;
 
-  return 1;
+  return 0;
 }
 
 /**********************************************//** 
@@ -330,6 +330,10 @@ PUBLIC int XmlReader_consumeElement(XmlReader* this)
       {
         this->content[this->contentUse++] = *this->readPtr;
       }
+      else
+      {
+        return 1; // Error: element name too long for buffer
+      }
       XmlReader_consumeOneChar(this);
     }
     else if (*this->readPtr == '>')
@@ -339,7 +343,7 @@ PUBLIC int XmlReader_consumeElement(XmlReader* this)
       this->content[this->contentUse] = 0;
       this->contentUse = 0;
       this->isInsideElement = 0;
-      return 1;
+      return 0;
     }
     else
     {
@@ -347,10 +351,10 @@ PUBLIC int XmlReader_consumeElement(XmlReader* this)
       this->contentUse = 0;
       /* Stay positioned at the space or '>' — do not consume */
       this->isInsideElement = 1;
-      return 1;
+      return 0;
     }
   }
-  return 0;
+  return 1;
 }
 
 /**********************************************//** 
@@ -417,7 +421,7 @@ PRIVATE int XmlReader_consumeName(XmlReader* this)
       break;
   }
 
-  return 1;
+  return 0;
 }
 
 PRIVATE int XmlReader_consumeSpace(XmlReader* this)
@@ -433,7 +437,7 @@ PRIVATE int XmlReader_consumeSpace(XmlReader* this)
       break;
   }
 
-  return 1;
+  return 0;
 }
 
 PRIVATE int XmlReader_consumeOneChar(XmlReader* this)
@@ -449,7 +453,7 @@ PRIVATE int XmlReader_consumeOneChar(XmlReader* this)
   }
   this->nbCharRead++;
   this->readPtr++;
-  return 1;
+  return 0;
 }
 
 PRIVATE int XmlReader_consumeString(XmlReader* this)
@@ -460,7 +464,7 @@ PRIVATE int XmlReader_consumeString(XmlReader* this)
     {
       /* String is read, do not consume */
       this->content[this->contentUse] = 0;
-      return 1;
+      return 0;
     }
     else if (*this->readPtr == '\n')
     {
@@ -479,7 +483,7 @@ PRIVATE int XmlReader_consumeString(XmlReader* this)
         this->content[this->contentUse] = 0;
         this->contentUse = 0;
         /* Stay positioned at the next char — do not consume */
-        return 1; 
+        return 0; 
       }
     }
   }

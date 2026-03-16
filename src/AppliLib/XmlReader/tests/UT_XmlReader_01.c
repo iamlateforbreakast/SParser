@@ -211,11 +211,16 @@ int UT_XmlReader_01_step4()
   }
   String* attribute2Name = XmlReader_getContent(testXmlReader);
   String* check2Name = String_newByRef("country");
+  String* attributeValue = XmlReader_getAttributeValue(testXmlReader);
+  String* checkAttributeValue = String_newByRef("USA");
   isPassed = isPassed && (node2==XMLATTRIBUTE);
   isPassed = isPassed && (String_compare(attribute2Name, check2Name)==0);
+  isPassed = isPassed && (String_compare(attributeValue, checkAttributeValue)==0);
 
   String_delete(attribute2Name);
   String_delete(check2Name);
+  String_delete(attributeValue);
+  String_delete(checkAttributeValue);
 
   UT_ASSERT((isPassed));
   
