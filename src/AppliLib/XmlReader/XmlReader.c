@@ -3,6 +3,7 @@
 #include "Object.h"
 #include "Memory.h"
 #include "Error.h"
+#include "Debug.h"
 
 #define BUFFER_SIZE (512) /* In bytes */
 
@@ -190,12 +191,8 @@ PUBLIC XmlNode XmlReader_read(XmlReader * this)
     }
     else
     {
-      if (*this->readPtr=='<')
-      {
-        this->node = XMLTEXT;
-      }
-      this->readPtr++;
-      this->nbCharRead++;
+      XmlReader_consumeString(this);
+      this->node = XMLTEXT;
     }
   }
 
@@ -313,6 +310,15 @@ PUBLIC int XmlReader_consumeElement(XmlReader* this)
       }
       XmlReader_consumeOneChar(this);
     }
+    else if (*this->readPtr == '>')
+    {
+      this->nbCharRead++;
+      this->readPtr++;
+      this->buffer[this->bufferUse] = 0;
+      this->bufferUse = 0;
+      this->isInsideElement = 0;
+      return 1;
+    }
     else
     {
       this->buffer[this->bufferUse] = 0;
@@ -426,5 +432,39 @@ PRIVATE int XmlReader_consumeOneChar(XmlReader* this)
   }
   this->nbCharRead++;
   this->readPtr++;
+  return 1;
+}
+
+PRIVATE int XmlReader_consumeString(XmlReader* this)
+{
+  while (this->nbCharRead<this->length)
+  {
+    if (*this->readPtr=='<')
+    {
+      /* String is read, do not consume */
+      return 1;
+    }
+    else if (*this->readPtr == '\n')
+    {
+      /* ignore this character */
+      XmlReader_consumeOneChar(this);
+    }
+    else
+    {
+      if (this->bufferUse < BUFFER_SIZE - 1)
+      {
+        this->buffer[this->bufferUse++] = *this->readPtr;
+        XmlReader_consumeOneChar(this);
+      }
+      else
+      {
+        this->buffer[this->bufferUse] = 0;
+        this->bufferUse = 0;
+        /* Stay positioned at the next char — do not consume */
+        return 1; 
+      }
+    }
+  }
+
   return 1;
 }
