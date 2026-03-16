@@ -14,7 +14,7 @@
 typedef struct SkipNode SkipNode;
 
 PUBLIC SkipNode * SkipNode_new();
-PUBLIC SkipNode * SkipNode_newFromAllocator();
+PUBLIC SkipNode * SkipNode_newFromAllocator(Allocator * allocator);
 PUBLIC void SkipNode_delete(SkipNode * this);
 PUBLIC SkipNode * SkipNode_copy(SkipNode * this);
 PUBLIC int SkipNode_compare(SkipNode * this, SkipNode * compared);

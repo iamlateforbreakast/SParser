@@ -13,7 +13,7 @@ typedef enum FileIoStatus
 typedef struct FileIo FileIo;
 
 PUBLIC FileIo * FileIo_new();
-PUBLIC void FileIo_delete();
+PUBLIC void FileIo_delete(FileIo* this);
 PUBLIC FileIo* FileIo_copy(FileIo* this);
 PUBLIC int FileIo_comp(FileIo* this, FileIo* compare);
 PUBLIC void FileIo_print(FileIo* this);

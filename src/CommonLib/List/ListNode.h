@@ -13,7 +13,7 @@
 
 typedef struct ListNode ListNode;
 
-PRIVATE ListNode * ListNode_new();
+PRIVATE ListNode* ListNode_new(Object* object, int isOwner);
 PRIVATE ListNode * ListNode_newFromAllocator(Allocator * allocator, Object * object, int isOwner);
 PRIVATE void ListNode_delete(ListNode* this);
 PRIVATE ListNode * ListNode_copy(ListNode* this);
