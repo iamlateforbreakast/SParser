@@ -88,7 +88,7 @@ PRIVATE int UT_XmlReader_01_step2()
   node = XmlReader_read(testXmlReader);
   node2 = XmlReader_read(testXmlReader);
 
-  UT_ASSERT(((node==XMLENDELEMENT)&&(node2==XMLENDELEMENT)));
+  UT_ASSERT(((node==XMLELEMENT)&&(node2==XMLTEXT)));
 
   XmlReader_delete(testXmlReader);
   String_delete(testXmlString);
