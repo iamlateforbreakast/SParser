@@ -33,8 +33,6 @@ struct ObjectMgr
 {
   Object object;
   unsigned int maxNbObjectAllocated; /**< This is member B */
-  unsigned int allocRequestId;
-  unsigned int freeRequestId;
   unsigned int nbAllocatedObjects;
   ObjectInfo allocatedObjects[MAX_NB_OBJECTS];
   unsigned int freeSpace;
@@ -49,6 +47,7 @@ PRIVATE ObjectMgr * objectMgr = 0;
   @details TBD
   @private
   @memberof ObjectMgr
+  @return new instance of ObjectMgr
 **************************************************/
 PRIVATE ObjectMgr * ObjectMgr_new()
 {
@@ -57,7 +56,7 @@ PRIVATE ObjectMgr * ObjectMgr_new()
   
   this = (ObjectMgr*)Memory_alloc(sizeof(ObjectMgr));
   if (OBJECT_IS_INVALID(this)) return 0;
-  
+
   this->object.marker = OBJECT_MARKER;
   this->object.delete = (void(*)(Object*))&ObjectMgr_delete;
   this->object.copy = (Object*(*)(Object*))&ObjectMgr_copy;
@@ -67,8 +66,6 @@ PRIVATE ObjectMgr * ObjectMgr_new()
   this->object.uniqId = 0;
 
   this->nextId = 1;
-  this->allocRequestId = 1;
-  this->freeRequestId = 0;
   this->nbAllocatedObjects = 1;
   this->maxNbObjectAllocated = 1;
   memset(this->allocatedObjects, 0, MAX_NB_OBJECTS * sizeof(ObjectInfo));
@@ -106,6 +103,7 @@ PUBLIC void ObjectMgr_delete(ObjectMgr * this)
   {
     this->object.marker = 0;
     Memory_free(this, sizeof(ObjectMgr));
+    objectMgr = 0;
   } 
 }
 
@@ -147,6 +145,8 @@ PUBLIC ObjectMgr * ObjectMgr_getRef()
 **************************************************/
 PUBLIC unsigned int ObjectMgr_report(ObjectMgr * this)
 {
+  if (OBJECT_IS_INVALID(this)) return 0;
+
   return this->nbAllocatedObjects;
 }
 
@@ -165,8 +165,8 @@ PUBLIC Object * ObjectMgr_allocate(ObjectMgr * this, unsigned int size)
   /* Error case: request allocation with size 0 */
   if (size == 0) return 0;
 
-  /* Error case: too many objects already allocated */
-  if (this->nbAllocatedObjects == MAX_NB_OBJECTS)
+  /* Error case: too many objects already allocated - Note ObjectMgr is already using one slot */
+  if (this->nbAllocatedObjects == MAX_NB_OBJECTS - 1)
   {
     printf("Too many objects %d\n", this->nbAllocatedObjects);
     exit(1);
@@ -222,7 +222,8 @@ PUBLIC void ObjectMgr_deallocate(ObjectMgr * this, Object * object)
  
   /* Nominal case */
   Memory_free(this->allocatedObjects[idx].ptr, this->allocatedObjects[idx].ptr->size);
-      
+  this->allocatedObjects[idx].ptr = 0;
+
   if (this->allocatedObjects[idx].nextId != END_OF_QUEUE)
   {
     this->allocatedObjects[this->allocatedObjects[idx].nextId].prevId = this->allocatedObjects[idx].prevId;  
