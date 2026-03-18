@@ -14,7 +14,7 @@
 typedef struct Buffer Buffer;
 
 PRIVATE Buffer * Buffer_new();
-PRIVATE Buffer * Buffer_newFromString();
+PRIVATE Buffer * Buffer_newFromString(String* content);
 PRIVATE void Buffer_delete(Buffer * this);
 PRIVATE void Buffer_print(Buffer * this);
 PRIVATE unsigned int Buffer_getSize(Buffer * this);

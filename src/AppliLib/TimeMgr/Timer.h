@@ -4,7 +4,7 @@
 
 typedef struct Timer Timer;
 
-PUBLIC Timer * Timer_new();
+PUBLIC Timer * Timer_new(String * name);
 PUBLIC void Timer_delete(Timer * this);
 PUBLIC Timer * Timer_copy(Timer * this);
 PUBLIC unsigned int Timer_getSize(Timer * this);

@@ -111,7 +111,7 @@ PUBLIC Grammar2 * Grammar2_new(FileReader * fr, SdbMgr * sdbMgr)
   this->sdbMgr = sdbMgr;
   Grammar2lex_init(&this->scanner);
   
-  this->contexts = List_new(this->contexts);
+  this->contexts = List_new();
   this->current = (GrammarContext*)Object_new(sizeof(GrammarContext),&grammarContextClass);
   this->current->lastNode = 0;
   this->current->includeNodeBranch = 0;
