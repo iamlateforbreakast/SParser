@@ -55,7 +55,7 @@ PRIVATE ObjectMgr * ObjectMgr_new()
   int i = 0;
   
   this = (ObjectMgr*)Memory_alloc(sizeof(ObjectMgr));
-  if (OBJECT_IS_INVALID(this)) return 0;
+  if (this == 0) return 0;
 
   this->object.marker = OBJECT_MARKER;
   this->object.delete = (void(*)(Object*))&ObjectMgr_delete;
