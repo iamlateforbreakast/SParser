@@ -19,7 +19,7 @@
 #endif
 
 #define MAX_TASKS (10)
-#define MAX_THREADS (1)
+#define MAX_THREADS (2)
 
 #define DEBUG (0)
 
@@ -41,7 +41,7 @@ PRIVATE int TaskMgr_waitNotFull(TaskMgr* this);
 PRIVATE int TaskMgr_waitNotEmpty(TaskMgr* this);
 PRIVATE int TaskMgr_signalNotEmpty(TaskMgr* this);
 PRIVATE int TaskMgr_signalNotFull(TaskMgr* this);
-PRIVATE void* TaskMgr_threadBody(void* this);
+PRIVATE void* TaskMgr_threadBody(void* p);
 #ifdef WIN32
 PRIVATE VOID WINAPI TaskMgr_threadWinBody(LPVOID Parameter);
 #endif
@@ -147,6 +147,7 @@ PUBLIC void TaskMgr_delete(TaskMgr* this)
   TaskMgr_destroySemaphores(this);
   TaskMgr_destroyLock(this);
   Object_deallocate(&this->object);
+  taskMgr = 0;
 }
 
 /**********************************************//**
@@ -170,12 +171,12 @@ PUBLIC int TaskMgr_start(TaskMgr* this, Task* task)
       {
         this->taskId[i] = task;
         isQueued = 1;
+        TaskMgr_signalNotEmpty(this);
         break;
       }
     }
 
     TaskMgr_unlock(this);
-    TaskMgr_signalNotEmpty(this);
   }
 
   return isQueued;
@@ -189,11 +190,8 @@ PUBLIC int TaskMgr_start(TaskMgr* this, Task* task)
 PUBLIC void TaskMgr_stop(TaskMgr* this)
 {
   this->isStopping = 1;
-  while (this->nbActiveThreads > 0)
-  {
+  for (int i = 0; i < this->nbMaxThreads; i++) {
     TaskMgr_signalNotEmpty(this);
-    
-    this->nbActiveThreads--;
   }
   TaskMgr_waitForThread(this);
 }
@@ -236,8 +234,14 @@ PRIVATE void* TaskMgr_threadBody(void* p)
   {
     if (TaskMgr_waitNotEmpty(this))
     {
-      if (this->isStopping) return 0; // Terminate the worker thread
-      
+      if (this->isStopping)
+      {
+        TaskMgr_lock(this);
+        this->nbActiveThreads--;
+        TaskMgr_unlock(this);
+
+        return 0; // Terminate the worker thread
+      }
       Task* taskToExecute = 0;
 
       TaskMgr_lock(this);
@@ -255,15 +259,8 @@ PRIVATE void* TaskMgr_threadBody(void* p)
       if (taskToExecute != 0)
       {
         Task_executeBody(taskToExecute);
-        TaskMgr_signalNotFull(this);
       }
-      else
-      {
-        // We were woken up but found no "Ready" task. 
-        // Put the signal back so we don't lose track of pending work.
-        TaskMgr_signalNotEmpty(this);
-        // Optional: add a small sleep or yield here to prevent CPU spinning
-      }
+      TaskMgr_signalNotFull(this);
     }
   }
 }
@@ -335,7 +332,7 @@ PRIVATE int TaskMgr_createWorkerThreads(TaskMgr* this)
     }
 #endif
   }
-  return (this->nbActiveThreads == MAX_THREADS);
+  return (this->nbActiveThreads == this->nbMaxThreads);
 }
 
 /**********************************************//**
@@ -475,15 +472,11 @@ PRIVATE int TaskMgr_waitNotEmpty(TaskMgr* this)
 **************************************************/
 PRIVATE int TaskMgr_signalNotFull(TaskMgr* this)
 {
-  int isSuccessful = 0;
-
 #ifndef WIN32
-  isSuccessful = !sem_post(&this->semEmpty);
+  if (!sem_post(&this->semEmpty)) return 1; else return 0;
 #else
-  isSuccessful = !ReleaseSemaphore(this->semEmpty, 1, NULL);
+  if (!ReleaseSemaphore(this->semEmpty, 1, NULL)) return 0; else return 1;
 #endif
-
-  return isSuccessful;
 }
 
 /**********************************************//**
@@ -493,15 +486,12 @@ PRIVATE int TaskMgr_signalNotFull(TaskMgr* this)
 **************************************************/
 PRIVATE int TaskMgr_signalNotEmpty(TaskMgr* this)
 {
-  int isSuccessful = 0;
-
 #ifndef WIN32
-  isSuccessful = !sem_post(&this->semFull);
+  if (sem_post(&this->semFull)) return 0;
 #else
-  isSuccessful = !ReleaseSemaphore(this->semFull, 1, NULL);
+  if (!ReleaseSemaphore(this->semFull, 1, NULL)) return 0;
 #endif
-
-  return isSuccessful;
+  return 1;
 }
 
 /**********************************************//**
@@ -583,7 +573,7 @@ PRIVATE int TaskMgr_unlock(TaskMgr* this)
 #ifndef WIN32
   if (!pthread_mutex_unlock(&this->mutex)) isSuccessful = 1;
 #else
-  ReleaseMutex(this->mutex);
+  isSuccessful = ReleaseMutex(this->mutex);
 #endif
 
   return isSuccessful;
