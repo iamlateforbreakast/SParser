@@ -60,7 +60,7 @@ struct TaskMgr
   sem_t semEmpty;
   sem_t semFull;
   pthread_mutex_t mutex;
-  int isStopping;
+  volatile int isStopping;
 #else
   Object object;
   int nbMaxThreads;
@@ -72,7 +72,7 @@ struct TaskMgr
   HANDLE semEmpty;
   HANDLE semFull;
   HANDLE mutex;
-  int isStopping;
+  volatile int isStopping;
   /*
   CRITICAL_SECTION cond;
   */
@@ -348,7 +348,7 @@ PRIVATE int TaskMgr_findAvailableTask(TaskMgr* this)
   int nextTask = -1;
   for (int i = 0; i < MAX_TASKS; i++)
   {
-    if (Task_isReady(this->taskId[i]))
+    if ((this->taskId[i]!=0) && (Task_isReady(this->taskId[i])))
     {
       nextTask = i;
       break;
@@ -518,6 +518,7 @@ PRIVATE int TaskMgr_initLock(TaskMgr* this)
     PRINT(("TaskMgr createMutex error.\n"));
     return 0; // Unsuccessful
   }
+  return 1;
 #else
   this->mutex = CreateMutex(
     NULL,              // default security attributes
@@ -529,6 +530,7 @@ PRIVATE int TaskMgr_initLock(TaskMgr* this)
     PRINT(("TaskMgr createMutex error: %d\n", GetLastError()));
     return 0; // Unsuccessful
   }
+  return 1;
 #endif
 }
 
