@@ -306,7 +306,7 @@ PRIVATE int TaskMgr_createWorkerThreads(TaskMgr* this)
 #ifndef WIN32
     int err = pthread_create(&(this->threadHandle[i]), NULL, &TaskMgr_threadBody, this);
     //pthread_detach(this->threadHandle[i]);
-    if (err != 0)
+    if (err == 0)
     {
       this->nbActiveThreads++;
     }
@@ -409,7 +409,7 @@ PRIVATE int TaskMgr_initSemaphores(TaskMgr* this)
 **************************************************/
 PRIVATE int TaskMgr_destroySemaphores(TaskMgr* this)
 {
-  int isSuccessful = 0;
+  int isSuccessful = 1;
 
 #ifndef WIN32
   if (sem_destroy(&this->semEmpty)!= 0) isSuccessful = 0;
@@ -442,7 +442,7 @@ PRIVATE int TaskMgr_waitNotFull(TaskMgr* this)
 #ifndef WIN32
   isSuccessful = !sem_wait(&this->semEmpty);
 #else
-  DWORD dwWaitResult = WaitForSingleObject(this->semEmpty, 0L);
+  DWORD dwWaitResult = WaitForSingleObject(this->semEmpty, INFINITE);
   isSuccessful = (dwWaitResult == WAIT_OBJECT_0);
 #endif
 
@@ -512,12 +512,11 @@ PRIVATE int TaskMgr_signalNotEmpty(TaskMgr* this)
 **************************************************/
 PRIVATE int TaskMgr_initLock(TaskMgr* this)
 {
-  int isSuccessful = 0;
-
 #ifndef WIN32
   if (pthread_mutex_init(&this->mutex, NULL) != 0)
   {
     PRINT(("TaskMgr createMutex error.\n"));
+    return 0; // Unsuccessful
   }
 #else
   this->mutex = CreateMutex(
@@ -528,10 +527,9 @@ PRIVATE int TaskMgr_initLock(TaskMgr* this)
   if (this->mutex == NULL)
   {
     PRINT(("TaskMgr createMutex error: %d\n", GetLastError()));
+    return 0; // Unsuccessful
   }
 #endif
-
-  return isSuccessful;
 }
 
 /**********************************************//**
@@ -542,15 +540,11 @@ PRIVATE int TaskMgr_initLock(TaskMgr* this)
 **************************************************/
 PRIVATE int TaskMgr_destroyLock(TaskMgr* this)
 {
-  int isSuccessful = 0;
-
 #ifndef WIN32
-  pthread_mutex_destroy(&this->mutex);
+  if (pthread_mutex_destroy(&this->mutex) == 0) return 1; else return 0;
 #else
-  CloseHandle(this->mutex);
+  if (CloseHandle(this->mutex) == 0) return 0; else return 1;
 #endif
-
-  return isSuccessful;
 }
 
 /**********************************************//**
