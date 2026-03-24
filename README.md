@@ -6,7 +6,7 @@ To compile:
 
 git clone https://github.com/iamlateforbreakast/SParser.git
 
-cd SParser-master
+cd SParser-main
 
 cd SParser
 
