@@ -17,7 +17,7 @@ struct Task
 {
   void* (*body)(void* p);
   int nbParams;
-  void * params[5];
+  void * params[MAX_PARAMS];
   int isReady;
   int isRunning;
   int isCompleted;
@@ -78,6 +78,8 @@ PUBLIC int Task_isReady(Task* this)
 ************************************************************/
 PUBLIC void Task_setReady(Task* this)
 {
+  if (this == 0) return;
+
   this->isReady = 1;
   this->isRunning = 0;
   this->isCompleted = 0;
@@ -91,6 +93,8 @@ PUBLIC void Task_setReady(Task* this)
 ************************************************************/
 PUBLIC int Task_isRunning(Task* this)
 {
+  if (this == 0) return;
+
   return this->isRunning;
 }
 
@@ -101,6 +105,8 @@ PUBLIC int Task_isRunning(Task* this)
 ************************************************************/
 PUBLIC void Task_setRunning(Task* this)
 {
+  if (this == 0) return;
+
   this->isReady = 0;
   this->isRunning = 1;
   this->isCompleted = 0;
@@ -114,6 +120,8 @@ PUBLIC void Task_setRunning(Task* this)
 ************************************************************/
 PUBLIC int Task_isCompleted(Task* this)
 {
+  if (this == 0) return;
+
   return this->isCompleted;
 }
 
@@ -124,6 +132,8 @@ PUBLIC int Task_isCompleted(Task* this)
 ************************************************************/
 PUBLIC void Task_setCompleted(Task* this)
 {
+  if (this == 0) return;
+
   this->isReady = 0;
   this->isRunning = 0;
   this->isCompleted = 1;
@@ -136,6 +146,8 @@ PUBLIC void Task_setCompleted(Task* this)
 ************************************************************/
 PUBLIC void Task_start(Task* this)
 {
+  if (this == 0) return;
+
   this->isReady = 1;
   this->isRunning = 0;
   this->isCompleted = 0;
@@ -152,7 +164,9 @@ PUBLIC void Task_executeBody(Task* this)
 {
 
   //PRINT(("Arg: %d\n", (int)this->params[0]));
-  this->body(&this->params[0]);
+  Task_setRunning(this);
+
+  this->body(this->params);
 
   Task_setCompleted(this);
 }
