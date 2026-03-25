@@ -3,7 +3,7 @@ COMMONLIB_INCLUDE = ../../../CommonLib/include
 APPLILIB = ../../../AppliLib/libAppli.a
 APPLILIB_INCLUDE = ../../../AppliLib/include
 
-all: $(COMMONLIB) $(APPLILIB) UT_HTTPServer_01
+all: UT_HTTPServer_01
 
 $(COMMONLIB):
 	$(MAKE) -C ../../../CommonLib/
@@ -11,7 +11,7 @@ $(COMMONLIB):
 $(APPLILIB):
 	$(MAKE) -C ../../../AppliLib/
 
-UT_HTTPServer_01: UT_HTTPServer_01.c ../HTTPServer.c ../HTTPServer.h ../HTTPRequest.h ../HTTPResponse.h
+UT_HTTPServer_01: UT_HTTPServer_01.c ../HTTPServer.c ../HTTPServer.h ../HTTPRequest.h ../HTTPResponse.h $(COMMONLIB) $(APPLILIB)	
 	gcc -g UT_HTTPServer_01.c ../HTTPServer.c \
 	$(APPLILIB) \
 	$(COMMONLIB) \
@@ -29,3 +29,5 @@ clean:
 cleanall: clean
 	$(MAKE) -C ../../../CommonLib/ clean
 	$(MAKE) -C ../../../AppliLib/ clean
+
+.PHONY: all clean cleanall run $(COMMONLIB) $(APPLILIB)
