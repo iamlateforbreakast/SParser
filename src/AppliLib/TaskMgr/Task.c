@@ -93,7 +93,7 @@ PUBLIC void Task_setReady(Task* this)
 ************************************************************/
 PUBLIC int Task_isRunning(Task* this)
 {
-  if (this == 0) return;
+  if (this == 0) return 0;
 
   return this->isRunning;
 }
@@ -105,7 +105,7 @@ PUBLIC int Task_isRunning(Task* this)
 ************************************************************/
 PUBLIC void Task_setRunning(Task* this)
 {
-  if (this == 0) return;
+  if (this == 0) return; 
 
   this->isReady = 0;
   this->isRunning = 1;
@@ -120,7 +120,7 @@ PUBLIC void Task_setRunning(Task* this)
 ************************************************************/
 PUBLIC int Task_isCompleted(Task* this)
 {
-  if (this == 0) return;
+  if (this == 0) return 0;
 
   return this->isCompleted;
 }
