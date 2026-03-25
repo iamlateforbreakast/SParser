@@ -27,8 +27,55 @@
 #include <winsock2.h>
 #endif
 
+#ifdef _WIN32
+#include <windows.h>	/* WinAPI */
 
+/* Windows sleep in 100ns units */
+int msleep(long msec) {
+  /* Declarations */
+  HANDLE timer;	/* Timer handle */
+  LARGE_INTEGER li;	/* Time definition */
+  /* Create timer */
+  if (!(timer = CreateWaitableTimer(NULL, 1, NULL)))
+    return 0;
+  /* Set timer properties */
+  li.QuadPart = -10000LL * msec;
+  if (!SetWaitableTimer(timer, &li, 0, NULL, NULL, 0)) {
+    CloseHandle(timer);
+    return 0;
+  }
+  /* Start & wait for timer */
+  WaitForSingleObject(timer, 0xFFFFFFFF);
+  /* Clean resources */
+  CloseHandle(timer);
+  /* Slept without problems */
+  return 1;
+}
+#else
+#include <pthread.h>
+#include <time.h>
+#include <errno.h>
+int msleep(long msec)
+{
+  struct timespec ts;
+  int res;
 
+  if (msec < 0)
+  {
+    errno = EINVAL;
+    return -1;
+  }
+
+  ts.tv_sec = msec / 1000;
+  ts.tv_nsec = (msec % 1000) * 1000000;
+
+  do {
+    res = nanosleep(&ts, &ts);
+  } while (res && errno == EINTR);
+
+  return res;
+}
+#endif
 
 #define REQUEST_BUFFER_SIZE (4096)
 #define RESPONSE_BUFFER_SIZE (4096)
@@ -46,7 +93,6 @@ struct HTTPServer
   Object object;
   int port;
   struct sockaddr_in server_addr;
-  /* HTTPSocket* socket */
 #ifndef WIN32
   int fd;
 #else
@@ -58,8 +104,10 @@ struct HTTPServer
 
 struct ConnectionParam
 {
+  struct sockaddr_in client_addr;
+  int client_addr_len;
 #ifndef WIN32
-  int* client_fd;
+  int client_fd;
 #else
   SOCKET client_fd;
 #endif
@@ -70,6 +118,8 @@ struct RouteParam
   char* pattern;
   
 };
+
+typedef struct ConnectionParam ConnectionParam;
 
 /**********************************************//**
   @private Class Description
@@ -109,7 +159,6 @@ PUBLIC HTTPServer* HTTPServer_new()
 #endif
 
   this->port = PORT;
-  /* this->socket = HTTPSocket_new(addr, port);*/
   if ((this->fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
   {
     PRINT(("Socket failed.\n"));
@@ -206,8 +255,6 @@ PUBLIC unsigned int HTTPServer_getSize(HTTPServer* this)
 **************************************************/
 PUBLIC void HTTPServer_start(HTTPServer* this)
 {
-  /* 
-  if (HTTPSocket_listenAndAccept(this->socket, HTTPServer_listenTaskBody)) */
   // listen for connections
   if (listen(this->fd, 10) < 0) {
     PRINT(("Listen failed.\n"));
@@ -215,29 +262,35 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
     exit(1);
   }
 
-  struct sockaddr_in client_addr;
-  int client_addr_len = sizeof(client_addr);
-  int *client_fd = malloc(sizeof(int) * MAX_CONNECTIONS);
-
   TaskMgr* taskMgr = TaskMgr_getRef();
   int nbRequests = 0;
   while (nbRequests<MAX_CONNECTIONS)
   {
-    if ((client_fd[nbRequests] = accept(this->fd,
-                           (struct sockaddr *)&client_addr, 
-                           &client_addr_len)) < 0) 
+    ConnectionParam * connectionParam = malloc(sizeof(ConnectionParam));
+    connectionParam->client_addr_len = sizeof(struct sockaddr_in);
+    connectionParam->client_fd = accept(this->fd, (struct sockaddr*)&connectionParam->client_addr, &connectionParam->client_addr_len);
+
+    PRINT(("Client FD1: 0x%x\n", connectionParam->client_fd));
+    if (connectionParam->client_fd < 0)
     {
       PRINT(("Accept failed.\n"));
+      free(connectionParam);
       exit(1);
     }
     PRINT(("Received connection request.\n"));
-    nbRequests++;
-    
-    void * params[5];
-    params[0] = &client_fd;
-    Task* connectionListen = Task_create(&HTTPServer_listenTaskBody, 1, params);
+
+    void* taskArgs[1] = { connectionParam };
+    Task* connectionListen = Task_create(&HTTPServer_listenTaskBody, 1, taskArgs);
 
     Task_start(connectionListen);
+    nbRequests++;
+  }
+
+  int timer = 0;
+  while (timer<50)
+  {
+    msleep(100);
+    timer++;
   }
 
   TaskMgr_stop(taskMgr);
@@ -258,25 +311,30 @@ PUBLIC void HTTPServer_start(HTTPServer* this)
   @public
   @memberof HTTPServer
 **************************************************/
-PRIVATE void* HTTPServer_listenTaskBody(void* params)
+PRIVATE void* HTTPServer_listenTaskBody(void* paramIn)
 { 
-  //int msg_len = 0;
-#ifndef WIN32   
-  int* client_fd = ((struct ConnectionParam**)params)[0]->client_fd;
+  void** params = (void**)paramIn;
+  ConnectionParam* connection = (ConnectionParam*)params[0];
+
+#ifndef WIN32
+  int client_fd = connection->client_fd;
 #else
-  SOCKET client_fd = ((struct ConnectionParam**)params)[0]->client_fd;
+  SOCKET client_fd = connection->client_fd;
 #endif
+
   char* requestBuffer = (char*)malloc(REQUEST_BUFFER_SIZE);
   Memory_set(requestBuffer, 0, REQUEST_BUFFER_SIZE);
 
-  PRINT(("Listen body starts\n Client FD:%d\n", *client_fd));
+  PRINT(("Listen body starts\n Client FD:%d\n", client_fd));
   /* request = Connection_waitForHttpRequest*/
   if ((client_fd) && (requestBuffer))
   {
     int nbCharRead = 0;
     do 
     {
-      int msg_len = recv(*client_fd, &requestBuffer[nbCharRead], REQUEST_BUFFER_SIZE - 1, 0);
+      // request = Connection_receive(c);
+      int msg_len = recv(client_fd, &requestBuffer[nbCharRead], REQUEST_BUFFER_SIZE - 1, 0);
+      // if request !=0 
       if (msg_len>0)
       {
         nbCharRead += msg_len;
@@ -288,7 +346,7 @@ PRIVATE void* HTTPServer_listenTaskBody(void* params)
         int nbCharToWrite = HTTPResponse_generate(response, responseBuffer, RESPONSE_BUFFER_SIZE - 1);
         if ((client_fd) && (responseBuffer))
         {
-          int msg_len = send(*client_fd, responseBuffer, nbCharToWrite, 0);
+          int msg_len = send(client_fd, responseBuffer, nbCharToWrite, 0);
           if (msg_len == 0) 
           {
             PRINT(("Client closed connection\n"));
@@ -310,11 +368,13 @@ PRIVATE void* HTTPServer_listenTaskBody(void* params)
         return 0;
       }
     } while (1);
-    #ifndef WIN32
-    close(*client_fd);
-    #else
+    free(requestBuffer);
+    free(connection);
+#ifndef WIN32
+    close(client_fd);
+#else
     closesocket(client_fd);
-    #endif
+#endif
   }
   return 0;
 }
@@ -345,25 +405,6 @@ PRIVATE HTTPResponse* HTTPServer_serveRequest(HTTPRequest* request)
     {
       String* errorMessage = String_newByRef("<doctype !html><html><head><title>Error</title></head>"
         "<body><h1>Error!</h1></body></html>\r\n");
-      HTTPResponse_setMimeType(response, "text/html");  
-      //HTTPResponse_addHeader(response, "Content - Type", "text/html; charset=UTF-8");
-      HTTPResponse_setBody(response, String_getBuffer(errorMessage));
-    }
-  }
-  else if (String_matchWildcard(HTTPRequest_getPath(request), "/paper.html"))
-  {
-    PRINT(("Load paper.html\n"));
-    FileDesc* fd = FileMgr_addFile(fm, "paper.html");
-    if (fd)
-    {
-      String* content = content = FileMgr_load(fm, "paper.html");
-      HTTPResponse_setMimeType(response, "text/html");
-      HTTPResponse_setBody(response, String_getBuffer(content));
-    }
-    else
-    {
-      String* errorMessage = String_newByRef("<doctype !html><html><head><title>Error</title></head>"
-        "<body><h1>Error loading paper.html!</h1></body></html>\r\n");
       HTTPResponse_setMimeType(response, "text/html");  
       //HTTPResponse_addHeader(response, "Content - Type", "text/html; charset=UTF-8");
       HTTPResponse_setBody(response, String_getBuffer(errorMessage));
@@ -421,10 +462,68 @@ PRIVATE HTTPResponse* HTTPServer_serveRequest(HTTPRequest* request)
       exit(1);
     }
   }
+  else if (String_matchWildcard(HTTPRequest_getPath(request), "/test1.html"))
+  {
+    PRINT(("Loading test1.html: "));
+    FileDesc* fd = FileMgr_addFile(fm, "test1.html");
+    if (fd)
+    {
+      String* content = FileMgr_load(fm, "test1.html");
+      HTTPResponse_setMimeType(response, "text/html");
+      HTTPResponse_setBody(response, String_getBuffer(content));
+      PRINT(("Done\n"));
+    }
+    else
+    {
+      String* errorMessage = String_newByRef("<doctype !html><html><head><title>Error</title></head>"
+        "<body><h1>Error!</h1></body></html>\r\n");
+      HTTPResponse_setMimeType(response, "text/html");
+      HTTPResponse_setBody(response, String_getBuffer(errorMessage));
+    }
+  }
+  else if (String_matchWildcard(HTTPRequest_getPath(request), "/test1.js"))
+  {
+    PRINT(("Loading test1.js: "));
+    FileDesc* fd = FileMgr_addFile(fm, "test1.js");
+    if (fd)
+    {
+      String* content = FileMgr_load(fm, "test1.js");
+      HTTPResponse_setMimeType(response, "text/javascript");
+      HTTPResponse_setBody(response, String_getBuffer(content));
+      PRINT(("Done\n"));
+    }
+    else
+    {
+      String* errorMessage = String_newByRef("<doctype !html><html><head><title>Error</title></head>"
+        "<body><h1>Error: test1.js not found!</h1></body></html>\r\n");
+      HTTPResponse_setMimeType(response, "text/html");
+      HTTPResponse_setBody(response, String_getBuffer(errorMessage));
+    }
+  }
+  else if (String_matchWildcard(HTTPRequest_getPath(request), "/paper.js"))
+  {
+  PRINT(("Loading paper.js: "));
+  FileDesc* fd = FileMgr_addFile(fm, "paper.js");
+  if (fd)
+  {
+    String* content = FileMgr_load(fm, "paper.js");
+    HTTPResponse_setMimeType(response, "text/javascript");
+    HTTPResponse_setBody(response, String_getBuffer(content));
+    PRINT(("Done\n"));
+  }
+  else
+  {
+    String* errorMessage = String_newByRef("<doctype !html><html><head><title>Error</title></head>"
+      "<body><h1>Error: paper.js not found!</h1></body></html>\r\n");
+    HTTPResponse_setMimeType(response, "text/html");
+    HTTPResponse_setBody(response, String_getBuffer(errorMessage));
+  }
+  }
   else
   {
     String* errorMessage = String_newByRef("<doctype !html><html><head><title>Error</title></head>"
       "<body><h1>Error!</h1></body></html>\r\n");
+    HTTPResponse_setMimeType(response, "text/html");
     HTTPResponse_setBody(response, String_getBuffer(errorMessage));
     //String_delete(errorMessage);
   }
