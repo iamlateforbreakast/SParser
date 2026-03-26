@@ -10,7 +10,7 @@ typedef struct OptionMgr OptionMgr;
 
 PUBLIC void OptionMgr_delete(OptionMgr * this);
 PUBLIC OptionMgr * OptionMgr_copy(OptionMgr * this);
-PUBLIC PUBLIC OptionMgr* OptionMgr_getRef();
+PUBLIC OptionMgr* OptionMgr_getRef();
 PUBLIC unsigned int OptionMgr_getSize(OptionMgr * this);
 PUBLIC String * OptionMgr_getOption(OptionMgr * this, const char * name);
 PUBLIC void OptionMgr_setOption(OptionMgr * this, const char * optionName, String * value);

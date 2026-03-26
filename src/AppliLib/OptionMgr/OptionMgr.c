@@ -84,8 +84,25 @@ PRIVATE OptionMgr * OptionMgr_new()
   for (j=0; j<nbOptions; j++)
   {
     optionName = String_new(optionDefault[j].name);
+    if (optionName == 0)
+    {
+      Object_deallocate(&this->object);
+      return 0;
+    }
     optionValue = String_new(optionDefault[j].value);
-    Map_insert(this->options, optionName, optionValue, 1);
+    if (optionValue == 0)
+    {
+      String_delete(optionName);
+      Object_deallocate(&this->object);
+      return 0;
+    }
+    if (Map_insert(this->options, optionName, optionValue, 1)!=0)
+    {
+      String_delete(optionName);
+      String_delete(optionValue);
+      Object_deallocate(&this->object);
+      return 0;
+    }
   }
 
   return this;
@@ -156,9 +173,13 @@ PUBLIC unsigned int OptionMgr_getSize(OptionMgr * this)
 }
 
 /**********************************************//** 
-  @brief TBD
+  @brief Get option value by name
   @public
   @memberof OptionMgr
+  @param[in] this OptionMgr instance
+  @param[in] name Option name to retrieve
+  @return String containing option value (caller must delete)
+  @warning Caller is responsible for deleting returned String
 **************************************************/
 PUBLIC String * OptionMgr_getOption(OptionMgr * this, const char * name)
 {
@@ -173,9 +194,14 @@ PUBLIC String * OptionMgr_getOption(OptionMgr * this, const char * name)
 }
 
 /**********************************************//** 
-  @brief TBD
+  @brief Set an option value, creating it if it doesn't exist
   @public
   @memberof OptionMgr
+  @param[in] this OptionMgr instance
+  @param[in] optionName Name of the option to set
+  @param[in] value Value to set (ownership transferred to OptionMgr)
+  @details If option exists, value is replaced. Previous value is freed.
+  @return 0 on success, non-zero on failure
 **************************************************/
 PUBLIC void OptionMgr_setOption(OptionMgr * this, const char * optionName, String * value)
 {
@@ -200,6 +226,12 @@ PUBLIC unsigned int OptionMgr_readFromFile(OptionMgr * this)
   String * path1 = 0;
   
   fileName = OptionMgr_getOption(this,"Config file name");
+  if (fileName == 0)
+  {
+    Error_new(ERROR_WARNING, "Config file name option not found\n");
+    FileMgr_delete(fileMgr);
+    return 1;  // Error code
+  }
   path1 = String_copy(fileName);
 #ifdef _WIN32
   String_prepend(path1,".\\");
@@ -212,7 +244,6 @@ PUBLIC unsigned int OptionMgr_readFromFile(OptionMgr * this)
     fileContent = FileMgr_load(fileMgr, String_getBuffer(fileName));
     OptionMgr_parseFile(this, fileContent);
   }
-  /* TODO: Try home directory */
   
   String_delete(path1);
   String_delete(fileContent);
@@ -246,7 +277,7 @@ PUBLIC unsigned int OptionMgr_readFromCmdLine(OptionMgr * this, const int argc, 
       if (Memory_cmp(optionDefault[j].flag, (void*)argv[i])==0)
       {
         optionName = String_new(optionDefault[j].name);
-        if (((i+1)<=argc))
+        if (((i+1)<argc))
         {
           if (optionDefault[j].value!=0)
           {
@@ -289,10 +320,13 @@ PUBLIC unsigned int OptionMgr_isOptionEnabled(OptionMgr* this, const char * opti
   String* yes = String_new("Yes");
   
   enabled = OptionMgr_getOption(this, optionName);
-  if (String_compare(enabled,yes)==0) result = 1;
+  if (enabled != 0 && String_compare(enabled, yes) == 0)
+  {
+    result = 1;
+  }
   
   String_delete(yes);
-  //String_delete(enabled);
+  String_delete(enabled);
   
   return result;
 }
