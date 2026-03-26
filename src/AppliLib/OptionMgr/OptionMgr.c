@@ -228,7 +228,7 @@ PUBLIC unsigned int OptionMgr_readFromFile(OptionMgr * this)
   fileName = OptionMgr_getOption(this,"Config file name");
   if (fileName == 0)
   {
-    Error_new(ERROR_WARNING, "Config file name option not found\n");
+    Error_new(ERROR_NORMAL, "Config file name option not found\n");
     FileMgr_delete(fileMgr);
     return 1;  // Error code
   }
