@@ -51,7 +51,9 @@ PUBLIC String * String_new(const char* initString)
   String * this = 0;
   
   this = (String*)Object_new(sizeof(String),&stringClass);
-  // TODO: Check if this is NULL
+  
+  if (OBJECT_IS_INVALID(this)) return 0;
+
   if (initString!=0)
   {
     this->length = Memory_len((void*)initString);
@@ -218,7 +220,7 @@ PUBLIC String * String_subString(String * this, unsigned int idx, unsigned int l
     }
     result->buffer = Memory_alloc(result->length+1);
     Memory_copy(result->buffer, this->buffer + idx, result->length);
-    result->buffer[length] = 0;
+    result->buffer[result-> length] = 0;
     result->isOwned = 1;
   }
   
