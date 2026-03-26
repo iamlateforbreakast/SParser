@@ -27,6 +27,8 @@ APPLILIB   OptionMgr     UT_OptionMgr_01      FAILED  FAILED
 APPLILIB   SdbMgr        UT_SdbMgr_01         FAILED  FAILED
 APPLILIB   TaskMgr       UT_TaskMgr_01        PASSED  PASSED
 APPLILIB   TimeMgr       UT_TimeMgr_01        FAILED  FAILED
+APPLILIB   XmlReader     UT_XmlReader_01      FAILED  FAILED
+APPLILIB   XmlWriter     UT_XmlWriter_01      FAILED  FAILED
 
 PARSELIB   Configuration UT_Configuration_01  PASSED  FAILED
 PARSELIB   FileReader    X
