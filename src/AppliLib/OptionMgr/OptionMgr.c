@@ -217,6 +217,12 @@ PUBLIC unsigned int OptionMgr_readFromFile(OptionMgr * this)
   String * path1 = 0;
   
   fileName = OptionMgr_getOption(this,"Config file name");
+  if (fileName == 0)
+  {
+    Error_new(ERROR_WARNING, "Config file name option not found\n");
+    FileMgr_delete(fileMgr);
+    return 1;  // Error code
+  }
   path1 = String_copy(fileName);
 #ifdef _WIN32
   String_prepend(path1,".\\");
@@ -229,7 +235,6 @@ PUBLIC unsigned int OptionMgr_readFromFile(OptionMgr * this)
     fileContent = FileMgr_load(fileMgr, String_getBuffer(fileName));
     OptionMgr_parseFile(this, fileContent);
   }
-  /* TODO: Try home directory */
   
   String_delete(path1);
   String_delete(fileContent);
@@ -237,21 +242,6 @@ PUBLIC unsigned int OptionMgr_readFromFile(OptionMgr * this)
   
   return result;
 }
-
-/*****************************************************************
-[-] Duplicate PUBLIC keyword	      HIGH	Syntax	Won't compile
-[-] Memory leaks in initialization	 HIGH	Memory	Resource exhaustion
-    When Map_insert() is called, the Map takes ownership of the key/value Strings. If Map insertion fails, these Strings are leaked.
-[-] NULL pointer dereferences	      HIGH	Safety	Crashes
-    path1 = String_copy(fileName);  // fileName could be NULL
-[-] Buffer overflow (argc check)	  HIGH	Security	Stack corruption
-    if (((i+1)<=argc))  // Should be: i+1 < argc
-[-] isFound variable not reset	    HIGH	Logic	Incorrect parsing
-[-] Incomplete error handling	      MEDIUM	Robustness	Silent failures
-[-] Missing documentation	          MEDIUM	Maintainability	Code clarity
-[-] Resource leaks on error paths	  MEDIUM	Memory	Resource exhaustion
-[-] Incomplete parser validation	  MEDIUM	Robustness	Malformed data accepted
-******************************************************************/
 
 /**********************************************//** 
   @brief TBD
@@ -278,7 +268,7 @@ PUBLIC unsigned int OptionMgr_readFromCmdLine(OptionMgr * this, const int argc, 
       if (Memory_cmp(optionDefault[j].flag, (void*)argv[i])==0)
       {
         optionName = String_new(optionDefault[j].name);
-        if (((i+1)<=argc))
+        if (((i+1)<argc))
         {
           if (optionDefault[j].value!=0)
           {
@@ -411,3 +401,18 @@ PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
   
   return result;
 }
+
+/*****************************************************************
+[X] Duplicate PUBLIC keyword	      HIGH	Syntax	Won't compile
+[X] Memory leaks in initialization	 HIGH	Memory	Resource exhaustion
+    When Map_insert() is called, the Map takes ownership of the key/value Strings. If Map insertion fails, these Strings are leaked.
+[-] NULL pointer dereferences	      HIGH	Safety	Crashes
+    path1 = String_copy(fileName);  // fileName could be NULL
+[-] Buffer overflow (argc check)	  HIGH	Security	Stack corruption
+    if (((i+1)<=argc))  // Should be: i+1 < argc
+[-] isFound variable not reset	    HIGH	Logic	Incorrect parsing
+[-] Incomplete error handling	      MEDIUM	Robustness	Silent failures
+[-] Missing documentation	          MEDIUM	Maintainability	Code clarity
+[-] Resource leaks on error paths	  MEDIUM	Memory	Resource exhaustion
+[-] Incomplete parser validation	  MEDIUM	Robustness	Malformed data accepted
+******************************************************************/
