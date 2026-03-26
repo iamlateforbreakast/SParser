@@ -38,7 +38,7 @@ Class listClass =
   .f_comp = (Comp_Operator)&List_compare,
   .f_print = (Printer)&List_print,
   .f_size = (Sizer)&List_getSize,
-  .classSize = sizeof(List);
+  .classSize = sizeof(List)
 };
 
 /**********************************************//** 
