@@ -84,6 +84,7 @@ int msleep(long msec)
 
 PRIVATE void* HTTPServer_listenTaskBody(void* params);
 PRIVATE HTTPResponse* HTTPServer_serveRequest(HTTPRequest* request);
+PRIVATE void HTTPServer_serveError(HTTPResponse* response, char* errorMessage);
 
 /**********************************************//**
   @class HTTPServer
@@ -113,12 +114,14 @@ struct ConnectionParam
 #endif
 };
 
-struct RouteParam
+struct Route
 {
-  char* pattern;
-  
+  const char* pattern;
+  const char* filePath;
+  const char* mimeType;
 };
 
+typedef struct Route Route;
 typedef struct ConnectionParam ConnectionParam;
 
 /**********************************************//**
@@ -132,6 +135,20 @@ Class httpServerClass =
   .f_comp = (Comp_Operator)&HTTPServer_compare,
   .f_print = (Printer)&HTTPServer_print,
   .f_size = (Sizer)&HTTPServer_getSize
+};
+
+/* Route table - add new routes here without touching serve logic */
+static const Route routes[] =
+{
+  { "/",           "index.html",   "text/html"       },
+  { "/index.html", "index.html",   "text/html"       },
+  { "/hello.css",  "hello.css",    "text/css"        },
+  { "/hello.js",   "hello.js",     "text/javascript" },
+  { "/favicon.ico","favicon.ico",  "text/x-icon"     },
+  { "/test1.html", "test1.html",   "text/html"       },
+  { "/test1.js",   "test1.js",     "text/javascript" },
+  { "/paper.js",   "paper.js",     "text/javascript" },
+  { 0, 0, 0 } /* sentinel */
 };
 
 /**********************************************//**
@@ -521,11 +538,7 @@ PRIVATE HTTPResponse* HTTPServer_serveRequest(HTTPRequest* request)
   }
   else
   {
-    String* errorMessage = String_newByRef("<doctype !html><html><head><title>Error</title></head>"
-      "<body><h1>Error!</h1></body></html>\r\n");
-    HTTPResponse_setMimeType(response, "text/html");
-    HTTPResponse_setBody(response, String_getBuffer(errorMessage));
-    //String_delete(errorMessage);
+    HTTPServer_serveError(response, "Error: File not found!");
   }
 
   FileMgr_delete(fm);
@@ -534,4 +547,12 @@ PRIVATE HTTPResponse* HTTPServer_serveRequest(HTTPRequest* request)
   
 
   return response;
+}
+
+PRIVATE void HTTPServer_serveError(HTTPResponse* response, char * errorMessage)
+{
+  HTTPResponse_setMimeType(response, "text/html");
+  HTTPResponse_setBody(response,
+    "<doctype !html><html><head><title>Error</title></head>"
+    "<body><h1>Error!</h1></body></html>\r\n");
 }
