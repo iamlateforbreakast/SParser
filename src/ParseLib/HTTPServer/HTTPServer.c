@@ -397,6 +397,57 @@ PRIVATE void* HTTPServer_listenTaskBody(void* paramIn)
 }
 
 PRIVATE HTTPResponse* HTTPServer_serveRequest(HTTPRequest* request)
+{
+  HTTPResponse* response = HTTPResponse_new();
+  HTTPResponse_setVersion(response, 1, 1);
+  HTTPResponse_setStatusCode(response, 200);
+  HTTPResponse_setReason(response, REASON_OK);
+
+  const char* path = String_getBuffer(HTTPRequest_getPath(request));
+  PRINT(("Requested path: %s\n", path));
+
+  /* Find matching route */
+  const Route* route = 0;
+  for (int i = 0; routes[i].pattern != 0; i++)
+  {
+    if (String_matchWildcard(HTTPRequest_getPath(request), routes[i].pattern))
+    {
+      route = &routes[i];
+      break;
+    }
+  }
+
+  if (route != 0)
+  {
+    FileMgr* fm = FileMgr_new();
+    FileDesc* fd = FileMgr_addFile(fm, route->filePath);
+
+    if (fd)
+    {
+      PRINT(("Loading %s\n", route->filePath));
+      String* content = FileMgr_load(fm, route->filePath);
+      HTTPResponse_setMimeType(response, route->mimeType);
+      HTTPResponse_setBody(response, String_getBuffer(content));
+      PRINT(("Done\n"));
+    }
+    else
+    {
+      PRINT(("Cannot find %s\n", route->filePath));
+      HTTPServer_serveError(response, "Error");
+    }
+    FileMgr_delete(fm);
+  }
+  else
+  {
+    PRINT(("No route matched: %s\n", path));
+    HTTPServer_serveError(response);
+  }
+
+  return response;
+}
+
+#if 0
+PRIVATE HTTPResponse* HTTPServer_serveRequest(HTTPRequest* request)
 { 
   HTTPResponse* response = HTTPResponse_new();
 
@@ -548,6 +599,7 @@ PRIVATE HTTPResponse* HTTPServer_serveRequest(HTTPRequest* request)
 
   return response;
 }
+#endif
 
 PRIVATE void HTTPServer_serveError(HTTPResponse* response, char * errorMessage)
 {
