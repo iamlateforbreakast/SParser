@@ -37,7 +37,8 @@ Class listClass =
   .f_copy = (Copy_Operator)&List_copy,
   .f_comp = (Comp_Operator)&List_compare,
   .f_print = (Printer)&List_print,
-  .f_size = (Sizer)&List_getSize
+  .f_size = (Sizer)&List_getSize,
+  .classSize = sizeof(List);
 };
 
 /**********************************************//** 

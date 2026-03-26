@@ -357,7 +357,7 @@ PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
         if (*p=='[') 
         {
           state = 1;
-          idx = p - String_getBuffer(fileContent) + 1;
+          idx = (unsigned int)(p - String_getBuffer(fileContent)) + 1;
           length = 0;
         }
         break;
@@ -375,7 +375,7 @@ PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
           {
             // Single line
           state = 3;
-          idx = p - String_getBuffer(fileContent) + 1;
+          idx = (unsigned int)(p - String_getBuffer(fileContent)) + 1;
           length = 0;
         }
         break;

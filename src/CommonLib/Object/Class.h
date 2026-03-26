@@ -21,6 +21,7 @@ struct Class
   Comp_Operator f_comp;
   Printer f_print;
   Sizer f_size;
+  unsigned int classSize;
 };
 
 #endif /* _CLASS_H_ */
