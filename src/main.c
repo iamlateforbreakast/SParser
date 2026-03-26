@@ -142,7 +142,7 @@ PRIVATE void start_application(String * inputDir, String * dbName)
     
   /* Cleanup */
   TimeMgr_delete(timeMgr);
-  String_delete(totalExecutionTime);
+  //String_delete(totalExecutionTime);
   FileMgr_delete(fileMgr);
 }
 
