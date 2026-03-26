@@ -84,8 +84,25 @@ PRIVATE OptionMgr * OptionMgr_new()
   for (j=0; j<nbOptions; j++)
   {
     optionName = String_new(optionDefault[j].name);
+    if (optionName == 0)
+    {
+      Object_deallocate(&this->object);
+      return 0;
+    }
     optionValue = String_new(optionDefault[j].value);
-    Map_insert(this->options, optionName, optionValue, 1);
+    if (optionValue == 0)
+    {
+      String_delete(optionName);
+      Object_deallocate(&this->object);
+      return 0;
+    }
+    if (Map_insert(this->options, optionName, optionValue, 1)!=0)
+    {
+      String_delete(optionName);
+      String_delete(optionValue);
+      Object_deallocate(&this->object);
+      return 0;
+    }
   }
 
   return this;
