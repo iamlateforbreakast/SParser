@@ -32,7 +32,7 @@ int UT_OptionMgr_01_step1()
   testOptionMgr1 = (testOptionMgr*)OptionMgr_getRef();
   testOptionMgr2 = (testOptionMgr*)OptionMgr_getRef();
   PRINT(("Step 1: Test 1 - Check there is only one OptionMgr: "));
-  isPassed = (testOptionMgr1 == testOptionMgr1) && isPassed;
+  isPassed = (testOptionMgr1 == testOptionMgr2) && isPassed;
 
   UT_ASSERT((isPassed));
 
