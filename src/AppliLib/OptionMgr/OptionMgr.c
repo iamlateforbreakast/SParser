@@ -320,10 +320,13 @@ PUBLIC unsigned int OptionMgr_isOptionEnabled(OptionMgr* this, const char * opti
   String* yes = String_new("Yes");
   
   enabled = OptionMgr_getOption(this, optionName);
-  if (String_compare(enabled,yes)==0) result = 1;
+  if (enabled != 0 && String_compare(enabled, yes) == 0)
+  {
+    result = 1;
+  }
   
   String_delete(yes);
-  //String_delete(enabled);
+  String_delete(enabled);
   
   return result;
 }
@@ -410,18 +413,3 @@ PRIVATE unsigned int OptionMgr_parseFile(OptionMgr * this, String * fileContent)
   
   return result;
 }
-
-/*****************************************************************
-[X] Duplicate PUBLIC keyword	      HIGH	Syntax	Won't compile
-[X] Memory leaks in initialization	 HIGH	Memory	Resource exhaustion
-    When Map_insert() is called, the Map takes ownership of the key/value Strings. If Map insertion fails, these Strings are leaked.
-[-] NULL pointer dereferences	      HIGH	Safety	Crashes
-    path1 = String_copy(fileName);  // fileName could be NULL
-[-] Buffer overflow (argc check)	  HIGH	Security	Stack corruption
-    if (((i+1)<=argc))  // Should be: i+1 < argc
-[-] isFound variable not reset	    HIGH	Logic	Incorrect parsing
-[-] Incomplete error handling	      MEDIUM	Robustness	Silent failures
-[-] Missing documentation	          MEDIUM	Maintainability	Code clarity
-[-] Resource leaks on error paths	  MEDIUM	Memory	Resource exhaustion
-[-] Incomplete parser validation	  MEDIUM	Robustness	Malformed data accepted
-******************************************************************/
