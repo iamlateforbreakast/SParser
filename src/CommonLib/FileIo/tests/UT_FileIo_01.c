@@ -94,7 +94,7 @@ PRIVATE int UT_FileIo_01_step4()
 {
   String* testFileName = String_new("test.file");
 
-  f = FileIo_new(testFileName);
+  f = FileIo_new();
   PRINT(("Step 4: Test 1 - Remove previous test.file: "));
   FileIo_remove(f, testFileName);
   UT_ASSERT((1));
