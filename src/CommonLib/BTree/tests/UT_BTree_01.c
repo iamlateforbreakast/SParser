@@ -79,7 +79,7 @@ PRIVATE int UT_BTree_01_step1()
   UT_ASSERT((isPassed));
 
   PRINT(("Step 1: Test 2 - Insert one object: "));
-  BTree_add(testTree, (Object*)key, (Object*)testObjects[0], 0);
+  BTree_add(testTree, (Object*)key, (Object*)UT_BTree_01_testObjects[0], 0);
 
   UT_ASSERT((isPassed));
 
@@ -136,7 +136,7 @@ PRIVATE int UT_BTree_01_step2()
   {
 	key = List_getNext(keys);
 	//Object_print((Object*)key);
-    BTree_add(testTree, (Object*)key, (Object*)testObjects[i], 0);
+    BTree_add(testTree, (Object*)key, (Object*)UT_BTree_01_testObjects[i], 0);
 	int nbNodes = BTree_getNbNodes(testTree);
 	isPassed = isPassed && (nbNodes == i + 1);
 
