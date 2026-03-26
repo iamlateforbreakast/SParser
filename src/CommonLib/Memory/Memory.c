@@ -135,7 +135,7 @@ PUBLIC int Memory_ncmp(void * pointer, void * compared, unsigned int nbBytes)
   @public
   @memberof Memory
 **************************************************/
-PUBLIC int Memory_cmp(void * pointer, void * compared)
+PUBLIC int Memory_cmp(void * pointer, const void * compared)
 {
   
   return strcmp(pointer, compared);
