@@ -67,7 +67,6 @@ int UT_FileMgr_01_step1()
 
   /* Test 4 */
   PRINT(("Step 1: test 4 - Check all memory is freed properly: "));
-  ObjectMgr * objMgr = ObjectMgr_getRef();
   
   TRACE(("  Memory Allocation request: %d\n", Memory_getAllocRequestNb()));
   TRACE(("  Memory Free requests: %d\n", Memory_getFreeRequestNb()));
