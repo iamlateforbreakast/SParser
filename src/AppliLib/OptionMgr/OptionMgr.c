@@ -173,9 +173,13 @@ PUBLIC unsigned int OptionMgr_getSize(OptionMgr * this)
 }
 
 /**********************************************//** 
-  @brief TBD
+  @brief Get option value by name
   @public
   @memberof OptionMgr
+  @param[in] this OptionMgr instance
+  @param[in] name Option name to retrieve
+  @return String containing option value (caller must delete)
+  @warning Caller is responsible for deleting returned String
 **************************************************/
 PUBLIC String * OptionMgr_getOption(OptionMgr * this, const char * name)
 {
@@ -190,9 +194,14 @@ PUBLIC String * OptionMgr_getOption(OptionMgr * this, const char * name)
 }
 
 /**********************************************//** 
-  @brief TBD
+  @brief Set an option value, creating it if it doesn't exist
   @public
   @memberof OptionMgr
+  @param[in] this OptionMgr instance
+  @param[in] optionName Name of the option to set
+  @param[in] value Value to set (ownership transferred to OptionMgr)
+  @details If option exists, value is replaced. Previous value is freed.
+  @return 0 on success, non-zero on failure
 **************************************************/
 PUBLIC void OptionMgr_setOption(OptionMgr * this, const char * optionName, String * value)
 {
