@@ -221,6 +221,21 @@ PUBLIC unsigned int OptionMgr_readFromFile(OptionMgr * this)
   return result;
 }
 
+/*****************************************************************
+[-] Duplicate PUBLIC keyword	      HIGH	Syntax	Won't compile
+[-] Memory leaks in initialization	 HIGH	Memory	Resource exhaustion
+    When Map_insert() is called, the Map takes ownership of the key/value Strings. If Map insertion fails, these Strings are leaked.
+[-] NULL pointer dereferences	      HIGH	Safety	Crashes
+    path1 = String_copy(fileName);  // fileName could be NULL
+[-] Buffer overflow (argc check)	  HIGH	Security	Stack corruption
+    if (((i+1)<=argc))  // Should be: i+1 < argc
+[-] isFound variable not reset	    HIGH	Logic	Incorrect parsing
+[-] Incomplete error handling	      MEDIUM	Robustness	Silent failures
+[-] Missing documentation	          MEDIUM	Maintainability	Code clarity
+[-] Resource leaks on error paths	  MEDIUM	Memory	Resource exhaustion
+[-] Incomplete parser validation	  MEDIUM	Robustness	Malformed data accepted
+******************************************************************/
+
 /**********************************************//** 
   @brief TBD
   @public
