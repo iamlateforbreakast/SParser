@@ -84,7 +84,7 @@ int UT_SkipList_01_step1()
 
   PRINT(("Step 1: Test 2 - Build a SkipList: "));
 
-  UT_SkipList_01_testList = SkipList_new(NB_OBJECTS + 1);
+  UT_SkipList_01_testList = SkipList_new();
 
   char* checkObjectPtr = (char*)UT_SkipList_01_testList;
   char* checkSkipListPtr = (char*)UT_SkipList_01_testList + (sizeof(Object) / MEM_ALIGN) * MEM_ALIGN;

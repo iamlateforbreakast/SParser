@@ -64,7 +64,7 @@ PRIVATE int UT_List_02_step1()
     
     List_insertHead(testList, items[i], 1);
     TRACE(("  Nb items %d\n", List_getNbNodes(testList)));
-    TRACE(("  Allocated %d bytes at %x\n", ((Object*)items[i])->class->f_size(0), items[i]));
+    TRACE(("  Allocated %d bytes at %x\n", ((Object*)items[i])->class->classSize, items[i]));
   }
   UT_ASSERT((List_getNbNodes(testList) == MAX_OBJECT_NB));
 
@@ -72,7 +72,7 @@ PRIVATE int UT_List_02_step1()
   for (i = 0; i< MAX_OBJECT_NB; i++)
   {
     removed[i] = List_removeHead(testList);
-    TRACE(("  Removed %d bytes at %x\n", ((Object*)removed[i])->class->f_size(0), removed[i]));
+    TRACE(("  Removed %d bytes at %x\n", ((Object*)removed[i])->class->classSize, removed[i]));
   }
   UT_ASSERT((1));
   
@@ -104,7 +104,7 @@ PRIVATE int UT_List_02_step2()
   {
     List_insertTail(testList, items[i], 1);
     TRACE(("  Nb items %d\n", List_getNbNodes(testList)));
-    TRACE(("  Allocated %d bytes at %x\n", ((Object*)items[i])->class->f_size(0), items[i]));
+    TRACE(("  Allocated %d bytes at %x\n", ((Object*)items[i])->class->classSize, items[i]));
   }
   UT_ASSERT((List_getNbNodes(testList) == MAX_OBJECT_NB));
 
@@ -112,7 +112,7 @@ PRIVATE int UT_List_02_step2()
   for (i = 0; i< MAX_OBJECT_NB; i++)
   {
     removed[i] = List_removeTail(testList);
-    TRACE(("  Removed %d bytes at %x\n", ((Object*)removed[i])->class->f_size(0), removed[i]));
+    TRACE(("  Removed %d bytes at %x\n", ((Object*)removed[i])->class->classSize, removed[i]));
     TestObject_delete(removed[i]);
   }
   UT_ASSERT((1));

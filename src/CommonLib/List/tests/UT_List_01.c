@@ -65,7 +65,7 @@ PRIVATE int UT_List_01_step1()
   {
     List_insertHead(testList, UT_List_01_items[i], 1);
     TRACE2((UT_List_01_logChannel, "Nb items %d\n", List_getNbNodes(testList)));
-    TRACE2((UT_List_01_logChannel, "  Allocated %d bytes at %x\n", ((Object*)UT_List_01_items[i])->class->f_size(0), UT_List_01_items[i]));
+    TRACE2((UT_List_01_logChannel, "  Allocated %d bytes at %x\n", ((Object*)UT_List_01_items[i])->class->classSize, UT_List_01_items[i]));
   }
   isPassed = isPassed && (List_getNbNodes(testList) == MAX_OBJECT_NB * 2);
 
@@ -74,7 +74,7 @@ PRIVATE int UT_List_01_step1()
   for (i = 0; i < MAX_OBJECT_NB * 2; i++)
   {
     removed[i] = List_removeHead(testList);
-    TRACE2((UT_List_01_logChannel, "  Removed %d bytes at %x\n", ((Object*)removed[i])->class->f_size(0), removed[i]));
+    TRACE2((UT_List_01_logChannel, "  Removed %d bytes at %x\n", ((Object*)removed[i])->class->classSize, removed[i]));
     TestObject_delete(removed[i]);
   }
   isPassed = isPassed && (List_getNbNodes(testList) == 0);
