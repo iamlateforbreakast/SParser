@@ -96,7 +96,7 @@ PRIVATE OptionMgr * OptionMgr_new()
       Object_deallocate(&this->object);
       return 0;
     }
-    if (Map_insert(this->options, optionName, optionValue, 1)!=0)
+    if (Map_insert(this->options, optionName, optionValue, 1)==0)
     {
       String_delete(optionName);
       String_delete(optionValue);
