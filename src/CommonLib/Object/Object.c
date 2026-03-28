@@ -97,10 +97,9 @@ PUBLIC Object* Object_newFromAllocator(Class* class, Allocator * allocator)
 **************************************************/
 PUBLIC void Object_delete(Object * this)
 {
-  if ((this->class != 0) && (this->class->f_delete != 0))
-  {
-    this->class->f_delete(this);
-  }
+  if (OBJECT_IS_INVALID(this)) return;
+
+  this->class->f_delete(this);
 }
 
 /**********************************************//**
@@ -110,11 +109,8 @@ PUBLIC void Object_delete(Object * this)
 **************************************************/
 PUBLIC void Object_deallocate(Object* this)
 {
-  if (this->marker != OBJECT_MARKER)
-  {
-    Error_new(ERROR_DBG, "Object_de-allocate uses a invalid object\n");
-    return;
-  }
+  if (OBJECT_IS_INVALID(this)) return;
+
   this->marker = 0;
   if (this->allocator == 0)
     ObjectMgr_deallocate(Object_objMgrPtr, this);
