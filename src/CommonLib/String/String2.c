@@ -85,6 +85,8 @@ PUBLIC String * String_newByRef(const char * initString)
   String * this = 0;
   
   this = (String*)Object_new(sizeof(String), &stringClass);
+  
+  if (OBJECT_IS_INVALID(this)) return 0;
 
   if (initString != 0)
   {
