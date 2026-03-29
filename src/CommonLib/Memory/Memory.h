@@ -6,11 +6,14 @@
 #include "Types.h"
 
 #ifdef _WIN32
-#define MEMORY_ISVALID(p) (*(long int*)p!=0xCDCDCDCD)
+#define MEMORY_IS_VALID(p) (*(long int*)p!=0xCDCDCDCD)
+#define MEMORY_IS_INVALID(p) (p==0xCDCDCDCD)
 #elif _WIN64
-#define MEMORY_ISVALID(p) (p!=0xCDCDCDCD)
+#define MEMORY_IS_VALID(p) (p!=0xCDCDCDCD)
+#define MEMORY_IS_INVALID(p) (p==0xCDCDCDCD)
 #else
-#define MEMORY_ISVALID(p) (p!=0)
+#define MEMORY_IS_VALID(p) (p!=0)
+#define MEMORY_IS_INVALID(p) (p==0)
 #endif
 
 PUBLIC void* Memory_alloc(unsigned int nbBytes);

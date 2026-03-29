@@ -1,9 +1,37 @@
-/**********************************************//** 
+/**********************************************//**
   @file Object.c
-  
-  @brief This file contains the implementation for the class Object
-  
-  The class Object is TBD
+
+  @brief Base object lifecycle implementation for the class framework.
+
+  @details Object is the root base class of the class framework. It provides
+  the core services that every managed object in the system depends on:
+  construction, destruction, copying, comparison, printing, and reference
+  counting. All higher-level classes are built on top of this foundation.
+
+  Two construction paths are supported:
+  - Object_new(): allocates through the ObjectMgr pool, suitable for
+    general-purpose objects with no specific memory placement requirement.
+  - Object_newFromAllocator(): allocates through a caller-specified Allocator
+    registered with the ObjectStore, suitable for objects that must reside in
+    a particular memory region (e.g. a pool, arena, or DMA buffer).
+
+  In both cases the constructed object is wired to its class descriptor,
+  which provides the virtual function table (delete, copy, compare, print)
+  and size. The object carries a validity marker (OBJECT_MARKER) that is
+  checked at the entry point of every mutating operation and cleared on
+  deallocation, providing a basic defence against use-after-free.
+
+  Reference counting is supported via Object_getRef() and Object_deRef().
+  The reference count expresses how many owners hold a reference to the
+  object. Deallocation is a two-step operation: Object_delete() invokes the
+  class destructor to release owned resources, and Object_deallocate()
+  returns the memory to whichever backend (ObjectMgr or ObjectStore) created
+  it.
+
+  @note Object_new() and Object_newFromAllocator() initialise their
+  respective singleton backends (ObjectMgr, ObjectStore) on first use.
+  These initialisations are not re-entrant and must not be called
+  concurrently without external synchronisation.
 **************************************************/
 
 #include "Class.h"
@@ -32,26 +60,24 @@ PUBLIC Object * Object_new(unsigned int size, Class * class)
 {
   Object * this = 0;
   
+  if (class == 0) return 0;
+
   if (Object_objMgrPtr==0)
   {
     // TODO: Not re-entrant
     Object_objMgrPtr = ObjectMgr_getRef();
   }
   this = ObjectMgr_allocate(Object_objMgrPtr, size);
+  
+  if (MEMORY_IS_INVALID(this)) return 0;
+
   this->class = class;
   this->marker = OBJECT_MARKER;
-  if (this->class!=0)
-  {
-    this->delete = class->f_delete;
-    this->copy = class->f_copy;
-    this->size = class->f_size();
-  }
-  else
-  {
-    this->delete = (Destructor)0;
-    this->copy = (Copy_Operator)0;
-    this->size = 0;
-  }
+  
+  this->delete = class->f_delete;
+  this->copy = class->f_copy;
+  this->size = class->f_size();
+  
   this->refCount = 1;
   this->allocator = 0;
   
@@ -59,34 +85,38 @@ PUBLIC Object * Object_new(unsigned int size, Class * class)
 }
 
 /**********************************************//**
-  @brief TBD
+  @brief Create an instance of the specified class using 
+  specified allocator.
   @public
   @param[in] Class to instanciate
+  @param[in] Allocator to use
   @memberof Object
 **************************************************/
 PUBLIC Object* Object_newFromAllocator(Class* class, Allocator * allocator)
 {
   Object* this = 0;
 
+  if (class == 0) return 0;
+
   if (Object_objectStore==0)
   {
     Object_objectStore = ObjectStore_getRef();
   }
-  this = ObjectStore_createObject(Object_objectStore, class, allocator);
-  if (this != 0)
-  {
-    this->marker = OBJECT_MARKER;
-    this->class = class;
-    if (this->class != 0)
-    {
-      this->delete = class->f_delete;
-      this->copy = class->f_copy;
-      this->size = class->f_size();
-    }
-    this->refCount = 1;
-    this->allocator = allocator;
-  }
 
+  this = ObjectStore_createObject(Object_objectStore, class, allocator);
+  
+  if (MEMORY_IS_INVALID(this)) return 0;
+
+  this->marker = OBJECT_MARKER;
+  this->class = class;
+  
+  this->delete = class->f_delete;
+  this->copy = class->f_copy;
+  this->size = class->f_size();
+  
+  this->refCount = 1;
+  this->allocator = allocator;
+  
   return this;
 }
 
@@ -128,10 +158,10 @@ PUBLIC Object * Object_copy(Object * this)
 {
   Object * copy = 0;
 
-  if ((this!=0) && (this->copy!=0))
-  {
-    copy = this->copy((Object*)this);
-  }
+  if (MEMORY_IS_INVALID(this)) return 0;
+
+  copy = this->copy((Object*)this);
+  
   return copy;
 }
 
@@ -179,6 +209,8 @@ PUBLIC char * Object_print(Object * this)
 **************************************************/
 PUBLIC Object* Object_getRef(Object* this)
 { 
+  if (OBJECT_IS_INVALID(this)) return 0;
+
   this->refCount++;
   
   return this;
@@ -191,6 +223,8 @@ PUBLIC Object* Object_getRef(Object* this)
 **************************************************/
 PUBLIC void Object_deRef(Object * this)
 {
+  if (OBJECT_IS_INVALID(this)) return;
+
   if ((this->refCount)>1)
     this->refCount--;
   else
@@ -205,7 +239,7 @@ PUBLIC void Object_deRef(Object * this)
 **************************************************/
 PUBLIC int Object_isValid(Object* this)
 {
-  if (this == 0) return 0;
+  if (OBJECT_IS_INVALID(this)) return 0;
 
-  return ((MEMORY_ISVALID(this) && (this->marker == OBJECT_MARKER)));
+  return ((MEMORY_IS_VALID(this) && (this->marker == OBJECT_MARKER)));
 }
