@@ -1,14 +1,27 @@
-/********************************************************//**
-  @file ObjectStorage.c
- 
-  @brief An object storage class.
-  @details This class purpose is to keep track of all objects
-   created provides an object allocation and
-   de-allocation service. This is performed by registering 
-   every Allocator object with the ObjectStore.
-   Only one instance of this class can be created.
-************************************************************/
+/**********************************************//**
+  @file ObjectStore.c
 
+  @brief Registry and broker for all runtime object allocators.
+
+  @details ObjectStore is a singleton that maintains a registry of Allocator
+  instances and acts as the dispatch layer between the object lifecycle API
+  and the underlying memory backends. Rather than managing memory directly,
+  it delegates all allocation and deallocation to whichever Allocator was
+  registered at object creation time, allowing different objects to be backed
+  by different memory strategies (heap, pool, arena, etc.) transparently.
+
+  Responsibilities:
+  - Registering and unregistering Allocator instances at runtime
+  - Allocating raw object memory through the appropriate Allocator
+  - Deallocating objects by routing back to their originating Allocator
+  - Tracking the total number of objects created across all allocators
+  - Reporting per-allocator usage statistics
+
+  Only one instance of this class may exist at any time. Callers obtain a
+  reference via ObjectStore_getRef() and release it via ObjectStore_delete(),
+  which uses reference counting to defer destruction until all references
+  are dropped.
+**************************************************/
 #include "ObjectStore.h"
 #include "Class.h"
 #include "Object.h"
@@ -58,6 +71,8 @@ PRIVATE ObjectStore * ObjectStore_new();
 **************************************************/
 PUBLIC void ObjectStore_delete(ObjectStore * this)
 {
+  if (OBJECT_IS_INVALID(this)) return;
+
   this->object.refCount = this->object.refCount - 1;
   
   if (this->object.refCount == 0)
@@ -97,7 +112,10 @@ PUBLIC ObjectStore * ObjectStore_copy(ObjectStore* this)
 
 /**********************************************//** 
   @brief Obtain the reference to the object store.
-  @details TBD
+  @details Return reference to the singleton ObjectStore
+  instance, creating it if it does not already exist. 
+  Increments the reference count on the ObjectStore
+   instance before returning.
   @public
   @memberof ObjectStore
 **************************************************/
@@ -117,7 +135,10 @@ PUBLIC ObjectStore * ObjectStore_getRef()
 
 /**********************************************//** 
   @brief Register an Allocator with the objectStore
-  @details TBD
+  @details Register an Allocator with the objectStore by creating an AllocInfo
+  instance for it and adding it to the linked list of allocators. 
+  The ObjectStore maintains a linked list of AllocInfo structures, 
+  each of which contains a pointer to an Allocator and
   @public
   @memberof ObjectStore
 **************************************************/
@@ -146,8 +167,9 @@ PUBLIC AllocInfo * ObjectStore_createAllocator(ObjectStore * this, Allocator * a
 }
 
 /**********************************************//** 
-  @brief TBD
-  @details TBD
+  @brief Unregister an Allocator from the objectStore
+  @details Unregister an Allocator from the objectStore by removing its AllocInfo
+  instance from the linked list of allocators and deleting it.
   @public
   @memberof ObjectStore
 **************************************************/
@@ -165,8 +187,9 @@ PUBLIC void ObjectStore_deleteAllocator(ObjectStore * this, AllocInfo * allocInf
 }
 
 /**********************************************//** 
-  @brief TBD
-  @details TBD
+  @brief Create an object in the object store.
+  @details Create an object in the object store by 
+  allocating memory for it through the appropriate Allocator
   @public
   @memberof ObjectStore
 **************************************************/
@@ -194,7 +217,8 @@ PUBLIC Object * ObjectStore_createObject(ObjectStore * this, Class * class, Allo
 
 /**********************************************//** 
   @brief Delete an object from the object store.
-  @details TBD
+  @details Delete an object from the object store by routing the deallocation
+  request back to the Allocator that was used to create the object.
   @public
   @memberof ObjectStore
 **************************************************/
@@ -208,6 +232,20 @@ PUBLIC void ObjectStore_deleteObject(ObjectStore * this, Object * object)
 
 /**********************************************//** 
   @brief Reports the usage statistics for an instance of ObjectStore.
+  @details TBD
+   Iterates through the list of registered Allocators and reports 
+   the number of allocated objects for each one, as well as the 
+   total number of allocated objects across all allocators.
+   This function can be used to monitor memory usage and identify 
+   potential leaks or inefficiencies in the allocation strategy.
+   The report includes:
+   - Total number of allocated objects across all allocators
+   - Number of allocated objects for each individual allocator
+   - Any additional statistics provided by the Allocator's report 
+     function (e.g. peak usage, fragmentation, etc.)
+   The output can be formatted as needed, such as in a tabular format
+    or with additional context for each allocator.
+  
   @public
   @memberof ObjectStore
 **************************************************/
@@ -230,6 +268,14 @@ PUBLIC void ObjectStore_report(ObjectStore * this)
 /**********************************************//** 
   @brief Reports the number of allocated objects in the ObjectStore.
   @details TBD
+   Returns the total number of allocated objects across all allocators in the ObjectStore.
+   This function can be used to quickly check the overall memory usage of the application
+   without needing to iterate through each individual allocator. It provides a high-level
+   overview of how many objects are currently allocated in the system, which can be useful
+   for monitoring and debugging purposes.
+  
+   The count is maintained by the ObjectStore and should be updated whenever an object is created or deleted through the ObjectStore's API.
+   This function simply returns the current value of that count, which represents the total number of allocated
   @public
   @memberof ObjectStore
 **************************************************/
@@ -263,7 +309,12 @@ PUBLIC void ObjectStore_print(ObjectStore * this)
 
 /**********************************************//** 
   @brief Create the instance of the ObjectStore
-  @details TBD
+  @details Initializes the singleton ObjectStore 
+  instance by allocating memory for it and setting up 
+  its initial state, including the linked list of AllocInfo s
+  tructures for registered allocators. This function is called 
+  internally by ObjectStore_getRef() when the first reference 
+  to the ObjectStore is requested. It should not be called directly by external code.
   @private
   @memberof ObjectStore
 **************************************************/
