@@ -1,3 +1,6 @@
+/* Times.c */
+
+/*
 //  Windows
 #ifdef _WIN32
 #include <Windows.h>
@@ -43,3 +46,31 @@ long double get_cpu_time() {
 	return (long double)clock() / CLOCKS_PER_SEC;
 }
 #endif
+#endif
+*/
+
+PUBLIC uint64_t Time_getNow(void) {
+#ifdef _WIN32
+    static LARGE_INTEGER frequency;
+    LARGE_INTEGER counter;
+    
+    /* Initialize frequency once */
+    if (frequency.QuadPart == 0) {
+        QueryPerformanceFrequency(&frequency);
+    }
+    
+    QueryPerformanceCounter(&counter);
+    
+    /* Convert to microseconds: (Counter * 1,000,000) / Frequency */
+    /* We use multiplication first for precision, but watch for overflow if 
+       uptime is extremely high (years). */
+    return (uint64_t)((counter.QuadPart * 1000000) / frequency.QuadPart);
+
+#else
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    
+    /* Convert seconds and microseconds to a single microsecond value */
+    return (uint64_t)(tv.tv_sec) * 1000000 + (uint64_t)(tv.tv_usec);
+#endif
+}
