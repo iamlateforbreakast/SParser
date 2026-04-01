@@ -17,7 +17,7 @@ typedef struct ArrayParam
   unsigned int autoresize;
 } ArrayParam;
 
-PUBLIC Array * Array_new(ArrayParam * param);
+PUBLIC Array * Array_new(unsigned int initialCapacity);
 PUBLIC Array * Array_newFromFile(FileIo * fileIo, ArrayParam * param);
 PUBLIC void Array_delete(Array* this);
 PUBLIC Array * Array_copy(Array* this);

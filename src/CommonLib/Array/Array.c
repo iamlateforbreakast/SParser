@@ -9,12 +9,12 @@
   - get
 **************************************************/
 #include "Array.h"
+#include "Memory.h"
 #include "Class.h"
 #include "Object.h"
 #include "Debug.h"
 
-#define NB_ELEMENT_MAX (100)
-#define ELEMENT_SIZE_BYTES (100)
+#define DEFAULT_INITIAL_CAPACITY (8)
 
 /**********************************************//**
   @class Array
@@ -37,8 +37,8 @@ PRIVATE Class arrayClass =
   .f_copy = (Copy_Operator)&Array_copy,
   .f_comp = (Comp_Operator)&Array_compare,
   .f_print = (Printer)&Array_print,
-  .f_size = (Sizer)&Array_getSize
-  .classSize = sizeof(struct Array);
+  .f_size = (Sizer)&Array_getSize,
+  .classSize = sizeof(struct Array)
 };
 
 /**********************************************//** 
@@ -52,11 +52,13 @@ PUBLIC Array * Array_new(unsigned int initialCapacity)
   Array * newArray = 0;
   newArray = (Array*)Object_new(sizeof(Array), &arrayClass);
 
+  if (OBJECT_IS_INVALID(newArray)) return 0;
+
   newArray->nbElements = 0;    
-  newArray->capacity = (initialCapacity > 0) ? initialCapacity : ARRAY_DEFAULT_CAPACITY;
+  newArray->capacity = (initialCapacity > 0) ? initialCapacity : DEFAULT_INITIAL_CAPACITY;
     
   /* Allocate the pointer table */
-  newArray->items = (Object**)malloc(sizeof(Object*) * newArray->capacity);
+  newArray->items = (Object**)Memory_alloc(sizeof(Object*) * newArray->capacity);
 	
   return newArray;
 }
@@ -87,21 +89,19 @@ PUBLIC void Array_delete(Array * this)
 {
   if (OBJECT_IS_INVALID(this)) return;
 
-  for (unsigned int i = 0; i < this->size; i++) 
+  for (unsigned int i = 0; i < this->nbElements; i++) 
   {
     Object_deRef(this->items[i]);
   }
 
   if (this->object.refCount==1)
-    {
-      //Pool_delete(this->pool);
-      Object_delete(&this->object);
-      this = 0;
-    }
-    else if (this->object.refCount>1)
-    {
-      this->object.refCount--;
-    }
+  {
+    Object_delete(&this->object);
+    this = 0;
+  }
+  else if (this->object.refCount>1)
+  {
+    this->object.refCount--;
   }
 }
 

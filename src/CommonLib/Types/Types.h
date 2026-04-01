@@ -3,7 +3,7 @@
 #ifndef _TYPES_H_
 #define _TYPES_H_
 
-#define PUBLIC (extern)
+#define PUBLIC extern
 
 #define DECLARE_CLASS(x)
 

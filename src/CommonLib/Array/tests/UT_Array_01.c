@@ -41,11 +41,11 @@ int step1()
 {
   Array * refArray = 0;
   Array * testArray = 0;
-  ArrayParam testParam = { .defaultSize = 10, .storageMode = 0, .autoresize = 0};
+  unsigned int defaultCapacity = 10;
 
   /* Test 1 */
   printf("Step 1: Test 1 - Check the Array object is well constructed: ");
-  testArray = Array_new(sizeof(TestObject),&testParam));
+  testArray = Array_new(defaultCapacity);
   UT_ASSERT((Memory_ncmp(testArray, refArray, sizeof(testArray))==1));
 
 
@@ -62,8 +62,9 @@ int step1()
 int step2()
 {
   int nbTestObjects = 5;
-  ArrayParam testParam = { .defaultSize = 10, .storageMode = 0, .autoresize = 0};
-  Array * testArray = Array_new(&testParam);
+  unsigned int defaultCapacity = 10;
+
+  Array * testArray = Array_new(defaultCapacity);
 
   /* Create test objects */
   TestObject ** objects = (TestObject**)malloc(sizeof(TestObject*)*nbTestObjects);
