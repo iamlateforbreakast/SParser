@@ -1,5 +1,5 @@
 
-#1. Project Architecture & OrganizationThe project is remarkably modular. 
+# 1. Project Architecture & OrganizationThe project is remarkably modular. 
 
    By splitting logic into subdirectories like ./Allocator, ./BTree, and ./ObjectMgr, you’ve created a "Library-first" design. This makes libCommon.a very reusable.
 
@@ -7,9 +7,9 @@
 
    Encapsulation: Using PRIVATE (static) and PUBLIC (extern) macros is a great way to enforce visibility in C89, where modern "private" keywords don't exist.
 
-#2. Strategic "Hot Spots" in the CodebaseBased on the file relationships in the repo, here are three areas that will be your biggest source of bugs or performance issues:
+# 2. Strategic "Hot Spots" in the CodebaseBased on the file relationships in the repo, here are three areas that will be your biggest source of bugs or performance issues:
 
-##A. The ObjectMgr vs. ObjectStore SplitYou have two different "Singletons" managing object lifetimes.
+## A. The ObjectMgr vs. ObjectStore SplitYou have two different "Singletons" managing object lifetimes.
 
    ObjectMgr seems to handle general-purpose pool allocation.ObjectStore handles objects with specific allocators (DMA, etc.).
 
@@ -17,7 +17,7 @@
 
    Ensure that every object created via Object_new never has an allocator assigned later, or they will be returned to the wrong manager, causing a heap corruption.
 
-##B. Collection Robustness (BTree, Map, SkipList)You’ve implemented several complex data structures.
+## B. Collection Robustness (BTree, Map, SkipList)You’ve implemented several complex data structures.
 
    Memory Overhead: Since every MapEntry or Node is an Object, each one carries the full Object header (marker, class pointer, refCount, etc.). If you parse a massive codebase with millions of tokens, the "Metadata-to-Data" ratio might become very high.
 
@@ -27,7 +27,7 @@
 
    Make sure the f_delete implementation for the SParse class correctly deRefs all the internal collections (like the symbol table or file list) it created during SParse_parse.
 
-#3. Build System ObservationYour Makefile.in (which we reviewed earlier) correctly identifies all these sub-modules. However, as the project grows, manually maintaining that SOURCES list will become a headache.
+# 3. Build System ObservationYour Makefile.in (which we reviewed earlier) correctly identifies all these sub-modules. However, as the project grows, manually maintaining that SOURCES list will become a headache.
 
    Tip: If you're staying with a manual Makefile.in, consider grouping SOURCES by module (e.g., SOURCES_MEM, SOURCES_COLL) and then combining them into a single SOURCES variable to make it easier to read.4. 
 
