@@ -3,7 +3,7 @@
 #ifndef _TYPES_H_
 #define _TYPES_H_
 
-#define PUBLIC
+#define PUBLIC (extern)
 
 #define DECLARE_CLASS(x)
 
@@ -26,6 +26,17 @@ union mem_align
 };
 
 #define MEM_ALIGN (sizeof(union mem_align))
+
+/* C89 INLINE implementation */
+#ifndef INLINE
+#  if defined(__GNUC__)
+#    define INLINE static __inline__
+#  elif defined(_MSC_VER)
+#    define INLINE static __inline
+#  else
+#    define INLINE static
+#  endif
+#endif
 
 #include "UserTypes.h"
 #endif /* _TYPES_H_ */
