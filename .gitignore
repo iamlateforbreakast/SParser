@@ -1,3 +1,9 @@
+# Ignore all
+*
+
+# Unignore all
+!*.*
+
 *.o
 *.a
 Makefile
