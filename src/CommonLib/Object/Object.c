@@ -227,6 +227,15 @@ PUBLIC void Object_deRef(Object * this)
 
   if ((this->refCount)>1)
     this->refCount--;
+  else if (this->refCount == 1)
+  {
+    // The last owner is done with the object.
+    // 1. Run the class-specific destructor (clean up internal resources)
+    Object_delete(this);
+    
+    // 2. Free the memory back to the manager/allocator
+    Object_deallocate(this);
+  }
   else
     Error_new(ERROR_NORMAL, "Attempt to de-reference an object not referenced.\n");
 }
