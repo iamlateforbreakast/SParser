@@ -1,45 +1,59 @@
-In your iamlateforbreakast/SParser repository, Debug.c acts as a simple but effective logging wrapper. Since you are targeting C89 and cross-platform compatibility (Linux/Windows), there are several improvements you can make to its robustness and usability.
+Implementing a cross-platform stack trace in C89 requires using platform-specific APIs because C89 itself has no built-in mechanism for stack unwinding. [1, 2, 3] 
+## 1. The Strategy
+You can bridge these platforms by creating a unified Error_printStackTrace() function that uses:
 
-## 1. Handling Variadic Macros (C89 Limitation)
+* Linux/POSIX: backtrace() and backtrace_symbols() from <execinfo.h>.
+* Windows: CaptureStackBackTrace() and the DbgHelp library (SymFromAddr) to translate addresses into names. [4, 5, 6, 7] 
 
-In C89, variadic macros (like #define PRINT(...)) are not officially supported; they were introduced in C99. If you are using a strictly C89-compliant compiler, your PRINT macro might fail.
+## 2. Implementation Logic
+Add this to your Error.c (or a dedicated StackTrace.c):
 
-* The Workaround: Use double parentheses to pass a single argument to the macro, which contains the variadic arguments for printf.
-* Old: #define PRINT(fmt, ...) (C99+)
-   * New (C89 compatible): #define PRINT(args) printf args
-   * Usage: PRINT(("Value: %d\n", val)); (Note the double brackets).
+```
+#include "Error.h"#include <stdio.h>#include <stdlib.h>
+#ifdef _WIN32#include <windows.h>#include <dbghelp.h>#pragma comment(lib, "dbghelp.lib")#else#include <execinfo.h>#endif
+#define MAX_FRAMES 64
+/* Prints stack trace using platform-specific methods */void Error_printStackTrace(void) {
+    void* stack[MAX_FRAMES];
+    unsigned short i;
+#ifdef _WIN32
+    // Windows: Use DbgHelp for symbol resolution
+    HANDLE process = GetCurrentProcess();
+    SYMBOL_INFO* symbol;
+    unsigned short frames = CaptureStackBackTrace(0, MAX_FRAMES, stack, NULL);
+    SymInitialize(process, NULL, TRUE);
+    
+    symbol = (SYMBOL_INFO*)calloc(sizeof(SYMBOL_INFO) + 256 * sizeof(char), 1);
+    symbol->MaxNameLen = 255;
+    symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
 
-## 2. Thread Safety
+    fprintf(stderr, "Windows Stack Trace:\n");
+    for (i = 0; i < frames; i++) {
+        if (SymFromAddr(process, (DWORD64)(stack[i]), 0, symbol)) {
+            fprintf(stderr, "%d: %s - 0x%0llX\n", i, symbol->Name, symbol->Address);
+        }
+    }
+    free(symbol);#else
+    // POSIX: Use execinfo.h
+    int frames = backtrace(stack, MAX_FRAMES);
+    char** symbols = backtrace_symbols(stack, frames);
+    if (symbols != NULL) {
+        fprintf(stderr, "POSIX Stack Trace:\n");
+        for (i = 0; i < (unsigned short)frames; i++) {
+            fprintf(stderr, "%s\n", symbols[i]);
+        }
+        free(symbols);
+    }#endif
+}
+```
 
-Your current debug implementation likely writes directly to stdout or stderr. In a multi-threaded environment, logs from different threads can interleave, making them unreadable. [6] 
+## 3. Key Requirements for Symbol Visibility
 
-* Recommendation: If you plan to add threading later, wrap your debug print logic in a mutex or use a single fwrite call to ensure atomicity for each log line.
+To resolve function names rather than raw addresses:
 
-## 3. Conditional Compilation for Release Builds
+* Linux/GCC: Compile with -rdynamic.
+* Windows/MSVC: Link DbgHelp.lib and ensure .pdb files are present.
+* Frame Pointers: Disable frame pointer omission (-fno-omit-frame-pointer or /Oy-). [3, 8, 9, 10, 11] 
 
-A common practice for a Debug module is to ensure that all logging code is completely removed in "Release" mode to save space and performance.
+## 4. Integration
 
-* Propose:
-
-#ifdef DEBUG_ENABLE
-  #define PRINT(args) printf args#else
-  #define PRINT(args) #endif
-
-This ensures that when you compile for production, the binary doesn't contain hundreds of debug strings.
-
-## 4. Portability with Portability.h
-
-Since we previously created a Portability.h for your Windows/POSIX bridge, ensure Debug.c uses it. Specifically:
-
-* MSVC Compatibility: MSVC uses _snprintf instead of snprintf.
-* Console Output: On Windows, you might want to redirect debug output to OutputDebugString() so it appears in the Visual Studio "Output" window instead of a console. [7] 
-
-## 5. Categorised Logging
-
-As SParser grows, you'll have thousands of debug messages. Consider adding "Levels" to your Debug.c (e.g., INFO, WARN, ERROR). [8, 9, 10] 
-
-* Example:
-
-PUBLIC void Debug_log(int level, const char* fmt, ...);
-
-This allows you to filter the output so you only see errors during normal operation, but can turn on "verbose" mode when debugging the SParse engine.
+Call Error_printStackTrace() within your error handling logic to capture the trace when a fatal error occurs.
