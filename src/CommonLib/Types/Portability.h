@@ -15,6 +15,9 @@
     /* Missing types in older MSVC C89 */
     typedef int ssize_t;
 
+    typedef signed __int64 int64_t;
+    typedef unsigned __int64 uint64_t;
+
     /* Signal compatibility */
     #define SIGHUP  1
     #define SIGKILL 9
@@ -28,16 +31,10 @@
     #include <unistd.h>
     #include <sys/stat.h>
     #include <sys/types.h>
-    
-    #define UNUSED_PARAM(x) (void)(__attribute__((unused))x)
-#endif
+    #include <sys/time.h>
+    #include <stdint.h>
 
-/* Standardize 'PUBLIC' and 'PRIVATE' if not in Types.h */
-#ifndef PUBLIC
-#  define PUBLIC extern
-#endif
-#ifndef PRIVATE
-#  define PRIVATE static
+    #define UNUSED_PARAM(x) (void)(__attribute__((unused))x)
 #endif
 
 #endif /* PORTABILITY_H */
