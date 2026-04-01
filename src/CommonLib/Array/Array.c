@@ -21,8 +21,10 @@
 **************************************************/
 struct Array
 {
-  Object object;
-  unsigned int nbElements;
+  Object object;       /* Base class */
+  Object **items;      /* Array of pointers to Objects */
+  unsigned int nbElements;   /* Current number of elements */
+  unsigned int capacity; /* Total allocated slots */
 };
 
 /**********************************************//**
@@ -36,6 +38,7 @@ PRIVATE Class arrayClass =
   .f_comp = (Comp_Operator)&Array_compare,
   .f_print = (Printer)&Array_print,
   .f_size = (Sizer)&Array_getSize
+  .classSize = sizeof(struct Array);
 };
 
 /**********************************************//** 
@@ -44,14 +47,17 @@ PRIVATE Class arrayClass =
   @memberof Array
   @return New instance.
 **************************************************/
-PUBLIC Array * Array_new(ArrayParam * param)
+PUBLIC Array * Array_new(unsigned int initialCapacity)
 {
   Array * newArray = 0;
   newArray = (Array*)Object_new(sizeof(Array), &arrayClass);
 
-  ////newArray->pool = Pool_new(NB_ELEMENT_MAX, ELEMENT_SIZE_BYTES);
-  newArray->nbElements = 0;
-
+  newArray->nbElements = 0;    
+  newArray->capacity = (initialCapacity > 0) ? initialCapacity : ARRAY_DEFAULT_CAPACITY;
+    
+  /* Allocate the pointer table */
+  newArray->items = (Object**)malloc(sizeof(Object*) * newArray->capacity);
+	
   return newArray;
 }
 
@@ -79,9 +85,14 @@ PUBLIC Array * Array_newFromFile(FileIo * fileIo, ArrayParam * param)
 **************************************************/
 PUBLIC void Array_delete(Array * this)
 {
-  if (this!=0)
+  if (OBJECT_IS_INVALID(this)) return;
+
+  for (unsigned int i = 0; i < this->size; i++) 
   {
-    if (this->object.refCount==1)
+    Object_deRef(this->items[i]);
+  }
+
+  if (this->object.refCount==1)
     {
       //Pool_delete(this->pool);
       Object_delete(&this->object);
