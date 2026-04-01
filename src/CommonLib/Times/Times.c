@@ -1,4 +1,6 @@
 /* Times.c */
+#include "Types.h"
+#include "Portability.h"
 
 /*
 //  Windows
@@ -49,7 +51,7 @@ long double get_cpu_time() {
 #endif
 */
 
-PUBLIC uint64_t Time_getNow(void) {
+extern uint64_t Time_getNow(void) {
 #ifdef _WIN32
     static LARGE_INTEGER frequency;
     LARGE_INTEGER counter;

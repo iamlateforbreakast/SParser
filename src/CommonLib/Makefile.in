@@ -25,6 +25,7 @@ SOURCES = \
 	./Array/Array.c
 
 HEADERS = ./Types/Types.h \
+	./Types/Portability.h \
 	./Types/UserTypes.h \
 	./Object/Class.h \
 	./Allocator/Allocator.h \
