@@ -39,6 +39,8 @@
 
    Your Makefile.in (which we reviewed earlier) correctly identifies all these sub-modules. However, as the project grows, manually maintaining that SOURCES list will become a headache.
 
-   Tip: If you're staying with a manual Makefile.in, consider grouping SOURCES by module (e.g., SOURCES_MEM, SOURCES_COLL) and then combining them into a single SOURCES variable to make it easier to read.4. 
+   Tip: If you're staying with a manual Makefile.in, consider grouping SOURCES by module (e.g., SOURCES_MEM, SOURCES_COLL) and then combining them into a single SOURCES variable to make it easier to read.
+   
+# 4. Recommendation: The "UniqId" Audit
 
-   Recommendation: The "UniqId" AuditIn Object.h, you have both id and uniqId. If your framework doesn't strictly need these for every String or ListEntry, you could save 8 bytes per object by removing them. In a large parse tree, that could save megabytes of RAM.Which specific module would you like to dive into next? I'd recommend looking at ObjectMgr.c to see how you're actually handling the memory pools.
+  In Object.h, you have both id and uniqId. If your framework doesn't strictly need these for every String or ListEntry, you could save 8 bytes per object by removing them. In a large parse tree, that could save megabytes of RAM.
