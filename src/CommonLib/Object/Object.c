@@ -248,7 +248,5 @@ PUBLIC void Object_deRef(Object * this)
 **************************************************/
 PUBLIC int Object_isValid(Object* this)
 {
-  if (OBJECT_IS_INVALID(this)) return 0;
-
   return ((MEMORY_IS_VALID(this) && (this->marker == OBJECT_MARKER)));
 }
