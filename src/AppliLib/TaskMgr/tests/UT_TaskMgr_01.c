@@ -1,4 +1,3 @@
-
 /* UT_TaskMgr_01.c */
 #include "Task.h"
 #include "TaskMgr.h"
@@ -56,10 +55,6 @@ static int msleep(long msec)
 }
 #endif
 
-//pthread_t thrId;
-//pthread_cond_t cond;
-//pthread_mutex_t mutex;
-
 void* taskBody(void* params)
 {
   int id = *(int*)params;
@@ -98,10 +93,9 @@ int UT_TaskMgr_01_step1()
   int evtIdx = 0;
   int isPassed = 1;
   int clock = 0; // In 100 ms slices
+  int totalEvents = sizeof(events) / sizeof(struct event);
 
   TaskMgr* taskMgr = TaskMgr_getRef();
-
-  //Task_start(testTask1);
 
   while (clock<100)
   {
@@ -109,8 +103,11 @@ int UT_TaskMgr_01_step1()
 	msleep(100);
 	while ((evtIdx<(sizeof(events)/sizeof(struct event))) && (clock==events[evtIdx].t))
 	{
-	  Task_start(events[evtIdx].f);
-	  evtIdx++;
+	  if (events[evtIdx].f != 0)
+	  {
+		Task_start(events[evtIdx].f);
+		evtIdx++;
+	  }
 	}
 	clock = clock + 1;
     if (clock == 65) TaskMgr_stop(taskMgr);
