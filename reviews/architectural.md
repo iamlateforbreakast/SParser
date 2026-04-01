@@ -29,9 +29,11 @@
 
    Memory Overhead: Since every MapEntry or Node is an Object, each one carries the full Object header (marker, class pointer, refCount, etc.). If you parse a massive codebase with millions of tokens, the "Metadata-to-Data" ratio might become very high.
 
-   C89 Compatibility: Ensure your BTree and SkipList don't rely on deep recursion, as C89 environments (especially embedded ones) often have limited stack space.C. 
+   C89 Compatibility: Ensure your BTree and SkipList don't rely on deep recursion, as C89 environments (especially embedded ones) often have limited stack space.
+   
+## C. The SParse Engine
 
-   The SParse EngineThe SParse module is the "God Object" of this repo—it coordinates FileMgr, TimeMgr, and the actual parsing logic.Cleanup: In main.c, you call SParse_delete(sparse). 
+   The SParse module is the "God Object" of this repo—it coordinates FileMgr, TimeMgr, and the actual parsing logic.Cleanup: In main.c, you call SParse_delete(sparse). 
 
    Make sure the f_delete implementation for the SParse class correctly deRefs all the internal collections (like the symbol table or file list) it created during SParse_parse.
 
