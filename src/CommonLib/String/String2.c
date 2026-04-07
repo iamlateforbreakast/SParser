@@ -147,7 +147,7 @@ PUBLIC String * String_copy(String * this)
       copy->buffer = Memory_alloc(copy->length+1);
       Memory_copy(copy->buffer, this->buffer, copy->length);
       copy->buffer[this->length] = 0;
-      copy->isOwned = this->isOwned;
+      copy->isOwned = 1;
     }
   }
   
