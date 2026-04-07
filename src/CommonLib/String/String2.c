@@ -212,7 +212,7 @@ PUBLIC String * String_subString(String * this, unsigned int idx, unsigned int l
   if (this!=0)
   {
     result = String_new(0);
-    if (idx+length < this->length)
+    if (idx+length <= this->length)
     {
       result->length = length;
     }
