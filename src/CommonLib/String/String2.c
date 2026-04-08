@@ -186,6 +186,9 @@ PUBLIC int String_compare(String * this, String * compared)
   int result = 0;
 
   if (!this) return -1;
+
+  if (OBJECT_IS_INVALID(compared)) return -1;
+
   while ((i < (int)this->length)&&(i < (int)compared->length))
   {
      result = (int)this->buffer[i] - (int)compared->buffer[i];
