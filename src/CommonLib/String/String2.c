@@ -212,6 +212,8 @@ PUBLIC String * String_subString(String * this, unsigned int idx, unsigned int l
 {
   String * result = 0;
   
+  if (this == 0 || idx >= this->length) return 0;
+
   if (this!=0)
   {
     result = String_new(0);
