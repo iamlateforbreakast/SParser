@@ -58,12 +58,12 @@ PUBLIC Map* Map_new()
   Map * this = 0;
   
   this = (Map*)Object_new(sizeof(Map),&mapClass);
-  if (this!=0)
+
+  if (OBJECT_IS_INVALID(this)) return 0;
+
+  for (int i = 0; i < HTABLE_SIZE; i++)
   {
-    for (int i = 0; i < HTABLE_SIZE; i++)
-    {
-      this->htable[i] = 0;
-    }
+    this->htable[i] = 0;
   }
 
   return this;
@@ -149,10 +149,13 @@ PUBLIC unsigned int Map_insert(Map * this,String * s, void * p, int isOwner)
   unsigned int i = 0;
   void * entry =0;
   MapEntry * me = 0;
- 
+  
+  if (OBJECT_IS_INVALID(this)) return 0;
+
   if (p == 0) return 0;
    
   if (s == 0) return 0;
+
   /* Check if there is an entry under s */
   if ((me = Map_findEntry(this, s))!=0)
   {
