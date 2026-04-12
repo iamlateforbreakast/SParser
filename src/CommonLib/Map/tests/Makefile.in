@@ -1,0 +1,23 @@
+# Makefile.in for UT_Map unit tests
+
+# Define the unit test executables
+TESTS = UT_Map_01 UT_Map_02
+
+# Define the compiler and flags
+CC = gcc
+CFLAGS = -g -Wall
+
+# Rule for building the tests
+all: $(TESTS)
+
+# Rule for UT_Map_01
+UT_Map_01: UT_Map_01.o 
+	$(CC) -o $@ $^
+
+# Rule for UT_Map_02
+UT_Map_02: UT_Map_02.o
+	$(CC) -o $@ $^
+
+# Clean up build files
+clean:
+	rm -f $(TESTS) *.o
