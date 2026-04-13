@@ -64,10 +64,11 @@ int UT_Map_01_delete_keys(int isOwner)
 
 int UT_Map_01_step1()
 {
+  int isPassed = 1;
   Map* testMap = 0;
   String * key = 0;
 
-    PRINT(("Step 1: Test 1 - Create an instance of class Map: "));
+  PRINT(("Step 1: Test 1 - Create an instance of class Map: "));
 
   testMap = Map_new();
 
@@ -86,7 +87,7 @@ int UT_Map_01_step1()
 
   Memory_report();
 
-  return 0;
+  return isPassed;
 }
 
 int UT_Map_01_step2()
@@ -145,8 +146,8 @@ int UT_Map_01_step4()
   PRINT(("New value : %s\n",
           String_getBuffer(newItem)));
   
-  String_delete(s);
-  String_delete(item);
+  //String_delete(s);
+  //String_delete(item);
 
   Map_delete(testMap);
 

@@ -12,7 +12,7 @@ UT_Map_01: UT_Map_01.c ../Map.c ../Map.h ../../../../tests/unit_tests/Words1000.
 	../../../../tests/unit_tests/Words1000.c \
 	../../libCommon.a \
 	-I../../include \
-	-I$(TEST_INCLUDE)
+	-I$(TEST_INCLUDE) \
 	-o UT_Map_01
 
 UT_Map_02: UT_Map_02.c ../Map.c ../Map.h ../../../../tests/unit_tests//MyAllocator.c ../../../../tests/unit_tests/MyAllocator.h

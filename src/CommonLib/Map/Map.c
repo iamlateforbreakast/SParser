@@ -2,7 +2,7 @@
   @file Map.c
  
   @brief A Map class.
-  This class provides a container indexed
+  This class provides a container of Objects indexed
   by a string.
 **************************************************/
 
@@ -44,7 +44,8 @@ PRIVATE Class mapClass =
   .f_copy = (Copy_Operator)&Map_copy,
   .f_comp = (Comp_Operator)&Map_comp,
   .f_print = (Printer)&Map_print,
-  .f_size = (Sizer)&Map_getSize
+  .f_size = (Sizer)&Map_getSize,
+  .classSize = sizeof(Map)
 };
 
 /********************************************************//**
@@ -81,12 +82,12 @@ PUBLIC Map* Map_newFromAllocator(Allocator * allocator)
   Map* this = 0;
 
   this = (Map*)Object_newFromAllocator(&mapClass, (Allocator*)allocator);
-  if (this!=0)
+
+  if (OBJECT_IS_INVALID(this)) return 0;
+
+  for (int i = 0; i < HTABLE_SIZE; i++)
   {
-    for (int i = 0; i < HTABLE_SIZE; i++)
-    {
-      this->htable[i] = 0;
-    }
+    this->htable[i] = 0;
   }
 
   return this;
@@ -99,23 +100,15 @@ PUBLIC Map* Map_newFromAllocator(Allocator * allocator)
 **************************************************/
 PUBLIC void Map_delete(Map * this)
 {
-  if (this != 0)
+  if (OBJECT_IS_INVALID(this)) return;
+
+  /* De-allocate the specific members */
+  for (int i = 0; i < HTABLE_SIZE; i++)
   {
-    if (this->object.refCount == 1)
-    {
-      /* De-allocate the specific members */
-      for (int i = 0; i < HTABLE_SIZE; i++)
-      {
-        List_delete(this->htable[i]);
-      }
-      /* De-allocate the base object */
-      Object_deallocate(&this->object);
-    }
-    else if (this->object.refCount > 1)
-    {
-      this->object.refCount--;
-    }
+    List_delete(this->htable[i]);
   }
+  /* De-allocate the base object */
+  Object_deallocate(&this->object);
 }
 
 /**********************************************//** 
@@ -195,6 +188,8 @@ PUBLIC unsigned int Map_insert(Map * this,String * s, void * p, int isOwner)
 **************************************************/
 PUBLIC unsigned int Map_find(Map* this, String* s, void** p)
 {
+  if (OBJECT_IS_INVALID(this)) return 0;
+
   unsigned int result = 0;
   MapEntry * n = 0;
   
@@ -328,10 +323,6 @@ PUBLIC unsigned int Map_getSize(Map* this)
   {
     return sizeof(Map);
   }
-  else
-  {
-    return sizeof(Map);
-  }
 }
 /**********************************************//** 
   @brief Get all the entries in an instance of a Map.
@@ -341,6 +332,8 @@ PUBLIC unsigned int Map_getSize(Map* this)
 **************************************************/
 PUBLIC List * Map_getAll(Map * this)
 {
+  if (OBJECT_IS_INVALID(this)) return 0;
+  
   List * result = 0;
   int i = 0;
   void * pItem = 0;
