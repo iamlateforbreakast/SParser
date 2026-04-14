@@ -6,6 +6,7 @@ AM_CPPFLAGS = -I$(srcdir)/include
 # list of headers
 pkginclude_HEADERS = \
     Allocator/Allocator.h \
+    Allocator/Malloc.h \
     BTree/BTree.h \
     Debug/Debug.h \
     Error/Error.h \
@@ -17,6 +18,8 @@ pkginclude_HEADERS = \
     Object/Handle.h \
     Object/Object.h \
     ObjectMgr/ObjectMgr.h \
+    ObjectStore/ObjectStore.h \
+    Pool/Pool.h \
     SkipList/SkipList.h \
     String/String2.h \
     Types/Portability.h \
@@ -47,8 +50,16 @@ libCommon_a_SOURCES = \
     BTree/BTree.c \
     Debug/Debug.c \
     Error/Error.c \
+    FileIo/FileIo.c \
+    Map/Map.c \
     Memory/Memory.c \
-    Map/Map.c
+    Object/Object.c \
+    ObjectMgr/ObjectMgr.c \
+    ObjectStore/ObjectStore.c \
+    Pool/Pool.c \
+    SkipList/SkipList.c \
+    String/String2.c \
+    Times/Times.c
 
 .PHONY: copy-headers
 

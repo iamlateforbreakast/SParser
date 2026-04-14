@@ -105,7 +105,12 @@ PUBLIC void Map_delete(Map * self)
   /* De-allocate the specific members */
   for (int i = 0; i < HTABLE_SIZE; i++)
   {
-    self->htable[i] = 0;
+    MapNode * n = self->htable[i];
+    if (n!=0)
+    {
+      MapNode_delete(n);
+      self->htable[i] = 0;
+    }
   }
   /* De-allocate the base object */
   Object_deallocate(&self->object);
@@ -164,6 +169,21 @@ PUBLIC unsigned int Map_insert(Map * self, Handle * string, Handle * item)
       entry = MapNode_new(string, item);
       self->htable[key] = entry;
 
+      result = 1;
+    }
+    else
+    {
+      /* Collision */
+      entry = MapNode_new(string, item);
+      for (i=0; i<HTABLE_SIZE; i++)
+      {
+        if (self->htable[(key + i) % HTABLE_SIZE] == 0)
+        {
+          self->htable[(key + i) % HTABLE_SIZE] = entry;
+          break;
+        }
+      }
+      
       result = 1;
     }
   }
@@ -239,24 +259,37 @@ PRIVATE MapNode * Map_findEntry(Map* self, String * s)
   unsigned int isFound = 0;
   MapNode * n = 0;
   
-  for (i=1; (i<=String_getLength(s)) && (!isFound); i++)
+  key = Map_hash(self, String_getBuffer(s), String_getLength(s));
+  if (self->htable[key] != 0)
   {
-    key = Map_hash(self, String_getBuffer(s), i);
-    if (self->htable[key] != 0)
+    n = self->htable[key];
+    if (String_compare(MapNode_getString(n), s)==0)
     {
-      n = (MapNode*)List_getNext(self->htable[key]);
-      while (n!= 0)
+      isFound = 1;
+      result = n;
+    }
+    else
+    {
+      /* Collision */
+      for (i=0; i<HTABLE_SIZE; i++)
       {
-        if (String_compare(MapNode_getString(n), s)==0)
+        n = self->htable[(key + i) % HTABLE_SIZE];
+        if (n!=0)
         {
-          isFound = 1;
-          result = n;
+          if (String_compare(MapNode_getString(n), s)==0)
+          {
+            isFound = 1;
+            result = n;
+            break;
+          }
+        }
+        else
+        {
           break;
         }
-        n = (MapNode*)List_getNext(self->htable[key]);
       }
-      
-    }
+    } 
+    n = self->htable[key];
   }
   
   return result;
@@ -281,14 +314,13 @@ PUBLIC void Map_print(Map * self)
     if (self->htable[i]!=0)
     {
       n = self->htable[i];
-      p = (char*)(String_getBuffer((String*)MapEntry_getItem(n)));
-      Error_new(ERROR_INFO,"Item %d: %x %x %x %x\n", j+1, *p, *(p+1), *(p+2), *(p+3));
+      p = (char*)(String_getBuffer((String*)MapNode_getString(n)));
+      Error_new(ERROR_INFO,"Item %d: %s\n", i, p);
     }
     else
     {
       Error_new(ERROR_INFO,"Item %d: void\n", j+1);
     }
-    n =self->htable[i];
   }
 }
 
