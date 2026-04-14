@@ -28,6 +28,7 @@ HEADERS = ./Types/Types.h \
 	./Types/Portability.h \
 	./Types/UserTypes.h \
 	./Object/Class.h \
+	./Object/Handle.h \
 	./Allocator/Allocator.h \
 	$(SOURCES:.c=.h)
 
