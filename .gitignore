@@ -7,21 +7,22 @@
 # Allow specific source files
 !*.c
 !*.h
-!Makefile.in
-!configure.in
+!configure.ac
+!Makefile.am
 
 # Ignore artefacts
 *.o
 *.a
 Makefile
+Makefile.in
 configure
 config.status
 autom4te.cache/
 src/AppliLib/include/
 src/CommonLib/include/
 src/ParseLib/include/
-src/ParseLib/Grammar2/Grammar2.lex.c
-src/ParseLib/Grammar2/Grammar2.parse.c
-src/ParseLib/Grammar2/Grammar2.parse.h
+Grammar2.lex.c
+Grammar2.parse.c
+Grammar2.parse.h
 *.log
 test.pool

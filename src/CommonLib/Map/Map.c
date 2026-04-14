@@ -7,7 +7,7 @@
 **************************************************/
 
 #include "Map.h"
-#include "MapEntry.h"
+#include "MapNode.h"
 #include "List.h"
 #include "Class.h"
 #include "Object.h"
@@ -22,8 +22,8 @@
 /**********************************************//**
   @private
 **************************************************/
-PRIVATE unsigned int Map_hash(Map * this, char * s, unsigned int i);
-PRIVATE MapEntry * Map_findEntry(Map* this, String * s);
+PRIVATE unsigned int Map_hash(Map * self, char * s, unsigned int i);
+PRIVATE MapNode * Map_findEntry(Map* self, String * s);
 
 /**********************************************//**
   @class Map
@@ -31,7 +31,7 @@ PRIVATE MapEntry * Map_findEntry(Map* this, String * s);
 struct Map
 {
   Object object;
-  List * htable[HTABLE_SIZE];
+  MapNode * htable[HTABLE_SIZE];
 };
 
 /**********************************************//**
@@ -105,7 +105,7 @@ PUBLIC void Map_delete(Map * this)
   /* De-allocate the specific members */
   for (int i = 0; i < HTABLE_SIZE; i++)
   {
-    List_delete(this->htable[i]);
+    this->htable[i] = 0;
   }
   /* De-allocate the base object */
   Object_deallocate(&this->object);
@@ -135,15 +135,15 @@ PUBLIC int Map_comp(Map* this, Map* compared)
   @memberof Map
   @return 1 is inserted
 **************************************************/
-PUBLIC unsigned int Map_insert(Map * this,String * s, void * p, int isOwner)
+PUBLIC unsigned int Map_insert(Map * self,String * s, Handle *)
 {
   unsigned int result = 0;
   unsigned int key = 0;
   unsigned int i = 0;
   void * entry =0;
-  MapEntry * me = 0;
+  MapNode * me = 0;
   
-  if (OBJECT_IS_INVALID(this)) return 0;
+  if (OBJECT_IS_INVALID(self)) return 0;
 
   if (p == 0) return 0;
    
@@ -160,21 +160,19 @@ PUBLIC unsigned int Map_insert(Map * this,String * s, void * p, int isOwner)
   else
   {
     /* Create a new entry */
-    for (i=1; (i<=String_getLength(s)) && (result==0); i++)
+    key = Map_hash(this,String_getBuffer(s), i);
+    if (this->htable[key] == 0)
     {
-      key = Map_hash(this,String_getBuffer(s), i);
-      if (this->htable[key] == 0)
-      {
-        this->htable[key] = List_new();
-        entry = MapEntry_new(s, p, isOwner);
-        List_insertHead(this->htable[key], entry, 1);
-        result = 1;
-      }
-      else if (i==String_getLength(s)) 
-      {
-        entry = MapEntry_new(s, p, isOwner);
-        List_insertHead(this->htable[key], entry, 1);
-      }
+      Handle hString = Handle_new(String_getRef(s));
+      this->htable[key] = List_new();
+      entry = MapEntry_new(s, p, isOwner);
+
+      result = 1;
+    }
+    else if (i==String_getLength(s)) 
+    {
+      entry = MapEntry_new(s, p, isOwner);
+      List_insertHead(this->htable[key], entry, 1);
     }
   }
   

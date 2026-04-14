@@ -4,6 +4,7 @@
 #define HANDLE_H
 
 #include "Object.h"
+#include "Memory.h"
 
 #define OWNER (1)
 #define NOT_OWNER (0)
@@ -51,7 +52,7 @@ PUBLIC void Handle_delete(Handle * this)
     {
       Object_delete(this->object);
     }
-    Memory_dealloc(this);
+    Memory_free(this, sizeof(Handle));
   }
 }
 

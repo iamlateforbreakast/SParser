@@ -9,7 +9,7 @@
 
 typedef struct MapNode MapNode;
 
-PRIVATE MapNode * MapNode_new(Handle string, Handle object);
+PRIVATE MapNode * MapNode_new(Handle * string, Handle * object);
 PRIVATE void MapNode_delete(MapNode * self);
 
 /**********************************************//**
@@ -18,8 +18,8 @@ PRIVATE void MapNode_delete(MapNode * self);
 struct MapNode
 {
   Object object;
-  Handle string;
-  Handle object;
+  Handle * string;
+  Handle * item;
 };
 
 /**********************************************//**
@@ -45,8 +45,8 @@ PRIVATE MapNode * MapNode_new(Handle * string, Handle * object)
 
   self = (MapNode*)Object_new(sizeof(MapNode),&mapNodeClass);
 
-  self->string = *string;
-  self->object = *object;
+  self->string = string;
+  self->item = object;
 
   return self;
 }
@@ -55,8 +55,8 @@ PRIVATE void MapNode_delete(MapNode * self)
 {
   /* Parameter self is guaranteed to be valid */
 
-  Handle_delete(&self->string);
-  Handle_delete(&self->object);
+  Handle_delete(self->string);
+  Handle_delete(self->item);
 
   Object_delete((Object*)self);
 }
