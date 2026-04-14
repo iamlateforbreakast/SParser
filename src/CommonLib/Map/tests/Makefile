@@ -1,13 +1,14 @@
 COMMONLIB=../../libCommon.a
 COMMONLIB_INCLUDE=../../include
-TEST_INCLUDE=../../../../tests/unit_tests
+TESTLIB_INCLUDE=../../../../tests/unit_tests
+TESTLIB=../../../../tests/unit_tests/libTest.a
 
 all: $(COMMONLIB) UT_Map_01 UT_Map_02
 
 $(COMMONLIB):
 	$(MAKE) -C ../../../CommonLib/
 	
-UT_Map_01: UT_Map_01.c ../Map.c ../Map.h ../../../../tests/unit_tests/Words1000.h
+UT_Map_01: UT_Map_01.c ../Map.c ../Map.h ../MapNode.h ../../../../tests/unit_tests/Words1000.h
 	gcc -g -DMAIN UT_Map_01.c \
 	../Map.c \
 	../MapEntry.c \
@@ -18,7 +19,7 @@ UT_Map_01: UT_Map_01.c ../Map.c ../Map.h ../../../../tests/unit_tests/Words1000.
 	-I$(TEST_INCLUDE) \
 	-o UT_Map_01
 
-UT_Map_02: UT_Map_02.c ../Map.c ../Map.h ../../../../tests/unit_tests//MyAllocator.c ../../../../tests/unit_tests/MyAllocator.h
+UT_Map_02: UT_Map_02.c ../Map.c ../Map.h ../MapNode.h ../../../../tests/unit_tests/MyAllocator.c ../../../../tests/unit_tests/MyAllocator.h
 	gcc -g -DMAIN \
 	UT_Map_02.c \
 	../../../../tests/unit_tests/MyAllocator.c \
