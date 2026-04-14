@@ -1,11 +1,10 @@
 
-BUILD_SOURCES = copy-headers
+BUILT_SOURCES = copy-headers
 
 # list of headers
 pkginclude_HEADERS = \
-    include/common.h \
     Map/Map.h \
-    Types\Types.h
+    Types/Types.h
 
 # List the headers you want to "publish" to the local include folder
 PUBLIC_HDRS = $(pkginclude_HEADERS)
