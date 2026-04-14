@@ -2,8 +2,11 @@ COMMONLIB=../../libCommon.a
 COMMONLIB_INCLUDE=../../include
 TEST_INCLUDE=../../../../tests/unit_tests
 
-all: UT_Map_01 UT_Map_02
+all: $(COMMONLIB) UT_Map_01 UT_Map_02
 
+$(COMMONLIB):
+	$(MAKE) -C ../../../CommonLib/
+	
 UT_Map_01: UT_Map_01.c ../Map.c ../Map.h ../../../../tests/unit_tests/Words1000.h
 	gcc -g -DMAIN UT_Map_01.c \
 	../Map.c \
@@ -27,3 +30,8 @@ UT_Map_02: UT_Map_02.c ../Map.c ../Map.h ../../../../tests/unit_tests//MyAllocat
 
 clean:
 	rm -rf UT_Map_01 UT_Map_02 *.o ../*.o
+
+cleanall: clean
+	$(MAKE) -C ../../../CommonLib/ clean
+
+.PHONY: all clean cleanall $(COMMONLIB)
