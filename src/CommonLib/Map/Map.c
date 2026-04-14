@@ -56,18 +56,18 @@ PRIVATE Class mapClass =
 ************************************************************/
 PUBLIC Map* Map_new()
 {
-  Map * this = 0;
+  Map * self = 0;
   
-  this = (Map*)Object_new(sizeof(Map),&mapClass);
+  self = (Map*)Object_new(sizeof(Map),&mapClass);
 
-  if (OBJECT_IS_INVALID(this)) return 0;
+  if (OBJECT_IS_INVALID(self)) return 0;
 
   for (int i = 0; i < HTABLE_SIZE; i++)
   {
-    this->htable[i] = 0;
+    self->htable[i] = 0;
   }
 
-  return this;
+  return self;
 }
 
 /**********************************************//**
@@ -79,18 +79,18 @@ PUBLIC Map* Map_new()
 **************************************************/
 PUBLIC Map* Map_newFromAllocator(Allocator * allocator)
 {
-  Map* this = 0;
+  Map* self = 0;
 
-  this = (Map*)Object_newFromAllocator(&mapClass, (Allocator*)allocator);
+  self = (Map*)Object_newFromAllocator(&mapClass, (Allocator*)allocator);
 
-  if (OBJECT_IS_INVALID(this)) return 0;
+  if (OBJECT_IS_INVALID(self)) return 0;
 
   for (int i = 0; i < HTABLE_SIZE; i++)
   {
-    this->htable[i] = 0;
+    self->htable[i] = 0;
   }
 
-  return this;
+  return self;
 }
 
 /**********************************************//** 
@@ -98,17 +98,17 @@ PUBLIC Map* Map_newFromAllocator(Allocator * allocator)
   @public
   @memberof Map
 **************************************************/
-PUBLIC void Map_delete(Map * this)
+PUBLIC void Map_delete(Map * self)
 {
-  if (OBJECT_IS_INVALID(this)) return;
+  if (OBJECT_IS_INVALID(self)) return;
 
   /* De-allocate the specific members */
   for (int i = 0; i < HTABLE_SIZE; i++)
   {
-    this->htable[i] = 0;
+    self->htable[i] = 0;
   }
   /* De-allocate the base object */
-  Object_deallocate(&this->object);
+  Object_deallocate(&self->object);
 }
 
 /**********************************************//** 
@@ -117,14 +117,14 @@ PUBLIC void Map_delete(Map * this)
   @memberof Map
   @return Copy of instance of NULL if failed to allocate.
 **************************************************/
-PUBLIC Map * Map_copy(Map * this)
+PUBLIC Map * Map_copy(Map * self)
 {
   Map * result = 0;
   
   return result;
 }
 
-PUBLIC int Map_comp(Map* this, Map* compared)
+PUBLIC int Map_comp(Map* self, Map* compared)
 {
   return 0;
 }
@@ -135,7 +135,7 @@ PUBLIC int Map_comp(Map* this, Map* compared)
   @memberof Map
   @return 1 is inserted
 **************************************************/
-PUBLIC unsigned int Map_insert(Map * self,String * s, Handle *)
+PUBLIC unsigned int Map_insert(Map * self, Handle * string, Handle * item)
 {
   unsigned int result = 0;
   unsigned int key = 0;
@@ -145,34 +145,26 @@ PUBLIC unsigned int Map_insert(Map * self,String * s, Handle *)
   
   if (OBJECT_IS_INVALID(self)) return 0;
 
-  if (p == 0) return 0;
+  if (item == 0) return 0;
    
-  if (s == 0) return 0;
+  if (string == 0) return 0;
 
   /* Check if there is an entry under s */
-  if ((me = Map_findEntry(this, s))!=0)
+  if ((me = Map_findEntry(self, (String*)string->object))!=0)
   {
-    /* Replace entry with new entry an free existing entry */
-    TRACE(("   Map_insert : %s\n", String_getBuffer(s)));
-    MapEntry_setString(me, String_getRef(s));
-    MapEntry_setItem(me, Object_getRef((Object*)p));
+    /* Entry already exists */
+    return 0;
   }
   else
   {
     /* Create a new entry */
-    key = Map_hash(this,String_getBuffer(s), i);
-    if (this->htable[key] == 0)
+    key = Map_hash(self,String_getBuffer((String*)string->object), i);
+    if (self->htable[key] == 0)
     {
-      Handle hString = Handle_new(String_getRef(s));
-      this->htable[key] = List_new();
-      entry = MapEntry_new(s, p, isOwner);
+      entry = MapNode_new(string, item);
+      self->htable[key] = entry;
 
       result = 1;
-    }
-    else if (i==String_getLength(s)) 
-    {
-      entry = MapEntry_new(s, p, isOwner);
-      List_insertHead(this->htable[key], entry, 1);
     }
   }
   
@@ -183,19 +175,20 @@ PUBLIC unsigned int Map_insert(Map * self,String * s, Handle *)
   @brief TBD
   @public
   @memberof Map
+  @return 1 if found
 **************************************************/
-PUBLIC unsigned int Map_find(Map* this, String* s, void** p)
+PUBLIC unsigned int Map_find(Map* self, String* s, void** p)
 {
-  if (OBJECT_IS_INVALID(this)) return 0;
+  if (OBJECT_IS_INVALID(self)) return 0;
 
   unsigned int result = 0;
-  MapEntry * n = 0;
+  MapNode * n = 0;
   
-  n = Map_findEntry(this, s);
+  n = Map_findEntry(self, s);
   
   if (n!=0)
   {
-    *p = (MapEntry_getItem(n));
+    *p = (MapNode_getItem(n));
     result = 1;
   }
   else
@@ -212,7 +205,7 @@ PUBLIC unsigned int Map_find(Map* this, String* s, void** p)
   @private
   @memberof Map
 **************************************************/
-PRIVATE unsigned int Map_hash(Map * this, char * s, unsigned int length)
+PRIVATE unsigned int Map_hash(Map * self, char * s, unsigned int length)
 {
   unsigned int result = 0;
   unsigned int i = 0;
@@ -238,30 +231,29 @@ PRIVATE unsigned int Map_hash(Map * this, char * s, unsigned int length)
   @private
   @memberof Map
 **************************************************/
-PRIVATE MapEntry * Map_findEntry(Map* this, String * s)
+PRIVATE MapNode * Map_findEntry(Map* self, String * s)
 {
-  MapEntry * result = 0;
+  MapNode * result = 0;
   unsigned int key = 0;
   unsigned int i = 0;
   unsigned int isFound = 0;
-  MapEntry * n = 0;
+  MapNode * n = 0;
   
   for (i=1; (i<=String_getLength(s)) && (!isFound); i++)
   {
-    key = Map_hash(this, String_getBuffer(s), i);
-    if (this->htable[key] != 0)
+    key = Map_hash(self, String_getBuffer(s), i);
+    if (self->htable[key] != 0)
     {
-      List_resetIterator(this->htable[key]);
-      n = (MapEntry*)List_getNext(this->htable[key]);
+      n = (MapNode*)List_getNext(self->htable[key]);
       while (n!= 0)
       {
-        if (String_compare(MapEntry_getString(n), s)==0)
+        if (String_compare(MapNode_getString(n), s)==0)
         {
           isFound = 1;
           result = n;
           break;
         }
-        n = (MapEntry*)List_getNext(this->htable[key]);
+        n = (MapNode*)List_getNext(self->htable[key]);
       }
       
     }
@@ -275,37 +267,28 @@ PRIVATE MapEntry * Map_findEntry(Map* this, String * s)
   @public
   @memberof Map
 **************************************************/
-PUBLIC void Map_print(Map * this)
+PUBLIC void Map_print(Map * self)
 {
   int i = 0;
-  MapEntry * n = 0;
+  MapNode * n = 0;
   int j = 0;
   char * p = 0;
   
-  if (this != 0)
+  if (OBJECT_IS_INVALID(self)) return;
+
+  for (i=0;i<HTABLE_SIZE;i++)
   {
-    for (i=0;i<HTABLE_SIZE;i++)
+    if (self->htable[i]!=0)
     {
-      if (this->htable[i]!=0)
-      {
-        Error_new(ERROR_INFO,"Map.c: Map[%d] is used with %d elements.\n",i, List_getSize(this->htable[i]));
-        for (j=0; j<(int)List_getSize(this->htable[i]);j++)
-        {
-          List_resetIterator(this->htable[i]);
-          n = (MapEntry*)List_getNext(this->htable[i]);
-          if  (n!=0)
-          {
-            p = (char*)(String_getBuffer((String*)MapEntry_getItem(n)));
-            Error_new(ERROR_INFO,"Item %d: %x %x %x %x\n", j+1, *p, *(p+1), *(p+2), *(p+3));
-          }
-          else
-          {
-            Error_new(ERROR_INFO,"Item %d: void\n", j+1);
-          }
-          n = (MapEntry*)List_getNext(this->htable[i]);
-        }
-      }
+      n = self->htable[i];
+      p = (char*)(String_getBuffer((String*)MapEntry_getItem(n)));
+      Error_new(ERROR_INFO,"Item %d: %x %x %x %x\n", j+1, *p, *(p+1), *(p+2), *(p+3));
     }
+    else
+    {
+      Error_new(ERROR_INFO,"Item %d: void\n", j+1);
+    }
+    n =self->htable[i];
   }
 }
 
@@ -335,21 +318,15 @@ PUBLIC List * Map_getAll(Map * this)
   List * result = 0;
   int i = 0;
   void * pItem = 0;
-  MapEntry * n = 0;
+  MapNode * n = 0;
   
   result = List_new();
   for (i=0; i<HTABLE_SIZE; i++)
   {
     if (this->htable[i]!=0)
     {
-      List_resetIterator(this->htable[i]);
-      n = (MapEntry*)List_getNext(this->htable[i]);
-      while (n!= 0)
-      {
-        pItem =  MapEntry_getItem(n);
-        List_insertHead(result, pItem, 0);
-        n = (MapEntry*)List_getNext(this->htable[i]);
-      }
+      n = this->htable[i];
+      pItem =  MapNode_getItem(n);
     }
   }
   

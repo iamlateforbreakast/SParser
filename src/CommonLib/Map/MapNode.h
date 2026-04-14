@@ -61,4 +61,14 @@ PRIVATE void MapNode_delete(MapNode * self)
   Object_delete((Object*)self);
 }
 
+PRIVATE String * MapNode_getString(MapNode * self)
+{
+  return (String*)self->string->object;
+}
+
+PRIVATE Object * MapNode_getItem(MapNode * self)
+{
+  return self->item->object;
+}
+
 #endif /* MAPNODE_H */
