@@ -1,6 +1,6 @@
 # 1. Build the libraries first
 # The order matters if AppliLib depends on CommonLib
-SUBDIRS = CommonLib ParseLib AppliLib
+SUBDIRS = CommonLib AppliLib ParseLib
 
 # 2. Define the final executable
 bin_PROGRAMS = sparse

@@ -2,6 +2,7 @@ dnl // Process this file with autoconf to produce a configure script
 
 AC_PREREQ([2.71])
 AC_INIT([sparse], [0.1], [toto@notreal.com])
+AM_INIT_AUTOMAKE([foreign subdir-objects])
 AC_CONFIG_SRCDIR([README.md])
 
 AC_PROG_CC
@@ -12,7 +13,6 @@ AC_PATH_XTRA
 
 PRIMARY_TARGET='sparse'
 MAKELIB="ar rv \$@"
-CLEAN="rm -rf"
 
 # Checks for libraries (e.g., sqlite3)
 AC_CHECK_LIB([sqlite3], [sqlite3_open], [], [

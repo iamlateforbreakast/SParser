@@ -3,18 +3,25 @@ noinst_LIBRARIES = libCommon.a
 
 # 2. List every .c and .h file required to build it
 libCommon_a_SOURCES = \
-    Map/map.c \
-    Map/map_utils.c \
-    Vector/vector.c \
-    Vector/vector_internal.h \
-    Utils/helpers.c \
+    Allocator/Allocator.c \
+    Array/Array.c \
+    Array/Array.h \
+    BTree/BTree.c \
+    BTree/BTree.h \
+    Debug/Debug.c \
+    Debug/Debug.h \
+    Error/Error.c \
+    Error/Error.h \
+    Memory/Memory.c \
+    Memory/Memory.h \
+    Map/Map.c \
+    Map/Map.h \
     include/common.h
 
 # This tells Automake where the 'public' headers should go
 pkginclude_HEADERS = \
     include/common.h \
-    Map/map.h \
-    Vector/vector.h
+    Map/Map.h
 
 # List the headers you want to "publish" to the local include folder
 PUBLIC_HDRS = $(pkginclude_HEADERS)
