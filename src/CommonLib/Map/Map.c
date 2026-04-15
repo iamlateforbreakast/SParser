@@ -23,7 +23,7 @@
 /**********************************************//**
   @private
 **************************************************/
-//PRIVATE unsigned int Map_hash(Map * self, char * s, unsigned int i);
+PRIVATE unsigned int Map_hash(Map * self, char * s, unsigned int i);
 PRIVATE MapNode * Map_findEntry(Map* self, String * s);
 PRIVATE int Map_resize(Map* self);
 
@@ -138,23 +138,72 @@ PUBLIC void Map_delete(Map* self)
   @brief Copy an instance of the class Map.
   @public
   @memberof Map
-  @return Copy of instance of NULL if failed to allocate.
+  @return Copy of instance or NULL if failed to allocate.
 **************************************************/
 PUBLIC Map* Map_copy(Map* self)
 {
-  Map* result = 0;
+  if (OBJECT_IS_INVALID(self)) return 0;
 
-  return result;
+  Map* copy = Map_new();
+
+  if (OBJECT_IS_INVALID(copy)) return 0;
+
+  for (int i = 0; i < self->capacity; i++)
+  {
+    /* Only copy slots that contain actual data */
+    if (self->htable[i] != 0)
+    {
+      Handle * hKey = MapNode_getString(self->htable[i]);
+      Handle * hItem = MapNode_getItem(self->htable[i]);
+
+      if (Map_insert(copy, hKey, hItem) == 0)
+      {
+        /* Clean up and fail if an insertion fails (e.g., out of memory) */
+        Map_delete(copy);
+        return 0;
+      }
+    }
+  }
+
+  return copy;
 }
 
 /**********************************************//**
   @brief Compare an instance of the class Map.
   @public
   @memberof Map
-  @return 0 if equal
+  @return 0 if equal, 1 if different
 **************************************************/
 PUBLIC int Map_comp(Map* self, Map* compared)
 {
+  /* 1. Basic pointer and size check */
+  if (self == compared) return 0;
+  if (self->count != compared->count) return 1;
+
+  /* 2. Iterate through self and verify every entry exists in 'compared' */
+  for (int i = 0; i < self->capacity; i++)
+  {
+    /* Skip empty or tombstone slots */
+    if (self->htable[i] != 0)
+    {
+      String* key = MapNode_getString(self->htable[i]);
+      void* value = MapNode_getValue(self->htable[i]);
+
+      /* Look up this key in the other map */
+      void* comparedValue = Map_get(compared, key);
+
+      /*
+       * If key doesn't exist in 'compared' or values don't match,
+       * maps are not equal.
+       */
+      if (comparedValue == 0 || !Value_isEqual(value, comparedValue))
+      {
+        return 1;
+      }
+    }
+  }
+
+  /* All keys and values matched */
   return 0;
 }
 
@@ -191,7 +240,7 @@ PUBLIC unsigned int Map_insert(Map* self, Handle* string, Handle* item)
   else
   {
     /* Create a new entry */
-    key = String_hash((String*)Handle_getObject(string));
+    key = Map_hash(self,String_getBuffer((String*)Handle_getObject(string)), String_getLength((String*)Handle_getObject(string)));
     if (self->htable[key] == 0)
     {
       entry = MapNode_new(string, item);
@@ -252,7 +301,77 @@ PUBLIC unsigned int Map_find(Map* self, String* s, void** p)
   return result;
 }
 
-#if 0
+/**********************************************//**
+  @brief Print a Map instance
+  @public
+  @memberof Map
+**************************************************/
+PUBLIC void Map_print(Map* self)
+{
+  int i = 0;
+  MapNode* n = 0;
+  int j = 0;
+  char* p = 0;
+
+  if (OBJECT_IS_INVALID(self)) return;
+
+  for (i = 0; i < self->capacity; i++)
+  {
+    if (self->htable[i] != 0)
+    {
+      n = self->htable[i];
+      p = (char*)(String_getBuffer((String*)MapNode_getString(n)));
+      Error_new(ERROR_INFO, "Item %d: %s\n", i, p);
+    }
+    else
+    {
+      Error_new(ERROR_INFO, "Item %d: void\n", j + 1);
+    }
+  }
+}
+
+/**********************************************//**
+  @brief Provide the size of a Map instance
+  @public
+  @memberof Map
+  @return Size in bytes
+**************************************************/
+PUBLIC unsigned int Map_getSize(Map* self)
+{
+  if (self == 0) return 0;
+
+  return sizeof(Map) + (self->count * sizeof(MapNode));
+}
+
+/**********************************************//**
+  @brief Get all the entries in an instance of a Map.
+  @public
+  @memberof Map
+  @return List of map objects
+**************************************************/
+PUBLIC List* Map_getAll(Map* self)
+{
+  if (OBJECT_IS_INVALID(self)) return 0;
+
+  List* result = 0;
+  int i = 0;
+  void* pItem = 0;
+  MapNode* n = 0;
+
+  result = List_new();
+  for (i = 0; i < self->capacity; i++)
+  {
+    if (self->htable[i] != 0)
+    {
+      n = self->htable[i];
+      pItem = MapNode_getItem(n);
+      List_insertHead(result, pItem, 0);
+    }
+  }
+
+  return result;
+}
+
 /**********************************************//** 
   @brief TBD
   @private
@@ -278,7 +397,6 @@ PRIVATE unsigned int Map_hash(Map * self, char * s, unsigned int length)
 
   return result;
 }
-#endif
 
 /**********************************************//**
   @brief Find a map item based on a key
@@ -372,75 +490,4 @@ PRIVATE int Map_resize(Map* self)
   self->capacity = newCapacity;
 
   return 1;
-}
-
-/**********************************************//**
-  @brief Print a Map instance
-  @public
-  @memberof Map
-**************************************************/
-PUBLIC void Map_print(Map * self)
-{
-  int i = 0;
-  MapNode * n = 0;
-  int j = 0;
-  char * p = 0;
-  
-  if (OBJECT_IS_INVALID(self)) return;
-
-  for (i=0;i<self->capacity;i++)
-  {
-    if (self->htable[i]!=0)
-    {
-      n = self->htable[i];
-      p = (char*)(String_getBuffer((String*)MapNode_getString(n)));
-      Error_new(ERROR_INFO,"Item %d: %s\n", i, p);
-    }
-    else
-    {
-      Error_new(ERROR_INFO,"Item %d: void\n", j+1);
-    }
-  }
-}
-
-/**********************************************//**
-  @brief Provide the size of a Map instance
-  @public
-  @memberof Map
-  @return Size in bytes
-**************************************************/
-PUBLIC unsigned int Map_getSize(Map* this)
-{
-  if (this == 0) return 0;
-
-  return sizeof(Map);
-}
-
-/**********************************************//** 
-  @brief Get all the entries in an instance of a Map.
-  @public
-  @memberof Map
-  @return List of map objects
-**************************************************/
-PUBLIC List * Map_getAll(Map * self)
-{
-  if (OBJECT_IS_INVALID(self)) return 0;
-  
-  List * result = 0;
-  int i = 0;
-  void * pItem = 0;
-  MapNode * n = 0;
-  
-  result = List_new();
-  for (i=0; i<self->capacity; i++)
-  {
-    if (self->htable[i]!=0)
-    {
-      n = self->htable[i];
-      pItem =  MapNode_getItem(n);
-      List_insertHead(result, pItem, 0);
-    }
-  }
-  
-  return result;
 }
