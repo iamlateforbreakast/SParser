@@ -23,7 +23,6 @@
 /**********************************************//**
   @private
 **************************************************/
-PRIVATE unsigned int Map_hash(Map * self, char * s, unsigned int i);
 PRIVATE MapNode * Map_findEntry(Map* self, String * s);
 PRIVATE int Map_resize(Map* self);
 
@@ -479,7 +478,7 @@ PRIVATE int Map_resize(Map* self)
       {
         for (int j = 1; j < newCapacity; j++)
         {
-          if (self->htable[(hash + j) % newCapacity] != 0)
+          if (newHtable[(hash + j) % newCapacity] != 0)
           {
             hash = (hash + j) % newCapacity;
             break;
