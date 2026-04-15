@@ -17,13 +17,15 @@
 #include "Error.h"
 
 #define DEBUG (0)
-#define HTABLE_SIZE (50)
+#define INITIAL_HTABLE_SIZE (50)
+#define LOAD_FACTOR_THRESHOLD (75)
 
 /**********************************************//**
   @private
 **************************************************/
 PRIVATE unsigned int Map_hash(Map * self, char * s, unsigned int i);
 PRIVATE MapNode * Map_findEntry(Map* self, String * s);
+PRIVATE int Map_resize(Map* self);
 
 /**********************************************//**
   @class Map
@@ -31,7 +33,7 @@ PRIVATE MapNode * Map_findEntry(Map* self, String * s);
 struct Map
 {
   Object object;
-  MapNode * htable[HTABLE_SIZE];
+  MapNode ** htable;
   int capacity;
   int count;
 };
@@ -61,28 +63,34 @@ PUBLIC Map* Map_new()
   Map * self = 0;
   
   self = (Map*)Object_new(sizeof(Map),&mapClass);
-
   if (OBJECT_IS_INVALID(self)) return 0;
 
-  for (int i = 0; i < HTABLE_SIZE; i++)
+  self->capacity = INITIAL_HTABLE_SIZE;
+  self->count = 0;
+
+  self->htable = (MapNode**)Memory_alloc(sizeof(MapNode*) * self->capacity);
+  if (self->htable == 0)
+  {
+    Map_delete(self);
+    return 0;
+  }
+
+  for (int i = 0; i < self->capacity; i++)
   {
     self->htable[i] = 0;
   }
-
-  self->capacity = HTABLE_SIZE;
-  self->count = 0;
 
   return self;
 }
 
 /**********************************************//**
-  @brief Create a new instance of the class Map 
+  @brief Create a new instance of the class Map
   using a specific allocator.
   @public
   @memberof Map
   @return New Map instance or NULL if failed to allocate.
 **************************************************/
-PUBLIC Map* Map_newFromAllocator(Allocator * allocator)
+PUBLIC Map* Map_newFromAllocator(Allocator* allocator)
 {
   Map* self = 0;
 
@@ -90,82 +98,94 @@ PUBLIC Map* Map_newFromAllocator(Allocator * allocator)
 
   if (OBJECT_IS_INVALID(self)) return 0;
 
-  for (int i = 0; i < HTABLE_SIZE; i++)
+  self->capacity = INITIAL_HTABLE_SIZE;
+  self->count = 0;
+
+  for (int i = 0; i < self->capacity; i++)
   {
     self->htable[i] = 0;
   }
 
-  self->capacity = HTABLE_SIZE;
-  self->count = 0;
-
   return self;
 }
 
-/**********************************************//** 
+/**********************************************//**
   @brief Delete an instance of the class Map.
   @public
   @memberof Map
 **************************************************/
-PUBLIC void Map_delete(Map * self)
+PUBLIC void Map_delete(Map* self)
 {
   if (OBJECT_IS_INVALID(self)) return;
 
   /* De-allocate the specific members */
-  for (int i = 0; i < HTABLE_SIZE; i++)
+  for (int i = 0; i < self->capacity; i++)
   {
-    MapNode * n = self->htable[i];
-    if (n!=0)
+    MapNode* n = self->htable[i];
+    if (n != 0)
     {
       MapNode_delete(n);
       self->htable[i] = 0;
     }
   }
+  Memory_free(self->htable, sizeof(MapNode*) * self->capacity);
+
   /* De-allocate the base object */
   Object_deallocate(&self->object);
 }
 
-/**********************************************//** 
+/**********************************************//**
   @brief Copy an instance of the class Map.
   @public
   @memberof Map
   @return Copy of instance of NULL if failed to allocate.
 **************************************************/
-PUBLIC Map * Map_copy(Map * self)
+PUBLIC Map* Map_copy(Map* self)
 {
-  Map * result = 0;
-  
+  Map* result = 0;
+
   return result;
 }
 
+/**********************************************//**
+  @brief Compare an instance of the class Map.
+  @public
+  @memberof Map
+  @return 0 if equal
+**************************************************/
 PUBLIC int Map_comp(Map* self, Map* compared)
 {
   return 0;
 }
 
-/**********************************************//** 
+/**********************************************//**
   @brief Insert an object into a Map instance
   @public
   @memberof Map
   @return 1 is inserted
 **************************************************/
-PUBLIC unsigned int Map_insert(Map * self, Handle * string, Handle * item)
+PUBLIC unsigned int Map_insert(Map* self, Handle* string, Handle* item)
 {
   unsigned int result = 0;
   unsigned int key = 0;
-  unsigned int i = 0;
-  void * entry =0;
-  MapNode * me = 0;
-  
+  int i = 0;
+  void* entry = 0;
+  MapNode* me = 0;
+
   if (OBJECT_IS_INVALID(self)) return 0;
 
   if (item == 0) return 0;
-   
+
   if (string == 0) return 0;
 
+  if ((self->count * 100) > LOAD_FACTOR_THRESHOLD * self->capacity)
+  {
+    Map_resize(self);
+  }
   /* Check if there is an entry under s */
   if ((me = Map_findEntry(self, (String*)Handle_getObject(string)))!=0)
   {
-    /* Entry already exists */
+    /* Failed: Entry already exists */
     return 0;
   }
   else
@@ -176,34 +196,38 @@ PUBLIC unsigned int Map_insert(Map * self, Handle * string, Handle * item)
     {
       entry = MapNode_new(string, item);
       self->htable[key] = entry;
-
-      result = 1;
+      self->count++;
+      result = 1; /* Success: Inserted */
     }
     else
     {
       /* Collision */
       entry = MapNode_new(string, item);
-      for (i=0; i<HTABLE_SIZE; i++)
+      for (i=0; i<self->capacity; i++)
       {
-        if (self->htable[(key + i) % HTABLE_SIZE] == 0)
+        if (self->htable[(key + i) % self->capacity] == 0)
         {
-          self->htable[(key + i) % HTABLE_SIZE] = entry;
+          self->htable[(key + i) % self->capacity] = entry;
+          self->count++;
+          result = 1; /* success: Inserted */
           break;
         }
       }
-      
-      result = 1;
+      /* Failed: No space left to insert */
     }
   }
   
   return result;
 }
 
-/**********************************************//** 
-  @brief TBD
+/**********************************************//**
+  @brief Retrieve an item from the Map by its key.
   @public
   @memberof Map
-  @return 1 if found
+  @param s The string key to search for.
+  @param[out] p Pointer to a pointer where the found item will be stored.
+               Set to NULL if the key is not found.
+  @return 1 if the key was found, 0 otherwise (or if the Map is invalid).
 **************************************************/
 PUBLIC unsigned int Map_find(Map* self, String* s, void** p)
 {
@@ -244,7 +268,7 @@ PRIVATE unsigned int Map_hash(Map * self, char * s, unsigned int length)
     result += (result << 10);
     result ^= (result>>6);
   }
-  result = result % HTABLE_SIZE;
+  result = result % self->capacity;
   /*
           hash += key[i], hash += ( hash << 10 ), hash ^= ( hash >> 6 );
     }
@@ -262,12 +286,11 @@ PRIVATE unsigned int Map_hash(Map * self, char * s, unsigned int length)
 PRIVATE MapNode * Map_findEntry(Map* self, String * s)
 {
   MapNode * result = 0;
-  unsigned int key = 0;
-  unsigned int i = 0;
+  int i = 0;
   unsigned int isFound = 0;
   MapNode * n = 0;
   
-  key = Map_hash(self, String_getBuffer(s), String_getLength(s));
+  unsigned int key = String_hash(s) % self->capacity;
   if (self->htable[key] != 0)
   {
     n = self->htable[key];
@@ -279,9 +302,9 @@ PRIVATE MapNode * Map_findEntry(Map* self, String * s)
     else
     {
       /* Collision */
-      for (i=1; i<HTABLE_SIZE; i++)
+      for (i = 1; i<self->capacity; i++)
       {
-        n = self->htable[(key + i) % HTABLE_SIZE];
+        n = self->htable[(key + i) % self->capacity];
         if (n!=0)
         {
           if (String_compare(MapNode_getString(n), s)==0)
@@ -293,10 +316,60 @@ PRIVATE MapNode * Map_findEntry(Map* self, String * s)
         }
       }
     } 
-    n = self->htable[key];
   }
   
   return result;
+}
+
+/**********************************************//**
+  @brief Increases the map's capacity by doubling it.
+
+  Allocates a new hash table and re-hashes all existing entries
+  using open addressing to resolve collisions in the new space.
+
+  @private
+  @memberof Map
+  @return 1 if successful, 0 if memory allocation failed.
+**************************************************/
+PRIVATE int Map_resize(Map* self)
+{
+  /* self is guaranteed to be valid */
+  
+  int newCapacity = self->capacity * 2;
+  MapNode** newHtable = (MapNode**)Memory_alloc(sizeof(MapNode*) * newCapacity);
+
+  if (newHtable == 0) return 0;
+
+  Memory_set(newHtable, 0, sizeof(MapNode*) * newCapacity);
+
+  for (int i = 0; i < self->capacity; i++)
+  {
+    if (self->htable[i] != 0)
+    {
+      String* key = MapNode_getString(self->htable[i]);
+      unsigned int hash = String_hash(key) % newCapacity;
+
+      /* Collision case */
+      if (newHtable[hash] != 0)
+      {
+        for (int j = 1; j < newCapacity; j++)
+        {
+          if (self->htable[(hash + j) % newCapacity] != 0)
+          {
+            hash = (hash + j) % newCapacity;
+            break;
+          }
+        }
+      }
+      newHtable[hash] = self->htable[i];
+      self->htable[i] = 0;
+    }
+  }
+  Memory_free(self->htable, sizeof(MapNode*) * self->capacity);
+  self->htable = newHtable;
+  self->capacity = newCapacity;
+
+  return 1;
 }
 
 /**********************************************//**
@@ -313,7 +386,7 @@ PUBLIC void Map_print(Map * self)
   
   if (OBJECT_IS_INVALID(self)) return;
 
-  for (i=0;i<HTABLE_SIZE;i++)
+  for (i=0;i<self->capacity;i++)
   {
     if (self->htable[i]!=0)
     {
@@ -336,20 +409,20 @@ PUBLIC void Map_print(Map * self)
 **************************************************/
 PUBLIC unsigned int Map_getSize(Map* this)
 {
-  if (this != 0)
-  {
-    return sizeof(Map);
-  }
+  if (this == 0) return 0;
+
+  return sizeof(Map);
 }
+
 /**********************************************//** 
   @brief Get all the entries in an instance of a Map.
   @public
   @memberof Map
   @return List of map objects
 **************************************************/
-PUBLIC List * Map_getAll(Map * this)
+PUBLIC List * Map_getAll(Map * self)
 {
-  if (OBJECT_IS_INVALID(this)) return 0;
+  if (OBJECT_IS_INVALID(self)) return 0;
   
   List * result = 0;
   int i = 0;
@@ -357,11 +430,11 @@ PUBLIC List * Map_getAll(Map * this)
   MapNode * n = 0;
   
   result = List_new();
-  for (i=0; i<HTABLE_SIZE; i++)
+  for (i=0; i<self->capacity; i++)
   {
-    if (this->htable[i]!=0)
+    if (self->htable[i]!=0)
     {
-      n = this->htable[i];
+      n = self->htable[i];
       pItem =  MapNode_getItem(n);
       List_insertHead(result, pItem, 0);
     }
