@@ -117,6 +117,13 @@ int UT_Map_01_step2()
   isPassed = isPassed && isFound;
 
   UT_ASSERT((isPassed));
+
+  PRINT(("Step 2: Test 3 - Reject same object insertion: "));
+  int isOK = !Map_insert(testMap, hKey, hItem);
+  isPassed = isPassed && isOK;
+
+  UT_ASSERT((isPassed));
+
   Map_delete(testMap);
 
   return isPassed;
@@ -126,20 +133,54 @@ int UT_Map_01_step3()
 {
   int isPassed = 1;
   Map * testMap = Map_new();
-  String * key = 0;
-  
-  PRINT(("Step 2: Test 1 - Insert %d objects: ", UT_Map_01_nbTokens));
+  int nbObjects = 30;
+
+  PRINT(("Step 3: Test 1 - Insert %d objects: ", nbObjects));
   List_resetIterator(UT_Map_01_keys);
-  for (int i = 0; i < UT_Map_01_nbTokens; i++)
+  for (int i = 0; i < nbObjects; i++)
   {
-    key = (String*)List_getNext(UT_Map_01_keys);
-    TRACE(("-->%s\n", String_getBuffer(key)));
+    String * key = (String*)List_getNext(UT_Map_01_keys);
     Handle * hKey = Handle_new(key, 0);
     Handle * hItem = Handle_new(UT_Map_01_testObjects[0], 0);
-    Map_insert(testMap, hKey, hItem);
+    isPassed = isPassed && Map_insert(testMap, hKey, hItem);
+    void * p;
+    isPassed = isPassed && Map_find(testMap, key, &p);
   }
   
-  UT_ASSERT((1));
+  UT_ASSERT((isPassed));
+
+  nbObjects = 1;
+
+  PRINT(("Step 3: Test 2 - Insert %d objects: ", nbObjects));
+  List_resetIterator(UT_Map_01_keys);
+  for (int i = 0; i < nbObjects; i++)
+  {
+    String * key = (String*)List_getNext(UT_Map_01_keys);
+    Handle * hKey = Handle_new(key, 0);
+    Handle * hItem = Handle_new(UT_Map_01_testObjects[0], 0);
+    isPassed = isPassed && Map_insert(testMap, hKey, hItem);
+    void * p;
+    isPassed = isPassed && Map_find(testMap, key, &p);
+  }
+  
+  UT_ASSERT((isPassed));
+
+  nbObjects = nbObjects * 2;
+  
+  PRINT(("Step 3: Test 3 - Insert %d objects: ", nbObjects));
+  List_resetIterator(UT_Map_01_keys);
+  for (int i = 0; i < nbObjects; i++)
+  {
+    String * key = (String*)List_getNext(UT_Map_01_keys);
+    Handle * hKey = Handle_new(key, 0);
+    Handle * hItem = Handle_new(UT_Map_01_testObjects[0], 0);
+    isPassed = isPassed && Map_insert(testMap, hKey, hItem);
+    void * p;
+    isPassed = isPassed && Map_find(testMap, key, &p);
+  }
+
+  UT_ASSERT((isPassed));
+
   Map_delete(testMap);
 
   //Memory_report();
@@ -261,7 +302,7 @@ int run_UT_Map_01()
 
   isPassed = UT_Map_01_step1() && isPassed;
   isPassed = UT_Map_01_step2() && isPassed;
-  //isPassed = UT_Map_01_step3() && isPassed;
+  isPassed = UT_Map_01_step3() && isPassed;
   //isPassed = UT_Map_01_step4() && isPassed;
   //isPassed = UT_Map_01_step5() && isPassed;
   //isPassed = UT_Map_01_step6() && isPassed;

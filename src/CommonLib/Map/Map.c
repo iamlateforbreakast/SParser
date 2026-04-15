@@ -23,7 +23,7 @@
 /**********************************************//**
   @private
 **************************************************/
-PRIVATE unsigned int Map_hash(Map * self, char * s, unsigned int i);
+//PRIVATE unsigned int Map_hash(Map * self, char * s, unsigned int i);
 PRIVATE MapNode * Map_findEntry(Map* self, String * s);
 PRIVATE int Map_resize(Map* self);
 
@@ -191,7 +191,7 @@ PUBLIC unsigned int Map_insert(Map* self, Handle* string, Handle* item)
   else
   {
     /* Create a new entry */
-    key = Map_hash(self,String_getBuffer((String*)Handle_getObject(string)), String_getLength((String*)Handle_getObject(string)));
+    key = String_hash((String*)Handle_getObject(string));
     if (self->htable[key] == 0)
     {
       entry = MapNode_new(string, item);
@@ -252,6 +252,7 @@ PUBLIC unsigned int Map_find(Map* self, String* s, void** p)
   return result;
 }
 
+#if 0
 /**********************************************//** 
   @brief TBD
   @private
@@ -277,6 +278,7 @@ PRIVATE unsigned int Map_hash(Map * self, char * s, unsigned int length)
 
   return result;
 }
+#endif
 
 /**********************************************//**
   @brief Find a map item based on a key
