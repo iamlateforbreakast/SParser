@@ -76,7 +76,7 @@ PUBLIC Object * Object_new(unsigned int size, Class * class)
   
   this->delete = class->f_delete;
   this->copy = class->f_copy;
-  this->size = class->f_size();
+  this->size = class->f_size(0);
   
   this->refCount = 1;
   this->allocator = 0;
@@ -112,7 +112,7 @@ PUBLIC Object* Object_newFromAllocator(Class* class, Allocator * allocator)
   
   this->delete = class->f_delete;
   this->copy = class->f_copy;
-  this->size = class->f_size();
+  this->size = class->f_size(0);
   
   this->refCount = 1;
   this->allocator = allocator;
