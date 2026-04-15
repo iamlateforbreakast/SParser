@@ -73,20 +73,24 @@ int UT_Map_01_step1()
 
   testMap = Map_new();
 
-  UT_ASSERT((testMap!=0));
+  isPassed = isPassed && OBJECT_IS_VALID(testMap);
 
-  PRINT(("Step 1: Test 2 - Insert an object: "));
-  key = (String*)List_getNext(UT_Map_01_keys);
-  Handle * hKey = Handle_new(key, 0);
-  Handle * hItem = Handle_new(UT_Map_01_testObjects[0], 0);
-  Map_insert(testMap, hKey, hItem);
+  UT_ASSERT((isPassed));
 
-  UT_ASSERT((1));
+  //PRINT(("Step 1: Test 2 - Insert an object: "));
+  //key = (String*)List_getNext(UT_Map_01_keys);
+  //Handle * hKey = Handle_new(key, 0);
+  //Handle * hItem = Handle_new(UT_Map_01_testObjects[0], 0);
+  //Map_insert(testMap, hKey, hItem);
 
-  PRINT(("Step 1: Test 3 - Delete the Map: "));
+  //UT_ASSERT((1));
+
+  PRINT(("Step 1: Test 2 - Delete the Map: "));
   Map_delete(testMap);
 
-  UT_ASSERT((1));
+  isPassed = isPassed && OBJECT_IS_INVALID(testMap);
+
+  UT_ASSERT((isPassed));
 
   //Memory_report();
 
@@ -94,6 +98,31 @@ int UT_Map_01_step1()
 }
 
 int UT_Map_01_step2()
+{
+  int isPassed = 1;
+  Map * testMap = Map_new();
+
+  PRINT(("Step 2: Test 1 - Insert one object: "));
+  String * key = (String*)List_getNext(UT_Map_01_keys);
+  Handle * hKey = Handle_new(key, 0);
+  Handle * hItem = Handle_new(UT_Map_01_testObjects[0], 0);
+  int isOk = Map_insert(testMap, hKey, hItem);
+  isPassed = isPassed && isOk;
+
+  UT_ASSERT((isPassed));
+
+  PRINT(("Step 2: Test 2 - Find inserted object: "));
+  void * foundItem = 0;
+  int isFound = Map_find(testMap, key, &foundItem);
+  isPassed = isPassed && isFound;
+
+  UT_ASSERT((isPassed));
+  Map_delete(testMap);
+
+  return isPassed;
+}
+
+int UT_Map_01_step3()
 {
   int isPassed = 1;
   Map * testMap = Map_new();
@@ -118,7 +147,7 @@ int UT_Map_01_step2()
   return isPassed;
 }
 
-int UT_Map_01_step3()
+int UT_Map_01_step4()
 {
   int isPassed = 1;
   Map* testMap = Map_new();
@@ -140,7 +169,7 @@ int UT_Map_01_step3()
 }
 
 
-int UT_Map_01_step4()
+int UT_Map_01_step5()
 {
   int isPassed = 1;
   Map* testMap = Map_new();
@@ -169,7 +198,7 @@ int UT_Map_01_step4()
   return isPassed;
 }
 
-int UT_Map_01_step5()
+int UT_Map_01_step6()
 {
   int i = 0;
   String * s = 0;
@@ -211,7 +240,7 @@ int UT_Map_01_step5()
 }
 
 #if 0
-int UT_Map_01_step6()
+int UT_Map_01_step7()
 {
   
   return 0;
