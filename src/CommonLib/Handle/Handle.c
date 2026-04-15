@@ -6,19 +6,19 @@
 
 struct Handle
 {
-  Object *object;
+  Object* object;
   int isOwner;
 };
 
-/**********************************************//** 
+/**********************************************//**
   @brief Create a new instance of the class Handle.
   @public
   @memberof Object
   @return New Handle instance or NULL if failed to allocate.
 **************************************************/
-PUBLIC Handle * Handle_new(void *object, int isOwner)
+PUBLIC Handle* Handle_new(void* object, int isOwner)
 {
-  Handle * result = 0;
+  Handle* result = 0;
 
   if (OBJECT_IS_INVALID(object)) return 0;
 
@@ -32,12 +32,12 @@ PUBLIC Handle * Handle_new(void *object, int isOwner)
   return result;
 }
 
-/**********************************************//** 
+/**********************************************//**
   @brief Delete an instance of the class Handle.
   @public
   @memberof Object
 **************************************************/
-PUBLIC void Handle_delete(Handle * this)
+PUBLIC void Handle_delete(Handle* this)
 {
   if (this != 0)
   {
@@ -49,8 +49,17 @@ PUBLIC void Handle_delete(Handle * this)
   }
 }
 
-PUBLIC Object * Handle_getObject(Handle * self)
+PUBLIC Handle* Handle_copy(Handle* self)
+{
+  Handle * copy = (Handle*)Memory_alloc(sizeof(Handle));
+
+  if (copy == 0) return 0;
+
+  copy->object = Object_copy(self->object);
+  copy->isOwner = self->isOwner;
+}
+
+PUBLIC Object* Handle_getObject(Handle* self)
 {
   return self->object;
 }
-
