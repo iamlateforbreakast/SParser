@@ -59,7 +59,7 @@ PRIVATE void MapNode_delete(MapNode * self)
   Handle_delete(self->string);
   Handle_delete(self->item);
 
-  Object_delete(&self->object);
+  Object_deallocate(&self->object);
 }
 
 PRIVATE int MapNode_getSize(MapNode * self)
