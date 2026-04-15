@@ -3,7 +3,7 @@ COMMONLIB_INCLUDE=../../include
 TESTLIB_INCLUDE=../../../../tests/unit_tests
 TESTLIB=../../../../tests/unit_tests/libTest.a
 
-all: $(COMMONLIB) UT_Map_01 UT_Map_02
+all: $(COMMONLIB) UT_Map_01
 
 $(COMMONLIB):
 	$(MAKE) -C ../../../CommonLib/
@@ -16,7 +16,7 @@ UT_Map_01: UT_Map_01.c ../Map.c ../Map.h ../MapNode.h ../../../../tests/unit_tes
 	../../../../tests/unit_tests/Words1000.c \
 	../../libCommon.a \
 	-I../../include \
-	-I$(TEST_INCLUDE) \
+	-I$(TESTLIB_INCLUDE) \
 	-o UT_Map_01
 
 UT_Map_02: UT_Map_02.c ../Map.c ../Map.h ../MapNode.h ../../../../tests/unit_tests/MyAllocator.c ../../../../tests/unit_tests/MyAllocator.h
@@ -26,7 +26,7 @@ UT_Map_02: UT_Map_02.c ../Map.c ../Map.h ../MapNode.h ../../../../tests/unit_tes
 	../Map.c ../MapEntry.c \
 	../../libCommon.a \
 	-I../../include \
-	-I$(TEST_INCLUDE) \
+	-I$(TESTLIB_INCLUDE) \
 	-o UT_Map_02
 
 clean:

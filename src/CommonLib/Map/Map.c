@@ -163,7 +163,7 @@ PUBLIC unsigned int Map_insert(Map * self, Handle * string, Handle * item)
   if (string == 0) return 0;
 
   /* Check if there is an entry under s */
-  if ((me = Map_findEntry(self, (String*)string->object))!=0)
+  if ((me = Map_findEntry(self, (String*)Handle_getObject(string)))!=0)
   {
     /* Entry already exists */
     return 0;
@@ -171,7 +171,7 @@ PUBLIC unsigned int Map_insert(Map * self, Handle * string, Handle * item)
   else
   {
     /* Create a new entry */
-    key = Map_hash(self,String_getBuffer((String*)string->object), String_getLength((String*)string->object));
+    key = Map_hash(self,String_getBuffer((String*)Handle_getObject(string)), String_getLength((String*)Handle_getObject(string)));
     if (self->htable[key] == 0)
     {
       entry = MapNode_new(string, item);

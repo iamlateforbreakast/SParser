@@ -11,11 +11,11 @@ pkginclude_HEADERS = \
     Debug/Debug.h \
     Error/Error.h \
     FileIo/FileIo.h \
+    Handle/Handle.h \
     List/List.h \
     Map/Map.h \
     Memory/Memory.h \
     Object/Class.h \
-    Object/Handle.h \
     Object/Object.h \
     ObjectMgr/ObjectMgr.h \
     ObjectStore/ObjectStore.h \
@@ -38,7 +38,7 @@ copy-headers:
 
 # Clean up the generated directory
 clean-local:
-	rm -rf $(top_builddir)/include
+	rm -rf $(srcdir)/include
     
 # 1. Define the library name
 noinst_LIBRARIES = libCommon.a
@@ -51,6 +51,7 @@ libCommon_a_SOURCES = \
     Debug/Debug.c \
     Error/Error.c \
     FileIo/FileIo.c \
+    Handle/Handle.c \
     List/List.c \
     Map/Map.c \
     Memory/Memory.c \
