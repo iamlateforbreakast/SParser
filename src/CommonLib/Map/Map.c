@@ -100,6 +100,8 @@ PUBLIC Map* Map_newFromAllocator(Allocator* allocator)
   self->capacity = INITIAL_HTABLE_SIZE;
   self->count = 0;
 
+  self->htable = (MapNode**)Memory_alloc(sizeof(MapNode*) * self->capacity);
+
   for (int i = 0; i < self->capacity; i++)
   {
     self->htable[i] = 0;
