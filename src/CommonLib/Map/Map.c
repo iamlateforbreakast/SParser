@@ -329,7 +329,7 @@ PUBLIC void Map_print(Map* self)
     }
     else
     {
-      Error_new(ERROR_INFO, "Item %d: void\n", j + 1);
+      Error_new(ERROR_INFO, "Item %d: void\n", i);
     }
   }
 }

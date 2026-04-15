@@ -190,18 +190,55 @@ int UT_Map_01_step3()
 int UT_Map_01_step4()
 {
   int isPassed = 1;
+  int i = 0;
+  String* s = 0;
+  String* c = 0;
+  List* l = 0;
   Map* testMap = Map_new();
 
-  String* s = String_new("Hello world");
-  String* item = 0;
 
-  PRINT(("Step 3: Test 1 - Insert %d object: ", UT_Map_01_nbTokens));
-  Map_find(testMap, s, (void**)&item);
+  const char* testNames[] =
+  {
+    "banana", "strawberry", "cherry", "apple", "orange", "pear", "blackberry"
+  };
 
-  TRACE(("Value : %s\n", String_getBuffer(item)));
-  UT_ASSERT((item == 0));
+  const char* testColor[] =
+  {
+    "yellow", "red", "red", "yellow", "orange", "green", "black"
+  };
 
-  String_delete(s);
+  for (i = 0; i < sizeof(testNames) / sizeof(const char*); i++)
+  {
+    Handle* hKey = Handle_new(String_newByRef(testNames[i]), 1);
+    Handle* hItem = Handle_new(String_newByRef(testColor[i]), 1);
+    isPassed = isPassed && Map_insert(testMap, hKey, hItem);
+    //String_delete(s);
+    //String_delete(c);
+  }
+
+  PRINT(("Step 4: Test 1 - Get all objects: ", sizeof(testNames) / sizeof(const char*)));
+
+  l = Map_getAll(testMap);
+
+  isPassed = isPassed && (List_getNbNodes(l) == (sizeof(testNames) / sizeof(const char*)));
+
+  UT_ASSERT((isPassed));
+
+  PRINT(("Step 4: Test 2 - Check all objects: ", sizeof(testNames) / sizeof(const char*)));
+  int objectSize = Map_getSize(testMap);
+
+  TRACE(("Map size: %d\n", objectSize));
+  isPassed = isPassed && (objectSize == 576);
+
+  UT_ASSERT((isPassed));
+
+  PRINT(("Step 4: Test 3 - Print all objects: "));
+
+  Map_print(testMap);
+
+  UT_ASSERT((1));
+
+  List_delete(l);
 
   Map_delete(testMap);
 
@@ -238,46 +275,7 @@ int UT_Map_01_step5()
   return isPassed;
 }
 
-int UT_Map_01_step6()
-{
-  int i = 0;
-  String* s = 0;
-  String* c = 0;
-  List* l = 0;
-  Map* testMap = Map_new();
 
-
-  const char* testNames[] =
-  {
-    "banana", "strawberry", "cherry", "apple", "orange", "pear", "blackberry"
-  };
-
-  const char* testColor[] =
-  {
-    "yellow", "red", "red", "yellow", "orange", "green", "black"
-  };
-
-  for (i = 0; i < sizeof(testNames) / sizeof(const char*); i++)
-  {
-    Handle* hKey = Handle_new(String_newByRef(testNames[i]), 1);
-    Handle* hItem = Handle_new(String_newByRef(testColor[i]), 1);
-    Map_insert(testMap, hKey, hItem);
-    //String_delete(s);
-    //String_delete(c);
-  }
-
-  PRINT(("Step 5: Test 1 - Insert %d object: ", UT_Map_01_nbTokens));
-
-  l = Map_getAll(testMap);
-
-  UT_ASSERT((1));
-
-  List_delete(l);
-
-  Map_delete(testMap);
-
-  return 0;
-}
 
 #if 0
 int UT_Map_01_step7()
@@ -302,7 +300,7 @@ int run_UT_Map_01()
   isPassed = UT_Map_01_step1() && isPassed;
   isPassed = UT_Map_01_step2() && isPassed;
   isPassed = UT_Map_01_step3() && isPassed;
-  //isPassed = UT_Map_01_step4() && isPassed;
+  isPassed = UT_Map_01_step4() && isPassed;
   //isPassed = UT_Map_01_step5() && isPassed;
   //isPassed = UT_Map_01_step6() && isPassed;
 
