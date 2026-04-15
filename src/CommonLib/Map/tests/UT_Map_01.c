@@ -58,7 +58,7 @@ int UT_Map_01_delete_keys(int isOwner)
     }
   }
   List_delete(UT_Map_01_keys);
-  Memory_free(UT_Map_01_testObjects, sizeof(UT_Map_01_testObjects));
+  Memory_free(UT_Map_01_testObjects, UT_Map_01_nbTokens * sizeof(TestObject*));
 
   return 1;
 }

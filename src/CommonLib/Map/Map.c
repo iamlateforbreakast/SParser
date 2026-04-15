@@ -244,7 +244,7 @@ PUBLIC unsigned int Map_insert(Map* self, Handle* string, Handle* item)
   else
   {
     /* Create a new entry */
-    key = Map_hash(self,String_getBuffer((String*)Handle_getObject(string)), String_getLength((String*)Handle_getObject(string)));
+    key = String_hash((String*)Handle_getObject(string)) % self->capacity;
     if (self->htable[key] == 0)
     {
       entry = MapNode_new(string, item);
