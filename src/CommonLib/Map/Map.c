@@ -153,8 +153,12 @@ PUBLIC Map* Map_copy(Map* self)
     /* Only copy slots that contain actual data */
     if (self->htable[i] != 0)
     {
-      Handle * hKey = MapNode_getString(self->htable[i]);
-      Handle * hItem = MapNode_getItem(self->htable[i]);
+      /* Deep copy content */
+      String * key = String_copy(MapNode_getString(self->htable[i]));
+      Object * item = Object_copy(MapNode_getItem(self->htable[i]));
+
+      Handle * hKey = Handle_new(key, 1);
+      Handle * hItem = Handle_new(item, 1);
 
       if (Map_insert(copy, hKey, hItem) == 0)
       {
@@ -187,16 +191,17 @@ PUBLIC int Map_comp(Map* self, Map* compared)
     if (self->htable[i] != 0)
     {
       String* key = MapNode_getString(self->htable[i]);
-      void* value = MapNode_getValue(self->htable[i]);
+      void* value = MapNode_getItem(self->htable[i]);
 
       /* Look up this key in the other map */
-      void* comparedValue = Map_get(compared, key);
+      void * p = 0;
+      int isExist = Map_find(compared, key, &p);
 
       /*
        * If key doesn't exist in 'compared' or values don't match,
        * maps are not equal.
        */
-      if (comparedValue == 0 || !Value_isEqual(value, comparedValue))
+      if (isExist == 1 || !Object_comp(value, p))
       {
         return 1;
       }
@@ -338,7 +343,7 @@ PUBLIC void Map_print(Map* self)
 **************************************************/
 PUBLIC unsigned int Map_getSize(Map* self)
 {
-  if (self == 0) return 0;
+  if (self == 0) return sizeof(Map);
 
   return sizeof(Map) + (self->count * sizeof(MapNode));
 }
