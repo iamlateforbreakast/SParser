@@ -478,7 +478,7 @@ PRIVATE int Map_resize(Map* self)
       {
         for (int j = 1; j < newCapacity; j++)
         {
-          if (newHtable[(hash + j) % newCapacity] != 0)
+          if (newHtable[(hash + j) % newCapacity] == 0)
           {
             hash = (hash + j) % newCapacity;
             break;
