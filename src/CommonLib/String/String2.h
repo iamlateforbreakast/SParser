@@ -27,4 +27,6 @@ PUBLIC List* String_splitToken(String* this, const char* separator);
 PUBLIC void String_stealBuffer(String* this, String* s);
 PUBLIC unsigned int String_getSize(String* this);
 PUBLIC void String_print(String* this);
+PUBLIC unsigned int String_hash(String* self);
+
 #endif /* _STRING2_H_ */
