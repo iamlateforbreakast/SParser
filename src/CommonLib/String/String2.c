@@ -147,7 +147,7 @@ PUBLIC String * String_copy(String * this)
       copy->buffer = Memory_alloc(copy->length+1);
       Memory_copy(copy->buffer, this->buffer, copy->length);
       copy->buffer[this->length] = 0;
-      copy->isOwned = 1;
+      copy->isOwned = this->isOwned;
     }
   }
   
@@ -186,9 +186,6 @@ PUBLIC int String_compare(String * this, String * compared)
   int result = 0;
 
   if (!this) return -1;
-
-  if (OBJECT_IS_INVALID(compared)) return -1;
-
   while ((i < (int)this->length)&&(i < (int)compared->length))
   {
      result = (int)this->buffer[i] - (int)compared->buffer[i];
@@ -212,12 +209,10 @@ PUBLIC String * String_subString(String * this, unsigned int idx, unsigned int l
 {
   String * result = 0;
   
-  if (this == 0 || idx >= this->length) return 0;
-
   if (this!=0)
   {
     result = String_new(0);
-    if (idx+length <= this->length)
+    if (idx+length < this->length)
     {
       result->length = length;
     }
@@ -312,9 +307,7 @@ PUBLIC unsigned int String_isContained(String * this, String * s2)
   char * p = 0;
   
   if ((this==0) || (s2==0)) return 0;
-
-  if (s2->length > this->length) return 0;
-
+  
   for (p=this->buffer; p<this->buffer + this->length - s2->length + 1;p++)
   {
     if (Memory_ncmp(p, s2->buffer, s2->length))
@@ -527,4 +520,29 @@ PUBLIC void String_print(String* this)
 {
   //PRINT((" ~ String Object: %d 0x%x\n", this->object.uniqId, this));
   PRINT((" ~ String Object: %d 0x%x %s\n", this->object.uniqId, this, String_getBuffer(this)));
+}
+
+/**********************************************//**
+  @brief TBD
+  @private
+  @memberof String
+**************************************************/
+PUBLIC unsigned int String_hash(String* self)
+{
+  unsigned int result = 0;
+  char* buffer = String_getBuffer(self);
+
+  for (unsigned int i = 0; i < String_getLength(self); i++)
+  {
+    result = result + buffer[i];
+    result += (result << 10);
+    result ^= (result >> 6);
+  }
+  /*
+          hash += key[i], hash += ( hash << 10 ), hash ^= ( hash >> 6 );
+    }
+    hash += ( hash << 3 ), hash ^= ( hash >> 11 ), hash += ( hash << 15 );
+    */
+
+  return result;
 }
