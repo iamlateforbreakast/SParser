@@ -23,7 +23,7 @@ struct Handle
   @memberof Object
   @return New Handle instance or NULL if failed to allocate.
 **************************************************/
-PUBLIC Handle * Handle_new(Object *object, int isOwner)
+PUBLIC Handle * Handle_new(void *object, int isOwner)
 {
   Handle * result = 0;
 

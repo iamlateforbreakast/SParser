@@ -32,6 +32,8 @@ struct Map
 {
   Object object;
   MapNode * htable[HTABLE_SIZE];
+  int capacity;
+  int count;
 };
 
 /**********************************************//**
@@ -67,6 +69,9 @@ PUBLIC Map* Map_new()
     self->htable[i] = 0;
   }
 
+  self->capacity = HTABLE_SIZE;
+  self->count = 0;
+
   return self;
 }
 
@@ -89,6 +94,9 @@ PUBLIC Map* Map_newFromAllocator(Allocator * allocator)
   {
     self->htable[i] = 0;
   }
+
+  self->capacity = HTABLE_SIZE;
+  self->count = 0;
 
   return self;
 }
@@ -163,7 +171,7 @@ PUBLIC unsigned int Map_insert(Map * self, Handle * string, Handle * item)
   else
   {
     /* Create a new entry */
-    key = Map_hash(self,String_getBuffer((String*)string->object), i);
+    key = Map_hash(self,String_getBuffer((String*)string->object), String_getLength((String*)string->object));
     if (self->htable[key] == 0)
     {
       entry = MapNode_new(string, item);
@@ -271,7 +279,7 @@ PRIVATE MapNode * Map_findEntry(Map* self, String * s)
     else
     {
       /* Collision */
-      for (i=0; i<HTABLE_SIZE; i++)
+      for (i=1; i<HTABLE_SIZE; i++)
       {
         n = self->htable[(key + i) % HTABLE_SIZE];
         if (n!=0)
@@ -282,10 +290,6 @@ PRIVATE MapNode * Map_findEntry(Map* self, String * s)
             result = n;
             break;
           }
-        }
-        else
-        {
-          break;
         }
       }
     } 
@@ -359,6 +363,7 @@ PUBLIC List * Map_getAll(Map * this)
     {
       n = this->htable[i];
       pItem =  MapNode_getItem(n);
+      List_insertHead(result, pItem, 0);
     }
   }
   

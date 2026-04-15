@@ -51,6 +51,7 @@ libCommon_a_SOURCES = \
     Debug/Debug.c \
     Error/Error.c \
     FileIo/FileIo.c \
+    List/List.c \
     Map/Map.c \
     Memory/Memory.c \
     Object/Object.c \
