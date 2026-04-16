@@ -11,6 +11,7 @@
 #include "Object.h"
 #include "String2.h"
 #include "Map.h"
+#include "Handle.h"
 #include "FileMgr.h"
 #include "Memory.h"
 #include "Error.h"
@@ -41,7 +42,8 @@ PRIVATE Class optionMgrClass =
   .f_copy = (Copy_Operator)&OptionMgr_copy,
   .f_comp = (Comp_Operator)0,
   .f_print = (Printer)0,
-  .f_size = (Sizer)&OptionMgr_getSize
+  .f_size = (Sizer)&OptionMgr_getSize,
+  .classSize = sizeof(OptionMgr)
 };
 
 /**********************************************//**
@@ -96,7 +98,9 @@ PRIVATE OptionMgr * OptionMgr_new()
       Object_deallocate(&this->object);
       return 0;
     }
-    if (Map_insert(this->options, optionName, optionValue, 1)==0)
+    Handle * hKey = Handle_new(optionName, HANDLE_OWNER);
+    Handle * hValue = Handle_new(optionValue, HANDLE_OWNER);
+    if (Map_insert(this->options, hKey, hValue)==0)
     {
       String_delete(optionName);
       String_delete(optionValue);
@@ -208,7 +212,9 @@ PUBLIC void OptionMgr_setOption(OptionMgr * this, const char * optionName, Strin
   String * option = String_new(optionName);
   /* find optionName in this->map */
   /* if not found insert value */
-  Map_insert(this->options, option, value, 1);
+  Handle * hKey = Handle_new(option, HANDLE_OWNER);
+  Handle * hValue = Handle_new(value, HANDLE_OWNER);
+  Map_insert(this->options, hKey, hValue);
   /* else modify value found in map */
 }
 
@@ -295,7 +301,9 @@ PUBLIC unsigned int OptionMgr_readFromCmdLine(OptionMgr * this, const int argc, 
     }
     if ((isFound) && (optionValue!=0))
     {
-      Map_insert(this->options, optionName, optionValue, 1);
+      Handle * hKey = Handle_new(optionName, HANDLE_OWNER);
+      Handle * hValue = Handle_new(optionValue, HANDLE_NOT_OWNER);
+      Map_insert(this->options, hKey, hValue);
     }
     else
     {
