@@ -1,5 +1,5 @@
 
-BUILT_SOURCES = copy-headers
+BUILT_SOURCES = $(srcdir)/include/.headers-copied
 
 AM_CPPFLAGS = -I$(srcdir)/include
 
@@ -31,12 +31,12 @@ pkginclude_HEADERS = \
 PUBLIC_HDRS = $(pkginclude_HEADERS)
 
 # This creates a 'built-include' directory and symlinks/copies files into it
-copy-headers:
+$(srcdir)/include/.headers-copied:
 	@mkdir -p $(srcdir)/include
 	@for hdr in $(PUBLIC_HDRS); do \
 	    cp -f $(srcdir)/$$hdr $(srcdir)/include/ ; \
 	done
-
+	@touch $@
 # Clean up the generated directory
 clean-local:
 	rm -rf $(srcdir)/include
@@ -63,8 +63,6 @@ libCommon_a_SOURCES = \
     SkipList/SkipList.c \
     String/String2.c \
     Times/Times.c
-
-.PHONY: copy-headers
 
 
 

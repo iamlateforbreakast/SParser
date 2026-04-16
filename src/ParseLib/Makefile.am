@@ -38,6 +38,7 @@ libParse_a_SOURCES = \
     Configuration/Configuration.c \
     Configuration/Product.c \
     FileReader/FileReader.c \
+    Grammar2/Grammar2.c \
     SParse/SParse.c \
     TransUnit/TransUnit.c \
     HTTPServer/HTTPServer.c \

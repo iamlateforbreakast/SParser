@@ -17,7 +17,12 @@ AM_CPPFLAGS = -I$(top_srcdir)/src/CommonLib/include \
 # 5. Link against your libraries
 # Use the relative paths to the .a files created in the subdirectories
 sparse_LDADD = \
-    AppliLib/libAppli.a \
-    ParseLib/libParse.a \
-    CommonLib/libCommon.a \
+    $(top_builddir)/src/ParseLib/libParse.a \
+    $(top_builddir)/src/AppliLib/libAppli.a \
+    $(top_builddir)/src/CommonLib/libCommon.a \
     -lsqlite3
+
+sparse_DEPENDENCIES = \
+    $(top_builddir)/src/ParseLib/libParse.a \
+    $(top_builddir)/src/AppliLib/libAppli.a \
+    $(top_builddir)/src/CommonLib/libCommon.a \
