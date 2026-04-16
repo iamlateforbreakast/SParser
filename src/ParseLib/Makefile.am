@@ -1,7 +1,14 @@
 
-BUILT_SOURCES = $(srcdir)/include/.headers-copied
+BUILT_SOURCES = $(srcdir)/include/.headers-copied \
+	Grammar2/Grammar2.lex.c \
+	Grammar2/Grammar2.parse.c \
+	Grammar2/Grammar2.parse.h
 
 AM_CPPFLAGS = -I$(srcdir)/include -I$(srcdir)/../AppliLib/include -I$(srcdir)/../CommonLib/include
+
+# Configure flex and bison
+AM_LFLAGS = -F
+AM_YFLAGS = -dy
 
 # list of headers
 pkginclude_HEADERS = \
@@ -29,7 +36,10 @@ $(srcdir)/include/.headers-copied:
 
 # Clean up the generated directory
 clean-local:
-	rm -rf $(srcdir)/include
+	rm -rf $(srcdir)/include \
+    	Grammar2/Grammar2.lex.c \
+	Grammar2/Grammar2.parse.c \
+	Grammar2/Grammar2.parse.h
     
 # 1. Define the library name
 lib_LIBRARIES = libParse.a
@@ -40,12 +50,12 @@ libParse_a_SOURCES = \
     Configuration/Product.c \
     FileReader/FileReader.c \
     Grammar2/Grammar2.c \
+    Grammar2/Grammar2.lex.c \
+    Grammar2/Grammar2.parse.c \
     SParse/SParse.c \
     TransUnit/TransUnit.c \
     HTTPServer/HTTPServer.c \
     Ast/Ast.c
-
-.PHONY: copy-headers
 
 
 
