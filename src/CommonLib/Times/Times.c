@@ -2,7 +2,6 @@
 #include "Types.h"
 #include "Portability.h"
 
-/*
 //  Windows
 #ifdef _WIN32
 #include <Windows.h>
@@ -48,8 +47,6 @@ long double get_cpu_time() {
 	return (long double)clock() / CLOCKS_PER_SEC;
 }
 #endif
-#endif
-*/
 
 extern uint64_t Time_getNow(void) {
 #ifdef _WIN32
