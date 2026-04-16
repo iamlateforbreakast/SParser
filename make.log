@@ -104,7 +104,7 @@ make[3]: Leaving directory '/home/thomas/Projects/SParser/src/ParseLib'
 make[2]: Leaving directory '/home/thomas/Projects/SParser/src/ParseLib'
 make[2]: Entering directory '/home/thomas/Projects/SParser/src'
 rm -f sparse
-gcc  -g -O2   -o sparse main.o ParseLib/libParse.a AppliLib/libAppli.a CommonLib/libCommon.a -lsqlite3 -lsqlite3 
+gcc  -g -O2   -o sparse main.o ../src/ParseLib/libParse.a ../src/AppliLib/libAppli.a ../src/CommonLib/libCommon.a -lsqlite3 -lsqlite3 
 make[2]: Leaving directory '/home/thomas/Projects/SParser/src'
 make[1]: Leaving directory '/home/thomas/Projects/SParser/src'
 make[1]: Entering directory '/home/thomas/Projects/SParser'
