@@ -1,0 +1,38 @@
+make  all-am
+make[1]: Entering directory '/home/thomas/Projects/SParser/src/ParseLib'
+/bin/sh ../../ylwrap Grammar2/Grammar2.l lex.yy.c Grammar2/Grammar2.c -- flex -F --prefix=Grammar2 --outfile=Grammar2/Grammar2.lex.c 
+depbase=`echo Grammar2/Grammar2.o | sed 's|[^/]*$|.deps/&|;s|\.o$||'`;\
+gcc -DPACKAGE_NAME=\"sparse\" -DPACKAGE_TARNAME=\"sparse\" -DPACKAGE_VERSION=\"0.1\" -DPACKAGE_STRING=\"sparse\ 0.1\" -DPACKAGE_BUGREPORT=\"toto@notreal.com\" -DPACKAGE_URL=\"\" -DPACKAGE=\"sparse\" -DVERSION=\"0.1\" -DX_DISPLAY_MISSING=1 -DYYTEXT_POINTER=1 -DHAVE_LIBSQLITE3=1 -I.  -I./include -I./../AppliLib/include -I./../CommonLib/include   -g -O2 -MT Grammar2/Grammar2.o -MD -MP -MF $depbase.Tpo -c -o Grammar2/Grammar2.o Grammar2/Grammar2.c &&\
+mv -f $depbase.Tpo $depbase.Po
+/usr/bin/mkdir -p SParse
+: >>SParse/.dirstamp
+/usr/bin/mkdir -p SParse/.deps
+: >>SParse/.deps/.dirstamp
+depbase=`echo SParse/SParse.o | sed 's|[^/]*$|.deps/&|;s|\.o$||'`;\
+gcc -DPACKAGE_NAME=\"sparse\" -DPACKAGE_TARNAME=\"sparse\" -DPACKAGE_VERSION=\"0.1\" -DPACKAGE_STRING=\"sparse\ 0.1\" -DPACKAGE_BUGREPORT=\"toto@notreal.com\" -DPACKAGE_URL=\"\" -DPACKAGE=\"sparse\" -DVERSION=\"0.1\" -DX_DISPLAY_MISSING=1 -DYYTEXT_POINTER=1 -DHAVE_LIBSQLITE3=1 -I.  -I./include -I./../AppliLib/include -I./../CommonLib/include   -g -O2 -MT SParse/SParse.o -MD -MP -MF $depbase.Tpo -c -o SParse/SParse.o SParse/SParse.c &&\
+mv -f $depbase.Tpo $depbase.Po
+/usr/bin/mkdir -p TransUnit
+: >>TransUnit/.dirstamp
+/usr/bin/mkdir -p TransUnit/.deps
+: >>TransUnit/.deps/.dirstamp
+depbase=`echo TransUnit/TransUnit.o | sed 's|[^/]*$|.deps/&|;s|\.o$||'`;\
+gcc -DPACKAGE_NAME=\"sparse\" -DPACKAGE_TARNAME=\"sparse\" -DPACKAGE_VERSION=\"0.1\" -DPACKAGE_STRING=\"sparse\ 0.1\" -DPACKAGE_BUGREPORT=\"toto@notreal.com\" -DPACKAGE_URL=\"\" -DPACKAGE=\"sparse\" -DVERSION=\"0.1\" -DX_DISPLAY_MISSING=1 -DYYTEXT_POINTER=1 -DHAVE_LIBSQLITE3=1 -I.  -I./include -I./../AppliLib/include -I./../CommonLib/include   -g -O2 -MT TransUnit/TransUnit.o -MD -MP -MF $depbase.Tpo -c -o TransUnit/TransUnit.o TransUnit/TransUnit.c &&\
+mv -f $depbase.Tpo $depbase.Po
+/usr/bin/mkdir -p HTTPServer
+: >>HTTPServer/.dirstamp
+/usr/bin/mkdir -p HTTPServer/.deps
+: >>HTTPServer/.deps/.dirstamp
+depbase=`echo HTTPServer/HTTPServer.o | sed 's|[^/]*$|.deps/&|;s|\.o$||'`;\
+gcc -DPACKAGE_NAME=\"sparse\" -DPACKAGE_TARNAME=\"sparse\" -DPACKAGE_VERSION=\"0.1\" -DPACKAGE_STRING=\"sparse\ 0.1\" -DPACKAGE_BUGREPORT=\"toto@notreal.com\" -DPACKAGE_URL=\"\" -DPACKAGE=\"sparse\" -DVERSION=\"0.1\" -DX_DISPLAY_MISSING=1 -DYYTEXT_POINTER=1 -DHAVE_LIBSQLITE3=1 -I.  -I./include -I./../AppliLib/include -I./../CommonLib/include   -g -O2 -MT HTTPServer/HTTPServer.o -MD -MP -MF $depbase.Tpo -c -o HTTPServer/HTTPServer.o HTTPServer/HTTPServer.c &&\
+mv -f $depbase.Tpo $depbase.Po
+/usr/bin/mkdir -p Ast
+: >>Ast/.dirstamp
+/usr/bin/mkdir -p Ast/.deps
+: >>Ast/.deps/.dirstamp
+depbase=`echo Ast/Ast.o | sed 's|[^/]*$|.deps/&|;s|\.o$||'`;\
+gcc -DPACKAGE_NAME=\"sparse\" -DPACKAGE_TARNAME=\"sparse\" -DPACKAGE_VERSION=\"0.1\" -DPACKAGE_STRING=\"sparse\ 0.1\" -DPACKAGE_BUGREPORT=\"toto@notreal.com\" -DPACKAGE_URL=\"\" -DPACKAGE=\"sparse\" -DVERSION=\"0.1\" -DX_DISPLAY_MISSING=1 -DYYTEXT_POINTER=1 -DHAVE_LIBSQLITE3=1 -I.  -I./include -I./../AppliLib/include -I./../CommonLib/include   -g -O2 -MT Ast/Ast.o -MD -MP -MF $depbase.Tpo -c -o Ast/Ast.o Ast/Ast.c &&\
+mv -f $depbase.Tpo $depbase.Po
+rm -f libParse.a
+ar cr libParse.a Configuration/Configuration.o Configuration/Product.o FileReader/FileReader.o Grammar2/Grammar2.o Grammar2/Grammar2.o Grammar2/Grammar2.o SParse/SParse.o TransUnit/TransUnit.o HTTPServer/HTTPServer.o Ast/Ast.o 
+ranlib libParse.a
+make[1]: Leaving directory '/home/thomas/Projects/SParser/src/ParseLib'
