@@ -1,14 +1,13 @@
 
 BUILT_SOURCES = $(srcdir)/include/.headers-copied \
-	Grammar2/Grammar2.lex.c \
-	Grammar2/Grammar2.parse.c \
-	Grammar2/Grammar2.parse.h
+	Grammar2/Grammar2.l \
+	Grammar2/Grammar2.y
 
 AM_CPPFLAGS = -I$(srcdir)/include -I$(srcdir)/../AppliLib/include -I$(srcdir)/../CommonLib/include
 
 # Configure flex and bison
-AM_LFLAGS = -F
-AM_YFLAGS = -dy
+AM_LFLAGS = -F --prefix=Grammar2 --outfile=Grammar2/Grammar2.lex.c
+AM_YFLAGS = -dy --output=Grammar2/Grammar2.parse.c
 
 # list of headers
 pkginclude_HEADERS = \
@@ -49,9 +48,9 @@ libParse_a_SOURCES = \
     Configuration/Configuration.c \
     Configuration/Product.c \
     FileReader/FileReader.c \
+    Grammar2/Grammar2.l \
+    Grammar2/Grammar2.y \
     Grammar2/Grammar2.c \
-    Grammar2/Grammar2.lex.c \
-    Grammar2/Grammar2.parse.c \
     SParse/SParse.c \
     TransUnit/TransUnit.c \
     HTTPServer/HTTPServer.c \
