@@ -7,8 +7,8 @@ fi; \
 dot_seen=no; \
 target=`echo all-recursive | sed s/-recursive//`; \
 case "all-recursive" in \
-  distclean-* | maintainer-clean-*) list='src/CommonLib src/AppliLib src/ParseLib src' ;; \
-  *) list='src/CommonLib src/AppliLib src/ParseLib src' ;; \
+  distclean-* | maintainer-clean-*) list='src' ;; \
+  *) list='src' ;; \
 esac; \
 for subdir in $list; do \
   echo "Making $target in $subdir"; \
@@ -24,31 +24,6 @@ done; \
 if test "$dot_seen" = "no"; then \
   make  "$target-am" || exit 1; \
 fi; test -z "$fail"
-Making all in src/CommonLib
-make[1]: Entering directory '/home/thomas/Projects/SParser/src/CommonLib'
-make  all-am
-make[2]: Entering directory '/home/thomas/Projects/SParser/src/CommonLib'
-make[2]: Nothing to be done for 'all-am'.
-make[2]: Leaving directory '/home/thomas/Projects/SParser/src/CommonLib'
-make[1]: Leaving directory '/home/thomas/Projects/SParser/src/CommonLib'
-Making all in src/AppliLib
-make[1]: Entering directory '/home/thomas/Projects/SParser/src/AppliLib'
-make  all-am
-make[2]: Entering directory '/home/thomas/Projects/SParser/src/AppliLib'
-make[2]: Nothing to be done for 'all-am'.
-make[2]: Leaving directory '/home/thomas/Projects/SParser/src/AppliLib'
-make[1]: Leaving directory '/home/thomas/Projects/SParser/src/AppliLib'
-Making all in src/ParseLib
-make[1]: Entering directory '/home/thomas/Projects/SParser/src/ParseLib'
-mkdir -p ./include
-for hdr in Configuration/Configuration.h Configuration/Product.h FileReader/FileReader.h Grammar/Grammar.h Grammar2/Grammar2.h GrammarC99/GrammarC99.h SParse/SParse.h TransUnit/TransUnit.h HTTPServer/HTTPServer.h Ast/Ast.h; do \
-    cp -f ./$hdr ./include/ ; \
-done
-make  all-am
-make[2]: Entering directory '/home/thomas/Projects/SParser/src/ParseLib'
-make[2]: Nothing to be done for 'all-am'.
-make[2]: Leaving directory '/home/thomas/Projects/SParser/src/ParseLib'
-make[1]: Leaving directory '/home/thomas/Projects/SParser/src/ParseLib'
 Making all in src
 make[1]: Entering directory '/home/thomas/Projects/SParser/src'
 fail=; \
@@ -93,20 +68,8 @@ make[3]: Leaving directory '/home/thomas/Projects/SParser/src/AppliLib'
 make[2]: Leaving directory '/home/thomas/Projects/SParser/src/AppliLib'
 Making all in ParseLib
 make[2]: Entering directory '/home/thomas/Projects/SParser/src/ParseLib'
-mkdir -p ./include
-for hdr in Configuration/Configuration.h Configuration/Product.h FileReader/FileReader.h Grammar/Grammar.h Grammar2/Grammar2.h GrammarC99/GrammarC99.h SParse/SParse.h TransUnit/TransUnit.h HTTPServer/HTTPServer.h Ast/Ast.h; do \
-    cp -f ./$hdr ./include/ ; \
-done
-make  all-am
-make[3]: Entering directory '/home/thomas/Projects/SParser/src/ParseLib'
-make[3]: Nothing to be done for 'all-am'.
-make[3]: Leaving directory '/home/thomas/Projects/SParser/src/ParseLib'
+make[2]: *** No rule to make target 'Grammar2/Grammar2.lex.c', needed by 'all'.  Stop.
 make[2]: Leaving directory '/home/thomas/Projects/SParser/src/ParseLib'
-make[2]: Entering directory '/home/thomas/Projects/SParser/src'
-rm -f sparse
-gcc  -g -O2   -o sparse main.o ../src/ParseLib/libParse.a ../src/AppliLib/libAppli.a ../src/CommonLib/libCommon.a -lsqlite3 -lsqlite3 
-make[2]: Leaving directory '/home/thomas/Projects/SParser/src'
+make[1]: *** [Makefile:441: all-recursive] Error 1
 make[1]: Leaving directory '/home/thomas/Projects/SParser/src'
-make[1]: Entering directory '/home/thomas/Projects/SParser'
-make[1]: Nothing to be done for 'all-am'.
-make[1]: Leaving directory '/home/thomas/Projects/SParser'
+make: *** [Makefile:352: all-recursive] Error 1
