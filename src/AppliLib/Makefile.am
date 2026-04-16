@@ -13,6 +13,7 @@ pkginclude_HEADERS = \
     TaskMgr/TaskMgr.h \
     TaskMgr/Task.h \
     TimeMgr/TimeMgr.h \
+    TimeMgr/Timer.h \
     XmlReader/XmlReader.h
 
 # List the headers you want to "publish" to the local include folder
@@ -43,5 +44,6 @@ libAppli_a_SOURCES = \
     TaskMgr/TaskMgr.c \
     TaskMgr/Task.c \
     TimeMgr/TimeMgr.c \
+    TimeMgr/Timer.c \
     XmlReader/XmlReader.c
 
