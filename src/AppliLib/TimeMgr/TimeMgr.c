@@ -140,7 +140,9 @@ PUBLIC void TimeMgr_latchTime(TimeMgr * this, String * s)
   else
   {
     timer = Timer_new(s);
-    Map_insert(this->timers, s, (void**)timer, 1);
+    Handle * hKey = Handle_new(s, HANDLE_OWNER);
+    Handle * hTimer = Handle_new(timer, HANDLE_OWNER);
+    Map_insert(this->timers, hKey, hTimer);
   }
 }
 
