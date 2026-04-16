@@ -22,6 +22,7 @@ pkginclude_HEADERS = \
     Pool/Pool.h \
     SkipList/SkipList.h \
     String/String2.h \
+    Times/Times.h \
     Types/Portability.h \
     Types/UserTypes.h \
     Types/Types.h

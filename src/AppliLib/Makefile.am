@@ -9,6 +9,7 @@ pkginclude_HEADERS = \
     FileMgr/FileDesc.h \
     OptionMgr/OptionMgr.h \
     SdbMgr/SdbMgr.h \
+    SdbMgr/SdbRequest.h \
     TaskMgr/TaskMgr.h \
     TimeMgr/TimeMgr.h \
     XmlReader/XmlReader.h
@@ -36,6 +37,7 @@ libAppli_a_SOURCES = \
     FileMgr/FileDesc.c \
     OptionMgr/OptionMgr.c \
     SdbMgr/SdbMgr.c \
+    SdbMgr/SdbRequest.c \
     TaskMgr/TaskMgr.c \
     TimeMgr/TimeMgr.c \
     XmlReader/XmlReader.c
