@@ -42,7 +42,7 @@ clean-local:
 	rm -rf $(srcdir)/include
     
 # 1. Define the library name
-noinst_LIBRARIES = libCommon.a
+lib_LIBRARIES = libCommon.a
 
 # 2. List every .c and .h file required to build it
 libCommon_a_SOURCES = \

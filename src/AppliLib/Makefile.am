@@ -31,7 +31,7 @@ clean-local:
 	rm -rf $(srcdir)/include
     
 # 1. Define the library name
-noinst_LIBRARIES = libAppli.a
+lib_LIBRARIES = libAppli.a
 
 # 2. List every .c and .h file required to build it
 libAppli_a_SOURCES = \

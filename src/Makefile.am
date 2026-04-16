@@ -19,10 +19,4 @@ AM_CPPFLAGS = -I$(top_srcdir)/src/CommonLib/include \
 sparse_LDADD = \
     $(top_builddir)/src/ParseLib/libParse.a \
     $(top_builddir)/src/AppliLib/libAppli.a \
-    $(top_builddir)/src/CommonLib/libCommon.a \
-    -lsqlite3
-
-sparse_DEPENDENCIES = \
-    $(top_builddir)/src/ParseLib/libParse.a \
-    $(top_builddir)/src/AppliLib/libAppli.a \
-    $(top_builddir)/src/CommonLib/libCommon.a \
+    $(top_builddir)/src/CommonLib/libCommon.a
