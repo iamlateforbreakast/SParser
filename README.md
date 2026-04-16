@@ -10,11 +10,11 @@ cd SParser-main
 
 cd SParser
 
-autoconf
+autoreconf -vfi
 
 ./configure
 
-autoreconf -- install
+make
 
 Debian:
 -------
