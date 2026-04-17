@@ -67,7 +67,6 @@ int UT_Map_01_step1()
 {
   int isPassed = 1;
   Map* testMap = 0;
-  String* key = 0;
 
   PRINT(("Step 1: Test 1 - Create an instance of class Map: "));
 
@@ -76,14 +75,6 @@ int UT_Map_01_step1()
   isPassed = isPassed && OBJECT_IS_VALID(testMap);
 
   UT_ASSERT((isPassed));
-
-  //PRINT(("Step 1: Test 2 - Insert an object: "));
-  //key = (String*)List_getNext(UT_Map_01_keys);
-  //Handle * hKey = Handle_new(key, 0);
-  //Handle * hItem = Handle_new(UT_Map_01_testObjects[0], 0);
-  //Map_insert(testMap, hKey, hItem);
-
-  //UT_ASSERT((1));
 
   PRINT(("Step 1: Test 2 - Delete the Map: "));
   Map_delete(testMap);
