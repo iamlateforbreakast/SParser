@@ -57,6 +57,8 @@ PUBLIC Handle* Handle_copy(Handle* self)
 
   copy->object = Object_copy(self->object);
   copy->isOwner = self->isOwner;
+
+  return copy;
 }
 
 PUBLIC Object* Handle_getObject(Handle* self)
