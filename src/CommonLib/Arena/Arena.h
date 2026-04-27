@@ -1,12 +1,13 @@
-/* Arean.h */
+/* Arena.h */
 #ifndef _ARENA_H_
 #define _ARENA_H_
 #include "Allocator.h"
 #include "Types.h"
 
-typedef struct Arena Arena；
+typedef struct Arena Arena;
 
-PUBLIC Arena * Arena_getRef();
+PUBLIC Arena * Arena_new();
+PUBLIC Arena * Arena_newFromAllocator(Allocator * allocator);
 PUBLIC void Arena_delete(Allocator * this);
 PUBLIC void * Arena_allocate(Allocator * this, unsigned int size);
 PUBLIC void Arena_deallocate(Allocator * this, void * ptr);

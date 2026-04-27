@@ -7,7 +7,9 @@ AM_CPPFLAGS = -I$(srcdir)/include
 pkginclude_HEADERS = \
     Allocator/Allocator.h \
     Allocator/Malloc.h \
+    Arena/Arena.h \
     BTree/BTree.h \
+    BTree/Node.h \
     Debug/Debug.h \
     Error/Error.h \
     FileIo/FileIo.h \
@@ -48,7 +50,9 @@ lib_LIBRARIES = libCommon.a
 libCommon_a_SOURCES = \
     Allocator/Malloc.c \
     Array/Array.c \
+    Arena/Arena.c \
     BTree/BTree.c \
+    BTree/Node.c \
     Debug/Debug.c \
     Error/Error.c \
     FileIo/FileIo.c \
