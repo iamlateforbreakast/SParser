@@ -51,6 +51,7 @@ PUBLIC Arena * Arena_new()
   mem_arena->allocator.delete = Arena_delete;
   mem_arena->allocator.nbAllocatedObjects = 0;
 
+  returm mem_arena;
 }
 
 /*
