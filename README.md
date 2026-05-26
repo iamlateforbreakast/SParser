@@ -24,6 +24,6 @@ apt install flex bison
 
 Fedora 41::
 ----------
-sudo dnf install automake doxygen flex bison sqlite sqlite-dev
+sudo dnf install automake doxygen flex bison sqlite sqlite-devel
 
 sudo dnf install git make gcc
