@@ -3,6 +3,8 @@
 #include "Arena.h"
 #include "Types.h"
 #include "Debug.h"
+#include "Object.h"
+#include "Memory.h"
 
 /* Arena configuration constants */
 #define ARENA_SIZE 65536  /* 64KB default arena size */
@@ -32,12 +34,12 @@ struct Arena
  */
 PUBLIC Arena * Arena_new()
 {
-  Arena * mem_arena = (Arena*)malloc(sizeof(Arena));
+  Arena * mem_arena = (Arena*)Memory_alloc(sizeof(Arena));
 
   if (mem_arena == 0) return 0;
 
   /* Initialize the arena on first access */
-  mem_arena->buffer = (char*)malloc(ARENA_SIZE);
+  mem_arena->buffer = (char*)Memory_alloc(ARENA_SIZE);
   mem_arena->current = mem_arena->buffer;
   mem_arena->totalSize = ARENA_SIZE;
   mem_arena->usedSize = 0;
@@ -51,7 +53,7 @@ PUBLIC Arena * Arena_new()
   mem_arena->allocator.delete = Arena_delete;
   mem_arena->allocator.nbAllocatedObjects = 0;
 
-  returm mem_arena;
+  return mem_arena;
 }
 
 /*
@@ -70,7 +72,7 @@ PUBLIC void Arena_delete(Allocator * this)
 
   if (arena->buffer != 0)
   {
-    free(arena->buffer);
+    Memory_free(arena->buffer, ARENA_SIZE);
     arena->buffer = 0;
     arena->current = 0;
     arena->totalSize = 0;
