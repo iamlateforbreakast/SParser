@@ -258,7 +258,7 @@ PUBLIC unsigned int Map_insert(Map* self, Handle* string, Handle* item)
     {
       /* Collision */
       entry = MapNode_new(string, item);
-      for (i=0; i<self->capacity; i++)
+      for (i=1; i<self->capacity; i++)
       {
         if (self->htable[(key + i) % self->capacity] == 0)
         {
