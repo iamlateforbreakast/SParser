@@ -28,11 +28,7 @@
                   || ((C>='0') && (C<='9')) || (C=='_') || (C=='/') || (C=='\\') || (C=='-') || (C=='.'))
 #define IS_FORBIDDEN(C) (C=='\t') 
 
-#ifdef _WIN32
-#define IS_EOL(P) (Memory_ncmp(P, "\r\n", 2))
-#else
-#define IS_EOL(P) (Memory_ncmp(P, "\n", 1))
-#endif
+#define IS_EOL_CHAR(C) ((C) == '\n' || (C) == '\r')
 
 /**********************************************//**
   @class Configuration
@@ -356,13 +352,14 @@ PRIVATE List* Configuration_readList(Configuration* this, String* s, unsigned in
 **************************************************/
 PRIVATE void Configuration_readEndOfLine(Configuration* this, String* s, unsigned int* idx)
 {
-  char* p = String_getBuffer(s);
+    char* p = String_getBuffer(s);
+    unsigned int length = String_getLength(s);
 
-  //while (!IS_EOL(p + *idx) && (*idx < String_getLength(s))) (*idx)++;
-  while ((*(p + *idx) == '\n') || (*(p+*idx) == '\r'))
-  {
-    (*idx)++;
-  }
+    // Dynamic runtime loop handling both \n and \r\n without platform macros
+    while ((*idx < length) && IS_EOL_CHAR(*(p + *idx)))
+    {
+        (*idx)++;
+    }
 }
 
 /**********************************************//**
