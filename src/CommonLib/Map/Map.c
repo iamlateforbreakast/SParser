@@ -202,9 +202,9 @@ PUBLIC int Map_comp(Map* self, Map* compared)
        * If key doesn't exist in 'compared' or values don't match,
        * maps are not equal.
        */
-      if (isExist == 1 || !Object_comp(value, p))
+      if (isExist == 0 || Object_comp(value, p))
       {
-        return 1;
+        return 1; /* Not equal */
       }
     }
   }
