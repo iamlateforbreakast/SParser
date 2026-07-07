@@ -4,17 +4,14 @@ A C to SQLite parser
 To compile:
 -----------
 
+```
 git clone https://github.com/iamlateforbreakast/SParser.git
 
-cd SParser-main
-
-cd SParser
-
+cd SParser-main/SParser
 autoreconf -vfi
-
 ./configure
-
 make
+```
 
 Debian:
 -------
