@@ -15,12 +15,17 @@ make
 
 Debian:
 -------
+```
 apt install autoconf autotools-dev doxygen
 apt install sqlite3 libsqlite3-dev
 apt install flex bison
+```
 
-Fedora 41::
+Fedora 41:
 ----------
-sudo dnf install automake doxygen flex bison sqlite sqlite-devel
+```
+sudo dnf install automake doxygen flex bison
+ sqlite sqlite-devel
+```
 
 sudo dnf install git make gcc
