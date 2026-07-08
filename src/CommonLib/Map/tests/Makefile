@@ -3,13 +3,16 @@ COMMONLIB_INCLUDE=../../include
 TESTLIB_INCLUDE=../../../../tests/unit_tests
 TESTLIB=../../../../tests/unit_tests/libTest.a
 
-all: $(COMMONLIB) UT_Map_01
+# Coverage flags
+COVERAGE_FLAGS = -fprofile-arcs -ftest-coverage
+
+all: $(COMMONLIB) UT_Map_01 UT_Map_02
 
 $(COMMONLIB):
 	$(MAKE) -C ../../../CommonLib/
 	
 UT_Map_01: UT_Map_01.c ../Map.c ../Map.h ../MapNode.h ../../../../tests/unit_tests/Words1000.h
-	gcc -g -DMAIN UT_Map_01.c \
+	gcc -g $(COVERAGE_FLAGS) -DMAIN UT_Map_01.c \
 	../Map.c \
 	../MapEntry.c \
 	../../../../tests/unit_tests/TestObject.c \
@@ -20,7 +23,7 @@ UT_Map_01: UT_Map_01.c ../Map.c ../Map.h ../MapNode.h ../../../../tests/unit_tes
 	-o UT_Map_01
 
 UT_Map_02: UT_Map_02.c ../Map.c ../Map.h ../MapNode.h ../../../../tests/unit_tests/MyAllocator.c ../../../../tests/unit_tests/MyAllocator.h
-	gcc -g -DMAIN \
+	gcc -g $(COVERAGE_FLAGS) -DMAIN \
 	UT_Map_02.c \
 	../../../../tests/unit_tests/MyAllocator.c \
 	../Map.c ../MapEntry.c \
@@ -29,10 +32,19 @@ UT_Map_02: UT_Map_02.c ../Map.c ../Map.h ../MapNode.h ../../../../tests/unit_tes
 	-I$(TESTLIB_INCLUDE) \
 	-o UT_Map_02
 
+run-tests: UT_Map_01 UT_Map_02
+	./UT_Map_01
+	./UT_Map_02
+
+coverage: run-tests
+	gcov ../Map.c
+	gcov ../MapEntry.c
+	@echo "Coverage reports generated: *.gcov files"
+
 clean:
-	rm -rf UT_Map_01 UT_Map_02 *.o ../*.o
+	rm -rf UT_Map_01 UT_Map_02 *.o ../*.o *.gcda *.gcno *.gcov
 
 cleanall: clean
 	$(MAKE) -C ../../../CommonLib/ clean
 
-.PHONY: all clean cleanall $(COMMONLIB)
+.PHONY: all clean cleanall coverage run-tests $(COMMONLIB)
