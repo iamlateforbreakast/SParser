@@ -35,7 +35,15 @@ int step1()
 
   UT_ASSERT((isPassed));
 
-  PRINT(("Step 1: Test 4 - Delete the reference to the Malloc instance: "));
+  PRINT(("Step 1: Test 4 - Reallocate the memory area using the Malloc instance: "));
+  set_data_malloc_result(0x123456);
+  char * new_buff = Malloc_reallocate((Allocator*)testMalloc, buff);
+  
+  isPassed = isPassed && (new_buff!=0);
+
+  UT_ASSERT((isPassed));
+
+  PRINT(("Step 1: Test 5 - Delete the reference to the Malloc instance: "));
 
   Malloc_delete((Allocator*)testMalloc);
 
