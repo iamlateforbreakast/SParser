@@ -2,19 +2,26 @@
 #include <stdio.h>
 
 // CommonLib tests
+extern int run_UT_Arena_01();
+extern int run_UT_Array_01();
 extern int run_UT_BTree_01();
+extern int run_UT_CharBuffer_01();
 extern int run_UT_Debug_01();
 extern int run_UT_Error_01();
 extern int run_UT_FileIo_01();
+extern int run_UT_Handle_01();
 extern int run_UT_List_01();
 extern int run_UT_List_02();
 extern int run_UT_Map_01();
 extern int run_UT_SkipList_01();
 extern int run_UT_SkipList_02();
 extern int run_UT_String_01();
+extern int run_UT_Times_01();
 
 // AppliLib tests
 extern int run_UT_FileMgr_01();
+extern int run_UT_JSONReader_01();
+extern int run_UT_JSONWriter_01();
 extern int run_UT_OptionMgr_01();
 extern int run_UT_SdbMgr_01();
 extern int run_UT_TaskMgr_01();
@@ -49,7 +56,8 @@ TestDefinition parseTests[] =
 TestDefinition appliTests[] = 
 {
   { "UT_FileMgr_01",       &run_UT_FileMgr_01,        DISABLED },
-  { "UT_OptionMgr_01",     &run_UT_OptionMgr_01,      ENABLED },
+  { "UT_JSONReader_01",    &run_UT_JSONReader_01,     DISABLED },
+  { "UT_OptionMgr_01",     &run_UT_OptionMgr_01,      ENABLED  },
   { "UT_SdbMgr_01",        &run_UT_SdbMgr_01,         DISABLED },
   { "UT_TaskMgr_01",       &run_UT_TaskMgr_01,        DISABLED },
   { "UT_TimeMgr_01",       &run_UT_TimeMgr_01,        DISABLED },
@@ -58,16 +66,21 @@ TestDefinition appliTests[] =
 
 TestDefinition commonTests[] =
 {
+  { "UT_Arena_01",         &run_UT_Arena_01,          DISABLED },
+  { "UT_Array_01",         &run_UT_Array_01,          DISABLED },
   { "UT_BTree_01",         &run_UT_BTree_01,          DISABLED },
+  { "UT_CharBuffer_01",    &run_UT_CharBuffer_01,     DISABLED },
   { "UT_Debug_01",         &run_UT_Debug_01,          DISABLED },
   { "UT_Error_01",         &run_UT_Error_01,          DISABLED },
   { "UT_FileIo_01",        &run_UT_FileIo_01,         DISABLED },
+  { "UT_Handle_01",        &run_UT_Handle_01,         DISABLED },
   { "UT_List_01",          &run_UT_List_01,           DISABLED },
   { "UT_List_02",          &run_UT_List_02,           DISABLED },
   { "UT_Map_01",           &run_UT_Map_01,            DISABLED },
   { "UT_SkipList_01",      &run_UT_SkipList_01,       DISABLED },
   { "UT_SkipList_02",      &run_UT_SkipList_02,       DISABLED },
-  { "UT_String_01",        &run_UT_String_01,         DISABLED }
+  { "UT_String_01",        &run_UT_String_01,         DISABLED },
+  { "UT_Times_01",         &run_UT_Times_01,          DISABLED }
 };
 
 int runTests(TestDefinition* tests, int nbTests)

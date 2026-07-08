@@ -7,6 +7,8 @@ AM_CPPFLAGS = -I$(srcdir)/include -I$(srcdir)/../CommonLib/include
 pkginclude_HEADERS = \
     FileMgr/FileMgr.h \
     FileMgr/FileDesc.h \
+    JSONReader/JSONReader.h \
+    JSONWriter/JSONWriter.h \
     OptionMgr/OptionMgr.h \
     SdbMgr/SdbMgr.h \
     SdbMgr/SdbRequest.h \
@@ -14,7 +16,8 @@ pkginclude_HEADERS = \
     TaskMgr/Task.h \
     TimeMgr/TimeMgr.h \
     TimeMgr/Timer.h \
-    XmlReader/XmlReader.h
+    XmlReader/XmlReader.h \
+    XmlWriter/XmlWriter.h
 
 # List the headers you want to "publish" to the local include folder
 PUBLIC_HDRS = $(pkginclude_HEADERS)
@@ -38,6 +41,8 @@ lib_LIBRARIES = libAppli.a
 libAppli_a_SOURCES = \
     FileMgr/FileMgr.c \
     FileMgr/FileDesc.c \
+    JSONReader/JSONReader.c \
+    JSONWriter/JSONWriter.c \
     OptionMgr/OptionMgr.c \
     SdbMgr/SdbMgr.c \
     SdbMgr/SdbRequest.c \
