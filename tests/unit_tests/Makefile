@@ -26,7 +26,9 @@ TESTS_APPLI = \
         ../../src/AppliLib/SdbMgr/tests/UT_SdbMgr_01.c \
         ../../src/AppliLib/TaskMgr/tests/UT_TaskMgr_01.c \
         ../../src/AppliLib/TimeMgr/tests/UT_TimeMgr_01.c \
-        ../../src/AppliLib/XmlReader/tests/UT_XmlReader_01.c
+        ../../src/AppliLib/XmlReader/tests/UT_XmlReader_01.c \
+        ../../src/AppliLib/JSONReader/tests/UT_JSONReader_01.c \
+        ../../src/AppliLib/JSONWriter/tests/UT_JSONWriter_01.c
 
 TESTS_PARSE = \
         ../../src/ParseLib/Configuration/tests/UT_Configuration_01.c \
