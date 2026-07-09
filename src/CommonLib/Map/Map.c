@@ -287,6 +287,8 @@ PUBLIC unsigned int Map_insert(Map* self, Handle* string, Handle* item)
 PUBLIC unsigned int Map_find(Map* self, String* s, void** p)
 {
   if (OBJECT_IS_INVALID(self)) return 0;
+  if (OBJECT_IS_INVALID(s)) return 0;
+  if (MEMORY_IS_INVALID(p)) return 0;
 
   unsigned int result = 0;
   MapNode * n = 0;
@@ -395,11 +397,6 @@ PRIVATE unsigned int Map_hash(Map * self, char * s, unsigned int length)
     result ^= (result>>6);
   }
   result = result % self->capacity;
-  /*
-          hash += key[i], hash += ( hash << 10 ), hash ^= ( hash >> 6 );
-    }
-    hash += ( hash << 3 ), hash ^= ( hash >> 11 ), hash += ( hash << 15 );
-    */
 
   return result;
 }
