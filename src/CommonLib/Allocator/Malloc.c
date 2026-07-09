@@ -12,7 +12,16 @@ struct Malloc
 /**********************************************//**
   @private
 **************************************************/
-PRIVATE Malloc mem_alloc;
+PRIVATE Malloc mem_alloc = {
+    {
+        0,                 /* init / new */
+        Malloc_allocate,   /* allocate */
+        Malloc_deallocate, /* deallocate */
+        Malloc_report,     /* report */
+        Malloc_destroy,    /* destroy / delete */
+        0                  /* nbAllocatedObjects */
+    }
+};
 
 /******************************************************//**
   @brief Get a reference to the Malloc allocator.
@@ -22,12 +31,6 @@ PRIVATE Malloc mem_alloc;
 *******************************************************/
 PUBLIC Malloc * Malloc_getRef()
 {
-  mem_alloc.allocator.new = 0;
-  mem_alloc.allocator.allocate = Malloc_allocate;
-  mem_alloc.allocator.deallocate = Malloc_deallocate;
-  mem_alloc.allocator.report = Malloc_report;
-  mem_alloc.allocator.delete = Malloc_delete;
-
   return &mem_alloc;
 }
 
@@ -39,7 +42,7 @@ PUBLIC Malloc * Malloc_getRef()
 ************************************************************/
 PUBLIC void Malloc_delete(Allocator * this)
 {
-  //Malloc_deallocate((Allocator*)Malloc_getRef(), (char*)this);
+  (void)this;
 }
 
 /********************************************************//**
