@@ -15,10 +15,11 @@ struct Malloc
 PRIVATE Malloc mem_alloc = {
     {
         0,                 /* init / new */
+        Malloc_delete,     /* delete */
         Malloc_allocate,   /* allocate */
         Malloc_deallocate, /* deallocate */
+        Malloc_reallocate, /* reallocate */
         Malloc_report,     /* report */
-        Malloc_destroy,    /* destroy / delete */
         0                  /* nbAllocatedObjects */
     }
 };
