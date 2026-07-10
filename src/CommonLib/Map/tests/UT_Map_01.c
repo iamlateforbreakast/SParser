@@ -97,7 +97,7 @@ int UT_Map_01_step2()
   String* key = (String*)List_getNext(UT_Map_01_keys);
   Handle* hKey = Handle_new(key, 0);
   Handle* hItem = Handle_new(UT_Map_01_testObjects[0], 0);
-  int isOk = Map_insert(testMap, hKey, hItem);
+  int isOk = Map_insertOrUpdate(testMap, hKey, hItem);
   isPassed = isPassed && isOk;
 
   UT_ASSERT((isPassed));
@@ -110,7 +110,7 @@ int UT_Map_01_step2()
   UT_ASSERT((isPassed));
 
   PRINT(("Step 2: Test 3 - Reject same object insertion: "));
-  int isOK = !Map_insert(testMap, hKey, hItem);
+  int isOK = !Map_insertOrUpdate(testMap, hKey, hItem);
   isPassed = isPassed && isOK;
 
   UT_ASSERT((isPassed));
@@ -133,7 +133,7 @@ int UT_Map_01_step3()
     String* key = (String*)List_getNext(UT_Map_01_keys);
     Handle* hKey = Handle_new(key, 0);
     Handle* hItem = Handle_new(UT_Map_01_testObjects[i], 0);
-    isPassed = isPassed && Map_insert(testMap, hKey, hItem);
+    isPassed = isPassed && Map_insertOrUpdate(testMap, hKey, hItem);
     void* p;
     isPassed = isPassed && Map_find(testMap, key, &p);
   }
@@ -148,7 +148,7 @@ int UT_Map_01_step3()
     String* key = (String*)List_getNext(UT_Map_01_keys);
     Handle* hKey = Handle_new(key, 0);
     Handle* hItem = Handle_new(UT_Map_01_testObjects[nbObjects1+i], 0);
-    isPassed = isPassed && Map_insert(testMap, hKey, hItem);
+    isPassed = isPassed && Map_insertOrUpdate(testMap, hKey, hItem);
     void* p;
     isPassed = isPassed && Map_find(testMap, key, &p);
   }
@@ -163,7 +163,7 @@ int UT_Map_01_step3()
     String* key = (String*)List_getNext(UT_Map_01_keys);
     Handle* hKey = Handle_new(key, 0);
     Handle* hItem = Handle_new(UT_Map_01_testObjects[nbObjects1 + nbObjects2 + i], 0);
-    isPassed = isPassed && Map_insert(testMap, hKey, hItem);
+    isPassed = isPassed && Map_insertOrUpdate(testMap, hKey, hItem);
     if (!isPassed) PRINT(("Failed %d %s\n", i, String_getBuffer(key)));
     void* p;
     isPassed = isPassed && Map_find(testMap, key, &p);
@@ -202,7 +202,7 @@ int UT_Map_01_step4()
   {
     Handle* hKey = Handle_new(String_newByRef(testNames[i]), 1);
     Handle* hItem = Handle_new(String_newByRef(testColor[i]), 1);
-    isPassed = isPassed && Map_insert(testMap, hKey, hItem);
+    isPassed = isPassed && Map_insertOrUpdate(testMap, hKey, hItem);
     //String_delete(s);
     //String_delete(c);
   }
@@ -251,7 +251,7 @@ int UT_Map_01_step5()
 
   PRINT(("Step 4: Test 1 - Insert %d object: ", UT_Map_01_nbTokens));
 
-  Map_insert(testMap, hKey, hItem);
+  Map_insertOrUpdate(testMap, hKey, hItem);
   Map_find(testMap, key, (void**)&newItem);
 
   PRINT(("New value : %s\n",

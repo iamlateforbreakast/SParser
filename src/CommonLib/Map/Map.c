@@ -13,6 +13,7 @@
 #include "Object.h"
 #include "String2.h"
 #include "Memory.h"
+#include "Allocator.h"
 #include "Debug.h"
 #include "Error.h"
 
@@ -25,6 +26,7 @@
 **************************************************/
 PRIVATE MapNode * Map_findEntry(Map* self, String * s);
 PRIVATE int Map_resize(Map* self);
+PRIVATE int Map_insert(Map* self, Handle* string, Handle* item);
 
 /**********************************************//**
   @class Map
@@ -32,9 +34,9 @@ PRIVATE int Map_resize(Map* self);
 struct Map
 {
   Object object;
-  MapNode ** htable;
   int capacity;
   int count;
+  MapNode ** htable;
 };
 
 /**********************************************//**
@@ -48,6 +50,7 @@ PRIVATE Class mapClass =
   .f_comp = (Comp_Operator)&Map_comp,
   .f_print = (Printer)&Map_print,
   .f_size = (Sizer)&Map_getSize,
+  //.f_serialise = (Serialiser)&Map_serialise,
   .classSize = sizeof(Map)
 };
 
@@ -68,6 +71,7 @@ PUBLIC Map* Map_new()
   self->count = 0;
 
   self->htable = (MapNode**)Memory_alloc(sizeof(MapNode*) * self->capacity);
+  //self->htable = (MapNode**)Allocator_allocate(sizeof(MapNode*) * self->capacity);
   if (self->htable == 0)
   {
     Map_delete(self);
@@ -97,15 +101,20 @@ PUBLIC Map* Map_newFromAllocator(Allocator* allocator)
 
   if (OBJECT_IS_INVALID(self)) return 0;
 
-  self->capacity = INITIAL_HTABLE_SIZE;
-  self->count = 0;
-
-  self->htable = (MapNode**)Memory_alloc(sizeof(MapNode*) * self->capacity);
+  self->htable = (MapNode**)Allocator_allocate((Allocator*)allocator, sizeof(MapNode*) * self->capacity);
+  if (self->htable == 0)
+  {
+    Map_delete(self);
+    return 0;
+  }
 
   for (int i = 0; i < self->capacity; i++)
   {
     self->htable[i] = 0;
   }
+
+  self->capacity = INITIAL_HTABLE_SIZE;
+  self->count = 0;
 
   return self;
 }
@@ -217,12 +226,15 @@ PUBLIC int Map_comp(Map* self, Map* compared)
   @brief Insert an object into a Map instance
   @public
   @memberof Map
-  @return 1 is inserted
+  @return 1 is inserted or updated
 **************************************************/
-PUBLIC unsigned int Map_insert(Map* self, Handle* string, Handle* item)
+PUBLIC unsigned int Map_insertOrUpdate(Map* self, Handle* string, Handle* item)
 {
   unsigned int result = 0;
   unsigned int key = 0;
+  Handle * hKey = 0;
+  Handle * hItem = 0;
+
   int i = 0;
   void* entry = 0;
   MapNode* me = 0;
@@ -233,46 +245,26 @@ PUBLIC unsigned int Map_insert(Map* self, Handle* string, Handle* item)
 
   if (string == 0) return 0;
 
+  hKey = Handle_copy(string);
+  hItem = Handle_copy(item);
+
   if ((self->count * 100) > LOAD_FACTOR_THRESHOLD * self->capacity)
   {
     Map_resize(self);
   }
   /* Check if there is an entry under s */
-  if ((me = Map_findEntry(self, (String*)Handle_getObject(string)))!=0)
+  if ((me = Map_findEntry(self, (String*)Handle_getObject(hKey)))!=0)
   {
     /* Failed: Entry already exists */
-    return 0;
+    MapNode_setString(me, hKey);
+    MapNode_setItem(me, hItem);
+
+    return 1;
   }
   else
   {
-    /* Create a new entry */
-    key = String_hash((String*)Handle_getObject(string)) % self->capacity;
-    if (self->htable[key] == 0)
-    {
-      entry = MapNode_new(string, item);
-      self->htable[key] = entry;
-      self->count++;
-      result = 1; /* Success: Inserted */
-    }
-    else
-    {
-      /* Collision */
-      entry = MapNode_new(string, item);
-      for (i=1; i<self->capacity; i++)
-      {
-        if (self->htable[(key + i) % self->capacity] == 0)
-        {
-          self->htable[(key + i) % self->capacity] = entry;
-          self->count++;
-          result = 1; /* success: Inserted */
-          break;
-        }
-      }
-      /* Failed: No space left to insert */
-    }
+    return Map_insert(self, hKey, hItem);
   }
-  
-  return result;
 }
 
 /**********************************************//**
@@ -493,4 +485,38 @@ PRIVATE int Map_resize(Map* self)
   self->capacity = newCapacity;
 
   return 1;
+}
+
+PRIVATE int Map_insert(Map* self, Handle* hKey, Handle* hItem)
+{
+  unsigned int keyHash = 0;
+
+  int i = 0;
+  void* entry = 0;
+
+  /* Create a new entry */
+  keyHash = String_hash((String*)Handle_getObject(hKey)) % self->capacity;
+  if (self->htable[keyHash] == 0)
+  {
+    entry = MapNode_new(hKey, hItem);
+    self->htable[keyHash] = entry;
+    self->count++;
+    return 1; /* Success: Inserted */
+  }
+  else
+  {
+    /* Collision */
+    entry = MapNode_new(hKey, hItem);
+    for (i=1; i<self->capacity; i++)
+    {
+      if (self->htable[(keyHash + i) % self->capacity] == 0)
+      {
+        self->htable[(keyHash + i) % self->capacity] = entry;
+        self->count++;
+        return 1; /* success: Inserted */
+        break;
+      }
+    }
+    /* Failed: No space left to insert */
+  }
 }

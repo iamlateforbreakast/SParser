@@ -99,7 +99,7 @@ int UT_Map_02_step2()
   String* key = (String*)List_getNext(UT_Map_02_keys);
   Handle* hKey = Handle_new(key, 0);
   Handle* hItem = Handle_new(UT_Map_02_testObjects[0], 0);
-  int isOk = Map_insert(testMap, hKey, hItem);
+  int isOk = Map_insertOrUpdate(testMap, hKey, hItem);
   isPassed = isPassed && isOk;
 
   UT_ASSERT((isPassed));
@@ -112,7 +112,7 @@ int UT_Map_02_step2()
   UT_ASSERT((isPassed));
 
   PRINT(("Step 2: Test 3 - Reject same object insertion: "));
-  int isOK = !Map_insert(testMap, hKey, hItem);
+  int isOK = !Map_insertOrUpdate(testMap, hKey, hItem);
   isPassed = isPassed && isOK;
 
   UT_ASSERT((isPassed));
