@@ -48,6 +48,7 @@ lib_LIBRARIES = libCommon.a
 
 # 2. List every .c and .h file required to build it
 libCommon_a_SOURCES = \
+    Allocator/Allocator.c \
     Allocator/Malloc.c \
     Array/Array.c \
     Arena/Arena.c \
