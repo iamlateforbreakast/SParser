@@ -13,6 +13,8 @@ typedef struct Handle Handle;
 
 PUBLIC Handle * Handle_new(void *object, int isOwner);
 PUBLIC void Handle_delete(Handle * this);
+PUBLIC Handle * Handle_copyWithOwnership(Handle * this);
+PUBLIC Handle * Handle_copyWithReference(Handle * this);
 PUBLIC Object * Handle_getObject(Handle * this);
 PUBLIC Handle* Handle_copy(Handle* self);
 

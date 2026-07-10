@@ -49,18 +49,41 @@ PUBLIC void Handle_delete(Handle* this)
   }
 }
 
-PUBLIC Handle* Handle_copy(Handle* self)
+/**********************************************//**
+  @brief Copy a Handle instance with ownership.
+  @public
+  @memberof Handle
+  @param this The Handle instance to copy.
+  @return New Handle instance or NULL if failed to allocate.
+**************************************************/
+PUBLIC Handle * Handle_copyWithOwnership(Handle * this)
 {
-  Handle * copy = (Handle*)Memory_alloc(sizeof(Handle));
+  if (this == 0) return 0;
 
-  if (copy == 0) return 0;
-
-  copy->object = Object_copy(self->object);
-  copy->isOwner = self->isOwner;
-
-  return copy;
+  return Handle_new(this->object, HANDLE_OWNER);
 }
 
+/**********************************************//**
+  @brief Copy a Handle instance with a reference.
+  @public
+  @memberof Handle
+  @param this The Handle instance to copy.
+  @return New Handle instance or NULL if failed to allocate.
+**************************************************/
+PUBLIC Handle * Handle_copyWithReference(Handle * this)
+{
+  if (this == 0) return 0;
+
+  return Handle_new(this->object, HANDLE_NOT_OWNER);
+}
+
+/**********************************************//**
+  @brief Get the object associated with a Handle instance.
+  @public
+  @memberof Handle
+  @param self The Handle instance.
+  @return The object associated with the Handle, or NULL if the Handle is invalid.
+**************************************************/
 PUBLIC Object* Handle_getObject(Handle* self)
 {
   return self->object;
