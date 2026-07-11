@@ -1,6 +1,7 @@
 /* UT_Map_01.c */
 
 #include "Map.h"
+#include "Handle.h"
 #include "String2.h"
 #include "TestObject.h"
 #include "ObjectMgr.h"
@@ -95,9 +96,11 @@ int UT_Map_01_step2()
 
   PRINT(("Step 2: Test 1 - Insert one object: "));
   String* key = (String*)List_getNext(UT_Map_01_keys);
-  Handle* hKey = Handle_new(key, 0);
-  Handle* hItem = Handle_new(UT_Map_01_testObjects[0], 0);
+  Handle* hKey = Handle_new(key, HANDLE_NOT_OWNER);
+  Handle* hItem = Handle_new(UT_Map_01_testObjects[0], HANDLE_NOT_OWNER);
   int isOk = Map_insertOrUpdate(testMap, hKey, hItem);
+  Handle_delete(hKey);
+  Handle_delete(hItem);
   isPassed = isPassed && isOk;
 
   UT_ASSERT((isPassed));
@@ -131,8 +134,8 @@ int UT_Map_01_step3()
   for (int i = 0; i < nbObjects1; i++)
   {
     String* key = (String*)List_getNext(UT_Map_01_keys);
-    Handle* hKey = Handle_new(key, 0);
-    Handle* hItem = Handle_new(UT_Map_01_testObjects[i], 0);
+    Handle* hKey = Handle_new(key, HANDLE_NOT_OWNER);
+    Handle* hItem = Handle_new(UT_Map_01_testObjects[i], HANDLE_NOT_OWNER);
     isPassed = isPassed && Map_insertOrUpdate(testMap, hKey, hItem);
     void* p;
     isPassed = isPassed && Map_find(testMap, key, &p);
@@ -146,8 +149,8 @@ int UT_Map_01_step3()
   for (int i = 0; i < nbObjects2; i++)
   {
     String* key = (String*)List_getNext(UT_Map_01_keys);
-    Handle* hKey = Handle_new(key, 0);
-    Handle* hItem = Handle_new(UT_Map_01_testObjects[nbObjects1+i], 0);
+    Handle* hKey = Handle_new(key, HANDLE_NOT_OWNER);
+    Handle* hItem = Handle_new(UT_Map_01_testObjects[nbObjects1+i], HANDLE_NOT_OWNER);
     isPassed = isPassed && Map_insertOrUpdate(testMap, hKey, hItem);
     void* p;
     isPassed = isPassed && Map_find(testMap, key, &p);
@@ -161,8 +164,8 @@ int UT_Map_01_step3()
   for (int i = 0; i < nbObjects3; i++)
   {
     String* key = (String*)List_getNext(UT_Map_01_keys);
-    Handle* hKey = Handle_new(key, 0);
-    Handle* hItem = Handle_new(UT_Map_01_testObjects[nbObjects1 + nbObjects2 + i], 0);
+    Handle* hKey = Handle_new(key, HANDLE_NOT_OWNER);
+    Handle* hItem = Handle_new(UT_Map_01_testObjects[nbObjects1 + nbObjects2 + i], HANDLE_NOT_OWNER);
     isPassed = isPassed && Map_insertOrUpdate(testMap, hKey, hItem);
     if (!isPassed) PRINT(("Failed %d %s\n", i, String_getBuffer(key)));
     void* p;

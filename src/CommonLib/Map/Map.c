@@ -101,6 +101,9 @@ PUBLIC Map* Map_newFromAllocator(Allocator* allocator)
 
   if (OBJECT_IS_INVALID(self)) return 0;
 
+  self->capacity = INITIAL_HTABLE_SIZE;
+  self->count = 0;
+
   self->htable = (MapNode**)Allocator_allocate((Allocator*)allocator, sizeof(MapNode*) * self->capacity);
   if (self->htable == 0)
   {
@@ -112,9 +115,6 @@ PUBLIC Map* Map_newFromAllocator(Allocator* allocator)
   {
     self->htable[i] = 0;
   }
-
-  self->capacity = INITIAL_HTABLE_SIZE;
-  self->count = 0;
 
   return self;
 }
@@ -174,6 +174,7 @@ PUBLIC Map* Map_copy(Map* self)
       {
         /* Clean up and fail if an insertion fails (e.g., out of memory) */
         Map_delete(copy);
+        // TBD: hKey and hItem needs to be deleted
         return 0;
       }
     }
@@ -228,10 +229,8 @@ PUBLIC int Map_comp(Map* self, Map* compared)
   @memberof Map
   @return 1 is inserted or updated
 **************************************************/
-PUBLIC unsigned int Map_insertOrUpdate(Map* self, Handle* string, Handle* item)
+PUBLIC unsigned int Map_insertOrUpdate(Map* self, Handle* hString, Handle* item)
 {
-  unsigned int result = 0;
-  unsigned int key = 0;
   Handle * hKey = 0;
   Handle * hItem = 0;
 
@@ -243,9 +242,9 @@ PUBLIC unsigned int Map_insertOrUpdate(Map* self, Handle* string, Handle* item)
 
   if (item == 0) return 0;
 
-  if (string == 0) return 0;
+  if (hString == 0) return 0;
 
-  hKey = Handle_copy(string);
+  hKey = Handle_copy(hString);
   hItem = Handle_copy(item);
 
   if ((self->count * 100) > LOAD_FACTOR_THRESHOLD * self->capacity)
@@ -265,6 +264,7 @@ PUBLIC unsigned int Map_insertOrUpdate(Map* self, Handle* string, Handle* item)
   {
     return Map_insert(self, hKey, hItem);
   }
+  return 0;
 }
 
 /**********************************************//**
@@ -518,5 +518,7 @@ PRIVATE int Map_insert(Map* self, Handle* hKey, Handle* hItem)
       }
     }
     /* Failed: No space left to insert */
+    return 0;
   }
+  return 0; /* Should not reach here */
 }

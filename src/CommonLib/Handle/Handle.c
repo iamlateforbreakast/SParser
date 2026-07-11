@@ -56,25 +56,21 @@ PUBLIC void Handle_delete(Handle* this)
   @param this The Handle instance to copy.
   @return New Handle instance or NULL if failed to allocate.
 **************************************************/
-PUBLIC Handle * Handle_copyWithOwnership(Handle * this)
+PUBLIC Handle * Handle_copy(Handle * this)
 {
   if (this == 0) return 0;
 
-  return Handle_new(this->object, HANDLE_OWNER);
-}
-
-/**********************************************//**
-  @brief Copy a Handle instance with a reference.
-  @public
-  @memberof Handle
-  @param this The Handle instance to copy.
-  @return New Handle instance or NULL if failed to allocate.
-**************************************************/
-PUBLIC Handle * Handle_copyWithReference(Handle * this)
-{
-  if (this == 0) return 0;
-
-  return Handle_new(this->object, HANDLE_NOT_OWNER);
+  if (this->isOwner)
+  {
+    /* Ownership transferred */
+    this->isOwner = HANDLE_NOT_OWNER;  
+    return Handle_new(this->object, HANDLE_OWNER);
+  }
+  else
+  {
+    /* If the original Handle does not own the object, we can just create a new Handle pointing to the same object */
+    return Handle_new(this->object, HANDLE_NOT_OWNER);
+  }
 }
 
 /**********************************************//**
