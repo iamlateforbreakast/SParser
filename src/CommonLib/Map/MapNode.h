@@ -12,6 +12,10 @@ typedef struct MapNode MapNode;
 PRIVATE MapNode * MapNode_new(Handle * string, Handle * object);
 PRIVATE void MapNode_delete(MapNode * self);
 PRIVATE int MapNode_getSize(MapNode * self);
+PRIVATE String * MapNode_getString(MapNode * self);
+PRIVATE Object * MapNode_getItem(MapNode * self);
+PRIVATE void MapNode_setString(MapNode * self, Handle * hString);
+PRIVATE void MapNode_setItem(MapNode * self, Handle * hItem);
 
 /**********************************************//**
   @private Class Description
@@ -77,4 +81,15 @@ PRIVATE Object * MapNode_getItem(MapNode * self)
   return Handle_getObject(self->item);
 }
 
+PRIVATE void MapNode_setString(MapNode * self, Handle * hString)
+{
+  Handle_delete(self->string);
+  self->string = hString;
+}
+
+PRIVATE void MapNode_setItem(MapNode * self, Handle * hItem)
+{
+  Handle_delete(self->item);
+  self->item = hItem;
+}
 #endif /* MAPNODE_H */
